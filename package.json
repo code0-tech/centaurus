@@ -1,0 +1,31 @@
+{
+  "name": "centaurus",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "workspaces": [
+    "actions/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "create-action": "node scripts/create-action.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "eslint": "^10.0.0",
+    "globals": "^17.4.0",
+    "typescript": "^5",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^4.0.0"
+  },
+  "dependencies": {
+    "@code0-tech/hercules": "file:code0-tech-hercules-1.0.0.tgz",
+    "@code0-tech/tucana": "file:code0-tech-tucana-0.0.0.tgz",
+    "axios": "^1.13.6",
+    "zod": "^4.3.6",
+    "zod-to-ts": "^2.0.0"
+  }
+}
