@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@code0-tech/hercules": "file:code0-tech-hercules-1.0.0.tgz",
-    "@code0-tech/tucana": "file:code0-tech-tucana-0.0.0.tgz",
+    "@code0-tech/tucana": "0.0.60",
     "axios": "^1.13.6",
     "zod": "^4.3.6",
     "zod-to-ts": "^2.0.0"
