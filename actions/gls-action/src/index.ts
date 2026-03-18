@@ -1,5 +1,5 @@
 import {
-    createSdk,
+    createSdk, HerculesActionProjectConfiguration,
     HerculesFunctionContext,
     HerculesRuntimeFunctionDefinition,
     RuntimeErrorException
@@ -2395,18 +2395,37 @@ sdk.registerConfigDefinitions(
         linkedDataTypes: ["STRING"],
     },
     {
-        identifier: "api_url",
+        identifier: "ship_it_api_url",
         type: "STRING",
+        defaultValue: " https://api.gls-group.net/shipit-farm/v1/backend/rs",
         name: [
             {
                 code: "en-US",
-                content: "API url"
+                content: "The ShipIt API url"
             }
         ],
         description: [
             {
                 code: "en-US",
-                content: "The url of the GLS API."
+                content: "The url of the GLS ShipIt API."
+            }
+        ],
+        linkedDataTypes: ["STRING"],
+    },
+    {
+        identifier: "auth_url",
+        type: "STRING",
+        defaultValue: "https://api.gls-group.net/oauth2/v2/token",
+        name: [
+            {
+                code: "en-US",
+                content: "The Auth API url"
+            }
+        ],
+        description: [
+            {
+                code: "en-US",
+                content: "The url of the Auth api ending in /token."
             }
         ],
         linkedDataTypes: ["STRING"],
@@ -2432,3 +2451,21 @@ sdk.registerConfigDefinitions(
     console.error("Failed to register config definitions:", reason)
     process.exit(1)
 })
+
+connectToSdk();
+
+function connectToSdk() {
+    sdk.connect().then((_: HerculesActionProjectConfiguration[]) => {
+        console.log("SDK connected successfully");
+    }).catch((_error) => {
+        console.error("Error connecting SDK:");
+    })
+
+    sdk.onError((error) => {
+        console.error("SDK Error occurred:", error.message);
+        console.log("Attempting to reconnect in 5s...");
+        setTimeout(() => {
+            connectToSdk();
+        }, 5000)
+    })
+}

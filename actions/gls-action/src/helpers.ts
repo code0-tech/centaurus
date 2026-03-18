@@ -65,13 +65,15 @@ export const getAuthToken = async (context: HerculesFunctionContext) => {
         client_secret: context.matchedConfig.findConfig("client_secret") as string,
         grant_type: "client_credentials"
     }
+    const url = context.matchedConfig.findConfig("auth_url") as string
+
     if (cachedToken.expiresAt > Date.now()) {
         console.log("Using cached access token")
         return cachedToken.token
     }
 
 
-    const authValue = await axios.post("https://api-sandbox.gls-group.net/oauth2/v2/token", AuthenticationRequestDataSchema.parse(data), {
+    const authValue = await axios.post(url, AuthenticationRequestDataSchema.parse(data), {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
         }
@@ -87,7 +89,7 @@ export const getAuthToken = async (context: HerculesFunctionContext) => {
 }
 
 export const validateShipment = async (data: ValidateShipmentRequestData, context: HerculesFunctionContext): Promise<ValidateShipmentResponseData> => {
-    const url = context?.matchedConfig.findConfig("api_url") as string;
+    const url = context?.matchedConfig.findConfig("ship_it_api_url") as string;
     const contactID = context?.matchedConfig.findConfig("contact_id") as string || ""
 
     try {
@@ -104,7 +106,7 @@ export const validateShipment = async (data: ValidateShipmentRequestData, contex
 
 }
 export const reprintParcel = async (data: ReprintParcelRequestData, context: HerculesFunctionContext): Promise<ReprintParcelResponseData> => {
-    const url = context.matchedConfig.findConfig("api_url") as string;
+    const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
 
     try {
         const result = await axios.post(`${url}/rs/shipments/reprintparcel`, data, {
@@ -121,7 +123,7 @@ export const reprintParcel = async (data: ReprintParcelRequestData, context: Her
 }
 
 export const updateParcelWeight = async (data: UpdateParcelWeightRequestData, context: HerculesFunctionContext): Promise<UpdateParcelWeightResponseData> => {
-    const url = context.matchedConfig.findConfig("api_url") as string;
+    const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
 
     try {
         const result = await axios.post(`${url}/rs/shipments/updateparcelweight`, data, {
@@ -139,7 +141,7 @@ export const updateParcelWeight = async (data: UpdateParcelWeightRequestData, co
 }
 
 export const getEndOfDayInfo = async (data: EndOfDayRequestData, context: HerculesFunctionContext): Promise<EndOfDayResponseData> => {
-    const url = context.matchedConfig.findConfig("api_url") as string;
+    const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
 
     try {
         const result = await axios.post(`${url}/rs/shipments/endofday?date=${data.date}`, {}, {
@@ -156,7 +158,7 @@ export const getEndOfDayInfo = async (data: EndOfDayRequestData, context: Hercul
 }
 
 export const getAllowedServices = async (data: AllowedServicesRequestData, context: HerculesFunctionContext): Promise<AllowedServicesResponseData> => {
-    const url = context.matchedConfig.findConfig("api_url") as string;
+    const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
 
     try {
         const result = await axios.post(`${url}/rs/shipments/allowedservices`, data, {
@@ -184,7 +186,7 @@ export const getAllowedServices = async (data: AllowedServicesRequestData, conte
 }
 
 export const cancelShipment = async (data: CancelShipmentRequestData, context: HerculesFunctionContext): Promise<CancelShipmentResponseData> => {
-    const url = context.matchedConfig.findConfig("api_url") as string;
+    const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
 
 
     try {
@@ -208,7 +210,7 @@ export const cancelShipment = async (data: CancelShipmentRequestData, context: H
 
 const postShipments = async (data: ShipmentRequestData, context: HerculesFunctionContext): Promise<CreateParcelsResponse> => {
     const contactID = context.matchedConfig.findConfig("contact_id") as string;
-    const url = context.matchedConfig.findConfig("api_url") as string;
+    const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
 
     const parsedData: InternalShipmentRequestData = transformShipmentRequestDataToInternalFormat(ShipmentRequestDataSchema.parse(data), context, contactID);
 
