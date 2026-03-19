@@ -150,7 +150,7 @@ types = new Map([
     ),
     ...zodSchemaToTypescriptDefs(
         "RETURN_LABELS",
-        PrintingOptionsSchema.shape.ReturnLabels,
+        PrintingOptionsSchema,
     ),
     ...zodSchemaToTypescriptDefs(
         "CREATE_SHOP_DELIVERY_REQUEST_DATA",
