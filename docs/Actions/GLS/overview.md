@@ -5,7 +5,7 @@ description: Overview of the GLS ShipIT action — what it does, what you need t
 
 # GLS Action
 
-The **GLS Action** integrates the [GLS ShipIT API](https://api.gls-group.net) into the Hercules automation platform. It lets you create, validate, cancel, and manage GLS parcel shipments directly from your flows — no manual API calls required.
+The **GLS Action** integrates the [GLS ShipIT API](https://dev-portal.gls-group.net/docs/shipit-farm/1/overview) as an action. It lets you create, validate, cancel, and manage GLS parcel shipments directly from your flows — no manual API calls required.
 
 ---
 
@@ -49,7 +49,7 @@ Before using the GLS Action you will need:
 ## Architecture overview
 
 ```
-Your Flow (Hercules)
+Your Flow
        │
        ▼
  GLS Action (this action)
@@ -87,10 +87,10 @@ GLS_CREATE_PARCELS_RESPONSE  ← tracking IDs, barcode data, print data, routing
 
 ## Next steps
 
-- [Quick Start](./quick-start) — Create your first shipment in a few steps
-- [Configuration](./configs) — Full list of configuration options and how to get credentials
-- [Functions](./functions) — All available functions with parameter details
-- [Types](./types) — All data types used in the GLS Action
-- [Events](./events) — Events emitted by the GLS Action
-- [Common Use Cases](./use-cases) — Example flows for real-world scenarios
-- [Troubleshooting](./troubleshooting) — FAQ and community support
+- [Quick Start](../quick-start) — Create your first shipment in a few steps
+- [Configuration](../configs) — Full list of configuration options and how to get credentials
+- [Functions](../functions) — All available functions with parameter details
+- [Types](../types) — All data types used in the GLS Action
+- [Events](../events) — Events emitted by the GLS Action
+- [Common Use Cases](../use-cases) — Example flows for real-world scenarios
+- [Troubleshooting](../troubleshooting) — FAQ and community support

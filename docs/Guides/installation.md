@@ -64,7 +64,7 @@ Then open `.env` in your editor and set the required variables:
 
 Example `.env` for the GLS action:
 
-```env
+```
 HERCULES_AUTH_TOKEN=your_hercules_auth_token
 HERCULES_AQUILA_URL=your-aquila-host:50051
 HERCULES_ACTION_ID=gls-action

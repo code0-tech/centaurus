@@ -309,7 +309,7 @@ export const ShipmentSchema = z.object({
     Product: z.enum(["PARCEL", "EXPRESS"]),
     ExpressAltDeliveryAllowed: z.boolean().optional(),
     Consignee: ConsigneeSchema,
-    Shipper: ShipperSchema,
+    Shipper: ShipperSchema.optional(),
     Carrier: z.enum(["ROYALMAIL"]).optional(),
     ShipmentUnit: ShipmentUnitSchema,
     Service: ShipmentServiceSchema,

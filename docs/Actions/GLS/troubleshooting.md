@@ -30,7 +30,7 @@ A: The action supports all major GLS shipment types and services, including:
 - Tyre service, addressee-only delivery
 - Saturday and next-working-day delivery (EXPRESS only)
 
-See [Functions](./functions) for the complete list.
+See [Functions](../functions.md) for the complete list.
 
 ---
 
@@ -63,28 +63,7 @@ A: Check the following:
 
 ---
 
-**Q: I get "Failed to register config definitions" on startup. What does that mean?**
-
-A: This means the action could not register its configuration schema with the Aquila server. Check:
-- The Aquila server is running and healthy
-- The `HERCULES_AUTH_TOKEN` has sufficient permissions
-- The action ID (`HERCULES_ACTION_ID`) is not already registered with a conflicting schema
-
----
-
-**Q: The action shows "SDK connected successfully" but my functions don't appear in Hercules.**
-
-A: Wait a few seconds — registration can take a moment. Then refresh the Hercules UI. If functions still don't appear, check that the action's `HERCULES_ACTION_ID` matches what is configured in Hercules.
-
----
-
 ### Authentication & API errors
-
-**Q: I get a 401 Unauthorized error when the action tries to call the GLS API.**
-
-A: Your `client_id` or `client_secret` is incorrect, or your GLS application does not have the required API scopes. Verify your credentials on the [GLS Developer Portal](https://dev-portal.gls-group.net) and ensure the **ShipIT** scope is enabled.
-
----
 
 **Q: I get an `INVALID_PRODUCT` error when creating a Saturday delivery shipment.**
 
@@ -104,11 +83,6 @@ A: No. Once GLS has scanned the parcel at a depot or delivery vehicle, cancellat
 
 ---
 
-**Q: My token expires frequently. Can I adjust the refresh interval?**
-
-A: The action automatically refreshes tokens 60 seconds before they expire. This is hard-coded and cannot be changed through configuration. GLS OAuth2 tokens typically have a validity of 1 hour.
-
----
 
 ### Labels & printing
 
@@ -212,9 +186,3 @@ Open a pull request against the `main` branch of [code0-tech/centaurus](https://
 | `npm run lint` | Run ESLint |
 | `npm run create-action -- <name>` | Scaffold a new action |
 
-### Code conventions
-
-- All types must use **Zod schemas** with a matching `Schema` suffix (e.g. `AddressSchema` / `Address`)
-- All registered types must have identifiers starting with `GLS_` (for the GLS action)
-- All function definitions must include `name` and `description` in `en-US`
-- Functions that call external APIs must wrap errors in `RuntimeErrorException`

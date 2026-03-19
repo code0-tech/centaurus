@@ -9,7 +9,7 @@ The GLS Action registers the following data types with the Hercules platform. Th
 
 ---
 
-## `GLS_ADDRESS` {#GLS_ADDRESS}
+## `GLS_ADDRESS`
 
 Represents a physical address used for consignee, shipper, and return addresses.
 
@@ -33,7 +33,7 @@ Represents a physical address used for consignee, shipper, and return addresses.
 
 ---
 
-## `GLS_CONSIGNEE` {#GLS_CONSIGNEE}
+## `GLS_CONSIGNEE`
 
 Represents the recipient of a shipment.
 
@@ -50,7 +50,7 @@ Represents the recipient of a shipment.
 
 ---
 
-## `GLS_SHIPPER` {#GLS_SHIPPER}
+## `GLS_SHIPPER`
 
 Represents the sender of a shipment.
 
@@ -67,7 +67,7 @@ Represents the sender of a shipment.
 
 ---
 
-## `GLS_UNIT_SERVICE` {#GLS_UNIT_SERVICE}
+## `GLS_UNIT_SERVICE`
 
 An optional array of value-added services applied to an individual shipment unit (parcel).
 
@@ -85,7 +85,7 @@ Each element is an object with one or more of the following optional fields:
 
 ---
 
-## `GLS_SHIPMENT_UNIT` {#GLS_SHIPMENT_UNIT}
+## `GLS_SHIPMENT_UNIT`
 
 Represents a single parcel within a shipment. A shipment may contain multiple units.
 
@@ -104,7 +104,7 @@ Represents a single parcel within a shipment. A shipment may contain multiple un
 
 ---
 
-## `GLS_SHIPMENT_SERVICE` {#GLS_SHIPMENT_SERVICE}
+## `GLS_SHIPMENT_SERVICE`
 
 An optional array of shipment-level services. Shipment creation functions automatically populate this based on which function you call.
 
@@ -134,7 +134,7 @@ Each element is an object with one of the following service fields:
 
 ---
 
-## `GLS_SHIPMENT` {#GLS_SHIPMENT}
+## `GLS_SHIPMENT`
 
 The complete shipment object including all services.
 
@@ -159,7 +159,7 @@ The complete shipment object including all services.
 
 ---
 
-## `GLS_SHIPMENT_WITHOUT_SERVICES` {#GLS_SHIPMENT_WITHOUT_SERVICES}
+## `GLS_SHIPMENT_WITHOUT_SERVICES`
 
 The shipment object without the `Service` field. Used as input to all shipment creation functions — the service is added automatically based on which function you call.
 
@@ -169,7 +169,7 @@ Same fields as `GLS_SHIPMENT` except `Service` is omitted.
 
 ---
 
-## `GLS_PRINTING_OPTIONS` {#GLS_PRINTING_OPTIONS}
+## `GLS_PRINTING_OPTIONS`
 
 Configures how shipping labels are generated.
 
@@ -184,7 +184,7 @@ Configures how shipping labels are generated.
 
 ---
 
-## `GLS_RETURN_OPTIONS` {#GLS_RETURN_OPTIONS}
+## `GLS_RETURN_OPTIONS`
 
 Controls whether the GLS API includes print data and routing info in the response.
 
@@ -197,7 +197,7 @@ Controls whether the GLS API includes print data and routing info in the respons
 
 ---
 
-## `GLS_CUSTOM_CONTENT` {#GLS_CUSTOM_CONTENT}
+## `GLS_CUSTOM_CONTENT`
 
 Customizes what appears on the printed shipping label.
 
@@ -211,7 +211,7 @@ Customizes what appears on the printed shipping label.
 
 ---
 
-## `GLS_CREATE_PARCELS_RESPONSE` {#GLS_CREATE_PARCELS_RESPONSE}
+## `GLS_CREATE_PARCELS_RESPONSE`
 
 The response returned by all shipment creation functions.
 
@@ -236,7 +236,7 @@ The response returned by all shipment creation functions.
 
 ---
 
-## `GLS_CANCEL_SHIPMENT_REQUEST_DATA` {#GLS_CANCEL_SHIPMENT_REQUEST_DATA}
+## `GLS_CANCEL_SHIPMENT_REQUEST_DATA`
 
 Input for the `cancelShipment` function.
 
@@ -246,7 +246,7 @@ Input for the `cancelShipment` function.
 
 ---
 
-## `GLS_CANCEL_SHIPMENT_RESPONSE_DATA` {#GLS_CANCEL_SHIPMENT_RESPONSE_DATA}
+## `GLS_CANCEL_SHIPMENT_RESPONSE_DATA`
 
 Response from the `cancelShipment` function.
 
@@ -257,7 +257,7 @@ Response from the `cancelShipment` function.
 
 ---
 
-## `GLS_ALLOWED_SERVICES_REQUEST_DATA` {#GLS_ALLOWED_SERVICES_REQUEST_DATA}
+## `GLS_ALLOWED_SERVICES_REQUEST_DATA`
 
 Input for the `getAllowedServices` function.
 
@@ -271,7 +271,7 @@ Input for the `getAllowedServices` function.
 
 ---
 
-## `GLS_ALLOWED_SERVICES_RESPONSE_DATA` {#GLS_ALLOWED_SERVICES_RESPONSE_DATA}
+## `GLS_ALLOWED_SERVICES_RESPONSE_DATA`
 
 Response from the `getAllowedServices` function.
 
@@ -285,7 +285,7 @@ Each element contains either `ServiceName` or `ProductName`, not both.
 
 ---
 
-## `GLS_END_OF_DAY_REQUEST_DATA` {#GLS_END_OF_DAY_REQUEST_DATA}
+## `GLS_END_OF_DAY_REQUEST_DATA`
 
 Input for the `getEndOfDayReport` function.
 
@@ -295,7 +295,7 @@ Input for the `getEndOfDayReport` function.
 
 ---
 
-## `GLS_END_OF_DAY_RESPONSE_DATA` {#GLS_END_OF_DAY_RESPONSE_DATA}
+## `GLS_END_OF_DAY_RESPONSE_DATA`
 
 Response from the `getEndOfDayReport` function.
 
@@ -312,7 +312,7 @@ Response from the `getEndOfDayReport` function.
 
 ---
 
-## `GLS_UPDATE_PARCEL_WEIGHT_REQUEST_DATA` {#GLS_UPDATE_PARCEL_WEIGHT_REQUEST_DATA}
+## `GLS_UPDATE_PARCEL_WEIGHT_REQUEST_DATA`
 
 Input for the `updateParcelWeight` function. Provide at least one identifier (`TrackID`, `ParcelNumber`, `ShipmentReference`, `ShipmentUnitReference`, or `PartnerParcelNumber`).
 
@@ -327,7 +327,7 @@ Input for the `updateParcelWeight` function. Provide at least one identifier (`T
 
 ---
 
-## `GLS_UPDATE_PARCEL_WEIGHT_RESPONSE_DATA` {#GLS_UPDATE_PARCEL_WEIGHT_RESPONSE_DATA}
+## `GLS_UPDATE_PARCEL_WEIGHT_RESPONSE_DATA`
 
 Response from the `updateParcelWeight` function.
 
@@ -337,7 +337,7 @@ Response from the `updateParcelWeight` function.
 
 ---
 
-## `GLS_REPRINT_PARCEL_REQUEST_DATA` {#GLS_REPRINT_PARCEL_REQUEST_DATA}
+## `GLS_REPRINT_PARCEL_REQUEST_DATA`
 
 Input for the `reprintParcel` function. Provide at least one identifier.
 
@@ -354,7 +354,7 @@ Input for the `reprintParcel` function. Provide at least one identifier.
 
 ---
 
-## `GLS_REPRINT_PARCEL_RESPONSE_DATA` {#GLS_REPRINT_PARCEL_RESPONSE_DATA}
+## `GLS_REPRINT_PARCEL_RESPONSE_DATA`
 
 Response from the `reprintParcel` function. Same structure as `GLS_CREATE_PARCELS_RESPONSE` without the `ShipmentReference` and `GDPR` fields.
 
@@ -373,7 +373,7 @@ Response from the `reprintParcel` function. Same structure as `GLS_CREATE_PARCEL
 
 ---
 
-## `GLS_VALIDATE_SHIPMENT_REQUEST_DATA` {#GLS_VALIDATE_SHIPMENT_REQUEST_DATA}
+## `GLS_VALIDATE_SHIPMENT_REQUEST_DATA`
 
 Input for the `validateShipment` function.
 
@@ -383,7 +383,7 @@ Input for the `validateShipment` function.
 
 ---
 
-## `GLS_VALIDATE_SHIPMENT_RESPONSE_DATA` {#GLS_VALIDATE_SHIPMENT_RESPONSE_DATA}
+## `GLS_VALIDATE_SHIPMENT_RESPONSE_DATA`
 
 Response from the `validateShipment` function.
 
