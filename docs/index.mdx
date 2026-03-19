@@ -6,4 +6,38 @@ template: splash
 
 ## What is Centaurus?
 
-Centaurus is a repository with a collection of actions provided by code0.
+Centaurus is a monorepo containing a collection of **actions** provided by [code0](https://github.com/code0-tech). Actions are integrations that connect external services to the **Hercules** automation platform, allowing you to build powerful workflows without writing boilerplate code.
+
+Each action exposes **functions**, **data types**, and **configuration** that can be composed inside flows to automate real-world tasks such as shipping logistics, notifications, payments, and more.
+
+---
+
+## Prerequisites
+
+Before using any action from Centaurus, make sure you have:
+
+- **Docker** and **Docker Compose** installed (for self-hosted deployment)
+- A running instance of the **Aquila** server (part of the Hercules platform)
+- An **auth token** (`HERCULES_AUTH_TOKEN`) for connecting your action to Aquila
+- Credentials specific to the external service the action integrates with (e.g. GLS API keys)
+
+---
+
+## Available Actions
+
+| Action | Description | Status |
+|--------|-------------|--------|
+| [GLS](./Actions/GLS/overview.md) | GLS ShipIT integration for creating and managing shipments | ✅ Available |
+
+---
+
+## Quick Links
+
+- [Installation Guide](./Guides/installation.md) — How to deploy an action on your self-hosted instance
+- [GLS Action Overview](./Actions/GLS/overview.md) — Get started with the GLS shipping integration
+- [GLS Configuration](./Actions/GLS/configs.md) — API keys and configuration options
+- [GLS Functions](./Actions/GLS/functions.md) — All available functions and their parameters
+- [GLS Types](./Actions/GLS/types.md) — Data types used across the GLS action
+- [GLS Events](./Actions/GLS/events.md) — Events emitted by the GLS action
+- [Common Use Cases](./Actions/GLS/use-cases.md) — Example workflows using the GLS action
+- [Troubleshooting](./Actions/GLS/troubleshooting.md) — FAQ and community support
