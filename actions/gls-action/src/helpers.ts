@@ -245,7 +245,7 @@ export function transformValidateShipmentRequestDataToInternalFormat(data: Valid
         Shipment: {
             ...data.Shipment,
             Middleware: "CodeZeroviaGLS",
-            Shipper: getShipper(data.Shipment.Shipper, context, contactID),
+            Shipper: getShipper(context, contactID, data.Shipment.Shipper),
             Service: InternalShipmentServiceSchema.parse(data.Shipment.Service),
             ShipmentUnit: InternalShipmentUnitSchema.parse(data.Shipment.ShipmentUnit)
         }
@@ -258,26 +258,30 @@ function transformShipmentRequestDataToInternalFormat(data: ShipmentRequestData,
         Shipment: {
             ...data.Shipment,
             Middleware: "CodeZeroviaGLS",
-            Shipper: getShipper(data.Shipment.Shipper, context, contactID),
+            Shipper: getShipper(context, contactID, data.Shipment.Shipper),
             Service: InternalShipmentServiceSchema.parse(data.Shipment.Service),
             ShipmentUnit: InternalShipmentUnitSchema.parse(data.Shipment.ShipmentUnit)
         }
     }
 }
 
-function getShipper(shipper: Shipper, context: HerculesFunctionContext | undefined, contactID: string | undefined): InternalShipper {
+function getShipper(context: HerculesFunctionContext | undefined, contactID: string | undefined, shipper?: Shipper): InternalShipper {
     const configShipper = context?.matchedConfig.findConfig("shipper") as Shipper || undefined
 
-    if (configShipper) {
-        return {
-            ...configShipper,
-            ContactID: contactID
-        }
-    } else {
+    if (!shipper && !configShipper) {
+        throw new RuntimeErrorException("MISSING_SHIPPER_INFORMATION", "No shipper information provided in shipment data or configuration.")
+    }
+
+    if (shipper) {
         return {
             ...shipper,
             ContactID: contactID
         }
+    }
+
+    return {
+        ...configShipper,
+        ContactID: contactID
     }
 }
 
