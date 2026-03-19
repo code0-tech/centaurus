@@ -56,7 +56,7 @@ createAddress(
 | `MobilePhonenumber` | string (min 4, max 35) | No | Mobile phone number |
 | `eMail` | string (max 80) | No | Email address |
 
-**Returns:** [`GLS_ADDRESS`](../types#GLS_ADDRESS)
+**Returns:** [`GLS_ADDRESS`](../GLS/types.md#GLS_ADDRESS)
 
 ---
 
@@ -83,7 +83,7 @@ createConsignee(
 | `Address` | GLS_ADDRESS | **Yes** | The delivery address for this consignee |
 | `Category` | `"BUSINESS"` \| `"PRIVATE"` | **Yes** | Whether the consignee is a business or private recipient |
 
-**Returns:** [`GLS_CONSIGNEE`](../types#GLS_CONSIGNEE)
+**Returns:** [`GLS_CONSIGNEE`](../GLS/types.md#GLS_CONSIGNEE)
 
 ---
 
@@ -114,7 +114,7 @@ createShipmentUnit(
 | `note2` | string (max 50) | No | Additional note printed on the label (line 2) |
 | `shipmentUnitService` | GLS_UNIT_SERVICE | No | Unit-level services (Cash, AddonLiability, HazardousGoods, etc.) |
 
-**Returns:** [`GLS_SHIPMENT_UNIT`](../types#GLS_SHIPMENT_UNIT)
+**Returns:** [`GLS_SHIPMENT_UNIT`](../GLS/types.md#GLS_SHIPMENT_UNIT)
 
 ---
 
@@ -140,7 +140,7 @@ createPrintingOptions(returnLabels: RETURN_LABELS): GLS_PRINTING_OPTIONS
 | `TemplateSet` | `NONE`, `D_200`, `PF_4_I`, `ZPL_200`, `ZPL_300`, ... | Label template set |
 | `LabelFormat` | `PDF`, `ZEBRA`, `INTERMEC`, `DATAMAX`, `TOSHIBA`, `PNG` | Output format |
 
-**Returns:** [`GLS_PRINTING_OPTIONS`](../types#GLS_PRINTING_OPTIONS)
+**Returns:** [`GLS_PRINTING_OPTIONS`](../GLS/types.md#GLS_PRINTING_OPTIONS)
 
 ---
 
@@ -169,7 +169,7 @@ createCustomContent(
 | `barcodeType` | `"EAN_128"` \| `"CODE_39"` | No | Barcode symbology |
 | `barcode` | string | No | Custom barcode value |
 
-**Returns:** [`GLS_CUSTOM_CONTENT`](../types#GLS_CUSTOM_CONTENT)
+**Returns:** [`GLS_CUSTOM_CONTENT`](../GLS/types.md#GLS_CUSTOM_CONTENT)
 
 ---
 
@@ -536,7 +536,7 @@ validateShipment
       └── validationResult.Issues[]
 ```
 
-See [Types — GLS_VALIDATE_SHIPMENT_REQUEST_DATA](../types#GLS_VALIDATE_SHIPMENT_REQUEST_DATA) for the input format.
+See [Types — GLS_VALIDATE_SHIPMENT_REQUEST_DATA](../GLS/types.md#GLS_VALIDATE_SHIPMENT_REQUEST_DATA) for the input format.
 
 ---
 

@@ -297,7 +297,7 @@ Response:
       "ShippingDate": "2025-01-15",
       "Product": "PARCEL",
       "Consignee": {
-        "Address": { "Name1": "Jane Smith", "City": "Hamburg", ... }
+        "Address": { "Name1": "Jane Smith", "City": "Hamburg" } // ... and other parameters
       },
       "ShipmentUnit": [
         { "TrackID": "12345678", "Weight": "1.2", "ParcelNumber": "00123456789" }

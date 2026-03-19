@@ -30,7 +30,7 @@ A: The action supports all major GLS shipment types and services, including:
 - Tyre service, addressee-only delivery
 - Saturday and next-working-day delivery (EXPRESS only)
 
-See [Functions](../functions.md) for the complete list.
+See [Functions](../GLS/functions.md) for the complete list.
 
 ---
 
@@ -73,7 +73,7 @@ A: Saturday delivery (and next-working-day delivery) requires the shipment's `Pr
 
 **Q: I get `ERROR_CREATING_GLS_SHIPMENT` — how do I find out what went wrong?**
 
-A: Use `validateShipment` first to check your shipment data before creating it. The validation response includes specific `Issues` with `Rule` and `Location` fields pointing to the problematic field. See [Use Cases — Validate before creating](./use-cases#use-case-2-validate-before-creating).
+A: Use `validateShipment` first to check your shipment data before creating it. The validation response includes specific `Issues` with `Rule` and `Location` fields pointing to the problematic field. See [Use Cases — Validate before creating](../GLS/use-cases.md#use-case-2-validate-before-creating).
 
 ---
 
