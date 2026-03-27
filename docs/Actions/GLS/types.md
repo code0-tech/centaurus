@@ -47,7 +47,7 @@ Represents the recipient of a shipment.
 | `ConsigneeID` | string                      | No       | max 40      | Your internal customer/consignee ID |
 | `CostCenter`  | string                      | No       | max 80      | Cost center for billing             |
 | `Category`    | `"BUSINESS"` \| `"PRIVATE"` | No       | —           | Type of recipient                   |
-| `Address`     | GLS_ADDRESS                 | **Yes**  | —           | Physical delivery address           |
+| `AddressSchema`     | GLS_ADDRESS                 | **Yes**  | —           | Physical delivery address           |
 
 ---
 
@@ -61,7 +61,7 @@ Represents the sender of a shipment.
 
 | Field                       | Type        | Required | Description                               |
 |-----------------------------|-------------|----------|-------------------------------------------|
-| `Address`                   | GLS_ADDRESS | No       | Primary shipper address                   |
+| `AddressSchema`                   | GLS_ADDRESS | No       | Primary shipper address                   |
 | `AlternativeShipperAddress` | GLS_ADDRESS | No       | Alternative address to print on the label |
 
 > **Note:** When used in the configuration (`shipper`), the action automatically includes the `ContactID` from the
@@ -119,7 +119,7 @@ Each element is an object with one of the following service fields:
 |------------------------|------------------------------------------------------------------------------------------|------------------------------------|
 | `ShopDelivery`         | `ParcelShopID` (max 50)                                                                  | Delivery to a GLS Parcel Shop      |
 | `ShopReturn`           | `NumberOfLabels`, `ReturnQR?`                                                            | Return from a Parcel Shop          |
-| `Exchange`             | `Address` (GLS_ADDRESS), `ExpectedWeight?`                                               | Exchange delivery and pickup       |
+| `Exchange`             | `AddressSchema` (GLS_ADDRESS), `ExpectedWeight?`                                               | Exchange delivery and pickup       |
 | `DeliveryAtWork`       | `RecipientName`, `Building`, `Floor`, `Room?`, `Phonenumber?`, `AlternateRecipientName?` | Workplace delivery                 |
 | `Deposit`              | `PlaceOfDeposit` (max 121)                                                               | Deposit without signature          |
 | `IdentPin`             | `PIN` (max 4), `Birthdate?`                                                              | PIN-based identity check           |
@@ -148,8 +148,8 @@ The complete shipment object including all services.
 | Field                       | Type                      | Required | Description                                      |
 |-----------------------------|---------------------------|----------|--------------------------------------------------|
 | `Product`                   | `"PARCEL"` \| `"EXPRESS"` | **Yes**  | Shipment product type                            |
-| `Consignee`                 | GLS_CONSIGNEE             | **Yes**  | Recipient details                                |
-| `Shipper`                   | GLS_SHIPPER               | **Yes**  | Sender details                                   |
+| `ConsigneeSchema`                 | GLS_CONSIGNEE             | **Yes**  | Recipient details                                |
+| `ShipperSchema`                   | GLS_SHIPPER               | **Yes**  | Sender details                                   |
 | `ShipmentUnit`              | GLS_SHIPMENT_UNIT[]       | **Yes**  | Array of parcels (min 1)                         |
 | `Service`                   | GLS_SHIPMENT_SERVICE      | No       | Shipment-level services                          |
 | `ShipmentReference`         | string (max 40)           | No       | Your internal shipment reference                 |
@@ -158,7 +158,7 @@ The complete shipment object including all services.
 | `Identifier`                | string (max 40)           | No       | Additional identifier                            |
 | `ExpressAltDeliveryAllowed` | boolean                   | No       | Allow alternative delivery for express shipments |
 | `Carrier`                   | `"ROYALMAIL"`             | No       | Override carrier (UK only)                       |
-| `Return.Address`            | GLS_ADDRESS               | No       | Address for return shipments                     |
+| `Return.AddressSchema`            | GLS_ADDRESS               | No       | AddressSchema for return shipments                     |
 
 ---
 
@@ -312,9 +312,9 @@ Response from the `getEndOfDayReport` function.
 |-------------------------------------------------|---------------------------|----------------------------------|
 | `Shipments[].ShippingDate`                      | ISO date                  | Date the shipment was dispatched |
 | `Shipments[].Product`                           | `"PARCEL"` \| `"EXPRESS"` | Product type                     |
-| `Shipments[].Consignee.Address`                 | GLS_ADDRESS               | Recipient address                |
-| `Shipments[].Shipper.ContactID`                 | string                    | GLS contact ID of shipper        |
-| `Shipments[].Shipper.AlternativeShipperAddress` | GLS_ADDRESS               | Alternative shipper address      |
+| `Shipments[].ConsigneeSchema.AddressSchema`                 | GLS_ADDRESS               | Recipient address                |
+| `Shipments[].ShipperSchema.ContactID`                 | string                    | GLS contact ID of shipper        |
+| `Shipments[].ShipperSchema.AlternativeShipperAddress` | GLS_ADDRESS               | Alternative shipper address      |
 | `Shipments[].ShipmentUnit[].TrackID`            | string                    | Tracking ID                      |
 | `Shipments[].ShipmentUnit[].Weight`             | string                    | Parcel weight                    |
 | `Shipments[].ShipmentUnit[].ParcelNumber`       | string                    | GLS parcel number                |
@@ -412,10 +412,10 @@ Response from the `validateShipment` function.
 
 ```
 GLS_SHIPMENT_WITHOUT_SERVICES
-    ├── Consignee: GLS_CONSIGNEE
-    │       └── Address: GLS_ADDRESS
-    ├── Shipper: GLS_SHIPPER
-    │       ├── Address: GLS_ADDRESS
+    ├── ConsigneeSchema: GLS_CONSIGNEE
+    │       └── AddressSchema: GLS_ADDRESS
+    ├── ShipperSchema: GLS_SHIPPER
+    │       ├── AddressSchema: GLS_ADDRESS
     │       └── AlternativeShipperAddress: GLS_ADDRESS
     └── ShipmentUnit[]: GLS_SHIPMENT_UNIT
             └── Service: GLS_UNIT_SERVICE

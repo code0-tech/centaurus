@@ -75,8 +75,8 @@ START
         parcelShopId: "12345"
         shipment:
           Product: "PARCEL"
-          Consignee: { Address: <recipient address> }
-          Shipper: { Address: <shipper address> }
+          ConsigneeSchema: { AddressSchema: <recipient address> }
+          ShipperSchema: { AddressSchema: <shipper address> }
           ShipmentUnit: [<shipment unit>]
         printingOptions: <printing options>
             │

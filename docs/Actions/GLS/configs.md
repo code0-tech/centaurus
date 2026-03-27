@@ -97,7 +97,7 @@ The value must be a valid `GLS_SHIPPER` object:
 
 ```json
 {
-  "Address": {
+  "AddressSchema": {
     "Name1": "My Company GmbH",
     "CountryCode": "DE",
     "City": "Berlin",

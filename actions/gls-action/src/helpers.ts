@@ -1,25 +1,121 @@
 import {ZodError, ZodObject} from "zod";
 import {createAuxiliaryTypeStore, printNode, zodToTs} from "zod-to-ts";
 import ts from "typescript";
+import axios from "axios";
+import {HerculesFunctionContext, HerculesRuntimeFunctionDefinition, RuntimeErrorException} from "@code0-tech/hercules";
 import {
-    AllowedServicesRequestData, AllowedServicesResponseData, AllowedServicesResponseDataSchema,
-    AuthenticationRequestData, AuthenticationRequestDataSchema, AuthenticationResponseDataSchema,
-    CancelShipmentRequestData, CancelShipmentResponseData,
-    CancelShipmentResponseDataSchema, CreateParcelsResponse,
-    CreateParcelsResponseSchema, CustomContent, EndOfDayRequestData, EndOfDayResponseData,
-    EndOfDayResponseDataSchema, InternalShipmentRequestData,
-    InternalShipmentServiceSchema, InternalShipmentUnitSchema, InternalShipper, InternalValidateShipmentRequestData,
+    AllowedServicesRequestData,
+    AllowedServicesResponseData,
+    AllowedServicesResponseDataSchema,
+    AuthenticationRequestData,
+    AuthenticationRequestDataSchema,
+    AuthenticationResponseDataSchema,
+    CancelShipmentRequestData,
+    CancelShipmentResponseData,
+    CancelShipmentResponseDataSchema,
+    CreateParcelsResponse,
+    CreateParcelsResponseSchema,
+    CustomContent,
+    EndOfDayRequestData,
+    EndOfDayResponseData,
+    EndOfDayResponseDataSchema,
+    InternalShipmentRequestData,
+    InternalShipmentServiceSchema,
+    InternalShipmentUnitSchema,
+    InternalShipper,
+    InternalValidateShipmentRequestData,
     PrintingOptions,
-    ReprintParcelRequestData, ReprintParcelResponseData,
-    ReprintParcelResponseDataSchema, ReturnOptions, ShipmentRequestData, ShipmentRequestDataSchema, ShipmentService,
-    ShipmentWithoutServices, Shipper,
+    ReprintParcelRequestData,
+    ReprintParcelResponseData,
+    ReprintParcelResponseDataSchema,
+    ReturnOptions,
+    ShipmentRequestData,
+    ShipmentRequestDataSchema,
+    ShipmentService,
+    ShipmentWithoutServices,
+    ShipperSchema,
     UpdateParcelWeightRequestData,
     UpdateParcelWeightResponseData,
-    UpdateParcelWeightResponseDataSchema, ValidateShipmentRequestData, ValidateShipmentResponseData,
+    UpdateParcelWeightResponseDataSchema,
+    ValidateShipmentRequestData,
+    ValidateShipmentResponseData,
     ValidateShipmentResponseDataSchema
 } from "./types";
-import axios from "axios";
-import {HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
+import * as path from "node:path";
+import {readdir, stat} from "fs/promises";
+
+
+export const DEFAULT_SIGNATURE_FOR_SERVICES = "shipment: GLS_SHIPMENT, printingOptions: GLS_PRINTING_OPTIONS, returnOptions?: GLS_RETURN_OPTIONS, customContent?: GLS_CUSTOM_CONTENT"
+export const DEFAULT_PARAMETERS_FOR_SERVICES: HerculesRuntimeFunctionDefinition["parameters"] = [
+    {
+        runtimeName: "shipment",
+        name: [
+            {
+                code: "en-US",
+                content: "Shipment",
+            }
+        ],
+        description: [
+            {
+                code: "en-US",
+                content: "The shipment for which to create the parcels. Must include all necessary information and services for the shipment.",
+            }
+        ]
+    },
+    {
+        runtimeName: "printingOptions",
+        name: [
+            {
+                code: "en-US",
+                content: "Printing options",
+            }
+        ],
+        description: [
+            {
+                code: "en-US",
+                content: "The printing options for the shipment. Specifies options for the labels to be printed for the shipment.",
+            }
+        ]
+    },
+    {
+        runtimeName: "returnOptions",
+        name: [
+            {
+                code: "en-US",
+                content: "Return options",
+            }
+        ],
+        description: [
+            {
+                code: "en-US",
+                content: "The return options for the shipment. Specifies options for return shipments.",
+            }
+        ]
+    },
+    {
+        runtimeName: "customContent",
+        name: [
+            {
+                code: "en-US",
+                content: "Custom content",
+            }
+        ],
+        description: [
+            {
+                code: "en-US",
+                content: "The custom content for the shipment. Specifies options for custom content to be printed on the labels.",
+            }
+        ]
+    }
+]
+export const DEFAULT_DATA_TYPES_FOR_SERVICES = [
+    "GLS_SHIPMENT",
+    "GLS_PRINTING_OPTIONS",
+    "GLS_RETURN_OPTIONS",
+    "GLS_CUSTOM_CONTENT",
+    "GLS_CREATE_PARCELS_RESPONSE"
+]
+
 
 export function zodSchemaToTypescriptDefs(
     typeName: string,
@@ -101,7 +197,7 @@ export const validateShipment = async (data: ValidateShipmentRequestData, contex
         })
         return ValidateShipmentResponseDataSchema.parse(result.data)
     } catch (error: any) {
-        throw error
+        throw new RuntimeErrorException("VALIDATE_SHIPMENT_FAILED", error.toString())
     }
 
 }
@@ -117,8 +213,7 @@ export const reprintParcel = async (data: ReprintParcelRequestData, context: Her
         })
         return ReprintParcelResponseDataSchema.parse(result.data)
     } catch (error: any) {
-        console.error("Error response from GLS API:", error)
-        throw error
+        throw new RuntimeErrorException("REPRINT_PARCEL_FAILED", error.toString())
     }
 }
 
@@ -134,8 +229,7 @@ export const updateParcelWeight = async (data: UpdateParcelWeightRequestData, co
         })
         return UpdateParcelWeightResponseDataSchema.parse(result.data)
     } catch (error: any) {
-        console.log(error)
-        throw error
+        throw new RuntimeErrorException("UPDATE_PARCEL_WEIGHT_FAILED", error.toString())
     }
 
 }
@@ -152,8 +246,7 @@ export const getEndOfDayInfo = async (data: EndOfDayRequestData, context: Hercul
         })
         return EndOfDayResponseDataSchema.parse(result.data)
     } catch (error: any) {
-        console.error("Error response from GLS API:", error)
-        throw error
+        throw new RuntimeErrorException("GET_END_OF_DAY_INFO_FAILED", error.toString())
     }
 }
 
@@ -180,7 +273,7 @@ export const getAllowedServices = async (data: AllowedServicesRequestData, conte
         } else {
             console.error("Error sending request to GLS API:", error)
         }
-        throw error
+        throw new RuntimeErrorException("ERROR_FETCHING_ALLOWED_SERVICES", "An error occurred while fetching allowed services from GLS API.")
     }
 
 }
@@ -203,8 +296,56 @@ export const cancelShipment = async (data: CancelShipmentRequestData, context: H
             console.error("Error sending cancel shipment request to GLS API:", headers.error, headers.args)
             throw new RuntimeErrorException("ERROR_CANCELING_GLS_SHIPMENT", `GLS API error: ${headers.error}, args: ${headers.args}`)
         }
-        console.error("Error sending cancel shipment request to GLS API:", error)
-        throw error
+        throw new RuntimeErrorException("ERROR_CANCELING_GLS_SHIPMENT")
+    }
+}
+
+
+export function transformValidateShipmentRequestDataToInternalFormat(data: ValidateShipmentRequestData, context: HerculesFunctionContext | undefined, contactID: string): InternalValidateShipmentRequestData {
+    return {
+        ...data,
+        Shipment: {
+            ...data.Shipment,
+            Middleware: "CodeZeroviaGLS",
+            Shipper: getShipper(context, contactID, data.Shipment.Shipper),
+            Service: InternalShipmentServiceSchema.parse(data.Shipment.Service),
+            ShipmentUnit: InternalShipmentUnitSchema.parse(data.Shipment.ShipmentUnit)
+        }
+    }
+}
+
+
+export function getShipper(context: HerculesFunctionContext | undefined, contactID: string | undefined, shipper?: ShipperSchema): InternalShipper {
+    const configShipper = context?.matchedConfig.findConfig("default_shipper") as ShipperSchema || undefined
+
+    if (!shipper && !configShipper) {
+        throw new RuntimeErrorException("MISSING_SHIPPER_INFORMATION", "No shipper information provided in shipment data or configuration.")
+    }
+
+    if (shipper) {
+        return {
+            ...shipper,
+            ContactID: contactID
+        }
+    }
+
+    return {
+        ...configShipper,
+        ContactID: contactID
+    }
+}
+
+
+export function transformShipmentRequestDataToInternalFormat(data: ShipmentRequestData, context: HerculesFunctionContext | undefined, contactID: string | undefined): InternalShipmentRequestData {
+    return {
+        ...data,
+        Shipment: {
+            ...data.Shipment,
+            Middleware: "CodeZeroviaGLS",
+            Shipper: getShipper(context, contactID, data.Shipment.Shipper),
+            Service: InternalShipmentServiceSchema.parse(data.Shipment.Service),
+            ShipmentUnit: InternalShipmentUnitSchema.parse(data.Shipment.ShipmentUnit)
+        }
     }
 }
 
@@ -239,52 +380,6 @@ const postShipments = async (data: ShipmentRequestData, context: HerculesFunctio
     }
 }
 
-export function transformValidateShipmentRequestDataToInternalFormat(data: ValidateShipmentRequestData, context: HerculesFunctionContext | undefined, contactID: string): InternalValidateShipmentRequestData {
-    return {
-        ...data,
-        Shipment: {
-            ...data.Shipment,
-            Middleware: "CodeZeroviaGLS",
-            Shipper: getShipper(context, contactID, data.Shipment.Shipper),
-            Service: InternalShipmentServiceSchema.parse(data.Shipment.Service),
-            ShipmentUnit: InternalShipmentUnitSchema.parse(data.Shipment.ShipmentUnit)
-        }
-    }
-}
-
-function transformShipmentRequestDataToInternalFormat(data: ShipmentRequestData, context: HerculesFunctionContext | undefined, contactID: string | undefined): InternalShipmentRequestData {
-    return {
-        ...data,
-        Shipment: {
-            ...data.Shipment,
-            Middleware: "CodeZeroviaGLS",
-            Shipper: getShipper(context, contactID, data.Shipment.Shipper),
-            Service: InternalShipmentServiceSchema.parse(data.Shipment.Service),
-            ShipmentUnit: InternalShipmentUnitSchema.parse(data.Shipment.ShipmentUnit)
-        }
-    }
-}
-
-function getShipper(context: HerculesFunctionContext | undefined, contactID: string | undefined, shipper?: Shipper): InternalShipper {
-    const configShipper = context?.matchedConfig.findConfig("shipper") as Shipper || undefined
-
-    if (!shipper && !configShipper) {
-        throw new RuntimeErrorException("MISSING_SHIPPER_INFORMATION", "No shipper information provided in shipment data or configuration.")
-    }
-
-    if (shipper) {
-        return {
-            ...shipper,
-            ContactID: contactID
-        }
-    }
-
-    return {
-        ...configShipper,
-        ContactID: contactID
-    }
-}
-
 export async function postShipmentHelper(context: HerculesFunctionContext, services: ShipmentService, shipment: ShipmentWithoutServices, printingOptions: PrintingOptions, customContent?: CustomContent, returnOptions?: ReturnOptions): Promise<CreateParcelsResponse> {
     try {
         return await postShipments({
@@ -301,5 +396,34 @@ export async function postShipmentHelper(context: HerculesFunctionContext, servi
             throw new RuntimeErrorException("ERROR_CREATING_GLS_SHIPMENT", error)
         }
         throw new RuntimeErrorException("ERROR_CREATING_GLS_SHIPMENT", "An error occurred while creating the shipment.")
+    }
+}
+
+
+export async function loadAllDefinitions() {
+    const baseDir = path.resolve("definitions");
+    await loadFromDirectory(baseDir);
+}
+
+async function loadFromDirectory(dir: string) {
+    const entries = await readdir(dir);
+
+    for (const entry of entries) {
+        const fullPath = path.join(dir, entry);
+        const stats = await stat(fullPath);
+
+        if (stats.isDirectory()) {
+            await loadFromDirectory(fullPath);
+        } else if (entry.endsWith(".ts")) {
+            const mod = await import(fullPath);
+
+            if (typeof mod.register === "function") {
+                try {
+                    await mod.register();
+                } catch (error) {
+                    console.log(`Error registering functions from file ${entry}:`, error);
+                }
+            }
+        }
     }
 }

@@ -1,5 +1,4 @@
-import {describe, it, expect, vi, beforeEach, test} from "vitest";
-import {GrpcOptions} from "@protobuf-ts/grpc-transport";
+import {describe, it, expect, vi, beforeEach} from "vitest";
 
 const state = vi.hoisted(() => {
     const state = {

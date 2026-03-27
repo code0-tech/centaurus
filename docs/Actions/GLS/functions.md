@@ -69,7 +69,7 @@ Creates a GLS consignee (recipient) object for use in shipments.
 createConsignee(
   consigneeId: string,
   costCenter: string,
-  Address: GLS_ADDRESS,
+  AddressSchema: GLS_ADDRESS,
   Category: "BUSINESS" | "PRIVATE"
 ): GLS_CONSIGNEE
 ```
@@ -80,7 +80,7 @@ createConsignee(
 |-----------|------|----------|-------------|
 | `consigneeId` | string (max 40) | **Yes** | Unique ID for the consignee (your internal customer ID) |
 | `costCenter` | string (max 80) | **Yes** | Cost center for billing purposes |
-| `Address` | GLS_ADDRESS | **Yes** | The delivery address for this consignee |
+| `AddressSchema` | GLS_ADDRESS | **Yes** | The delivery address for this consignee |
 | `Category` | `"BUSINESS"` \| `"PRIVATE"` | **Yes** | Whether the consignee is a business or private recipient |
 
 **Returns:** [`GLS_CONSIGNEE`](types.md#GLS_CONSIGNEE)
@@ -259,7 +259,7 @@ createExchangeShipment(
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `address` | GLS_ADDRESS | **Yes** | Address for the exchange pickup |
+| `address` | GLS_ADDRESS | **Yes** | AddressSchema for the exchange pickup |
 | `expectedWeight` | number (min 1) | No | Expected weight of the parcel being returned |
 
 ---
@@ -602,7 +602,7 @@ getEndOfDayReport({ date })
               │
               ▼
     GLS_END_OF_DAY_RESPONSE_DATA
-      └── Shipments[]: { ShippingDate, Product, Consignee, Shipper, ShipmentUnit[] }
+      └── Shipments[]: { ShippingDate, Product, ConsigneeSchema, ShipperSchema, ShipmentUnit[] }
 ```
 
 ---
