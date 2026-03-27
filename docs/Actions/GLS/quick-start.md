@@ -13,12 +13,12 @@ This guide walks you through creating your first GLS shipment using the GLS Acti
 
 Follow the [Installation Guide](../../Guides/installation.md) to deploy the GLS Action, then set the following configuration values in your Hercules admin panel (or `.env` file):
 
-| Config | Value |
-|--------|-------|
-| `client_id` | Your GLS OAuth2 client ID |
-| `client_secret` | Your GLS OAuth2 client secret |
+| Config            | Value                                                                                |
+|-------------------|--------------------------------------------------------------------------------------|
+| `client_id`       | Your GLS OAuth2 client ID                                                            |
+| `client_secret`   | Your GLS OAuth2 client secret                                                        |
 | `ship_it_api_url` | GLS ShipIT endpoint (default: `https://api.gls-group.net/shipit-farm/v1/backend/rs`) |
-| `auth_url` | GLS auth endpoint (default: `https://api.gls-group.net/oauth2/v2/token`) |
+| `auth_url`        | GLS auth endpoint (default: `https://api.gls-group.net/oauth2/v2/token`)             |
 
 See [Configuration](./configs.md) for the full list of options and how to obtain credentials.
 
