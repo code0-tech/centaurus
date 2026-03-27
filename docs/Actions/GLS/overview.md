@@ -27,20 +27,20 @@ Before using the GLS Action you will need:
 
 ### Hercules / Aquila
 
-| Requirement | Description |
-|-------------|-------------|
-| Running Aquila server | The action connects to Aquila on startup to register its functions |
-| `HERCULES_AUTH_TOKEN` | Auth token issued by your Aquila instance |
-| `HERCULES_AQUILA_URL` | Host and port of your Aquila server (e.g. `aquila.example.com:50051`) |
-| Docker + Docker Compose | Used to run the action as a container |
+| Requirement             | Description                                                           |
+|-------------------------|-----------------------------------------------------------------------|
+| Running Aquila server   | The action connects to Aquila on startup to register its functions    |
+| `HERCULES_AUTH_TOKEN`   | Auth token issued by your Aquila instance                             |
+| `HERCULES_AQUILA_URL`   | Host and port of your Aquila server (e.g. `aquila.example.com:50051`) |
+| Docker + Docker Compose | Used to run the action as a container                                 |
 
 ### GLS Developer Portal
 
-| Requirement | How to obtain |
-|-------------|---------------|
-| `client_id` | Create an application at [https://dev-portal.gls-group.net](https://dev-portal.gls-group.net) and find it under **My Apps** |
-| `client_secret` | Found alongside the `client_id` in **My Apps** on the GLS developer portal |
-| `contact_id` *(optional)* | Issued by GLS support — contact them directly to request it |
+| Requirement               | How to obtain                                                                                                               |
+|---------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| `client_id`               | Create an application at [https://dev-portal.gls-group.net](https://dev-portal.gls-group.net) and find it under **My Apps** |
+| `client_secret`           | Found alongside the `client_id` in **My Apps** on the GLS developer portal                                                  |
+| `contact_id` *(optional)* | Issued by GLS support — contact them directly to request it                                                                 |
 
 > **Note:** The `contact_id` is required for some shipment operations. If you are unsure whether you need it, contact GLS support.
 

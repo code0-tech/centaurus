@@ -179,12 +179,12 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 **Common parameters for all shipment functions:**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `shipment` | GLS_SHIPMENT_WITHOUT_SERVICES | **Yes** | Shipment data (consignee, shipper, units, product) |
-| `printingOptions` | GLS_PRINTING_OPTIONS | **Yes** | Label format settings |
-| `returnOptions` | GLS_RETURN_OPTIONS | No | Whether to return print data and routing info |
-| `customContent` | GLS_CUSTOM_CONTENT | No | Custom logo and barcode settings |
+| Parameter         | Type                          | Required | Description                                        |
+|-------------------|-------------------------------|----------|----------------------------------------------------|
+| `shipment`        | GLS_SHIPMENT_WITHOUT_SERVICES | **Yes**  | Shipment data (consignee, shipper, units, product) |
+| `printingOptions` | GLS_PRINTING_OPTIONS          | **Yes**  | Label format settings                              |
+| `returnOptions`   | GLS_RETURN_OPTIONS            | No       | Whether to return print data and routing info      |
+| `customContent`   | GLS_CUSTOM_CONTENT            | No       | Custom logo and barcode settings                   |
 
 ---
 

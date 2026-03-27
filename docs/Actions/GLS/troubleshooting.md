@@ -111,10 +111,10 @@ A: Yes, use the `reprintParcel` function with the `TrackID` and the original `Cr
 
 ## Common error codes
 
-| Error Code | Cause | Resolution |
-|------------|-------|------------|
-| `ERROR_CREATING_GLS_SHIPMENT` | API returned an error during shipment creation or management | Check `validateShipment` output for details |
-| `INVALID_PRODUCT` | Used `"PARCEL"` product with a service that requires `"EXPRESS"` | Set `Product: "EXPRESS"` in the shipment |
+| Error Code                    | Cause                                                            | Resolution                                  |
+|-------------------------------|------------------------------------------------------------------|---------------------------------------------|
+| `ERROR_CREATING_GLS_SHIPMENT` | API returned an error during shipment creation or management     | Check `validateShipment` output for details |
+| `INVALID_PRODUCT`             | Used `"PARCEL"` product with a service that requires `"EXPRESS"` | Set `Product: "EXPRESS"` in the shipment    |
 
 ---
 
@@ -178,11 +178,11 @@ Open a pull request against the `main` branch of [code0-tech/centaurus](https://
 
 ### Development commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run build` | Build all actions |
-| `npm run test` | Run the test suite |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run lint` | Run ESLint |
-| `npm run create-action -- <name>` | Scaffold a new action |
+| Command                           | Description             |
+|-----------------------------------|-------------------------|
+| `npm run build`                   | Build all actions       |
+| `npm run test`                    | Run the test suite      |
+| `npm run test:watch`              | Run tests in watch mode |
+| `npm run lint`                    | Run ESLint              |
+| `npm run create-action -- <name>` | Scaffold a new action   |
 

@@ -11,14 +11,14 @@ The GLS action requires a few credentials to authenticate with the GLS ShipIT AP
 
 ## Configuration reference
 
-| Config Name     | Type        | Required | Default | Description |
-|-----------------|-------------|----------|---------|-------------|
-| `client_id`     | string      | **Yes**  | —       | OAuth2 client ID for authenticating with the GLS API |
-| `client_secret` | string      | **Yes**  | —       | OAuth2 client secret for authenticating with the GLS API |
-| `contact_id`    | string      | No       | `""`    | GLS contact ID used in some API requests (see note below) |
-| `ship_it_api_url` | string    | No       | `https://api.gls-group.net/shipit-farm/v1/backend/rs` | GLS ShipIT API base URL |
-| `auth_url`      | string      | No       | `https://api.gls-group.net/oauth2/v2/token` | GLS OAuth2 token endpoint — must end in `/token` |
-| `shipper`       | GLS_SHIPPER | No       | —       | Default shipper address used when no shipper is provided in the shipment data |
+| Config Name       | Type        | Required | Default                                               | Description                                                                   |
+|-------------------|-------------|----------|-------------------------------------------------------|-------------------------------------------------------------------------------|
+| `client_id`       | string      | **Yes**  | —                                                     | OAuth2 client ID for authenticating with the GLS API                          |
+| `client_secret`   | string      | **Yes**  | —                                                     | OAuth2 client secret for authenticating with the GLS API                      |
+| `contact_id`      | string      | No       | `""`                                                  | GLS contact ID used in some API requests (see note below)                     |
+| `ship_it_api_url` | string      | No       | `https://api.gls-group.net/shipit-farm/v1/backend/rs` | GLS ShipIT API base URL                                                       |
+| `auth_url`        | string      | No       | `https://api.gls-group.net/oauth2/v2/token`           | GLS OAuth2 token endpoint — must end in `/token`                              |
+| `shipper`         | GLS_SHIPPER | No       | —                                                     | Default shipper address used when no shipper is provided in the shipment data |
 
 > **`contact_id`:** This identifier is required for certain shipment operations (e.g. end-of-day reports and some services). It is issued by GLS support — contact them directly to request it.
 
