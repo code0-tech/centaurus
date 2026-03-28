@@ -4,7 +4,7 @@ export function register() {
     return sdk.registerConfigDefinitions(
         {
             identifier: "ship_it_api_url",
-            type: "STRING",
+            type: "TEXT",
             defaultValue: " https://api.gls-group.net/shipit-farm/v1/backend/rs",
             name: [
                 {
@@ -18,7 +18,7 @@ export function register() {
                     content: "The url of the GLS ShipIt API."
                 }
             ],
-            linkedDataTypes: ["STRING"],
+            linkedDataTypes: ["TEXT"],
         },
     )
 }

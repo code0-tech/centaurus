@@ -4,7 +4,7 @@ export function register() {
     return sdk.registerConfigDefinitions(
         {
             identifier: "contact_id",
-            type: "STRING",
+            type: "TEXT",
             name: [
                 {
                     code: "en-US",
@@ -18,7 +18,7 @@ export function register() {
                 }
             ],
             defaultValue: "",
-            linkedDataTypes: ["STRING"],
+            linkedDataTypes: ["TEXT"],
         },
     )
 }

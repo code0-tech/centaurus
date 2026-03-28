@@ -4,7 +4,7 @@ export function register() {
     return sdk.registerConfigDefinitions(
         {
             identifier: "client_id",
-            type: "STRING",
+            type: "TEXT",
             name: [
                 {
                     code: "en-US",
@@ -17,7 +17,7 @@ export function register() {
                     content: "The client id to authenticate with the GLS API"
                 }
             ],
-            linkedDataTypes: ["STRING"],
+            linkedDataTypes: ["TEXT"],
         },
     )
 }

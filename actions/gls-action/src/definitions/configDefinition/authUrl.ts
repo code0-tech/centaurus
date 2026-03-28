@@ -4,7 +4,7 @@ export function register() {
     return sdk.registerConfigDefinitions(
         {
             identifier: "auth_url",
-            type: "STRING",
+            type: "TEXT",
             defaultValue: "https://api.gls-group.net/oauth2/v2/token",
             name: [
                 {
