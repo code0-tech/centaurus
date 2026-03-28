@@ -107,4 +107,4 @@ The value must be a valid `GLS_SHIPPER` object:
 }
 ```
 
-See [Types — GLS_SHIPPER](../GLS/types.md/#GLS_SHIPPER) for the full field reference.
+See [Types — GLS_SHIPPER](types.md#GLS_SHIPPER) for the full field reference.

@@ -11,7 +11,7 @@ This guide walks you through creating your first GLS shipment using the GLS Acti
 
 ## Step 1: Install and configure the action
 
-Follow the [Installation Guide](../installation.md) to deploy the GLS Action, then set the following configuration values in your Hercules admin panel (or `.env` file):
+Follow the [Installation Guide](../../installation.md) to deploy the GLS Action, then set the following configuration values in your Hercules admin panel (or `.env` file):
 
 | Config            | Value                                                                                |
 |-------------------|--------------------------------------------------------------------------------------|
@@ -128,7 +128,7 @@ The `GLS_CREATE_PARCELS_RESPONSE` contains everything you need:
 
 ## Common next steps
 
-- [Validate before creating](./functions.md#validateShipment) — Call `validateShipment` first to catch errors before committing
-- [Cancel a shipment](./functions.md#cancelShipment) — Use `cancelShipment` with the `TrackID` if something changes
-- [Reprint a label](./functions.md#reprintParcel) — Use `reprintParcel` if a label is lost or damaged
-- [Common Use Cases](./use-cases.md) — End-to-end examples for real-world scenarios
+- [Validate before creating](functions.md#validateShipment) — Call `validateShipment` first to catch errors before committing
+- [Cancel a shipment](functions.md#cancelShipment) — Use `cancelShipment` with the `TrackID` if something changes
+- [Reprint a label](functions.md#reprintParcel) — Use `reprintParcel` if a label is lost or damaged
+- [Common Use Cases](use-cases.md) — End-to-end examples for real-world scenarios
