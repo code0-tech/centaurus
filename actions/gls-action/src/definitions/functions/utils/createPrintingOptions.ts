@@ -1,7 +1,7 @@
-import {sdk} from "../../../index";
-import {PrintingOptions, ReturnLabels} from "../../../types";
+import {ActionSdk} from "@code0-tech/hercules";
+import {PrintingOptions, ReturnLabels} from "../../datatypes/glsPrintingOptions";
 
-function register() {
+function register(sdk: ActionSdk) {
     sdk.registerFunctionDefinitions(
         {
             definition: {

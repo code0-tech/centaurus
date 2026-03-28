@@ -1,6 +1,6 @@
-import {sdk} from "../../index";
+import {ActionSdk} from "@code0-tech/hercules";
 
-export function register() {
+export function register(sdk: ActionSdk) {
     return sdk.registerConfigDefinitions(
         {
             identifier: "ship_it_api_url",

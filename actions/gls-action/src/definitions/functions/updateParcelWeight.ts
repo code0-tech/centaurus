@@ -1,12 +1,13 @@
-import {sdk} from "../../index";
+import {ActionSdk, HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
+import {getAuthToken} from "../../helpers";
+import axios from "axios";
 import {
     UpdateParcelWeightRequestData,
-    UpdateParcelWeightResponseData
-} from "../../types";
-import {HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
-import {updateParcelWeight} from "../../helpers";
+    UpdateParcelWeightResponseData,
+    UpdateParcelWeightResponseDataSchema
+} from "../datatypes/glsUpdateParcelWeight";
 
-export function register() {
+export function register(sdk: ActionSdk) {
     return sdk.registerFunctionDefinitions(
         {
             definition: {
@@ -47,13 +48,18 @@ export function register() {
                 ],
             },
             handler: async (data: UpdateParcelWeightRequestData, context: HerculesFunctionContext): Promise<UpdateParcelWeightResponseData> => {
+                const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
+
                 try {
-                    return await updateParcelWeight(data, context)
-                } catch (error) {
-                    if (typeof error === "string") {
-                        throw new RuntimeErrorException("ERROR_CREATING_GLS_SHIPMENT", error)
-                    }
-                    throw new RuntimeErrorException("ERROR_CREATING_GLS_SHIPMENT", "An error occurred while creating the shipment.")
+                    const result = await axios.post(`${url}/rs/shipments/updateparcelweight`, data, {
+                        headers: {
+                            Authorization: `Bearer ${await getAuthToken(context)}`,
+                            "Content-Type": "application/glsVersion1+json"
+                        }
+                    })
+                    return UpdateParcelWeightResponseDataSchema.parse(result.data)
+                } catch (error: any) {
+                    throw new RuntimeErrorException("UPDATE_PARCEL_WEIGHT_FAILED", error.toString())
                 }
             }
         },

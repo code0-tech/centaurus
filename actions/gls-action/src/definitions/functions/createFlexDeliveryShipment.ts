@@ -1,19 +1,16 @@
-import {sdk} from "../../index";
 import {
     DEFAULT_DATA_TYPES_FOR_SERVICES,
     DEFAULT_PARAMETERS_FOR_SERVICES,
     DEFAULT_SIGNATURE_FOR_SERVICES, postShipmentHelper
 } from "../../helpers";
-import {HerculesFunctionContext} from "@code0-tech/hercules";
-import {
-    CreateParcelsResponse,
-    CustomContent,
-    PrintingOptions,
-    ReturnOptions,
-    ShipmentWithoutServices
-} from "../../types";
+import {ActionSdk, HerculesFunctionContext} from "@code0-tech/hercules";
+import {ShipmentWithoutServices} from "../datatypes/glsShipment";
+import {CreateParcelsResponse} from "../datatypes/glsCreateParcelsResponse";
+import {ReturnOptions} from "../datatypes/glsReturnOptions";
+import {CustomContent} from "../datatypes/glsCustomContent";
+import {PrintingOptions} from "../datatypes/glsPrintingOptions";
 
-export function register() {
+export function register(sdk: ActionSdk) {
     return sdk.registerFunctionDefinitions(
         {
             definition: {

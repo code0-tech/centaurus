@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
     "esModuleInterop": true,
-    "declaration": true,
-    "outDir": "dist",
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "target": "es2020",
+    "lib": ["es2020", "dom"],
     "strict": false,
-    "skipLibCheck": true,
-    "allowImportingTsExtensions": false
-  }
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
 }

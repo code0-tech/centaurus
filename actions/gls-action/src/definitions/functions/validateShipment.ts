@@ -1,9 +1,13 @@
-import {sdk} from "../../index";
-import {HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
-import {ValidateShipmentRequestData, ValidateShipmentResponseData} from "../../types";
-import {validateShipment} from "../../helpers";
+import {ActionSdk, HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
+import {getAuthToken, transformValidateShipmentRequestDataToInternalFormat} from "../../helpers";
+import axios from "axios";
+import {
+    ValidateShipmentRequestData,
+    ValidateShipmentResponseData,
+    ValidateShipmentResponseDataSchema
+} from "../datatypes/glsValidateShipment";
 
-export function register() {
+export function register(sdk: ActionSdk) {
     return sdk.registerFunctionDefinitions(
         {
             definition: {
@@ -44,13 +48,19 @@ export function register() {
                 ],
             },
             handler: async (data: ValidateShipmentRequestData, context: HerculesFunctionContext): Promise<ValidateShipmentResponseData> => {
+                const url = context?.matchedConfig.findConfig("ship_it_api_url") as string;
+                const contactID = context?.matchedConfig.findConfig("contact_id") as string || ""
+
                 try {
-                    return await validateShipment(data, context)
-                } catch (error) {
-                    if (typeof error === "string") {
-                        throw new RuntimeErrorException("ERROR_CREATING_GLS_SHIPMENT", error)
-                    }
-                    throw new RuntimeErrorException("ERROR_CREATING_GLS_SHIPMENT", "An error occurred while creating the shipment.")
+                    const result = await axios.post(`${url}/rs/shipments/validate`, transformValidateShipmentRequestDataToInternalFormat(data, context, contactID), {
+                        headers: {
+                            Authorization: `Bearer ${await getAuthToken(context)}`,
+                            "Content-Type": "application/glsVersion1+json"
+                        }
+                    })
+                    return ValidateShipmentResponseDataSchema.parse(result.data)
+                } catch (error: any) {
+                    throw new RuntimeErrorException("VALIDATE_SHIPMENT_FAILED", error.toString())
                 }
             }
         },

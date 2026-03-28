@@ -1,9 +1,9 @@
-import {sdk} from "../../index";
-import {EndOfDayRequestData, EndOfDayResponseData} from "../../types";
-import {HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
-import {getEndOfDayInfo} from "../../helpers";
+import {ActionSdk, HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
+import {getAuthToken} from "../../helpers";
+import axios from "axios";
+import {EndOfDayRequestData, EndOfDayResponseData, EndOfDayResponseDataSchema} from "../datatypes/glsEndOfDayRequest";
 
-export function register() {
+export function register(sdk: ActionSdk) {
     return sdk.registerFunctionDefinitions(
         {
             definition: {
@@ -44,14 +44,20 @@ export function register() {
                 ],
             },
             handler: async (data: EndOfDayRequestData, context: HerculesFunctionContext): Promise<EndOfDayResponseData> => {
+                const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
+
                 try {
-                    return await getEndOfDayInfo(data, context)
-                } catch (error) {
-                    if (typeof error === "string") {
-                        throw new RuntimeErrorException("ERROR_CREATING_GLS_SHIPMENT", error)
-                    }
-                    throw new RuntimeErrorException("ERROR_CREATING_GLS_SHIPMENT", "An error occurred while creating the shipment.")
+                    const result = await axios.post(`${url}/rs/shipments/endofday?date=${data.date}`, {}, {
+                        headers: {
+                            Authorization: `Bearer ${await getAuthToken(context)}`,
+                            "Content-Type": "application/glsVersion1+json"
+                        }
+                    })
+                    return EndOfDayResponseDataSchema.parse(result.data)
+                } catch (error: any) {
+                    throw new RuntimeErrorException("GET_END_OF_DAY_INFO_FAILED", error.toString())
                 }
+
             }
         },
     )

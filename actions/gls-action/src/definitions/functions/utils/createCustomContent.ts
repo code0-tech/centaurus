@@ -1,8 +1,8 @@
-import {sdk} from "../../../index";
-import {CustomContent} from "../../../types";
+import {ActionSdk} from "@code0-tech/hercules";
+import {CustomContent} from "../../datatypes/glsCustomContent";
 
-function register() {
-    sdk.registerFunctionDefinitions(
+export function register(sdk: ActionSdk) {
+    return sdk.registerFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createCustomContent",

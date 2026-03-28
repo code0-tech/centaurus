@@ -1,19 +1,17 @@
-import {sdk} from "../../index";
-import {HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
+import {ActionSdk, HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
 import {
     DEFAULT_DATA_TYPES_FOR_SERVICES,
     DEFAULT_PARAMETERS_FOR_SERVICES,
     DEFAULT_SIGNATURE_FOR_SERVICES, postShipmentHelper
 } from "../../helpers";
-import {
-    CreateParcelsResponse,
-    CustomContent,
-    PrintingOptions,
-    ReturnOptions,
-    ShipmentWithoutServices
-} from "../../types";
+import {ShipmentWithoutServices} from "../datatypes/glsShipment";
+import {PrintingOptions} from "../datatypes/glsPrintingOptions";
+import {CustomContent} from "../datatypes/glsCustomContent";
+import {ReturnOptions} from "../datatypes/glsReturnOptions";
+import {CreateParcelsResponse} from "../datatypes/glsCreateParcelsResponse";
 
-export function register() {
+
+export function register(sdk: ActionSdk) {
     return sdk.registerFunctionDefinitions(
         {
             definition: {

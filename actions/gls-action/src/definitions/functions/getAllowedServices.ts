@@ -1,9 +1,13 @@
-import {sdk} from "../../index";
-import {AllowedServicesRequestData, AllowedServicesResponseData} from "../../types";
-import {HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
-import {getAllowedServices} from "../../helpers";
+import {ActionSdk, HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
+import {getAuthToken} from "../../helpers";
+import axios from "axios";
+import {
+    AllowedServicesRequestData,
+    AllowedServicesResponseData,
+    AllowedServicesResponseDataSchema
+} from "../datatypes/glsAllowedServices";
 
-export function register() {
+export function register(sdk: ActionSdk) {
     return sdk.registerFunctionDefinitions(
         {
             definition: {
@@ -45,7 +49,14 @@ export function register() {
             },
             handler: async (data: AllowedServicesRequestData, context: HerculesFunctionContext): Promise<AllowedServicesResponseData> => {
                 try {
-                    return await getAllowedServices(data, context)
+                    const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
+                    const result = await axios.post(`${url}/rs/shipments/allowedservices`, data, {
+                        headers: {
+                            Authorization: `Bearer ${await getAuthToken(context)}`,
+                            "Content-Type": "application/glsVersion1+json"
+                        }
+                    })
+                    return AllowedServicesResponseDataSchema.parse(result.data)
                 } catch (error) {
                     if (typeof error === "string") {
                         throw new RuntimeErrorException("ERROR_CREATING_GLS_SHIPMENT", error)

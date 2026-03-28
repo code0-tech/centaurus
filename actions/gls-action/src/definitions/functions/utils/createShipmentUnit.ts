@@ -1,7 +1,8 @@
-import {sdk} from "../../../index";
-import {ShipmentUnit, UnitService} from "../../../types";
+import {ActionSdk} from "@code0-tech/hercules";
+import { UnitService } from "../../datatypes/glsUnitService";
+import {ShipmentUnit} from "../../datatypes/glsShipmentUnit";
 
-function register() {
+function register(sdk: ActionSdk) {
     sdk.registerFunctionDefinitions(
         {
             definition: {

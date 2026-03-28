@@ -1,10 +1,25 @@
-import {sdk, types} from "../../index";
+import {ActionSdk} from "@code0-tech/hercules";
+import {singleZodSchemaToTypescriptDef} from "../../helpers";
+import z from "zod";
 
-export function register() {
+export const CancelShipmentRequestDataSchema = z.object({
+    TrackID: z.string()
+})
+export type CancelShipmentRequestData = z.infer<typeof CancelShipmentRequestDataSchema>
+export const CancelShipmentResponseDataSchema = z.object({
+    TrackID: z.string(),
+    result: z.enum(["CANCELLED", "CANCELLATION_PENDING", "SCANNED", "ERROR"])
+})
+export type CancelShipmentResponseData = z.infer<typeof CancelShipmentResponseDataSchema>
+
+export function register(sdk: ActionSdk) {
     return sdk.registerDataTypes(
         {
             identifier: "GLS_CANCEL_SHIPMENT_REQUEST_DATA",
-            type: types.get("GLS_CANCEL_SHIPMENT_REQUEST_DATA")!,
+            type: singleZodSchemaToTypescriptDef(
+                "GLS_CANCEL_SHIPMENT_REQUEST_DATA",
+                CancelShipmentRequestDataSchema
+            ),
             name: [
                 {
                     code: "en-US",
@@ -20,7 +35,9 @@ export function register() {
         },
         {
             identifier: "GLS_CANCEL_SHIPMENT_RESPONSE_DATA",
-            type: types.get("GLS_CANCEL_SHIPMENT_RESPONSE_DATA")!,
+            type: singleZodSchemaToTypescriptDef("GLS_CANCEL_SHIPMENT_RESPONSE_DATA",
+                CancelShipmentResponseDataSchema
+            ),
             name: [
                 {
                     code: "en-US",

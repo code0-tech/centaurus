@@ -1,7 +1,8 @@
-import {sdk} from "../../../index";
-import {AddressSchema, ConsigneeSchema} from "../../../types";
+import {ActionSdk} from "@code0-tech/hercules";
+import {AddressSchema} from "../../datatypes/glsAddress";
+import {ConsigneeSchema} from "../../datatypes/glsConsignee";
 
-function register() {
+export function register(sdk: ActionSdk) {
     sdk.registerFunctionDefinitions(
         {
             definition: {

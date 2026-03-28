@@ -1,11 +1,14 @@
-import {sdk} from "../../index";
-import {ReprintParcelRequestData, ReprintParcelResponseData} from "../../types";
-import {HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
-import {reprintParcel} from "../../helpers";
+import {ActionSdk, HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
+import {getAuthToken} from "../../helpers";
+import axios from "axios";
+import {
+    ReprintParcelRequestData,
+    ReprintParcelResponseData,
+    ReprintParcelResponseDataSchema
+} from "../datatypes/glsReprintParcel";
 
-export function register() {
+export async function register(sdk: ActionSdk) {
     return sdk.registerFunctionDefinitions(
-
         {
             definition: {
                 runtimeName: "reprintParcel",
@@ -45,13 +48,19 @@ export function register() {
                 ],
             },
             handler: async (data: ReprintParcelRequestData, context: HerculesFunctionContext): Promise<ReprintParcelResponseData> => {
+                const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
+
                 try {
-                    return await reprintParcel(data, context)
-                } catch (error) {
-                    if (typeof error === "string") {
-                        throw new RuntimeErrorException("ERROR_CREATING_GLS_SHIPMENT", error)
-                    }
-                    throw new RuntimeErrorException("ERROR_CREATING_GLS_SHIPMENT", "An error occurred while creating the shipment.")
+                    const result = await axios.post(`${url}/rs/shipments/reprintparcel`, data, {
+                        headers: {
+                            Authorization: `Bearer ${await getAuthToken(context)}`,
+                            "Content-Type": "application/glsVersion1+json"
+                        }
+                    })
+                    return ReprintParcelResponseDataSchema.parse(result.data)
+                } catch (error: any) {
+                    console.log(error)
+                    throw new RuntimeErrorException("REPRINT_PARCEL_FAILED", error.toString())
                 }
             }
         }

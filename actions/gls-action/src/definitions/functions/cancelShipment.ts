@@ -1,9 +1,8 @@
-import {sdk} from "../../index";
-import {HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
-import {CancelShipmentRequestData, CancelShipmentResponseData} from "../../types";
+import {ActionSdk, HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
 import {cancelShipment} from "../../helpers";
+import {CancelShipmentRequestData, CancelShipmentResponseData} from "../datatypes/glsCancelShipment";
 
-export function register() {
+export function register(sdk: ActionSdk) {
     return sdk.registerFunctionDefinitions(
         {
             definition: {

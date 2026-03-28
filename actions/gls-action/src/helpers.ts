@@ -2,47 +2,42 @@ import {ZodError, ZodObject} from "zod";
 import {createAuxiliaryTypeStore, printNode, zodToTs} from "zod-to-ts";
 import ts from "typescript";
 import axios from "axios";
-import {HerculesFunctionContext, HerculesRuntimeFunctionDefinition, RuntimeErrorException} from "@code0-tech/hercules";
-import {
-    AllowedServicesRequestData,
-    AllowedServicesResponseData,
-    AllowedServicesResponseDataSchema,
-    AuthenticationRequestData,
-    AuthenticationRequestDataSchema,
-    AuthenticationResponseDataSchema,
-    CancelShipmentRequestData,
-    CancelShipmentResponseData,
-    CancelShipmentResponseDataSchema,
-    CreateParcelsResponse,
-    CreateParcelsResponseSchema,
-    CustomContent,
-    EndOfDayRequestData,
-    EndOfDayResponseData,
-    EndOfDayResponseDataSchema,
-    InternalShipmentRequestData,
-    InternalShipmentServiceSchema,
-    InternalShipmentUnitSchema,
-    InternalShipper,
-    InternalValidateShipmentRequestData,
-    PrintingOptions,
-    ReprintParcelRequestData,
-    ReprintParcelResponseData,
-    ReprintParcelResponseDataSchema,
-    ReturnOptions,
-    ShipmentRequestData,
-    ShipmentRequestDataSchema,
-    ShipmentService,
-    ShipmentWithoutServices,
-    ShipperSchema,
-    UpdateParcelWeightRequestData,
-    UpdateParcelWeightResponseData,
-    UpdateParcelWeightResponseDataSchema,
-    ValidateShipmentRequestData,
-    ValidateShipmentResponseData,
-    ValidateShipmentResponseDataSchema
-} from "./types";
 import * as path from "node:path";
 import {readdir, stat} from "fs/promises";
+import {
+    HerculesRuntimeFunctionDefinition,
+    HerculesFunctionContext,
+    RuntimeErrorException,
+    ActionSdk
+} from "@code0-tech/hercules";
+import {InternalShipmentServiceSchema, ShipmentService} from "./definitions/datatypes/glsShipmentService";
+import {ShipmentWithoutServices} from "./definitions/datatypes/glsShipment";
+import {
+    CancelShipmentRequestData,
+    CancelShipmentResponseData,
+    CancelShipmentResponseDataSchema
+} from "./definitions/datatypes/glsCancelShipment";
+import {
+    InternalValidateShipmentRequestData,
+    ValidateShipmentRequestData
+} from "./definitions/datatypes/glsValidateShipment";
+import {InternalShipmentUnitSchema} from "./definitions/datatypes/glsShipmentUnit";
+import {InternalShipper, ShipperSchema} from "./definitions/datatypes/glsShipper";
+import {CreateParcelsResponse, CreateParcelsResponseSchema} from "./definitions/datatypes/glsCreateParcelsResponse";
+import {PrintingOptions} from "./definitions/datatypes/glsPrintingOptions";
+import {CustomContent} from "./definitions/datatypes/glsCustomContent";
+import {ReturnOptions} from "./definitions/datatypes/glsReturnOptions";
+import {
+    AuthenticationRequestData,
+    AuthenticationRequestDataSchema,
+    AuthenticationResponseDataSchema
+} from "./types/definitions/auth";
+import {
+    InternalShipmentRequestData,
+    ShipmentRequestData,
+    ShipmentRequestDataSchema
+} from "./types/requests/shipmentRequest";
+import { fileURLToPath } from 'url';
 
 
 export const DEFAULT_SIGNATURE_FOR_SERVICES = "shipment: GLS_SHIPMENT, printingOptions: GLS_PRINTING_OPTIONS, returnOptions?: GLS_RETURN_OPTIONS, customContent?: GLS_CUSTOM_CONTENT"
@@ -107,7 +102,7 @@ export const DEFAULT_PARAMETERS_FOR_SERVICES: HerculesRuntimeFunctionDefinition[
             }
         ]
     }
-]
+] as HerculesRuntimeFunctionDefinition["parameters"]
 export const DEFAULT_DATA_TYPES_FOR_SERVICES = [
     "GLS_SHIPMENT",
     "GLS_PRINTING_OPTIONS",
@@ -116,6 +111,12 @@ export const DEFAULT_DATA_TYPES_FOR_SERVICES = [
     "GLS_CREATE_PARCELS_RESPONSE"
 ]
 
+export function singleZodSchemaToTypescriptDef(
+    typeName: string,
+    zodSchema: ZodObject<any>
+) {
+    return zodSchemaToTypescriptDefs(typeName, zodSchema).get(typeName)!;
+}
 
 export function zodSchemaToTypescriptDefs(
     typeName: string,
@@ -182,100 +183,6 @@ export const getAuthToken = async (context: HerculesFunctionContext) => {
         expiresAt: Date.now() + (result.expires_in - 60) * 1000
     }
     return result.access_token
-}
-
-export const validateShipment = async (data: ValidateShipmentRequestData, context: HerculesFunctionContext): Promise<ValidateShipmentResponseData> => {
-    const url = context?.matchedConfig.findConfig("ship_it_api_url") as string;
-    const contactID = context?.matchedConfig.findConfig("contact_id") as string || ""
-
-    try {
-        const result = await axios.post(`${url}/rs/shipments/validate`, transformValidateShipmentRequestDataToInternalFormat(data, context, contactID), {
-            headers: {
-                Authorization: `Bearer ${await getAuthToken(context)}`,
-                "Content-Type": "application/glsVersion1+json"
-            }
-        })
-        return ValidateShipmentResponseDataSchema.parse(result.data)
-    } catch (error: any) {
-        throw new RuntimeErrorException("VALIDATE_SHIPMENT_FAILED", error.toString())
-    }
-
-}
-export const reprintParcel = async (data: ReprintParcelRequestData, context: HerculesFunctionContext): Promise<ReprintParcelResponseData> => {
-    const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
-
-    try {
-        const result = await axios.post(`${url}/rs/shipments/reprintparcel`, data, {
-            headers: {
-                Authorization: `Bearer ${await getAuthToken(context)}`,
-                "Content-Type": "application/glsVersion1+json"
-            }
-        })
-        return ReprintParcelResponseDataSchema.parse(result.data)
-    } catch (error: any) {
-        throw new RuntimeErrorException("REPRINT_PARCEL_FAILED", error.toString())
-    }
-}
-
-export const updateParcelWeight = async (data: UpdateParcelWeightRequestData, context: HerculesFunctionContext): Promise<UpdateParcelWeightResponseData> => {
-    const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
-
-    try {
-        const result = await axios.post(`${url}/rs/shipments/updateparcelweight`, data, {
-            headers: {
-                Authorization: `Bearer ${await getAuthToken(context)}`,
-                "Content-Type": "application/glsVersion1+json"
-            }
-        })
-        return UpdateParcelWeightResponseDataSchema.parse(result.data)
-    } catch (error: any) {
-        throw new RuntimeErrorException("UPDATE_PARCEL_WEIGHT_FAILED", error.toString())
-    }
-
-}
-
-export const getEndOfDayInfo = async (data: EndOfDayRequestData, context: HerculesFunctionContext): Promise<EndOfDayResponseData> => {
-    const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
-
-    try {
-        const result = await axios.post(`${url}/rs/shipments/endofday?date=${data.date}`, {}, {
-            headers: {
-                Authorization: `Bearer ${await getAuthToken(context)}`,
-                "Content-Type": "application/glsVersion1+json"
-            }
-        })
-        return EndOfDayResponseDataSchema.parse(result.data)
-    } catch (error: any) {
-        throw new RuntimeErrorException("GET_END_OF_DAY_INFO_FAILED", error.toString())
-    }
-}
-
-export const getAllowedServices = async (data: AllowedServicesRequestData, context: HerculesFunctionContext): Promise<AllowedServicesResponseData> => {
-    const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
-
-    try {
-        const result = await axios.post(`${url}/rs/shipments/allowedservices`, data, {
-            headers: {
-                Authorization: `Bearer ${await getAuthToken(context)}`,
-                "Content-Type": "application/glsVersion1+json"
-            }
-        })
-        return AllowedServicesResponseDataSchema.parse(result.data)
-    } catch (error: any) {
-        if (error.response?.data) {
-            console.error("Error response from GLS API:", error.response.data)
-        } else if (error.response?.headers) {
-            const headers = error?.response.headers;
-            console.error("Error sending request to GLS API:", headers.error, headers.args)
-            throw new RuntimeErrorException("ERROR_FETCHING_ALLOWED_SERVICES", `GLS API error: ${headers.error}, args: ${headers.args}`)
-        } else if (error instanceof ZodError) {
-            console.error("Error sending request to GLS API:", error.message)
-        } else {
-            console.error("Error sending request to GLS API:", error)
-        }
-        throw new RuntimeErrorException("ERROR_FETCHING_ALLOWED_SERVICES", "An error occurred while fetching allowed services from GLS API.")
-    }
-
 }
 
 export const cancelShipment = async (data: CancelShipmentRequestData, context: HerculesFunctionContext): Promise<CancelShipmentResponseData> => {
@@ -399,13 +306,15 @@ export async function postShipmentHelper(context: HerculesFunctionContext, servi
     }
 }
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-export async function loadAllDefinitions() {
-    const baseDir = path.resolve("definitions");
-    await loadFromDirectory(baseDir);
+export async function loadAllDefinitions(sdk: ActionSdk) {
+    const baseDir = path.resolve(__dirname, "definitions");
+    await loadFromDirectory(baseDir, sdk);
 }
 
-async function loadFromDirectory(dir: string) {
+async function loadFromDirectory(dir: string, sdk: ActionSdk) {
     const entries = await readdir(dir);
 
     for (const entry of entries) {
@@ -413,13 +322,13 @@ async function loadFromDirectory(dir: string) {
         const stats = await stat(fullPath);
 
         if (stats.isDirectory()) {
-            await loadFromDirectory(fullPath);
-        } else if (entry.endsWith(".ts")) {
+            await loadFromDirectory(fullPath, sdk);
+        } else if (entry.endsWith(".ts") && !entry.endsWith(".test.ts")) {
             const mod = await import(fullPath);
 
             if (typeof mod.register === "function") {
                 try {
-                    await mod.register();
+                    await mod.register(sdk);
                 } catch (error) {
                     console.log(`Error registering functions from file ${entry}:`, error);
                 }
