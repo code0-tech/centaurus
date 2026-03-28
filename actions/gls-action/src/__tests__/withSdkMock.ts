@@ -51,7 +51,7 @@ export const withSdkMock = async (tests: (state: SdkMockState) => void) => {
                     fullyConnected: () => {
                         return true
                     },
-                    connect: vi.fn((options) => {
+                    connect: vi.fn(() => {
                         return Promise.resolve([]);
                     }),
                     onError: vi.fn(),
