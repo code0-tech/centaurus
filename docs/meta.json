@@ -1,5 +1,12 @@
 {
   "title": "Centaurus",
-  "description": "Monorepo for code0 actions",
-  "root": true
+  "description": "Monorepo for CodeZero actions",
+  "root": true,
+  "pages": [
+    "---Introduction---",
+    "index",
+    "installation",
+    "---Actions---",
+    "...Actions"
+  ]
 }

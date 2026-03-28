@@ -1,5 +1,5 @@
 ---
-title: Troubleshooting & Community Support
+title: Troubleshooting
 description: Frequently asked questions, troubleshooting tips, and community resources for the GLS Action.
 ---
 

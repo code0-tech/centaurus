@@ -1,6 +1,7 @@
 ---
-title: GLS Action Overview
+title: Overview
 description: Overview of the GLS ShipIT action — what it does, what you need to get started, and how it fits into your flows.
+icon: IconHome
 ---
 
 # GLS Action

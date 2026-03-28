@@ -1,9 +1,9 @@
 ---
-title: GLS Action Functions
+title: Functions
 description: All functions available in the GLS Action with detailed descriptions, parameters, and data flow diagrams.
 ---
 
-# GLS Action Functions
+# Functions
 
 The GLS Action exposes **26 functions** grouped into three categories:
 

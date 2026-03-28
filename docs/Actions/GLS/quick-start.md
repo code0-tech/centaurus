@@ -1,5 +1,5 @@
 ---
-title: Quick Start — GLS Action
+title: Quick Start
 description: Create your first GLS shipment in a few steps.
 ---
 
@@ -11,7 +11,7 @@ This guide walks you through creating your first GLS shipment using the GLS Acti
 
 ## Step 1: Install and configure the action
 
-Follow the [Installation Guide](../../Guides/installation.md) to deploy the GLS Action, then set the following configuration values in your Hercules admin panel (or `.env` file):
+Follow the [Installation Guide](../../installation.md) to deploy the GLS Action, then set the following configuration values in your Hercules admin panel (or `.env` file):
 
 | Config            | Value                                                                                |
 |-------------------|--------------------------------------------------------------------------------------|

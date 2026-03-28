@@ -1,5 +1,5 @@
 ---
-title: Action Configuration
+title: Configuration
 description: All configuration options for the GLS Action, including how to obtain credentials from the GLS Developer Portal.
 ---
 
