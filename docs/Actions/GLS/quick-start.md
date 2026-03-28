@@ -11,7 +11,7 @@ This guide walks you through creating your first GLS shipment using the GLS Acti
 
 ## Step 1: Install and configure the action
 
-Follow the [Installation Guide](../../installation.md) to deploy the GLS Action, then set the following configuration values in your Hercules admin panel (or `.env` file):
+Follow the [Installation Guide](../installation.md) to deploy the GLS Action, then set the following configuration values in your Hercules admin panel (or `.env` file):
 
 | Config            | Value                                                                                |
 |-------------------|--------------------------------------------------------------------------------------|
@@ -20,7 +20,7 @@ Follow the [Installation Guide](../../installation.md) to deploy the GLS Action,
 | `ship_it_api_url` | GLS ShipIT endpoint (default: `https://api.gls-group.net/shipit-farm/v1/backend/rs`) |
 | `auth_url`        | GLS auth endpoint (default: `https://api.gls-group.net/oauth2/v2/token`)             |
 
-See [Configuration](./configs.md) for the full list of options and how to obtain credentials.
+See [Configuration](configs.md) for the full list of options and how to obtain credentials.
 
 ---
 

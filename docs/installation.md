@@ -20,7 +20,7 @@ Before you begin, make sure you have the following:
 - **Docker** and **Docker Compose** installed
 - A running **Aquila** server (part of the Hercules platform)
 - Your `HERCULES_AUTH_TOKEN` from the Aquila admin panel
-- Service-specific credentials (e.g. GLS API keys — see [GLS Configuration](../Actions/GLS/configs.md))
+- Service-specific credentials (e.g. GLS API keys — see [GLS Configuration](GLS/configs.md))
 
 ---
 
@@ -71,7 +71,7 @@ HERCULES_ACTION_ID=gls-action
 HERCULES_SDK_VERSION=1.0.0
 ```
 
-For action-specific variables (e.g. GLS API credentials), see the [GLS Configuration](../Actions/GLS/configs.md) page.
+For action-specific variables (e.g. GLS API credentials), see the [GLS Configuration](GLS/configs.md) page.
 
 ---
 
@@ -119,5 +119,5 @@ If the action fails to start or connect, check:
 - That `HERCULES_AUTH_TOKEN` is valid and not expired
 - That `HERCULES_AQUILA_URL` points to the correct host and port
 - That Docker has access to the internet (for pulling the base image)
-- The service-specific credentials are correct (see [Troubleshooting](../Actions/GLS/troubleshooting.md))
+- The service-specific credentials are correct (see [Troubleshooting](GLS/troubleshooting.md))
 
