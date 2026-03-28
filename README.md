@@ -27,13 +27,13 @@ All actions share the following base environment variables, which connect them t
 4. Fill in your credentials and Hercules connection details in `.env`
 5. Start the action: `docker compose up -d`
 
-See the [Installation Guide](docs/Guides/installation.md) for detailed steps.
+See the [Installation Guide](docs/installation.md) for detailed steps.
 
 ## Documentation
 
 Full documentation is located in the [`docs/`](docs/) folder:
 
-- [Installation Guide](docs/Guides/installation.md)
+- [Installation Guide](docs/installation.md)
 - [GLS Action Overview](docs/Actions/GLS/overview.md)
 - [GLS Configuration](docs/Actions/GLS/configs.md)
 - [GLS Functions](docs/Actions/GLS/functions.md)

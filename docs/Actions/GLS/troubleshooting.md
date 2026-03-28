@@ -1,5 +1,5 @@
 ---
-title: Troubleshooting & Community Support
+title: Troubleshooting
 description: Frequently asked questions, troubleshooting tips, and community resources for the GLS Action.
 ---
 
@@ -30,7 +30,7 @@ A: The action supports all major GLS shipment types and services, including:
 - Tyre service, addressee-only delivery
 - Saturday and next-working-day delivery (EXPRESS only)
 
-See [Functions](../GLS/functions.md) for the complete list.
+See [Functions](functions.md) for the complete list.
 
 ---
 

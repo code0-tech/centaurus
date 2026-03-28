@@ -1,5 +1,5 @@
 ---
-title: GLS Action Events
+title: Trigger
 description: Events emitted by the GLS Action — what they are, how they trigger flows in Aquila, and what future events are planned.
 ---
 

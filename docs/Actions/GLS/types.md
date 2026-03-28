@@ -1,5 +1,5 @@
 ---
-title: GLS Action Types
+title: Datatypes
 description: All data types registered by the GLS Action — field references and descriptions.
 ---
 

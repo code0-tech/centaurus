@@ -2,13 +2,16 @@
   "title": "GLS Action",
   "description": "GLS ShipIT integration for creating and managing shipments",
   "pages": [
+    "---Introduction---",
     "overview",
     "quick-start",
     "configs",
+    "troubleshooting",
+    "---Definitions---",
     "events",
     "functions",
     "types",
-    "use-cases",
-    "troubleshooting"
+    "---Use Cases---",
+    "use-cases"
   ]
 }
