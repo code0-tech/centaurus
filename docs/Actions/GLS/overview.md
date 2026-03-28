@@ -88,10 +88,10 @@ GLS_CREATE_PARCELS_RESPONSE  ← tracking IDs, barcode data, print data, routing
 
 ## Next steps
 
-- [Quick Start](../GLS/quick-start.md) — Create your first shipment in a few steps
-- [Configuration](../GLS/configs.md) — Full list of configuration options and how to get credentials
-- [Functions](../GLS/functions.md) — All available functions with parameter details
-- [Types](../GLS/types.md) — All data types used in the GLS Action
-- [Events](../GLS/events.md) — Events emitted by the GLS Action
-- [Common Use Cases](../GLS/use-cases.md) — Example flows for real-world scenarios
-- [Troubleshooting](../GLS/troubleshooting.md) — FAQ and community support
+- [Quick Start](quick-start.md) — Create your first shipment in a few steps
+- [Configuration](configs.md) — Full list of configuration options and how to get credentials
+- [Functions](functions.md) — All available functions with parameter details
+- [Types](types.md) — All data types used in the GLS Action
+- [Events](events.md) — Events emitted by the GLS Action
+- [Common Use Cases](use-cases.md) — Example flows for real-world scenarios
+- [Troubleshooting](troubleshooting.md) — FAQ and community support
