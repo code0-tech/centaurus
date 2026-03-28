@@ -10,12 +10,19 @@ export const sdk = createSdk({
     version: process.env.HERCULES_SDK_VERSION || "0.0.0",
 })
 
-try {
-    await loadAllDefinitions(sdk)
-    connectToSdk()
-} catch (error) {
-    console.error(error)
+async function main() {
+    try {
+        await loadAllDefinitions(sdk)
+        connectToSdk()
+    } catch (error) {
+        console.error(error)
+    }
 }
+main().catch(err => {
+    console.error(err)
+    process.exit(1)
+})
+
 
 function connectToSdk() {
     sdk.connect().then(() => {

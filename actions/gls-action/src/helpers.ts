@@ -2,8 +2,6 @@ import {ZodError, ZodObject} from "zod";
 import {createAuxiliaryTypeStore, printNode, zodToTs} from "zod-to-ts";
 import ts from "typescript";
 import axios from "axios";
-import * as path from "node:path";
-import {readdir, stat} from "fs/promises";
 import {
     HerculesRuntimeFunctionDefinition,
     HerculesFunctionContext,
@@ -37,7 +35,6 @@ import {
     ShipmentRequestData,
     ShipmentRequestDataSchema
 } from "./types/requests/shipmentRequest";
-import { fileURLToPath } from 'url';
 
 
 export const DEFAULT_SIGNATURE_FOR_SERVICES = "shipment: GLS_SHIPMENT, printingOptions: GLS_PRINTING_OPTIONS, returnOptions?: GLS_RETURN_OPTIONS, customContent?: GLS_CUSTOM_CONTENT"
@@ -306,32 +303,17 @@ export async function postShipmentHelper(context: HerculesFunctionContext, servi
     }
 }
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 export async function loadAllDefinitions(sdk: ActionSdk) {
-    const baseDir = path.resolve(__dirname, "definitions");
-    await loadFromDirectory(baseDir, sdk);
-}
+    const modules = import.meta.glob('./definitions/**/*.ts');
 
-async function loadFromDirectory(dir: string, sdk: ActionSdk) {
-    const entries = await readdir(dir);
+    for (const path in modules) {
+        const mod: any = await modules[path]();
 
-    for (const entry of entries) {
-        const fullPath = path.join(dir, entry);
-        const stats = await stat(fullPath);
-
-        if (stats.isDirectory()) {
-            await loadFromDirectory(fullPath, sdk);
-        } else if (entry.endsWith(".ts") && !entry.endsWith(".test.ts")) {
-            const mod = await import(fullPath);
-
-            if (typeof mod.register === "function") {
-                try {
-                    await mod.register(sdk);
-                } catch (error) {
-                    console.log(`Error registering functions from file ${entry}:`, error);
-                }
+        if (typeof mod.register === 'function') {
+            try {
+                await mod.register(sdk);
+            } catch (error) {
+                console.log(`Error registering functions from ${path}:`, error);
             }
         }
     }

@@ -1,31 +1,28 @@
 import { defineConfig } from 'vite';
-import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 
 export default defineConfig({
     build: {
-        target: "node18",
+        target: 'node18',
         ssr: true,
-        lib: {
-            entry: resolve(__dirname, 'src/index.ts'),
-            name: 'centaurus',
-            fileName: 'centaurus',
-            formats: ['es']
-        },
+        outDir: 'dist',
+        emptyOutDir: true,
         rollupOptions: {
-            external: (id) =>
-                ['fs', 'path', 'typescript'].includes(id) || id.startsWith('node:')
+            input: resolve(__dirname, 'src/index.ts'),
+            external: [
+                'fs',
+                'path',
+                'os',
+                'crypto',
+                'stream',
+                'util',
+                'events',
+                'buffer',
+                'url',
+                'zlib',
+                'node:fs',
+                'node:path'
+            ]
         }
-    },
-    plugins: [
-        dts({
-            insertTypesEntry: true,
-            include: ['src/**/*.ts'],
-            afterDiagnostic: diagnostics => {
-                if (diagnostics.length > 0) {
-                    throw new Error("dts failed");
-                }
-            }
-        })
-    ]
+    }
 });
