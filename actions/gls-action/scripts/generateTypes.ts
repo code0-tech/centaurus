@@ -15,10 +15,10 @@ const state = {
 
 async function run() {
     await loadAllDefinitions({
-        onError: handler => {
+        onError: () => {
         },
-        connect: options => Promise.resolve([]),
-        dispatchEvent: (event, payload) => Promise.resolve(),
+        connect: () => Promise.resolve([]),
+        dispatchEvent: () => Promise.resolve(),
         getProjectActionConfigurations: () => [],
         config: {
             authToken: "",
@@ -49,6 +49,10 @@ async function run() {
             return Promise.resolve()
         },
         registerFlowTypes: (...flowTypes) => {
+            state.flowTypes = [
+                ...state.flowTypes,
+                ...flowTypes
+            ]
             return Promise.resolve()
         }
 
