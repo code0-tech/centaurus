@@ -5,7 +5,7 @@ import {
     HerculesFlowType,
     HerculesRegisterFunctionParameter
 } from "@code0-tech/hercules";
-import {withSdkMock} from "./__tests__/withSdkMock";
+import {withSdkMock} from "./helpers/withSdkMock";
 
 export type SdkMockState = {
     registeredFunctionDefinitions: HerculesRegisterFunctionParameter[] | null;
@@ -69,7 +69,7 @@ describe("withSdkMock", () => {
 
         it('should be valid', async () => {
             vi.resetModules();     // clear module cache
-            await import("./index");  // now it runs
+            await import("../src");  // now it runs
 
             state.dataTypes?.forEach((dataType: HerculesDataType) => {
                 expect(dataType.identifier.startsWith("GLS_"), `${dataType.identifier}: Identifier should start with GLS_`).toBeTruthy()

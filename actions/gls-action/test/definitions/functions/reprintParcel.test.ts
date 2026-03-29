@@ -3,9 +3,9 @@ import {HerculesFunctionContext} from "@code0-tech/hercules";
 import {
     ReprintParcelResponseData,
     ReprintParcelResponseDataSchema
-} from "../datatypes/glsReprintParcel";
-import {withBaseFunctionMock} from "../../__tests__/withBaseFunction";
-import {AuthenticationResponseData} from "../../types/definitions/auth";
+} from "../../../src/definitions/datatypes/glsReprintParcel";
+import {withBaseFunctionMock} from "../../helpers/withBaseFunction";
+import {AuthenticationResponseData} from "../../../src/types/definitions/auth";
 
 const mockRequestData = {
     CreationDate: "2024-01-01T00:00:00Z",
@@ -77,7 +77,7 @@ describe("reprintParcel.ts", () => {
     });
 
     it("registers function definitions and calls API endpoints correctly", async () => {
-        const {register} = await import("./reprintParcel");
+        const {register} = await import("../../../src/definitions/functions/reprintParcel");
 
         await withBaseFunctionMock(register, async (state) => {
             expect(state.registeredFunctionDefinitions).toHaveLength(1);
