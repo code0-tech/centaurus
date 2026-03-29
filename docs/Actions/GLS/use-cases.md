@@ -72,12 +72,12 @@ createShopDeliveryShipment(
   parcelShopId: "PSH-HH-001",
   shipment: {
     Product: "PARCEL",
-    Consignee: {
+    ConsigneeSchema: {
       ConsigneeID: "CUST-5678",
       Category: "PRIVATE",
-      Address: <recipient GLS_ADDRESS>
+      AddressSchema: <recipient GLS_ADDRESS>
     },
-    Shipper: {},         ← uses default shipper from action config
+    ShipperSchema: {},         ← uses default shipper from action config
     ShipmentUnit: [<GLS_SHIPMENT_UNIT>]
   },
   printingOptions: <GLS_PRINTING_OPTIONS>
@@ -117,8 +117,8 @@ createShopDeliveryShipment(
 validateShipment({
   Shipment: {
     Product: "PARCEL",
-    Consignee: {
-      Address: {
+    ConsigneeSchema: {
+      AddressSchema: {
         Name1: "Test Recipient",
         CountryCode: "DE",
         City: "Berlin",
@@ -126,7 +126,7 @@ validateShipment({
         ZIPCode: "10115"
       }
     },
-    Shipper: {},
+    ShipperSchema: {},
     ShipmentUnit: [{ Weight: 0.5 }]
   }
 })
@@ -149,7 +149,7 @@ If `success` is `false`, inspect `validationResult.Issues` for details:
     "Issues": [
       {
         "Rule": "MIN_LENGTH",
-        "Location": "Shipment.Consignee.Address.Street",
+        "Location": "Shipment.ConsigneeSchema.AddressSchema.Street",
         "Parameters": ["4"]
       }
     ]
@@ -185,8 +185,8 @@ createShopReturnShipment(
   numberOfLabels: 1,
   shipment: {
     Product: "PARCEL",
-    Consignee: {
-      Address: {
+    ConsigneeSchema: {
+      AddressSchema: {
         Name1: "My Warehouse GmbH",
         CountryCode: "DE",
         City: "Frankfurt",
@@ -194,7 +194,7 @@ createShopReturnShipment(
         ZIPCode: "60327"
       }
     },
-    Shipper: {},
+    ShipperSchema: {},
     ShipmentUnit: [{ Weight: 2.0 }]
   },
   printingOptions: {
@@ -240,8 +240,8 @@ createIdentShipment(
   nationality: "DE",
   shipment: {
     Product: "PARCEL",
-    Consignee: {
-      Address: {
+    ConsigneeSchema: {
+      AddressSchema: {
         Name1: "Hans Mueller",
         CountryCode: "DE",
         City: "Munich",
@@ -249,7 +249,7 @@ createIdentShipment(
         ZIPCode: "80333"
       }
     },
-    Shipper: {},
+    ShipperSchema: {},
     ShipmentUnit: [{ Weight: 1.8 }]
   },
   printingOptions: {
@@ -296,8 +296,8 @@ Response:
     {
       "ShippingDate": "2025-01-15",
       "Product": "PARCEL",
-      "Consignee": {
-        "Address": { "Name1": "Jane Smith", "City": "Hamburg" } // ... and other parameters
+      "ConsigneeSchema": {
+        "AddressSchema": { "Name1": "Jane Smith", "City": "Hamburg" } // ... and other parameters
       },
       "ShipmentUnit": [
         { "TrackID": "12345678", "Weight": "1.2", "ParcelNumber": "00123456789" }
@@ -407,8 +407,8 @@ Use this to dynamically enable/disable delivery options in your checkout flow.
 createDeliverySaturdayShipment(
   shipment: {
     Product: "EXPRESS",   ← required!
-    Consignee: {
-      Address: {
+    ConsigneeSchema: {
+      AddressSchema: {
         Name1: "Weekend Shopper",
         CountryCode: "DE",
         City: "Cologne",
@@ -416,7 +416,7 @@ createDeliverySaturdayShipment(
         ZIPCode: "50667"
       }
     },
-    Shipper: {},
+    ShipperSchema: {},
     ShipmentUnit: [{ Weight: 0.8 }]
   },
   printingOptions: {
