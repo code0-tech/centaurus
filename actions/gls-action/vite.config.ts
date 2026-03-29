@@ -10,6 +10,7 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: resolve(__dirname, 'src/index.ts'),
+                generateTypes: resolve(__dirname, 'scripts/generateTypes.ts')
             },
             external: [
                 'fs',

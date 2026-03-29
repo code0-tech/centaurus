@@ -3,8 +3,8 @@
     "esModuleInterop": true,
     "module": "es2022",
     "moduleResolution": "bundler",
-    "target": "es2020",
-    "lib": ["es2020", "dom"],
+    "target": "es2021",
+    "lib": ["es2022", "es2021", "dom"],
     "strict": false,
     "skipLibCheck": true,
     "types": ["vite/client"]
