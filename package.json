@@ -6,8 +6,10 @@
   "workspaces": [
     "actions/*"
   ],
+  "packageManager": "npm@11.12.1",
   "scripts": {
     "build": "npm run build --workspaces --if-present",
+    "start": "turbo run start",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
@@ -17,6 +19,7 @@
     "@eslint/js": "^10.0.0",
     "eslint": "^10.0.0",
     "globals": "^17.4.0",
+    "turbo": "^2.8.21",
     "typescript": "^5",
     "typescript-eslint": "^8.0.0",
     "vitest": "^4.0.0"

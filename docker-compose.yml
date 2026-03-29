@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  gls-action:
+    build:
+      context: .
+      dockerfile: actions/gls-action/Dockerfile
+    container_name: gls-action
