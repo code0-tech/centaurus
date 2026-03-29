@@ -17,7 +17,7 @@ export const ShipmentSchema = z.object({
     Consignee: ConsigneeSchema,
     Shipper: ShipperSchema.optional(),
     Carrier: z.enum(["ROYALMAIL"]).optional(),
-    ShipmentUnit: ShipmentUnitSchema,
+    ShipmentUnit: z.lazy(() => ShipmentUnitSchema),
     Service: z.lazy(() => ShipmentServiceSchema),
     Return: z.object({
         Address: AddressSchema
@@ -30,7 +30,7 @@ export const InternalShipmentSchma = ShipmentSchema.extend({
     Middleware: z.string().max(40),
     Shipper: InternalShipperSchema,
     Service: z.lazy(() => InternalShipmentServiceSchema),
-    ShipmentUnit: InternalShipmentUnitSchema
+    ShipmentUnit: z.lazy(() => InternalShipmentUnitSchema)
 })
 
 export default (sdk: ActionSdk) => {

@@ -1,0 +1,603 @@
+---
+title: Datatypes
+description: All data types registered by the GLS Action — field references and descriptions.
+---
+
+# GLS Action Types
+
+The GLS Action registers the following data types with the Hercules platform. These types are used as inputs and outputs
+of the GLS functions and can be referenced in your flows.
+
+--- 
+    
+# GLS_VALIDATE_SHIPMENT_REQUEST_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_VALIDATE_SHIPMENT_REQUEST_DATA = {
+    /**
+ @fumadocsHref #type-table-temp.ts-GLS_SHIPMENT
+**/
+Shipment: GLS_SHIPMENT
+}
+        
+`} name="GLS_VALIDATE_SHIPMENT_REQUEST_DATA"/>
+
+
+# GLS_VALIDATE_SHIPMENT_RESPONSE_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_VALIDATE_SHIPMENT_RESPONSE_DATA = {
+    success: boolean;
+    validationResult: {
+        Issues: {
+            Rule: string;
+            Location: string;
+            Parameters?: string[];
+        }[];
+    };
+}
+        
+`} name="GLS_VALIDATE_SHIPMENT_RESPONSE_DATA"/>
+
+
+# GLS_UPDATE_PARCEL_WEIGHT_REQUEST_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_UPDATE_PARCEL_WEIGHT_REQUEST_DATA = {
+    TrackID?: string;
+    ParcelNumber?: number;
+    ShipmentReference?: string;
+    ShipmentUnitReference?: string;
+    PartnerParcelNumber?: string;
+    Weight: number;
+}
+        
+`} name="GLS_UPDATE_PARCEL_WEIGHT_REQUEST_DATA"/>
+
+
+# GLS_UPDATE_PARCEL_WEIGHT_RESPONSE_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_UPDATE_PARCEL_WEIGHT_RESPONSE_DATA = {
+    UpdatedWeight: string;
+}
+        
+`} name="GLS_UPDATE_PARCEL_WEIGHT_RESPONSE_DATA"/>
+
+
+# GLS_UNIT_SERVICE (array)
+        
+<AutoTypeTable type={`
+        
+export type GLS_UNIT_SERVICE =  {
+    Cash?: {
+        Reason: string;
+        Amount: number;
+        Currency: string;
+    };
+    AddonLiability?: {
+        Amount: number;
+        Currency: string;
+        ParcelContent: string;
+    };
+    HazardousGoods?: {
+        HarzardousGood: {
+            Weight: number;
+            GLSHazNo: string;
+        }[];
+    };
+    ExWorks?: {};
+    LimitedQuantities?: {
+        Weight?: number;
+    };
+};
+        
+`} name="GLS_UNIT_SERVICE"/>
+
+
+# GLS_SHIPPER
+        
+<AutoTypeTable type={`
+        
+export type GLS_SHIPPER = {
+    /**
+ Optional.
+ @fumadocsHref #type-table-temp.ts-GLS_ADDRESS
+**/
+AlternativeShipperAddress: GLS_ADDRESS
+    /**
+ Optional.
+ @fumadocsHref #type-table-temp.ts-GLS_ADDRESS
+**/
+Address: GLS_ADDRESS
+}
+        
+`} name="GLS_SHIPPER"/>
+
+
+# GLS_SHIPMENT_UNIT (array)
+        
+<AutoTypeTable type={`
+        
+export type GLS_SHIPMENT_UNIT =  {
+    ShipmentUnitReference?: string;
+    PartnerParcelNumber?: string;
+    Weight: number;
+    Note1?: string;
+    Note2?: string;
+    Service?: {
+        Cash?: {
+            Reason: string;
+            Amount: number;
+            Currency: string;
+        };
+        AddonLiability?: {
+            Amount: number;
+            Currency: string;
+            ParcelContent: string;
+        };
+        HazardousGoods?: {
+            HarzardousGood: {
+                Weight: number;
+                GLSHazNo: string;
+            }[];
+        };
+        ExWorks?: {};
+        LimitedQuantities?: {
+            Weight?: number;
+        };
+    }[];
+};
+        
+`} name="GLS_SHIPMENT_UNIT"/>
+
+
+# GLS_SHIPMENT
+        
+<AutoTypeTable type={`
+        
+export type GLS_SHIPMENT = {
+    ShipmentReference?: string;
+    ShipmentDate?: Date;
+    IncotermCode?: number;
+    Identifier?: string;
+    Product: "PARCEL" | "EXPRESS";
+    ExpressAltDeliveryAllowed?: boolean;
+    /**
+ @fumadocsHref #type-table-temp.ts-GLS_CONSIGNEE
+**/
+Consignee: GLS_CONSIGNEE
+    /**
+ Optional.
+ @fumadocsHref #type-table-temp.ts-GLS_SHIPPER
+**/
+Shipper: GLS_SHIPPER
+    Carrier?: ("ROYALMAIL");
+    /**
+ @fumadocsHref #type-table-temp.ts-GLS_SHIPMENT_UNIT
+**/
+ShipmentUnit: GLS_SHIPMENT_UNIT
+    /**
+ Optional.
+ @fumadocsHref #type-table-temp.ts-GLS_SHIPMENT_SERVICE
+**/
+Service: GLS_SHIPMENT_SERVICE
+    Return?: {
+        /**
+ @fumadocsHref #type-table-temp.ts-GLS_ADDRESS
+**/
+Address: GLS_ADDRESS
+    };
+}
+        
+`} name="GLS_SHIPMENT"/>
+
+
+# GLS_SHIPMENT_WITHOUT_SERVICES
+        
+<AutoTypeTable type={`
+        
+export type GLS_SHIPMENT_WITHOUT_SERVICES = {
+    ShipmentReference?: string;
+    ShipmentDate?: Date;
+    IncotermCode?: number;
+    Identifier?: string;
+    Product: "PARCEL" | "EXPRESS";
+    ExpressAltDeliveryAllowed?: boolean;
+    /**
+ @fumadocsHref #type-table-temp.ts-GLS_CONSIGNEE
+**/
+Consignee: GLS_CONSIGNEE
+    /**
+ Optional.
+ @fumadocsHref #type-table-temp.ts-GLS_SHIPPER
+**/
+Shipper: GLS_SHIPPER
+    Carrier?: ("ROYALMAIL");
+    /**
+ @fumadocsHref #type-table-temp.ts-GLS_SHIPMENT_UNIT
+**/
+ShipmentUnit: GLS_SHIPMENT_UNIT
+    Return?: {
+        /**
+ @fumadocsHref #type-table-temp.ts-GLS_ADDRESS
+**/
+Address: GLS_ADDRESS
+    };
+}
+        
+`} name="GLS_SHIPMENT_WITHOUT_SERVICES"/>
+
+
+# GLS_RETURN_OPTIONS
+        
+<AutoTypeTable type={`
+        
+export type GLS_RETURN_OPTIONS = {
+    ReturnPrintData?: boolean;
+    ReturnRoutingInfo?: boolean;
+}
+        
+`} name="GLS_RETURN_OPTIONS"/>
+
+
+# GLS_REPRINT_PARCEL_REQUEST_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_REPRINT_PARCEL_REQUEST_DATA = {
+    TrackID?: string;
+    ParcelNumber?: number;
+    ShipmentReference?: string;
+    ShipmentUnitReference?: string;
+    PartnerParcelNumber?: string;
+    CreationDate: string;
+    PrintingOptions: {
+        ReturnLabels: {
+            TemplateSet: "NONE" | "ZPL_200" | "ZPL_300";
+            LabelFormat: "PDF" | "ZEBRA" | "PNG" | "PNG_200";
+        };
+    };
+}
+        
+`} name="GLS_REPRINT_PARCEL_REQUEST_DATA"/>
+
+
+# GLS_REPRINT_PARCEL_RESPONSE_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_REPRINT_PARCEL_RESPONSE_DATA = {
+    CreatedShipment: {
+        ParcelData: {
+            TrackID: string;
+            ShipmentUnitReference?: string[];
+            ParcelNumber: string;
+            Barcodes: {
+                Primary2D: string;
+                Secondary2D: string;
+                Primary1D: string;
+                Primary1DPrint: boolean;
+            };
+            RoutingInfo: {
+                Tour: string;
+                InboundSortingFlag: string;
+                FinalLocationCode: string;
+                LastRoutingDate: string;
+                HubLocation: string;
+            };
+        }[];
+        PrintData: {
+            Data: string;
+            LabelFormat: "PDF" | "ZEBRA" | "PNG" | "PNG_200";
+        }[];
+        CustomerID: string;
+        PickupLocation: string;
+        GDPR: string[];
+    };
+}
+        
+`} name="GLS_REPRINT_PARCEL_RESPONSE_DATA"/>
+
+
+# GLS_PRINTING_OPTIONS
+        
+<AutoTypeTable type={`
+        
+export type GLS_PRINTING_OPTIONS = {
+    ReturnLabels?: {
+        TemplateSet: "NONE" | "D_200" | "PF_4_I" | "PF_4_I_200" | "PF_4_I_300" | "PF_8_D_200" | "T_200_BF" | "T_300_BF" | "ZPL_200" | "ZPL_200_TRACKID_EAN_128" | "ZPL_200_TRACKID_CODE_39" | "ZPL_200_REFNO_EAN_128" | "ZPL_200_REFNO_CODE_39" | "ZPL_300" | "ZPL_300_TRACKID_EAN_128" | "ZPL_300_TRACKID_CODE_39" | "ZPL_300_REFNO_EAN_128" | "ZPL_300_REFNO_CODE_39";
+        LabelFormat: "PDF" | "ZEBRA" | "INTERMEC" | "DATAMAX" | "TOSHIBA" | "PNG";
+    };
+    useDefault?: string;
+    DefinePrinter?: {
+        LabelPrinter?: string;
+        DocumentPrinter?: string;
+    };
+}
+        
+`} name="GLS_PRINTING_OPTIONS"/>
+
+
+# GLS_END_OF_DAY_REQUEST_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_END_OF_DAY_REQUEST_DATA = {
+    date: string;
+}
+        
+`} name="GLS_END_OF_DAY_REQUEST_DATA"/>
+
+
+# GLS_END_OF_DAY_RESPONSE_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_END_OF_DAY_RESPONSE_DATA = {
+    Shipments?: {
+        ShippingDate: string;
+        Product: "PARCEL" | "EXPRESS";
+        Consignee: {
+            /**
+ @fumadocsHref #type-table-temp.ts-GLS_ADDRESS
+**/
+Address: GLS_ADDRESS
+        };
+        Shipper: {
+            ContactID: string;
+            /**
+ Optional.
+ @fumadocsHref #type-table-temp.ts-GLS_ADDRESS
+**/
+AlternativeShipperAddress: GLS_ADDRESS
+        };
+        ShipmentUnit?: {
+            Weight: string;
+            TrackID: string;
+            ParcelNumber: string;
+        }[];
+    }[];
+}
+        
+`} name="GLS_END_OF_DAY_RESPONSE_DATA"/>
+
+
+# GLS_CUSTOM_CONTENT
+        
+<AutoTypeTable type={`
+        
+export type GLS_CUSTOM_CONTENT = {
+    CustomerLogo: string;
+    BarcodeContentType: "TRACK_ID" | "GLS_SHIPMENT_REFERENCE";
+    Barcode?: string;
+    BarcodeType?: ("EAN_128" | "CODE_39");
+    HideShipperAddress?: boolean;
+}
+        
+`} name="GLS_CUSTOM_CONTENT"/>
+
+
+# GLS_CREATE_PARCELS_RESPONSE
+        
+<AutoTypeTable type={`
+        
+export type GLS_CREATE_PARCELS_RESPONSE = {
+    CreatedShipment: {
+        ShipmentReference: string[];
+        ParcelData: {
+            TrackID: string;
+            ParcelNumber: string;
+            Barcodes: {
+                Primary2D: string;
+                Secondary2D: string;
+                Primary1D: string;
+                Primary1DPrint: boolean;
+            };
+            RoutingInfo: {
+                Tour: string;
+                InboundSortingFlag: string;
+                FinalLocationCode: string;
+                LastRoutingDate: string;
+                HubLocation: string;
+            };
+        }[];
+        PrintData: {
+            Data: string;
+            LabelFormat: "PDF" | "ZEBRA" | "INTERMEC" | "DATAMAX" | "TOSHIBA" | "PNG";
+        }[];
+        CustomerID: string;
+        PickupLocation: string;
+        GDPR: string[];
+    };
+}
+        
+`} name="GLS_CREATE_PARCELS_RESPONSE"/>
+
+
+# GLS_CONSIGNEE
+        
+<AutoTypeTable type={`
+        
+export type GLS_CONSIGNEE = {
+    ConsigneeID?: string;
+    CostCenter?: string;
+    Category?: ("BUSINESS" | "PRIVATE");
+    /**
+ @fumadocsHref #type-table-temp.ts-GLS_ADDRESS
+**/
+Address: GLS_ADDRESS
+}
+        
+`} name="GLS_CONSIGNEE"/>
+
+
+# GLS_CANCEL_SHIPMENT_REQUEST_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_CANCEL_SHIPMENT_REQUEST_DATA = {
+    TrackID: string;
+}
+        
+`} name="GLS_CANCEL_SHIPMENT_REQUEST_DATA"/>
+
+
+# GLS_CANCEL_SHIPMENT_RESPONSE_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_CANCEL_SHIPMENT_RESPONSE_DATA = {
+    TrackID: string;
+    result: "CANCELLED" | "CANCELLATION_PENDING" | "SCANNED" | "ERROR";
+}
+        
+`} name="GLS_CANCEL_SHIPMENT_RESPONSE_DATA"/>
+
+
+# GLS_ALLOWED_SERVICES_REQUEST_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_ALLOWED_SERVICES_REQUEST_DATA = {
+    Source: {
+        CountryCode: string;
+        ZIPCode: string;
+    };
+    Destination: {
+        CountryCode: string;
+        ZIPCode: string;
+    };
+    ContactID?: string;
+}
+        
+`} name="GLS_ALLOWED_SERVICES_REQUEST_DATA"/>
+
+
+# GLS_ALLOWED_SERVICES_RESPONSE_DATA
+        
+<AutoTypeTable type={`
+        
+export type GLS_ALLOWED_SERVICES_RESPONSE_DATA = {
+    AllowedServices: ({
+        ServiceName: string;
+        [x: string]: never;
+    } | {
+        ProductName: string;
+        [x: string]: never;
+    })[];
+}
+        
+`} name="GLS_ALLOWED_SERVICES_RESPONSE_DATA"/>
+
+
+# GLS_ADDRESS
+        
+<AutoTypeTable type={`
+        
+export type GLS_ADDRESS = {
+    /**
+
+        Primary name line (person or company).
+        Max 40 characters.
+         
+**/
+    Name1: string;
+    /**
+
+        Optional second name line (e.g., department or additional identifier).
+        Max 40 characters.
+         
+**/
+    Name2?: string;
+    /**
+
+        Optional third name line for extended address details.
+        Max 40 characters.
+         
+**/
+    Name3?: string;
+    /**
+
+        Two-letter ISO country code (e.g., DE, US).
+         
+**/
+    CountryCode: string;
+    /**
+
+        State, province, or region.
+        Optional field.
+        Max 40 characters.
+         
+**/
+    Province?: string;
+    /**
+
+        City or locality name.
+        Max 40 characters.
+         
+**/
+    City: string;
+    /**
+
+        Street name.
+        Minimum 4 characters required.
+         
+**/
+    Street: string;
+    /**
+
+        House or building number.
+        Optional field.
+        Max 40 characters.
+         
+**/
+    StreetNumber?: string;
+    /**
+
+        Full name of a contact person.
+        Optional field.
+        Must be between 6 and 40 characters.
+         
+**/
+    ContactPerson?: string;
+    /**
+
+        Landline phone number.
+        Optional field.
+        Must be between 4 and 35 characters.
+         
+**/
+    FixedLinePhonenumber?: string;
+    /**
+
+        Mobile phone number.
+        Optional field.
+        Must be between 4 and 35 characters.
+         
+**/
+    MobilePhonenumber?: string;
+    /**
+
+        Email address.
+        Optional field.
+        Max 80 characters.
+         
+**/
+    eMail?: string;
+    /**
+
+        Postal or ZIP code.
+        Max 10 characters.
+         
+**/
+    ZIPCode: string;
+}
+        
+`} name="GLS_ADDRESS"/>
+
+
