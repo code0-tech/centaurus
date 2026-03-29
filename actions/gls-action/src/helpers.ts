@@ -8,33 +8,33 @@ import {
     RuntimeErrorException,
     ActionSdk
 } from "@code0-tech/hercules";
-import {InternalShipmentServiceSchema, ShipmentService} from "./definitions/datatypes/glsShipmentService";
-import {ShipmentWithoutServices} from "./definitions/datatypes/glsShipment";
+import {InternalShipmentServiceSchema, ShipmentService} from "./types/glsShipmentService";
+import {ShipmentWithoutServices} from "./types/glsShipment";
 import {
     CancelShipmentRequestData,
     CancelShipmentResponseData,
     CancelShipmentResponseDataSchema
-} from "./definitions/datatypes/glsCancelShipment";
+} from "./types/glsCancelShipment";
 import {
     InternalValidateShipmentRequestData,
     ValidateShipmentRequestData
-} from "./definitions/datatypes/glsValidateShipment";
-import {InternalShipmentUnitSchema} from "./definitions/datatypes/glsShipmentUnit";
-import {InternalShipper, ShipperSchema} from "./definitions/datatypes/glsShipper";
-import {CreateParcelsResponse, CreateParcelsResponseSchema} from "./definitions/datatypes/glsCreateParcelsResponse";
-import {PrintingOptions} from "./definitions/datatypes/glsPrintingOptions";
-import {CustomContent} from "./definitions/datatypes/glsCustomContent";
-import {ReturnOptions} from "./definitions/datatypes/glsReturnOptions";
+} from "./types/glsValidateShipment";
+import {InternalShipmentUnitSchema} from "./types/glsShipmentUnit";
+import {InternalShipper, ShipperSchema} from "./types/glsShipper";
+import {CreateParcelsResponse, CreateParcelsResponseSchema} from "./types/glsCreateParcelsResponse";
+import {PrintingOptions} from "./types/glsPrintingOptions";
+import {CustomContent} from "./types/glsCustomContent";
+import {ReturnOptions} from "./types/glsReturnOptions";
 import {
     AuthenticationRequestData,
     AuthenticationRequestDataSchema,
     AuthenticationResponseDataSchema
-} from "./types/definitions/auth";
+} from "./types/auth";
 import {
     InternalShipmentRequestData,
     ShipmentRequestData,
     ShipmentRequestDataSchema
-} from "./types/requests/shipmentRequest";
+} from "./types/shipmentRequest";
 
 
 export const DEFAULT_SIGNATURE_FOR_SERVICES = "shipment: GLS_SHIPMENT, printingOptions: GLS_PRINTING_OPTIONS, returnOptions?: GLS_RETURN_OPTIONS, customContent?: GLS_CUSTOM_CONTENT"
@@ -304,14 +304,14 @@ export async function postShipmentHelper(context: HerculesFunctionContext, servi
 }
 
 export async function loadAllDefinitions(sdk: ActionSdk) {
-    const modules = import.meta.glob('./definitions/**/*.ts');
+    const modules = import.meta.glob('./{types,functions,config}/**/*.ts');
 
     for (const path in modules) {
         const mod: any = await modules[path]();
 
-        if (typeof mod.register === 'function') {
+        if (typeof mod.default === 'function') {
             try {
-                await mod.register(sdk);
+                await mod.default(sdk);
             } catch (error) {
                 console.log(`Error registering functions from ${path}:`, error);
             }

@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite';
-import { resolve } from 'path';
+import {defineConfig} from 'vite';
+import {resolve} from 'path';
 
 export default defineConfig({
     build: {
@@ -8,7 +8,9 @@ export default defineConfig({
         outDir: 'dist',
         emptyOutDir: true,
         rollupOptions: {
-            input: resolve(__dirname, 'src/index.ts'),
+            input: {
+                main: resolve(__dirname, 'src/index.ts'),
+            },
             external: [
                 'fs',
                 'path',
