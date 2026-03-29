@@ -37,7 +37,7 @@ Full documentation is located in the [`docs/`](docs/) folder:
 - [GLS Action Overview](docs/Actions/GLS/overview.md)
 - [GLS Configuration](docs/Actions/GLS/configs.md)
 - [GLS Functions](docs/Actions/GLS/functions.md)
-- [GLS Types](docs/Actions/GLS/types.md)
+- [GLS Types](docs/Actions/GLS/types.mdx)
 - [GLS Events](docs/Actions/GLS/events.md)
 - [Common Use Cases](docs/Actions/GLS/use-cases.md)
 - [Troubleshooting & Community Support](docs/Actions/GLS/troubleshooting.md)
