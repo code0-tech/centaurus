@@ -1,8 +1,5 @@
 import z from "zod";
 import {AddressSchema} from "./glsAddress";
-import {zodSchemaToTypescriptDefs} from "../helpers";
-import {ShipmentSchema} from "./glsShipment";
-import {ActionSdk} from "@code0-tech/hercules";
 
 
 export const ShipmentServiceSchema = z.array(z.object({
@@ -185,33 +182,3 @@ export const InternalShipmentServiceSchema = z.array(z.object({
         serviceName: z.string().default("service_Saturday"),
     }).optional(),
 })).optional()
-
-export default (sdk: ActionSdk) => {
-    return sdk.registerDataTypes(
-        {
-            identifier: "GLS_SHIPMENT_SERVICE",
-            type: zodSchemaToTypescriptDefs(
-                "XXX",
-                ShipmentSchema,
-                {
-                    GLS_SHIPMENT_SERVICE: ShipmentServiceSchema,
-                }
-            ).get("GLS_SHIPMENT_SERVICE")!, // Hacky way because shipment service is defined as an array
-            name: [
-                {
-                    code: "en-US",
-                    content: "Shipment Service"
-                }
-            ],
-            displayMessage: [
-                {
-                    code: "en-US",
-                    content: "Shipment Service"
-                }
-            ],
-            linkedDataTypes: [
-                "GLS_ADDRESS"
-            ]
-        },
-    )
-}
