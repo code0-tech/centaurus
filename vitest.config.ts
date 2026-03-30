@@ -1,9 +1,11 @@
-import {defineConfig} from "vitest/config";
+import { defineConfig } from "vitest/config";
+import {resolve} from "path";
 
 export default defineConfig({
     test: {
-        include: ["actions/**/*.{test,spec}.{ts,tsx}"],
+        include: [resolve(__dirname, "actions/**/*.{test,spec}.{ts,tsx}")],
         environment: "node",
-        exclude: ['**/dist/**'],
+        exclude: ["**/dist/**"],
+        setupFiles: [resolve(__dirname, "vitest.setup.ts")],
     },
 });
