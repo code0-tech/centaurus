@@ -77,9 +77,9 @@ describe("reprintParcel.ts", () => {
     });
 
     it("registers function definitions and calls API endpoints correctly", async () => {
-        const {register} = await import("../../src/functions/reprintParcel");
+        const register = await import("../../src/functions/reprintParcel");
 
-        await withBaseFunctionMock(register, async (state) => {
+        await withBaseFunctionMock(register.default, async (state) => {
             expect(state.registeredFunctionDefinitions).toHaveLength(1);
 
             const [reprintParcel] = state.registeredFunctionDefinitions;
