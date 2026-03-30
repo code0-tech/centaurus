@@ -3,6 +3,7 @@ import {
     HerculesActionConfigurationDefinition,
     HerculesDataType, HerculesFlowType, HerculesRegisterFunctionParameter,
 } from "@code0-tech/hercules";
+import {Project, SymbolFlags, Type} from "ts-morph";
 
 
 const state = {
@@ -60,10 +61,11 @@ async function run() {
 }
 
 run().then(async () => {
-    let typeContent = `---
+    console.log(`---
 title: Datatypes
 description: All data types registered by the GLS Action — field references and descriptions.
 ---
+import {TypeTable} from "fumadocs-ui/components/type-table";
 
 # GLS Action Types
 
@@ -71,66 +73,150 @@ The GLS Action registers the following data types with the Hercules platform. Th
 of the GLS functions and can be referenced in your flows.
 
 --- 
-    `
-
+    `)
     state.dataTypes.forEach(value => {
         value.type = `export type ${value.identifier} = ${value.type}`
             .replace(/ \| undefined/g, "")
-            .replace(/\/\*\*/g, "/**\n")
-            .replace(/\*\//g, "\n**/")
-            .replace(
-                /(\w+)(\?)?:\s*(GLS_\w+);/g,
-                (match, name, optionalMark, gls) => {
-                    if (optionalMark) {
-                        return `/**
- Optional.
- @fumadocsHref #type-table-temp.ts-${gls}
-**/
-${name}: ${gls}`;
+
+
+        function breakDown(
+            typeName: string,
+            code: string
+        ): Record<string, string> {
+            const map: Record<string, string> = {};
+
+            const project = new Project({useInMemoryFileSystem: true});
+            const sourceFile = project.createSourceFile("example.ts", code);
+
+            const typeAlias = sourceFile.getTypeAliasOrThrow(typeName);
+            let rootType = typeAlias.getType();
+
+            if (rootType.isArray()) {
+                rootType = rootType.getArrayElementTypeOrThrow();
+            }
+
+            function buildType(type: Type, currentName: string): string {
+                const props = type.getProperties();
+
+                const lines: string[] = [];
+
+                props.forEach(symbol => {
+                    const name = symbol.getName();
+                    const decl = symbol.getDeclarations()[0];
+                    if (!decl) return;
+
+
+                    let propType = symbol.getTypeAtLocation(decl);
+
+                    // unwrap arrays
+                    let isArray = false;
+                    if (propType.isArray()) {
+                        propType = propType.getArrayElementTypeOrThrow();
+                        isArray = true;
                     }
 
-                    return `/**
- @fumadocsHref #type-table-temp.ts-${gls}
-**/
-${name}: ${gls}`;
-                }
-            );
+                    let typeText: string;
 
-        let array = false
-        if (value.type.endsWith("[];")) {
-            value.type = value.type.slice(0, -3) + ";"
-            array = true
+                    if (propType.getText().startsWith("{")) {
+                        const newName = `${currentName}$${name}`;
+
+                        // recurse first
+                        const nestedType = buildType(propType, newName);
+
+                        map[newName] = `export type ${newName} = ${nestedType};`;
+
+                        typeText = isArray ? `${newName}[]` : newName;
+                    } else {
+                        typeText = propType.getText(decl);
+                    }
+
+                    // JSDoc
+                    const jsDocs = (decl as any).getJsDocs?.()
+                        ?.map(d => d.getText())
+                        .join("\n");
+
+                    const docPrefix = jsDocs ? `${jsDocs}\n` : "";
+
+                    lines.push(
+                        `${docPrefix}${name}${symbol.hasFlags(SymbolFlags.Optional) ? "?" : ""}: ${typeText};`
+                    );
+                });
+
+                return `{\n${lines.map(l => "    " + l).join("\n")}\n}`;
+            }
+
+            const finalType = buildType(rootType, typeName);
+
+            map[typeName] = `export type ${typeName} = ${finalType};`;
+
+            return map;
         }
 
-        typeContent += `
-# ${value.identifier}${array ? " (array)" : ""}
-        
-<AutoTypeTable type={\`
-        
-${value.type}
-        
-\`} name="${value.identifier}"/>
 
-`
+        const broke = breakDown(value.identifier, value.type)
+        const entries = Object.entries(broke).reverse();
+
+        for (const [key, val] of entries) {
+            let typeString = `
+            `
+
+            const project = new Project({useInMemoryFileSystem: true});
+            const sourceFile = project.createSourceFile("example.ts", val);
+
+
+            const typeAlias = sourceFile.getTypeAliasOrThrow(key);
+
+
+            let type = typeAlias.getType()
+            const array = typeAlias.getType().isArray()
+            if (array) {
+                type = type.getArrayElementTypeOrThrow()
+            }
+
+            type.getProperties().forEach(property => {
+                const name = property.getName();
+
+                const currType = property.getTypeAtLocation(typeAlias);
+                const currTypeText = currType.getText();
+
+                const docs = {
+                    description: "No description set",
+                    deprecated: false,
+                    default: undefined,
+                    link: undefined
+                }
+
+
+                property.getJsDocTags().forEach(info => {
+                    info.getText().forEach(part => {
+                        docs[info.getName()] = part.text.trim()
+                    })
+                })
+                if (currTypeText.startsWith("GLS_")) {
+                    docs.link = currTypeText.toLowerCase()
+                        .replace(/-/g, "_")
+                        .replace(/\$/g, "")
+                        .replace("[]", "")
+                }
+                typeString += `${name}: {
+                description: '${docs.description}',
+                deprecated: ${docs.deprecated},
+                required: ${!property.isOptional()}, ${docs.link ? `\ntypeDescriptionLink: '#${docs.link}',` : ""}
+                type: '${currTypeText}', ${docs.default ? `\ndefault: ${docs.default}` : ""} 
+            },
+            `
+
+            })
+
+            const table = `<TypeTable type={{${typeString}}}
+/>`
+            console.log(`# ${key}`)
+            console.log(table)
+        }
+        // console.log(`
+// # ${value.identifier} ${array ? "[]" : ""}
+//         `)
+//         console.log(table)
     })
-    typeContent = typeContent.replace(" | undefined", "")
 
-    console.log(typeContent)
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

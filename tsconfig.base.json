@@ -7,7 +7,7 @@
     "lib": ["es2022", "es2021", "dom"],
     "strict": false,
     "skipLibCheck": true,
-    "types": ["vite/client"]
+    "types": ["vite/client"],
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "***/test/**", "**/*.test.ts"]

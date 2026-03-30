@@ -114,7 +114,7 @@ createShipmentUnit(
 | `note2` | string (max 50) | No | Additional note printed on the label (line 2) |
 | `shipmentUnitService` | GLS_UNIT_SERVICE | No | Unit-level services (Cash, AddonLiability, HazardousGoods, etc.) |
 
-**Returns:** [`GLS_SHIPMENT_UNIT`](types.mdx#GLS_SHIPMENT_UNIT-array)
+**Returns:** [`GLS_SHIPMENT_UNIT`](types.mdx#gls_shipment_unit)
 
 ---
 
