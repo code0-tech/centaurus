@@ -78,7 +78,6 @@ of the GLS functions and can be referenced in your flows.
         value.type = `export type ${value.identifier} = ${value.type}`
             .replace(/ \| undefined/g, "")
 
-
         function breakDown(
             typeName: string,
             code: string
@@ -172,6 +171,7 @@ of the GLS functions and can be referenced in your flows.
             if (array) {
                 type = type.getArrayElementTypeOrThrow()
             }
+            let globalDocumentation: string
 
             type.getProperties().forEach(property => {
                 const name = property.getName();
@@ -189,9 +189,15 @@ of the GLS functions and can be referenced in your flows.
 
                 property.getJsDocTags().forEach(info => {
                     info.getText().forEach(part => {
+                        if (info.getName() === "global") {
+                            globalDocumentation = (globalDocumentation || "") + "\n" + part.text.trim()
+                            return
+                        }
                         docs[info.getName()] = part.text.trim()
                     })
+
                 })
+
                 if (currTypeText.startsWith("GLS_")) {
                     docs.link = currTypeText.toLowerCase()
                         .replace(/-/g, "_")
@@ -211,12 +217,10 @@ of the GLS functions and can be referenced in your flows.
             const table = `<TypeTable type={{${typeString}}}
 />`
             console.log(`# ${key}`)
+            console.log(globalDocumentation || "\nNo documentation provided for this type.")
+            console.log()
             console.log(table)
         }
-        // console.log(`
-// # ${value.identifier} ${array ? "[]" : ""}
-//         `)
-//         console.log(table)
     })
 
 })

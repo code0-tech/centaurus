@@ -12,7 +12,7 @@ export const ShipmentSchema = z.object({
     ShipmentDate: z.date().optional(),
     IncotermCode: z.int().max(99).optional(),
     Identifier: z.string().max(40).optional(),
-    Product: z.enum(["PARCEL", "EXPRESS"]),
+    Product: z.enum(["PARCEL", "EXPRESS"]).default("PARCEL"),
     ExpressAltDeliveryAllowed: z.boolean().optional(),
     Consignee: ConsigneeSchema,
     Shipper: ShipperSchema.optional(),
