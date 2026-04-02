@@ -18,7 +18,7 @@ export default (sdk: ActionSdk) => {
                         content: "Create address"
                     }
                 ],
-                signature: "Name1: string, CountryCode: string, City: string, Street: string, ZIPCode: string, Name2?: string, Name3?: string, Province?: string, StreetNumber?: string, ContactPerson?: string, FixedLinePhonenumber?: string, MobilePhonenumber?: string, Email?: string): GLS_ADDRESS",
+                signature: "(Name1: string, CountryCode: string, City: string, Street: string, ZIPCode: string, Name2?: string, Name3?: string, Province?: string, StreetNumber?: string, ContactPerson?: string, FixedLinePhonenumber?: string, MobilePhonenumber?: string, Email?: string): GLS_ADDRESS",
                 name: [
                     {
                         code: "en-US",

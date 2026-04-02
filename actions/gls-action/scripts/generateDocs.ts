@@ -255,6 +255,54 @@ interface FunctionDefinition {
 }
 
 async function generateFunctions(sdk: ActionSdk): Promise<string> {
+    function getParamInfo(signature: string, paramName: string): { optional: boolean; type: string | null } {
+        const paramsMatch = signature.match(/\((.*)\)/s);
+        if (!paramsMatch) {
+            return {optional: false, type: null};
+        }
+
+        const params = paramsMatch[1].split(",");
+
+        for (const param of params) {
+            const trimmed = param.trim();
+
+            // Match: name?: type OR name: type
+            const match = trimmed.match(new RegExp(`${paramName}\s*(\\?)?\\s*:\\s*(.+)`));
+            if (match) {
+                const isOptional = match[1] === "?";
+                const type = match[2].trim();
+
+                return {
+                    optional: isOptional,
+                    type
+                };
+            }
+        }
+
+        return {optional: false, type: null};
+    }
+
+    function generateMarkdownTable(headers: string[], rows: string[][]) {
+        const headerRow = `| ${headers.join(' | ')} |`;
+        const separator = `| ${headers.map(() => '---').join(' | ')} |`;
+        const bodyRows = rows.map(row => `| ${row.join(' | ')} |`);
+
+        return [headerRow, separator, ...bodyRows].join('\n');
+    }
+    function getLinkFromType(typeName?: string) {
+        if (!typeName || !typeName.startsWith("GLS_")) return typeName
+        switch (typeName) { // Some edge cases
+            case "SHIPMENT_UNIT_SERVICE": {
+                typeName = "SHIPMENT_UNIT$Service"
+                break
+            }
+        }
+        const normalizedName = typeName.toLowerCase()
+            .replace(/-/g, "_")
+            .replace(/\$/g, "");
+        return `[${typeName}](./types.mdx#${normalizedName})`
+    }
+
     async function loadFunctions(modules: Record<string, () => Promise<unknown>>) {
         for (const path in modules) {
 
@@ -343,8 +391,32 @@ All shipment functions accept a common set of parameters in addition to their ty
                 displayMessages: definition.displayMessage
             }
 
+            const headers = ["Parameter", "Name", "Type", "Required", "Description"]
+
+            let rows = []
+
+            definition.parameters.forEach(param => {
+                const paramInfo = getParamInfo(definition.signature, param.runtimeName);
+
+                paramInfo.type = getLinkFromType(paramInfo.type);
+
+                rows.push([
+                    param.runtimeName,
+                    param.name[0].content,
+                    paramInfo.type?.replace(/\|/g, "\\|") || "Unknown",
+                    paramInfo.optional ? "No" : "Yes",
+                    param.description[0].content
+                ])
+            })
+
             generatedDoc += `
 ### \`${definition.runtimeName}\`
+
+${generateMarkdownTable(headers, rows)}
+
+Return Type: ${getLinkFromType(definition.signature.split("):")[1].trim())}
+
+#
 
 ${definition.documentation?.at(0).content || ""}
         
