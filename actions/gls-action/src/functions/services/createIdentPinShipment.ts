@@ -16,6 +16,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createIdentPinShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Delivers a parcel with PIN and optional birthdate verification."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",
@@ -31,7 +37,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS ident pin shipment.",
+                        content: "Delivers a parcel with PIN and optional birthdate verification.",
                     }
                 ],
                 signature: `(pin: string, ${DEFAULT_SIGNATURE_FOR_SERVICES}, birthDate: string): GLS_CREATE_PARCELS_RESPONSE`,

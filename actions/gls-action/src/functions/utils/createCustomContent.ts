@@ -6,6 +6,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createCustomContent",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates custom content settings for GLS labels, including logos and barcodes."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",

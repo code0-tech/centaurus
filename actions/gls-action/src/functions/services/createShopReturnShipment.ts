@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createShopReturnShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a shop)."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",
@@ -30,7 +36,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS shop return shipment.",
+                        content: "Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a shop).",
                     }
                 ],
                 signature: `(numberOfLabels: number, ${DEFAULT_SIGNATURE_FOR_SERVICES}, returnQR: "PDF" | "PNG" | "ZPL"): GLS_CREATE_PARCELS_RESPONSE`,

@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createGuaranteed24Shipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates a shipment with guaranteed delivery within 24 hours."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",
@@ -30,7 +36,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS guaranteed 24 shipment.",
+                        content: "Creates a shipment with guaranteed delivery within 24 hours.",
                     }
                 ],
                 signature: `(${DEFAULT_SIGNATURE_FOR_SERVICES}): GLS_CREATE_PARCELS_RESPONSE`,

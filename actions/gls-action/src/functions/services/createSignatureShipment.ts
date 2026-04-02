@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createSignatureShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates a shipment that requires a recipient signature upon delivery."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",
@@ -30,7 +36,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS signature shipment.",
+                        content: "Creates a shipment that requires a recipient signature upon delivery.",
                     }
                 ],
                 signature: `(${DEFAULT_SIGNATURE_FOR_SERVICES}): GLS_CREATE_PARCELS_RESPONSE`,

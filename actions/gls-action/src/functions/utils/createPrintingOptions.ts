@@ -6,6 +6,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createPrintingOptions",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates GLS printing options that control how labels are generated."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",

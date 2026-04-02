@@ -6,6 +6,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createAddress",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates a GLS address object (`GLS_ADDRESS`) for use in shipments as consignee, shipper, or return address."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",

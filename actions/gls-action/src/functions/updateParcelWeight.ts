@@ -12,6 +12,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "updateParcelWeight",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Updates the weight of an already-created parcel. Useful when the final weight is only known after packaging."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",
@@ -27,7 +33,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Updates the weight of a GLS parcel.",
+                        content: "Updates the weight of an already-created parcel. Useful when the final weight is only known after packaging.",
                     }
                 ],
                 signature: "(data: GLS_UPDATE_PARCEL_WEIGHT_REQUEST_DATA): GLS_END_OF_DAY_RESPONSE_DATA",

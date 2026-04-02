@@ -14,6 +14,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createShopDeliveryShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Delivers a parcel to a GLS Parcel Shop where the recipient can collect it."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",
@@ -29,7 +35,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS shop delivery shipment.",
+                        content: "Delivers a parcel to a GLS Parcel Shop where the recipient can collect it.",
                     }
                 ],
                 signature: `(parcelShopId: string, ${DEFAULT_SIGNATURE_FOR_SERVICES}): GLS_CREATE_PARCELS_RESPONSE`,

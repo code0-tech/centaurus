@@ -15,7 +15,7 @@ The GLS Action exposes 26 functions grouped into three categories:
                 
 ### `createShipmentUnit`
 
-
+Creates a GLS shipment unit (an individual parcel within a shipment).
         
 <FunctionCard definition={
 {
@@ -139,7 +139,7 @@ The GLS Action exposes 26 functions grouped into three categories:
 
 ### `createPrintingOptions`
 
-
+Creates GLS printing options that control how labels are generated.
         
 <FunctionCard definition={
 {
@@ -188,7 +188,7 @@ The GLS Action exposes 26 functions grouped into three categories:
 
 ### `createCustomContent`
 
-
+Creates custom content settings for GLS labels, including logos and barcodes.
         
 <FunctionCard definition={
 {
@@ -297,14 +297,14 @@ The GLS Action exposes 26 functions grouped into three categories:
 
 ### `createConsignee`
 
-
+Creates a GLS consignee (recipient) object for use in shipments.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS consignee object which can be used for shipments."
+            "content": "Creates a GLS consignee (recipient) object for use in shipments."
         }
     ],
     "names": [
@@ -391,7 +391,7 @@ The GLS Action exposes 26 functions grouped into three categories:
 
 ### `createAddress`
 
-
+Creates a GLS address object (`GLS_ADDRESS`) for use in shipments as consignee, shipper, or return address.
         
 <FunctionCard definition={
 {
@@ -635,14 +635,14 @@ All shipment functions accept a common set of parameters in addition to their ty
                 
 ### `createTyreShipment`
 
-
+Creates a shipment specifically for tyre/wheel delivery (uses the GLS TyreService).
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS tyre shipment."
+            "content": "Creates a shipment specifically for tyre/wheel delivery (uses the GLS TyreService)."
         }
     ],
     "names": [
@@ -729,14 +729,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createSignatureShipment`
 
-
+Creates a shipment that requires a recipient signature upon delivery.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS signature shipment."
+            "content": "Creates a shipment that requires a recipient signature upon delivery."
         }
     ],
     "names": [
@@ -823,14 +823,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createShopReturnShipment`
 
-
+Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a shop).
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS shop return shipment."
+            "content": "Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a shop)."
         }
     ],
     "names": [
@@ -947,14 +947,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createShopDeliveryShipment`
 
-
+Delivers a parcel to a GLS Parcel Shop where the recipient can collect it.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS shop delivery shipment."
+            "content": "Delivers a parcel to a GLS Parcel Shop where the recipient can collect it."
         }
     ],
     "names": [
@@ -1056,14 +1056,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createPickAndShipShipment`
 
-
+Schedules a pickup from the consignee's address on a given date.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS pick and ship shipment."
+            "content": "Schedules a pickup from the consignee's address on a given date."
         }
     ],
     "names": [
@@ -1165,14 +1165,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createIdentShipment`
 
-
+Delivers a parcel with identity verification - the driver checks the recipient's ID document.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS ident shipment."
+            "content": "Delivers a parcel with identity verification - the driver checks the recipient's ID document."
         }
     ],
     "names": [
@@ -1319,14 +1319,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createIdentPinShipment`
 
-
+Delivers a parcel with PIN and optional birthdate verification.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS ident pin shipment."
+            "content": "Delivers a parcel with PIN and optional birthdate verification."
         }
     ],
     "names": [
@@ -1443,14 +1443,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createGuaranteed24Shipment`
 
-
+Creates a shipment with guaranteed delivery within 24 hours.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS guaranteed 24 shipment."
+            "content": "Creates a shipment with guaranteed delivery within 24 hours."
         }
     ],
     "names": [
@@ -1537,14 +1537,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createFlexDeliveryShipment`
 
-
+Creates a shipment with flexible delivery - the recipient can redirect or reschedule delivery.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS flex delivery shipment."
+            "content": "Creates a shipment with flexible delivery - the recipient can redirect or reschedule delivery."
         }
     ],
     "names": [
@@ -1631,14 +1631,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createExchangeShipment`
 
-
+Delivers a new parcel while simultaneously picking up an existing one (exchange).
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS exchange shipment."
+            "content": "Delivers a new parcel while simultaneously picking up an existing one (exchange)."
         }
     ],
     "names": [
@@ -1755,14 +1755,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createDepositShipment`
 
-
+Delivers a parcel to a designated deposit location (e.g. a garage or shed) without requiring a signature.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS deposit shipment."
+            "content": "Delivers a parcel to a designated deposit location (e.g. a garage or shed) without requiring a signature."
         }
     ],
     "names": [
@@ -1864,14 +1864,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createDeliverySaturdayShipment`
 
-
+Creates an EXPRESS shipment for Saturday delivery.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS delivery Saturday shipment."
+            "content": "Creates an EXPRESS shipment for Saturday delivery."
         }
     ],
     "names": [
@@ -1958,14 +1958,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createDeliveryNextWorkingDayShipment`
 
-
+Creates an EXPRESS shipment for delivery on the next working day (EOB service).
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS delivery next working day shipment."
+            "content": "Creates an EXPRESS shipment for delivery on the next working day (EOB service)."
         }
     ],
     "names": [
@@ -2052,14 +2052,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createDeliveryAtWorkShipment`
 
-
+Delivers a parcel to a specific location within a workplace (building, floor, room).
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS delivery at work shipment."
+            "content": "Delivers a parcel to a specific location within a workplace (building, floor, room)."
         }
     ],
     "names": [
@@ -2236,14 +2236,14 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createAddresseeOnlyShipment`
 
-
+Creates a shipment that can only be delivered to the named addressee (no neighbor delivery).
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Creates a GLS addressee only shipment."
+            "content": "Creates a shipment that can only be delivered to the named addressee (no neighbor delivery)."
         }
     ],
     "names": [
@@ -2332,14 +2332,14 @@ All shipment functions accept a common set of parameters in addition to their ty
                 
 ### `validateShipment`
 
-Validates a shipment against the GLS API without creating it. Use this before `createShipment*` functions to catch errors early.
+Validates a shipment against the GLS API without creating it. Use this before `createShipment` functions to catch errors early.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Validates a GLS shipment."
+            "content": "Validates a shipment against the GLS API without creating it. Use this before `createShipment` functions to catch errors early."
         }
     ],
     "names": [
@@ -2381,14 +2381,14 @@ Validates a shipment against the GLS API without creating it. Use this before `c
 
 ### `updateParcelWeight`
 
-
+Updates the weight of an already-created parcel. Useful when the final weight is only known after packaging.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Updates the weight of a GLS parcel."
+            "content": "Updates the weight of an already-created parcel. Useful when the final weight is only known after packaging."
         }
     ],
     "names": [
@@ -2430,14 +2430,14 @@ Validates a shipment against the GLS API without creating it. Use this before `c
 
 ### `reprintParcel`
 
-
+Reprints the label for an existing parcel. Use this if the original label is damaged, lost, or needs to be printed in a different format.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Reprints the labels for a GLS parcel."
+            "content": "Reprints the label for an existing parcel. Use this if the original label is damaged, lost, or needs to be printed in a different format."
         }
     ],
     "names": [
@@ -2479,14 +2479,14 @@ Validates a shipment against the GLS API without creating it. Use this before `c
 
 ### `getEndOfDayReport`
 
-
+Retrieves all shipments dispatched on a given date. Useful for reconciliation and end-of-day processing.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Returns the GLS end of day report."
+            "content": "Retrieves all shipments dispatched on a given date. Useful for reconciliation and end-of-day processing."
         }
     ],
     "names": [
@@ -2528,14 +2528,14 @@ Validates a shipment against the GLS API without creating it. Use this before `c
 
 ### `getAllowedServices`
 
-
+Returns the GLS services available for a given origin/destination country and ZIP code combination.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Returns the allowed GLS services for a given set of parameters."
+            "content": "Returns the GLS services available for a given origin/destination country and ZIP code combination."
         }
     ],
     "names": [
@@ -2577,14 +2577,14 @@ Validates a shipment against the GLS API without creating it. Use this before `c
 
 ### `cancelShipment`
 
-
+Cancels an existing shipment by its Track ID. Only possible if the parcel has not yet been scanned.
         
 <FunctionCard definition={
 {
     "descriptions": [
         {
             "code": "en-US",
-            "content": "Cancels a GLS shipment."
+            "content": "Cancels an existing shipment by its Track ID. Only possible if the parcel has not yet been scanned."
         }
     ],
     "names": [

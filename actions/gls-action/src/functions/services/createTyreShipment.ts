@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createTyreShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates a shipment specifically for tyre/wheel delivery (uses the GLS TyreService)."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",
@@ -30,7 +36,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS tyre shipment.",
+                        content: "Creates a shipment specifically for tyre/wheel delivery (uses the GLS TyreService).",
                     }
                 ],
                 signature: `(${DEFAULT_SIGNATURE_FOR_SERVICES}): GLS_CREATE_PARCELS_RESPONSE`,

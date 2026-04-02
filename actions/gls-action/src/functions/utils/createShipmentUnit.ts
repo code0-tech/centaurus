@@ -7,6 +7,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createShipmentUnit",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates a GLS shipment unit (an individual parcel within a shipment)."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",

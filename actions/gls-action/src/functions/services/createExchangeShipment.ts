@@ -16,6 +16,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createExchangeShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Delivers a new parcel while simultaneously picking up an existing one (exchange)."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",
@@ -31,7 +37,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS exchange shipment.",
+                        content: "Delivers a new parcel while simultaneously picking up an existing one (exchange).",
                     }
                 ],
                 signature: `(address: GLS_ADDRESS, ${DEFAULT_SIGNATURE_FOR_SERVICES}, expectedWeight?: number): GLS_CREATE_PARCELS_RESPONSE`,

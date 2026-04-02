@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createPickAndShipShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Schedules a pickup from the consignee's address on a given date."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",
@@ -30,7 +36,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS pick and ship shipment.",
+                        content: "Schedules a pickup from the consignee's address on a given date.",
                     }
                 ],
                 signature: `(pickupDate: string, ${DEFAULT_SIGNATURE_FOR_SERVICES}): GLS_CREATE_PARCELS_RESPONSE`,

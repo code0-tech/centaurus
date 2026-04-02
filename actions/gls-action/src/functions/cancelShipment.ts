@@ -7,6 +7,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "cancelShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Cancels an existing shipment by its Track ID. Only possible if the parcel has not yet been scanned."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",
@@ -22,7 +28,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Cancels a GLS shipment.",
+                        content: "Cancels an existing shipment by its Track ID. Only possible if the parcel has not yet been scanned.",
                     }
                 ],
                 signature: "(data: GLS_CANCEL_SHIPMENT_REQUEST_DATA): GLS_CANCEL_SHIPMENT_RESPONSE_DATA",

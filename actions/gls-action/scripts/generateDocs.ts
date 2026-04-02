@@ -362,11 +362,11 @@ ${JSON.stringify(generateDefinition, null, 4)}
 }
 
 run().then(async (sdk) => {
-    // writeFileSync(
-    //     "../../docs/Actions/GLS/types.mdx",
-    //     generateDatatypes(),
-    //     "utf8"
-    // )
+    writeFileSync(
+        "../../docs/Actions/GLS/types.mdx",
+        generateDatatypes(),
+        "utf8"
+    )
 
     writeFileSync(
         "../../docs/Actions/GLS/functions.mdx",

@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createDeliveryAtWorkShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Delivers a parcel to a specific location within a workplace (building, floor, room)."
+                    }
+                ],
                 displayMessage: [
                     {
                         code: "en-US",
@@ -30,7 +36,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS delivery at work shipment.",
+                        content: "Delivers a parcel to a specific location within a workplace (building, floor, room).",
                     }
                 ],
                 signature: `(recipientName: string, building: string, floor: number, ${DEFAULT_SIGNATURE_FOR_SERVICES}, alternateRecipientName?: string, room?: number, phonenumber?: string): GLS_CREATE_PARCELS_RESPONSE`,
