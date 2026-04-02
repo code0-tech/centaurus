@@ -6,7 +6,9 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc --build",
-    "lint": "eslint ."
+    "build": "vite build",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "start": "node dist/main.js"
   }
 }
