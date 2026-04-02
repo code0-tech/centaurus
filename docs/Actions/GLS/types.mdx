@@ -6,21 +6,20 @@ import {TypeTable} from "fumadocs-ui/components/type-table";
 
 # GLS Action Types
 
-The GLS Action registers the following data types with the Hercules platform. These types are used as inputs and outputs
-of the GLS functions and can be referenced in your flows.
+The GLS Action registers the following data types with the Hercules platform. These types are used as inputs and outputs of the GLS functions and can be referenced in your flows.
 
---- 
-    
+---
+
 # GLS_VALIDATE_SHIPMENT_REQUEST_DATA
 No documentation provided for this type.
 
 <TypeTable type={{
-            Shipment: {
+Shipment: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_shipment',
-                type: 'GLS_SHIPMENT',  
+                type: 'GLS_SHIPMENT', 
             },
             }}
 />
@@ -29,18 +28,18 @@ typeDescriptionLink: '#gls_shipment',
 No documentation provided for this type.
 
 <TypeTable type={{
-            success: {
+success: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'boolean',  
+                type: 'boolean', 
             },
             validationResult: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_validate_shipment_response_datavalidationresult',
-                type: 'GLS_VALIDATE_SHIPMENT_RESPONSE_DATA$validationResult',  
+                type: 'GLS_VALIDATE_SHIPMENT_RESPONSE_DATA$validationResult', 
             },
             }}
 />
@@ -49,12 +48,12 @@ typeDescriptionLink: '#gls_validate_shipment_response_datavalidationresult',
 No documentation provided for this type.
 
 <TypeTable type={{
-            Issues: {
+Issues: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_validate_shipment_response_datavalidationresultissues',
-                type: 'GLS_VALIDATE_SHIPMENT_RESPONSE_DATA$validationResult$Issues[]',  
+                type: 'GLS_VALIDATE_SHIPMENT_RESPONSE_DATA$validationResult$Issues[]', 
             },
             }}
 />
@@ -63,23 +62,23 @@ typeDescriptionLink: '#gls_validate_shipment_response_datavalidationresultissues
 No documentation provided for this type.
 
 <TypeTable type={{
-            Rule: {
+Rule: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Location: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Parameters: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -88,41 +87,41 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            TrackID: {
+TrackID: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             ParcelNumber: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'number',  
+                type: 'number', 
             },
             ShipmentReference: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             ShipmentUnitReference: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             PartnerParcelNumber: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             Weight: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'number',  
+                type: 'number', 
             },
             }}
 />
@@ -131,11 +130,11 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            UpdatedWeight: {
+UpdatedWeight: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -144,40 +143,40 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            Cash: {
+Cash: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_unit_servicecash',
-                type: 'GLS_UNIT_SERVICE$Cash',  
+                type: 'GLS_UNIT_SERVICE$Cash', 
             },
             AddonLiability: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_unit_serviceaddonliability',
-                type: 'GLS_UNIT_SERVICE$AddonLiability',  
+                type: 'GLS_UNIT_SERVICE$AddonLiability', 
             },
             HazardousGoods: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_unit_servicehazardousgoods',
-                type: 'GLS_UNIT_SERVICE$HazardousGoods',  
+                type: 'GLS_UNIT_SERVICE$HazardousGoods', 
             },
             ExWorks: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_unit_serviceexworks',
-                type: 'GLS_UNIT_SERVICE$ExWorks',  
+                type: 'GLS_UNIT_SERVICE$ExWorks', 
             },
             LimitedQuantities: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_unit_servicelimitedquantities',
-                type: 'GLS_UNIT_SERVICE$LimitedQuantities',  
+                type: 'GLS_UNIT_SERVICE$LimitedQuantities', 
             },
             }}
 />
@@ -186,11 +185,11 @@ typeDescriptionLink: '#gls_unit_servicelimitedquantities',
 No documentation provided for this type.
 
 <TypeTable type={{
-            Weight: {
+Weight: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'number',  
+                type: 'number', 
             },
             }}
 />
@@ -199,19 +198,19 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            }}
+}}
 />
             
 # GLS_UNIT_SERVICE$HazardousGoods
 No documentation provided for this type.
 
 <TypeTable type={{
-            HarzardousGood: {
+HarzardousGood: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_unit_servicehazardousgoodsharzardousgood',
-                type: 'GLS_UNIT_SERVICE$HazardousGoods$HarzardousGood[]',  
+                type: 'GLS_UNIT_SERVICE$HazardousGoods$HarzardousGood[]', 
             },
             }}
 />
@@ -220,17 +219,17 @@ typeDescriptionLink: '#gls_unit_servicehazardousgoodsharzardousgood',
 No documentation provided for this type.
 
 <TypeTable type={{
-            Weight: {
+Weight: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'number',  
+                type: 'number', 
             },
             GLSHazNo: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -239,23 +238,23 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            Amount: {
+Amount: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'number',  
+                type: 'number', 
             },
             Currency: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             ParcelContent: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -264,23 +263,23 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            Reason: {
+Reason: {
                 description: 'Test',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Amount: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'number',  
+                type: 'number', 
             },
             Currency: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -289,19 +288,19 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            AlternativeShipperAddress: {
+AlternativeShipperAddress: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_address',
-                type: 'GLS_ADDRESS',  
+                type: 'GLS_ADDRESS', 
             },
             Address: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_address',
-                type: 'GLS_ADDRESS',  
+                type: 'GLS_ADDRESS', 
             },
             }}
 />
@@ -310,42 +309,42 @@ typeDescriptionLink: '#gls_address',
 No documentation provided for this type.
 
 <TypeTable type={{
-            ShipmentUnitReference: {
+ShipmentUnitReference: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             PartnerParcelNumber: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             Weight: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'number',  
+                type: 'number', 
             },
             Note1: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             Note2: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             Service: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_shipment_unitservice',
-                type: 'GLS_SHIPMENT_UNIT$Service[]',  
+                type: 'GLS_SHIPMENT_UNIT$Service[]', 
             },
             }}
 />
@@ -354,40 +353,40 @@ typeDescriptionLink: '#gls_shipment_unitservice',
 No documentation provided for this type.
 
 <TypeTable type={{
-            Cash: {
+Cash: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_shipment_unitservicecash',
-                type: 'GLS_SHIPMENT_UNIT$Service$Cash',  
+                type: 'GLS_SHIPMENT_UNIT$Service$Cash', 
             },
             AddonLiability: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_shipment_unitserviceaddonliability',
-                type: 'GLS_SHIPMENT_UNIT$Service$AddonLiability',  
+                type: 'GLS_SHIPMENT_UNIT$Service$AddonLiability', 
             },
             HazardousGoods: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_shipment_unitservicehazardousgoods',
-                type: 'GLS_SHIPMENT_UNIT$Service$HazardousGoods',  
+                type: 'GLS_SHIPMENT_UNIT$Service$HazardousGoods', 
             },
             ExWorks: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_shipment_unitserviceexworks',
-                type: 'GLS_SHIPMENT_UNIT$Service$ExWorks',  
+                type: 'GLS_SHIPMENT_UNIT$Service$ExWorks', 
             },
             LimitedQuantities: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_shipment_unitservicelimitedquantities',
-                type: 'GLS_SHIPMENT_UNIT$Service$LimitedQuantities',  
+                type: 'GLS_SHIPMENT_UNIT$Service$LimitedQuantities', 
             },
             }}
 />
@@ -396,11 +395,11 @@ typeDescriptionLink: '#gls_shipment_unitservicelimitedquantities',
 No documentation provided for this type.
 
 <TypeTable type={{
-            Weight: {
+Weight: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'number',  
+                type: 'number', 
             },
             }}
 />
@@ -409,19 +408,19 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            }}
+}}
 />
             
 # GLS_SHIPMENT_UNIT$Service$HazardousGoods
 No documentation provided for this type.
 
 <TypeTable type={{
-            HarzardousGood: {
+HarzardousGood: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_shipment_unitservicehazardousgoodsharzardousgood',
-                type: 'GLS_SHIPMENT_UNIT$Service$HazardousGoods$HarzardousGood[]',  
+                type: 'GLS_SHIPMENT_UNIT$Service$HazardousGoods$HarzardousGood[]', 
             },
             }}
 />
@@ -430,17 +429,17 @@ typeDescriptionLink: '#gls_shipment_unitservicehazardousgoodsharzardousgood',
 No documentation provided for this type.
 
 <TypeTable type={{
-            Weight: {
+Weight: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'number',  
+                type: 'number', 
             },
             GLSHazNo: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -449,23 +448,23 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            Amount: {
+Amount: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'number',  
+                type: 'number', 
             },
             Currency: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             ParcelContent: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -474,23 +473,23 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            Reason: {
+Reason: {
                 description: 'Test',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Amount: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'number',  
+                type: 'number', 
             },
             Currency: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -499,82 +498,82 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            ShipmentReference: {
+ShipmentReference: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             ShipmentDate: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'Date',  
+                type: 'Date', 
             },
             IncotermCode: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'number',  
+                type: 'number', 
             },
             Identifier: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             Product: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: '"PARCEL" | "EXPRESS"',  
+                type: '"PARCEL" | "EXPRESS"', 
             },
             ExpressAltDeliveryAllowed: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'boolean',  
+                type: 'boolean', 
             },
             Consignee: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_consignee',
-                type: 'GLS_CONSIGNEE',  
+                type: 'GLS_CONSIGNEE', 
             },
             Shipper: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_shipper',
-                type: 'GLS_SHIPPER',  
+                type: 'GLS_SHIPPER', 
             },
             Carrier: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: '"ROYALMAIL"',  
+                type: '"ROYALMAIL"', 
             },
             ShipmentUnit: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_shipment_unit',
-                type: 'GLS_SHIPMENT_UNIT',  
+                type: 'GLS_SHIPMENT_UNIT', 
             },
             Service: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_shipment_service',
-                type: 'GLS_SHIPMENT_SERVICE',  
+                type: 'GLS_SHIPMENT_SERVICE', 
             },
             Return: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_shipmentreturn',
-                type: 'GLS_SHIPMENT$Return',  
+                type: 'GLS_SHIPMENT$Return', 
             },
             }}
 />
@@ -583,12 +582,12 @@ typeDescriptionLink: '#gls_shipmentreturn',
 No documentation provided for this type.
 
 <TypeTable type={{
-            Address: {
+Address: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_address',
-                type: 'GLS_ADDRESS',  
+                type: 'GLS_ADDRESS', 
             },
             }}
 />
@@ -597,75 +596,75 @@ typeDescriptionLink: '#gls_address',
 No documentation provided for this type.
 
 <TypeTable type={{
-            ShipmentReference: {
+ShipmentReference: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             ShipmentDate: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'Date',  
+                type: 'Date', 
             },
             IncotermCode: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'number',  
+                type: 'number', 
             },
             Identifier: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             Product: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: '"PARCEL" | "EXPRESS"',  
+                type: '"PARCEL" | "EXPRESS"', 
             },
             ExpressAltDeliveryAllowed: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'boolean',  
+                type: 'boolean', 
             },
             Consignee: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_consignee',
-                type: 'GLS_CONSIGNEE',  
+                type: 'GLS_CONSIGNEE', 
             },
             Shipper: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_shipper',
-                type: 'GLS_SHIPPER',  
+                type: 'GLS_SHIPPER', 
             },
             Carrier: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: '"ROYALMAIL"',  
+                type: '"ROYALMAIL"', 
             },
             ShipmentUnit: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_shipment_unit',
-                type: 'GLS_SHIPMENT_UNIT',  
+                type: 'GLS_SHIPMENT_UNIT', 
             },
             Return: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_shipment_without_servicesreturn',
-                type: 'GLS_SHIPMENT_WITHOUT_SERVICES$Return',  
+                type: 'GLS_SHIPMENT_WITHOUT_SERVICES$Return', 
             },
             }}
 />
@@ -674,12 +673,12 @@ typeDescriptionLink: '#gls_shipment_without_servicesreturn',
 No documentation provided for this type.
 
 <TypeTable type={{
-            Address: {
+Address: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_address',
-                type: 'GLS_ADDRESS',  
+                type: 'GLS_ADDRESS', 
             },
             }}
 />
@@ -688,17 +687,17 @@ typeDescriptionLink: '#gls_address',
 No documentation provided for this type.
 
 <TypeTable type={{
-            ReturnPrintData: {
+ReturnPrintData: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'boolean',  
+                type: 'boolean', 
             },
             ReturnRoutingInfo: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'boolean',  
+                type: 'boolean', 
             },
             }}
 />
@@ -707,48 +706,48 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            TrackID: {
+TrackID: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             ParcelNumber: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'number',  
+                type: 'number', 
             },
             ShipmentReference: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             ShipmentUnitReference: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             PartnerParcelNumber: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             CreationDate: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             PrintingOptions: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_reprint_parcel_request_dataprintingoptions',
-                type: 'GLS_REPRINT_PARCEL_REQUEST_DATA$PrintingOptions',  
+                type: 'GLS_REPRINT_PARCEL_REQUEST_DATA$PrintingOptions', 
             },
             }}
 />
@@ -757,12 +756,12 @@ typeDescriptionLink: '#gls_reprint_parcel_request_dataprintingoptions',
 No documentation provided for this type.
 
 <TypeTable type={{
-            ReturnLabels: {
+ReturnLabels: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_reprint_parcel_request_dataprintingoptionsreturnlabels',
-                type: 'GLS_REPRINT_PARCEL_REQUEST_DATA$PrintingOptions$ReturnLabels',  
+                type: 'GLS_REPRINT_PARCEL_REQUEST_DATA$PrintingOptions$ReturnLabels', 
             },
             }}
 />
@@ -771,17 +770,17 @@ typeDescriptionLink: '#gls_reprint_parcel_request_dataprintingoptionsreturnlabel
 No documentation provided for this type.
 
 <TypeTable type={{
-            TemplateSet: {
+TemplateSet: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: '"NONE" | "ZPL_200" | "ZPL_300"',  
+                type: '"NONE" | "ZPL_200" | "ZPL_300"', 
             },
             LabelFormat: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: '"PDF" | "ZEBRA" | "PNG" | "PNG_200"',  
+                type: '"PDF" | "ZEBRA" | "PNG" | "PNG_200"', 
             },
             }}
 />
@@ -790,12 +789,12 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            CreatedShipment: {
+CreatedShipment: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_reprint_parcel_response_datacreatedshipment',
-                type: 'GLS_REPRINT_PARCEL_RESPONSE_DATA$CreatedShipment',  
+                type: 'GLS_REPRINT_PARCEL_RESPONSE_DATA$CreatedShipment', 
             },
             }}
 />
@@ -804,37 +803,37 @@ typeDescriptionLink: '#gls_reprint_parcel_response_datacreatedshipment',
 No documentation provided for this type.
 
 <TypeTable type={{
-            ParcelData: {
+ParcelData: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_reprint_parcel_response_datacreatedshipmentparceldata',
-                type: 'GLS_REPRINT_PARCEL_RESPONSE_DATA$CreatedShipment$ParcelData[]',  
+                type: 'GLS_REPRINT_PARCEL_RESPONSE_DATA$CreatedShipment$ParcelData[]', 
             },
             PrintData: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_reprint_parcel_response_datacreatedshipmentprintdata',
-                type: 'GLS_REPRINT_PARCEL_RESPONSE_DATA$CreatedShipment$PrintData[]',  
+                type: 'GLS_REPRINT_PARCEL_RESPONSE_DATA$CreatedShipment$PrintData[]', 
             },
             CustomerID: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             PickupLocation: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             GDPR: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -843,17 +842,17 @@ typeDescriptionLink: '#gls_reprint_parcel_response_datacreatedshipmentprintdata'
 No documentation provided for this type.
 
 <TypeTable type={{
-            Data: {
+Data: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             LabelFormat: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: '"PDF" | "ZEBRA" | "PNG" | "PNG_200"',  
+                type: '"PDF" | "ZEBRA" | "PNG" | "PNG_200"', 
             },
             }}
 />
@@ -862,37 +861,37 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            TrackID: {
+TrackID: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             ShipmentUnitReference: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             ParcelNumber: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Barcodes: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_reprint_parcel_response_datacreatedshipmentparceldatabarcodes',
-                type: 'GLS_REPRINT_PARCEL_RESPONSE_DATA$CreatedShipment$ParcelData$Barcodes',  
+                type: 'GLS_REPRINT_PARCEL_RESPONSE_DATA$CreatedShipment$ParcelData$Barcodes', 
             },
             RoutingInfo: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_reprint_parcel_response_datacreatedshipmentparceldataroutinginfo',
-                type: 'GLS_REPRINT_PARCEL_RESPONSE_DATA$CreatedShipment$ParcelData$RoutingInfo',  
+                type: 'GLS_REPRINT_PARCEL_RESPONSE_DATA$CreatedShipment$ParcelData$RoutingInfo', 
             },
             }}
 />
@@ -901,35 +900,35 @@ typeDescriptionLink: '#gls_reprint_parcel_response_datacreatedshipmentparceldata
 No documentation provided for this type.
 
 <TypeTable type={{
-            Tour: {
+Tour: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             InboundSortingFlag: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             FinalLocationCode: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             LastRoutingDate: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             HubLocation: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -938,29 +937,29 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            Primary2D: {
+Primary2D: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Secondary2D: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Primary1D: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Primary1DPrint: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'boolean',  
+                type: 'boolean', 
             },
             }}
 />
@@ -969,25 +968,25 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            ReturnLabels: {
+ReturnLabels: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_printing_optionsreturnlabels',
-                type: 'GLS_PRINTING_OPTIONS$ReturnLabels',  
+                type: 'GLS_PRINTING_OPTIONS$ReturnLabels', 
             },
             useDefault: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             DefinePrinter: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_printing_optionsdefineprinter',
-                type: 'GLS_PRINTING_OPTIONS$DefinePrinter',  
+                type: 'GLS_PRINTING_OPTIONS$DefinePrinter', 
             },
             }}
 />
@@ -996,17 +995,17 @@ typeDescriptionLink: '#gls_printing_optionsdefineprinter',
 No documentation provided for this type.
 
 <TypeTable type={{
-            LabelPrinter: {
+LabelPrinter: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             DocumentPrinter: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -1015,17 +1014,17 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            TemplateSet: {
+TemplateSet: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: '"NONE" | "D_200" | "PF_4_I" | "PF_4_I_200" | "PF_4_I_300" | "PF_8_D_200" | "T_200_BF" | "T_300_BF" | "ZPL_200" | "ZPL_200_TRACKID_EAN_128" | "ZPL_200_TRACKID_CODE_39" | "ZPL_200_REFNO_EAN_128" | "ZPL_200_REFNO_CODE_39" | "ZPL_300" | "ZPL_300_TRACKID_EAN_128" | "ZPL_300_TRACKID_CODE_39" | "ZPL_300_REFNO_EAN_128" | "ZPL_300_REFNO_CODE_39"',  
+                type: '"NONE" | "D_200" | "PF_4_I" | "PF_4_I_200" | "PF_4_I_300" | "PF_8_D_200" | "T_200_BF" | "T_300_BF" | "ZPL_200" | "ZPL_200_TRACKID_EAN_128" | "ZPL_200_TRACKID_CODE_39" | "ZPL_200_REFNO_EAN_128" | "ZPL_200_REFNO_CODE_39" | "ZPL_300" | "ZPL_300_TRACKID_EAN_128" | "ZPL_300_TRACKID_CODE_39" | "ZPL_300_REFNO_EAN_128" | "ZPL_300_REFNO_CODE_39"', 
             },
             LabelFormat: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: '"PDF" | "ZEBRA" | "INTERMEC" | "DATAMAX" | "TOSHIBA" | "PNG"',  
+                type: '"PDF" | "ZEBRA" | "INTERMEC" | "DATAMAX" | "TOSHIBA" | "PNG"', 
             },
             }}
 />
@@ -1034,11 +1033,11 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            date: {
+date: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -1047,12 +1046,12 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            Shipments: {
+Shipments: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_end_of_day_response_datashipments',
-                type: 'GLS_END_OF_DAY_RESPONSE_DATA$Shipments[]',  
+                type: 'GLS_END_OF_DAY_RESPONSE_DATA$Shipments[]', 
             },
             }}
 />
@@ -1061,38 +1060,38 @@ typeDescriptionLink: '#gls_end_of_day_response_datashipments',
 No documentation provided for this type.
 
 <TypeTable type={{
-            ShippingDate: {
+ShippingDate: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Product: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: '"PARCEL" | "EXPRESS"',  
+                type: '"PARCEL" | "EXPRESS"', 
             },
             Consignee: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_end_of_day_response_datashipmentsconsignee',
-                type: 'GLS_END_OF_DAY_RESPONSE_DATA$Shipments$Consignee',  
+                type: 'GLS_END_OF_DAY_RESPONSE_DATA$Shipments$Consignee', 
             },
             Shipper: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_end_of_day_response_datashipmentsshipper',
-                type: 'GLS_END_OF_DAY_RESPONSE_DATA$Shipments$Shipper',  
+                type: 'GLS_END_OF_DAY_RESPONSE_DATA$Shipments$Shipper', 
             },
             ShipmentUnit: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_end_of_day_response_datashipmentsshipmentunit',
-                type: 'GLS_END_OF_DAY_RESPONSE_DATA$Shipments$ShipmentUnit[]',  
+                type: 'GLS_END_OF_DAY_RESPONSE_DATA$Shipments$ShipmentUnit[]', 
             },
             }}
 />
@@ -1101,23 +1100,23 @@ typeDescriptionLink: '#gls_end_of_day_response_datashipmentsshipmentunit',
 No documentation provided for this type.
 
 <TypeTable type={{
-            Weight: {
+Weight: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             TrackID: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             ParcelNumber: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -1126,18 +1125,18 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            ContactID: {
+ContactID: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             AlternativeShipperAddress: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
 typeDescriptionLink: '#gls_address',
-                type: 'GLS_ADDRESS',  
+                type: 'GLS_ADDRESS', 
             },
             }}
 />
@@ -1146,12 +1145,12 @@ typeDescriptionLink: '#gls_address',
 No documentation provided for this type.
 
 <TypeTable type={{
-            Address: {
+Address: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_address',
-                type: 'GLS_ADDRESS',  
+                type: 'GLS_ADDRESS', 
             },
             }}
 />
@@ -1160,35 +1159,35 @@ typeDescriptionLink: '#gls_address',
 No documentation provided for this type.
 
 <TypeTable type={{
-            CustomerLogo: {
+CustomerLogo: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             BarcodeContentType: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: '"TRACK_ID" | "GLS_SHIPMENT_REFERENCE"',  
+                type: '"TRACK_ID" | "GLS_SHIPMENT_REFERENCE"', 
             },
             Barcode: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             BarcodeType: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: '"EAN_128" | "CODE_39"',  
+                type: '"EAN_128" | "CODE_39"', 
             },
             HideShipperAddress: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'boolean',  
+                type: 'boolean', 
             },
             }}
 />
@@ -1197,12 +1196,12 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            CreatedShipment: {
+CreatedShipment: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_create_parcels_responsecreatedshipment',
-                type: 'GLS_CREATE_PARCELS_RESPONSE$CreatedShipment',  
+                type: 'GLS_CREATE_PARCELS_RESPONSE$CreatedShipment', 
             },
             }}
 />
@@ -1211,43 +1210,43 @@ typeDescriptionLink: '#gls_create_parcels_responsecreatedshipment',
 No documentation provided for this type.
 
 <TypeTable type={{
-            ShipmentReference: {
+ShipmentReference: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             ParcelData: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_create_parcels_responsecreatedshipmentparceldata',
-                type: 'GLS_CREATE_PARCELS_RESPONSE$CreatedShipment$ParcelData[]',  
+                type: 'GLS_CREATE_PARCELS_RESPONSE$CreatedShipment$ParcelData[]', 
             },
             PrintData: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_create_parcels_responsecreatedshipmentprintdata',
-                type: 'GLS_CREATE_PARCELS_RESPONSE$CreatedShipment$PrintData[]',  
+                type: 'GLS_CREATE_PARCELS_RESPONSE$CreatedShipment$PrintData[]', 
             },
             CustomerID: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             PickupLocation: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             GDPR: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -1256,17 +1255,17 @@ typeDescriptionLink: '#gls_create_parcels_responsecreatedshipmentprintdata',
 No documentation provided for this type.
 
 <TypeTable type={{
-            Data: {
+Data: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             LabelFormat: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: '"PDF" | "ZEBRA" | "INTERMEC" | "DATAMAX" | "TOSHIBA" | "PNG"',  
+                type: '"PDF" | "ZEBRA" | "INTERMEC" | "DATAMAX" | "TOSHIBA" | "PNG"', 
             },
             }}
 />
@@ -1275,31 +1274,31 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            TrackID: {
+TrackID: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             ParcelNumber: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Barcodes: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_create_parcels_responsecreatedshipmentparceldatabarcodes',
-                type: 'GLS_CREATE_PARCELS_RESPONSE$CreatedShipment$ParcelData$Barcodes',  
+                type: 'GLS_CREATE_PARCELS_RESPONSE$CreatedShipment$ParcelData$Barcodes', 
             },
             RoutingInfo: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_create_parcels_responsecreatedshipmentparceldataroutinginfo',
-                type: 'GLS_CREATE_PARCELS_RESPONSE$CreatedShipment$ParcelData$RoutingInfo',  
+                type: 'GLS_CREATE_PARCELS_RESPONSE$CreatedShipment$ParcelData$RoutingInfo', 
             },
             }}
 />
@@ -1308,35 +1307,35 @@ typeDescriptionLink: '#gls_create_parcels_responsecreatedshipmentparceldatarouti
 No documentation provided for this type.
 
 <TypeTable type={{
-            Tour: {
+Tour: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             InboundSortingFlag: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             FinalLocationCode: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             LastRoutingDate: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             HubLocation: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -1345,29 +1344,29 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            Primary2D: {
+Primary2D: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Secondary2D: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Primary1D: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Primary1DPrint: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'boolean',  
+                type: 'boolean', 
             },
             }}
 />
@@ -1376,30 +1375,30 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            ConsigneeID: {
+ConsigneeID: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             CostCenter: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             Category: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: '"BUSINESS" | "PRIVATE"',  
+                type: '"BUSINESS" | "PRIVATE"', 
             },
             Address: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_address',
-                type: 'GLS_ADDRESS',  
+                type: 'GLS_ADDRESS', 
             },
             }}
 />
@@ -1408,11 +1407,11 @@ typeDescriptionLink: '#gls_address',
 No documentation provided for this type.
 
 <TypeTable type={{
-            TrackID: {
+TrackID: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -1421,17 +1420,17 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            TrackID: {
+TrackID: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             result: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: '"CANCELLED" | "CANCELLATION_PENDING" | "SCANNED" | "ERROR"',  
+                type: '"CANCELLED" | "CANCELLATION_PENDING" | "SCANNED" | "ERROR"', 
             },
             }}
 />
@@ -1440,25 +1439,25 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            Source: {
+Source: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_allowed_services_request_datasource',
-                type: 'GLS_ALLOWED_SERVICES_REQUEST_DATA$Source',  
+                type: 'GLS_ALLOWED_SERVICES_REQUEST_DATA$Source', 
             },
             Destination: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_allowed_services_request_datadestination',
-                type: 'GLS_ALLOWED_SERVICES_REQUEST_DATA$Destination',  
+                type: 'GLS_ALLOWED_SERVICES_REQUEST_DATA$Destination', 
             },
             ContactID: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -1467,17 +1466,17 @@ typeDescriptionLink: '#gls_allowed_services_request_datadestination',
 No documentation provided for this type.
 
 <TypeTable type={{
-            CountryCode: {
+CountryCode: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             ZIPCode: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -1486,17 +1485,17 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            CountryCode: {
+CountryCode: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             ZIPCode: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -1505,12 +1504,12 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            AllowedServices: {
+AllowedServices: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
 typeDescriptionLink: '#gls_allowed_services_response_dataallowedservices',
-                type: 'GLS_ALLOWED_SERVICES_RESPONSE_DATA$AllowedServices[]',  
+                type: 'GLS_ALLOWED_SERVICES_RESPONSE_DATA$AllowedServices[]', 
             },
             }}
 />
@@ -1519,17 +1518,17 @@ typeDescriptionLink: '#gls_allowed_services_response_dataallowedservices',
 No documentation provided for this type.
 
 <TypeTable type={{
-            ServiceName: {
+ServiceName: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             ProductName: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />
@@ -1538,83 +1537,83 @@ No documentation provided for this type.
 No documentation provided for this type.
 
 <TypeTable type={{
-            Name1: {
+Name1: {
                 description: 'Primary name line (person or company). Max 40 characters.',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Name2: {
                 description: 'Optional second name line (e.g., department or additional identifier). Max 40 characters.',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             Name3: {
                 description: 'Optional third name line for extended address details. Max 40 characters.',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             CountryCode: {
                 description: 'Two-letter ISO country code (e.g., DE, US).',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Province: {
                 description: 'State, province, or region. Optional field. Max 40 characters.',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             City: {
                 description: 'City or locality name. Max 40 characters.',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             Street: {
                 description: 'Street name. Minimum 4 characters required.',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             StreetNumber: {
                 description: 'House or building number. Optional field. Max 40 characters.',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             ContactPerson: {
                 description: 'Full name of a contact person. Optional field. Must be between 6 and 40 characters.',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             FixedLinePhonenumber: {
                 description: 'Landline phone number. Optional field. Must be between 4 and 35 characters.',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             MobilePhonenumber: {
                 description: 'Mobile phone number. Optional field. Must be between 4 and 35 characters.',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             eMail: {
                 description: 'Email address. Optional field. Max 80 characters.',
                 deprecated: false,
                 required: false, 
-                type: 'string',  
+                type: 'string', 
             },
             ZIPCode: {
                 description: 'Postal or ZIP code. Max 10 characters.',
                 deprecated: false,
                 required: true, 
-                type: 'string',  
+                type: 'string', 
             },
             }}
 />

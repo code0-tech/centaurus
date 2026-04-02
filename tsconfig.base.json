@@ -9,6 +9,6 @@
     "skipLibCheck": true,
     "types": ["vite/client"],
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "scripts"],
   "exclude": ["node_modules", "dist", "***/test/**", "**/*.test.ts"]
 }
