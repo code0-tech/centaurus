@@ -267,7 +267,7 @@ async function generateFunctions(sdk: ActionSdk): Promise<string> {
             const trimmed = param.trim();
 
             // Match: name?: type OR name: type
-            const match = trimmed.match(new RegExp(`${paramName}\s*(\\?)?\\s*:\\s*(.+)`));
+            const match = trimmed.match(new RegExp(`${paramName}\\s*(\\?)?\\s*:\\s*(.+)`));
             if (match) {
                 const isOptional = match[1] === "?";
                 const type = match[2].trim();
@@ -393,7 +393,7 @@ All shipment functions accept a common set of parameters in addition to their ty
 
             const headers = ["Parameter", "Name", "Type", "Required", "Description"]
 
-            let rows = []
+            const rows = []
 
             definition.parameters.forEach(param => {
                 const paramInfo = getParamInfo(definition.signature, param.runtimeName);
