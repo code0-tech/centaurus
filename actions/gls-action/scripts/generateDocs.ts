@@ -292,8 +292,8 @@ async function generateFunctions(sdk: ActionSdk): Promise<string> {
     function getLinkFromType(typeName?: string) {
         if (!typeName || !typeName.startsWith("GLS_")) return typeName
         switch (typeName) { // Some edge cases
-            case "SHIPMENT_UNIT_SERVICE": {
-                typeName = "SHIPMENT_UNIT$Service"
+            case "GLS_SHIPMENT_UNIT_SERVICE": {
+                typeName = "GLS_SHIPMENT_UNIT$Service"
                 break
             }
         }
