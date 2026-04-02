@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createGuaranteed24Shipment",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create guaranteed 24 shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",

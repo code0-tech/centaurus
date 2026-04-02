@@ -7,6 +7,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "cancelShipment",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Cancel shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",

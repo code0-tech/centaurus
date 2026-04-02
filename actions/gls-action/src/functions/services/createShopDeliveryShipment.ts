@@ -14,6 +14,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createShopDeliveryShipment",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create shop delivery shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -59,7 +65,3 @@ export default (sdk: ActionSdk) => {
         },
     )
 }
-
-
-
-

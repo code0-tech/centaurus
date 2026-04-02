@@ -12,6 +12,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "updateParcelWeight",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Update parcel weight"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",

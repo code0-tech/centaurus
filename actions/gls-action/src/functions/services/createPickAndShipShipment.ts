@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createPickAndShipShipment",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create pick and ship shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",

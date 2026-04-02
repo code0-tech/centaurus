@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "start": "node dist/main.js",
-    "docs:generate": "npm run build && node dist/generateTypes.js > ../../docs/Actions/GLS/types.mdx"
+    "generate:docs": "npm run build && node dist/generateDocs.js"
   },
   "dependencies": {
     "ts-morph": "^27.0.2"

@@ -1,9 +1,11 @@
 import {loadAllDefinitions} from "../src/helpers";
 import {
+    ActionSdk,
     HerculesActionConfigurationDefinition,
     HerculesDataType, HerculesFlowType, HerculesRegisterFunctionParameter,
 } from "@code0-tech/hercules";
 import {Project, SymbolFlags, Type} from "ts-morph";
+import {writeFileSync} from "fs"
 
 
 const state = {
@@ -14,8 +16,8 @@ const state = {
 }
 
 
-async function run() {
-    await loadAllDefinitions({
+async function run(): Promise<ActionSdk> {
+    const sdk = {
         onError: () => {
         },
         connect: () => Promise.resolve([]),
@@ -57,13 +59,19 @@ async function run() {
             return Promise.resolve()
         }
 
-    })
+    };
+    await loadAllDefinitions(sdk)
+
+    return sdk
 }
 
-run().then(async () => {
-    console.log(`---
+
+function generateDatatypes(): string {
+    let generatedDoc = ""
+
+    generatedDoc += `---
 title: Datatypes
-description: All data types registered by the GLS Action — field references and descriptions.
+description: All data types registered by the GLS Action.
 ---
 import {TypeTable} from "fumadocs-ui/components/type-table";
 
@@ -73,7 +81,8 @@ The GLS Action registers the following data types with the Hercules platform. Th
 of the GLS functions and can be referenced in your flows.
 
 --- 
-    `)
+    `
+
     state.dataTypes.forEach(value => {
         value.type = `export type ${value.identifier} = ${value.type}`
             .replace(/ \| undefined/g, "")
@@ -216,11 +225,152 @@ of the GLS functions and can be referenced in your flows.
 
             const table = `<TypeTable type={{${typeString}}}
 />`
-            console.log(`# ${key}`)
-            console.log(globalDocumentation || "\nNo documentation provided for this type.")
-            console.log()
-            console.log(table)
+            generatedDoc += `
+# ${key}${globalDocumentation || "\nNo documentation provided for this type."}
+
+${table}
+            `
         }
     })
+    return generatedDoc
+}
 
+interface Translation {
+    code?: string;
+    content?: string;
+}
+
+interface FunctionDefinition {
+    descriptions?: Array<Translation>;
+    displayMessages?: Array<Translation>;
+    identifier?: string;
+    names?: Array<Translation>;
+    parameterDefinitions?: {
+        nodes: {
+            identifier: string,
+            descriptions: Array<Translation>,
+            names: Array<Translation>
+        }[]
+    };
+}
+
+async function generateFunctions(sdk: ActionSdk): Promise<string> {
+    async function loadFunctions(modules: Record<string, () => Promise<unknown>>) {
+        for (const path in modules) {
+
+            const mod: any = await modules[path]();
+            if (typeof mod.default === 'function') {
+                try {
+                    await mod.default(sdk);
+                } catch (error) {
+                    console.log(`Error registering functions from ${path}:`, error);
+                }
+            }
+        }
+    }
+
+    let generatedDoc = `---
+title: Functions
+description: All functions registered by the GLS Action.
+---
+
+The GLS Action exposes ${state.runtimeFunctions.length} functions grouped into three categories:
+
+- **Builder functions** — Construct data objects (no API call)
+- **Shipment functions** — Create different types of GLS shipments (calls GLS API)
+- **API functions** — Query or modify shipments (calls GLS API)
+
+---
+`
+    const functionGlobs = [
+        import.meta.glob('../src/functions/utils/*.ts'),
+        import.meta.glob('../src/functions/services/*.ts'),
+        import.meta.glob('../src/functions/*.ts')
+    ]
+    for (let i = 0; i < functionGlobs.length; i++) {
+        const modules = functionGlobs[i]
+        state.runtimeFunctions = []
+        await loadFunctions(modules)
+
+        switch (i) {
+            case 0: {
+                generatedDoc += `
+## Builder functions
+                `
+                break
+            }
+            case 1: {
+                generatedDoc += `
+## Shipment functions
+
+All shipment functions accept a common set of parameters in addition to their type-specific parameters. They call the GLS ShipIT API (\`POST /rs/shipments\`) and return a \`GLS_CREATE_PARCELS_RESPONSE\`.
+
+**Common parameters for all shipment functions:**
+
+| Parameter         | Type                          | Required | Description                                        |
+|-------------------|-------------------------------|----------|----------------------------------------------------|
+| \`shipment\`        | GLS_SHIPMENT_WITHOUT_SERVICES | **Yes**  | Shipment data (consignee, shipper, units, product) |
+| \`printingOptions\` | GLS_PRINTING_OPTIONS          | **Yes**  | Label format settings                              |
+| \`returnOptions\`   | GLS_RETURN_OPTIONS            | No       | Whether to return print data and routing info      |
+| \`customContent\`   | GLS_CUSTOM_CONTENT            | No       | Custom logo and barcode settings                   |
+
+---
+                `
+                break
+            }
+            default: {
+                generatedDoc += `
+                ## API functions
+                `
+            }
+        }
+
+        state.runtimeFunctions.forEach(value => {
+            const definition = value.definition;
+            const generateDefinition: FunctionDefinition = {
+                descriptions: definition.description,
+                names: definition.name,
+                identifier: definition.runtimeName,
+                parameterDefinitions: {
+                    nodes: definition.parameters.map(p => {
+                        return {
+                            names: p.name,
+                            identifier: p.runtimeName,
+                            descriptions: p.description
+                        }
+                    })
+                },
+                displayMessages: definition.displayMessage
+            }
+
+            generatedDoc += `
+### \`${definition.runtimeName}\`
+
+${definition.documentation?.at(0).content || ""}
+        
+<FunctionCard definition={
+${JSON.stringify(generateDefinition, null, 4)}
+        } />
+        
+---
+`
+        })
+    }
+
+
+    return generatedDoc
+}
+
+run().then(async (sdk) => {
+    // writeFileSync(
+    //     "../../docs/Actions/GLS/types.mdx",
+    //     generateDatatypes(),
+    //     "utf8"
+    // )
+
+    writeFileSync(
+        "../../docs/Actions/GLS/functions.mdx",
+        await generateFunctions(sdk),
+        "utf-8"
+    )
 })

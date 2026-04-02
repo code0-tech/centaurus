@@ -3,10 +3,16 @@ import { UnitService } from "../../types/glsUnitService";
 import {ShipmentUnit} from "../../types/glsShipmentUnit";
 
 export default (sdk: ActionSdk) => {
-    sdk.registerFunctionDefinitions(
+    return sdk.registerFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createShipmentUnit",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create shipment unit"
+                    }
+                ],
                 signature: "(weight: number, shipmentUnitReference?: string, partnerParcelNumber?: string, note1?: string, note2?: string, shipmentUnitService: GLS_SHIPMENT_UNIT_SERVICE): GLS_SHIPMENT_UNIT",
                 name: [
                     {

@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createSignatureShipment",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create signature shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",

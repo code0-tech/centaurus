@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createAddresseeOnlyShipment",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create addressee only shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -45,3 +51,4 @@ export default (sdk: ActionSdk) => {
         },
     )
 }
+

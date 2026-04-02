@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createDeliveryAtWorkShipment",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create delivery at work shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",

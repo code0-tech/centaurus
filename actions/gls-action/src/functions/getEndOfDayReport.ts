@@ -8,6 +8,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "getEndOfDayReport",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Get end of day report"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",

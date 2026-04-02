@@ -16,6 +16,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createIdentShipment",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create ident shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",

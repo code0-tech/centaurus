@@ -2,10 +2,16 @@ import {ActionSdk} from "@code0-tech/hercules";
 import {PrintingOptions, ReturnLabels} from "../../types/glsPrintingOptions";
 
 export default (sdk: ActionSdk) => {
-    sdk.registerFunctionDefinitions(
+    return sdk.registerFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createPrintingOptions",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create printing options"
+                    }
+                ],
                 signature: "(returnLabels: RETURN_LABELS): GLS_PRINTING_OPTIONS",
                 name: [
                     {

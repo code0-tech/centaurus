@@ -12,6 +12,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "reprintParcel",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Reprint parcel"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",

@@ -16,6 +16,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createDepositShipment",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create deposit shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",

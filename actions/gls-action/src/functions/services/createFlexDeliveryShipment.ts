@@ -15,6 +15,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createFlexDeliveryShipment",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create flex delivery shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",

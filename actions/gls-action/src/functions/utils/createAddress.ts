@@ -2,10 +2,16 @@ import {ActionSdk} from "@code0-tech/hercules";
 import {AddressSchema} from "../../types/glsAddress";
 
 export default (sdk: ActionSdk) => {
-    sdk.registerFunctionDefinitions(
+    return sdk.registerFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createAddress",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create address"
+                    }
+                ],
                 signature: "Name1: string, CountryCode: string, City: string, Street: string, ZIPCode: string, Name2?: string, Name3?: string, Province?: string, StreetNumber?: string, ContactPerson?: string, FixedLinePhonenumber?: string, MobilePhonenumber?: string, Email?: string): GLS_ADDRESS",
                 name: [
                     {

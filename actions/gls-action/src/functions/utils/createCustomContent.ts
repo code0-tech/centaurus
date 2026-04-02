@@ -6,6 +6,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createCustomContent",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create custom content"
+                    }
+                ],
                 signature: "(barcodeContentType: \"TRACK_ID\"|\"GLS_SHIPMENT_REFERENCE\", customerLogo: string, hideShipperAddress?: boolean, barcodeType?: \"EAN_128\"|\"CODE_39\", barcode?: string): GLS_CUSTOM_CONTENT",
                 name: [
                     {

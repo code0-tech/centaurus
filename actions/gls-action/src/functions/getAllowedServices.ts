@@ -12,6 +12,12 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "getAllowedServices",
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Get allowed services"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
