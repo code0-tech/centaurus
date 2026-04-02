@@ -9,7 +9,7 @@
   "packageManager": "npm@11.12.1",
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "docs:generate": "npm run docs:generate --workspaces --if-present",
+    "generate:docs": "npm run generate:docs --workspaces --if-present",
     "start": "turbo run start",
     "test": "vitest run",
     "test:watch": "vitest",
