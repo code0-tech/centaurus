@@ -6,6 +6,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createCustomContent",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates custom content settings for GLS labels, including logos and barcodes."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create custom content"
+                    }
+                ],
                 signature: "(barcodeContentType: \"TRACK_ID\"|\"GLS_SHIPMENT_REFERENCE\", customerLogo: string, hideShipperAddress?: boolean, barcodeType?: \"EAN_128\"|\"CODE_39\", barcode?: string): GLS_CUSTOM_CONTENT",
                 name: [
                     {

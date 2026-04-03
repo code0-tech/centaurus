@@ -15,6 +15,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createFlexDeliveryShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates a shipment with flexible delivery - the recipient can redirect or reschedule delivery."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create flex delivery shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -24,7 +36,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS flex delivery shipment.",
+                        content: "Creates a shipment with flexible delivery - the recipient can redirect or reschedule delivery.",
                     }
                 ],
                 signature: `(${DEFAULT_SIGNATURE_FOR_SERVICES}): GLS_CREATE_PARCELS_RESPONSE`,

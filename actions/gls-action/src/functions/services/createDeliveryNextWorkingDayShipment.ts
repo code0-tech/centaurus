@@ -15,6 +15,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createDeliveryNextWorkingDayShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates an EXPRESS shipment for delivery on the next working day (EOB service)."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create delivery next working day shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -24,7 +36,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS delivery next working day shipment.",
+                        content: "Creates an EXPRESS shipment for delivery on the next working day (EOB service).",
                     }
                 ],
                 signature: `(${DEFAULT_SIGNATURE_FOR_SERVICES}): GLS_CREATE_PARCELS_RESPONSE`,

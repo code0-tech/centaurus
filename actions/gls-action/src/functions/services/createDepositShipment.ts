@@ -16,6 +16,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createDepositShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Delivers a parcel to a designated deposit location (e.g. a garage or shed) without requiring a signature."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create deposit shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -25,7 +37,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS deposit shipment.",
+                        content: "Delivers a parcel to a designated deposit location (e.g. a garage or shed) without requiring a signature.",
                     }
                 ],
                 signature: `(placeOfDeposit: string, ${DEFAULT_SIGNATURE_FOR_SERVICES}): GLS_CREATE_PARCELS_RESPONSE`,

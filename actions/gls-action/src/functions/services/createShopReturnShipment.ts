@@ -15,6 +15,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createShopReturnShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a shop)."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create shop return shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -24,23 +36,23 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS shop return shipment.",
+                        content: "Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a shop).",
                     }
                 ],
                 signature: `(numberOfLabels: number, ${DEFAULT_SIGNATURE_FOR_SERVICES}, returnQR: "PDF" | "PNG" | "ZPL"): GLS_CREATE_PARCELS_RESPONSE`,
                 parameters: [
                     {
-                        runtimeName: "parcelShopId",
+                        runtimeName: "numberOfLabels",
                         name: [
                             {
                                 code: "en-US",
-                                content: "Parcel shop Id",
+                                content: "The number of labels",
                             }
                         ],
                         description: [
                             {
                                 code: "en-US",
-                                content: "The ID of the parcel shop where the shipment should be delivered.",
+                                content: "The number of labels to be created for the return shipment.",
                             }
                         ]
                     },

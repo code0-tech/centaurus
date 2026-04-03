@@ -16,6 +16,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createIdentShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Delivers a parcel with identity verification - the driver checks the recipient's ID document."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create ident shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -25,7 +37,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS ident shipment.",
+                        content: "Delivers a parcel with identity verification - the driver checks the recipient's ID document.",
                     }
                 ],
                 signature: `(birthDate: string, firstName: string, lastName: string, nationality: string, ${DEFAULT_SIGNATURE_FOR_SERVICES}): GLS_CREATE_PARCELS_RESPONSE`,

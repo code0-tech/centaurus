@@ -12,6 +12,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "reprintParcel",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Reprints the label for an existing parcel. Use this if the original label is damaged, lost, or needs to be printed in a different format."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Reprint parcel"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -21,7 +33,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Reprints the labels for a GLS parcel.",
+                        content: "Reprints the label for an existing parcel. Use this if the original label is damaged, lost, or needs to be printed in a different format.",
                     }
                 ],
                 signature: "(data: GLS_REPRINT_PARCEL_REQUEST_DATA): GLS_REPRINT_PARCEL_RESPONSE_DATA",

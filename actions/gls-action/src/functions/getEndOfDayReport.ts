@@ -8,6 +8,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "getEndOfDayReport",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Retrieves all shipments dispatched on a given date. Useful for reconciliation and end-of-day processing."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Get end of day report"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -17,7 +29,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Returns the GLS end of day report.",
+                        content: "Retrieves all shipments dispatched on a given date. Useful for reconciliation and end-of-day processing.",
                     }
                 ],
                 signature: "(data: GLS_END_OF_DAY_REQUEST_DATA): GLS_END_OF_DAY_RESPONSE_DATA",

@@ -9,6 +9,10 @@
     "build": "vite build",
     "lint": "eslint .",
     "test": "vitest run",
-    "start": "node dist/main.js"
+    "start": "node dist/main.js",
+    "generate:docs": "npm run build && node dist/generateDocs.js"
+  },
+  "dependencies": {
+    "ts-morph": "^27.0.2"
   }
 }

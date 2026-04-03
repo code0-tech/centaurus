@@ -53,6 +53,7 @@ describe("withSdkMock", () => {
             });
 
             await sdk.registerFlowTypes({
+                signature: "",
                 identifier: "Flow1",
                 editable: false,
             });
@@ -62,7 +63,7 @@ describe("withSdkMock", () => {
             ]);
 
             expect(state.flowTypes).toEqual([
-                {identifier: "Flow1", editable: false},
+                {identifier: "Flow1", editable: false, signature: ""},
             ]);
         });
 
@@ -94,6 +95,7 @@ describe("withSdkMock", () => {
             state.registeredFunctionDefinitions?.forEach(value => {
                 expect(value.definition.name || [], `${value.definition.runtimeName}: Name should be set`).not.toHaveLength(0)
                 expect(value.definition.description || [], `${value.definition.runtimeName}: Description should be set`).not.toHaveLength(0)
+                expect(value.definition.documentation || [], `${value.definition.runtimeName}: Documentation should be set`).not.toHaveLength(0)
                 value.definition.parameters?.forEach(param => {
                     expect(param.name || [], `${value.definition.runtimeName} parameter ${param.runtimeName}: Name should be set`).not.toHaveLength(0)
                     expect(param.description || [], `${value.definition.runtimeName} parameter ${param.runtimeName}: Description should be set`).not.toHaveLength(0)

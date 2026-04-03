@@ -2,11 +2,23 @@ import {ActionSdk} from "@code0-tech/hercules";
 import {AddressSchema} from "../../types/glsAddress";
 
 export default (sdk: ActionSdk) => {
-    sdk.registerFunctionDefinitions(
+    return sdk.registerFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createAddress",
-                signature: "Name1: string, CountryCode: string, City: string, Street: string, ZIPCode: string, Name2?: string, Name3?: string, Province?: string, StreetNumber?: string, ContactPerson?: string, FixedLinePhonenumber?: string, MobilePhonenumber?: string, Email?: string): GLS_ADDRESS",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates a GLS address object (`GLS_ADDRESS`) for use in shipments as consignee, shipper, or return address."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create address"
+                    }
+                ],
+                signature: "(Name1: string, CountryCode: string, City: string, Street: string, ZIPCode: string, Name2?: string, Name3?: string, Province?: string, StreetNumber?: string, ContactPerson?: string, FixedLinePhonenumber?: string, MobilePhonenumber?: string, Email?: string): GLS_ADDRESS",
                 name: [
                     {
                         code: "en-US",
