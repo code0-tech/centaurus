@@ -1,0 +1,24 @@
+{
+  "name": "@code0-tech/ai-action",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "vite build",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "start": "node dist/main.js",
+    "generate:docs": "npm run build && node dist/generateDocs.js"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.66",
+    "@ai-sdk/google": "^3.0.57",
+    "@ai-sdk/openai": "^3.0.50",
+    "ai": "^6.0.145",
+    "ai-sdk-ollama": "^3.8.2",
+    "ollama-ai-provider-v2": "^3.5.0",
+    "ts-morph": "^27.0.2"
+  }
+}

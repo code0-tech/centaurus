@@ -1,5 +1,5 @@
 import z from "zod";
-import {singleZodSchemaToTypescriptDef} from "../helpers";
+import {singleZodSchemaToTypescriptDef} from "../../../../src/helpers";
 import {ActionSdk} from "@code0-tech/hercules";
 
 export const UpdateParcelWeightRequestDataSchema = z.object({

@@ -10,7 +10,7 @@ import {ReturnOptions} from "../../types/glsReturnOptions";
 import { CreateParcelsResponse } from "../../types/glsCreateParcelsResponse";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createShopDeliveryShipment",

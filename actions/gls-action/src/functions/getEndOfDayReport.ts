@@ -4,7 +4,7 @@ import axios from "axios";
 import {EndOfDayRequestData, EndOfDayResponseData, EndOfDayResponseDataSchema} from "../types/glsEndOfDayRequest";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "getEndOfDayReport",

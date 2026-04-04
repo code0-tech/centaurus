@@ -1,7 +1,7 @@
 import {ActionSdk} from "@code0-tech/hercules";
 import z from "zod";
 import {InternalShipmentSchma, ShipmentSchema} from "./glsShipment";
-import {singleZodSchemaToTypescriptDef, zodSchemaToTypescriptDefs} from "../helpers";
+import {singleZodSchemaToTypescriptDef, zodSchemaToTypescriptDefs} from "../../../../src/helpers";
 
 
 export const ValidateShipmentRequestDataSchema = z.object({

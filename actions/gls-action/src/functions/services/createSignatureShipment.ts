@@ -11,7 +11,7 @@ import {ReturnOptions} from "../../types/glsReturnOptions";
 import {CreateParcelsResponse} from "../../types/glsCreateParcelsResponse";
 
 export default (sdk: ActionSdk) => {
-    sdk.registerFunctionDefinitions(
+    sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createSignatureShipment",

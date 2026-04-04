@@ -11,7 +11,7 @@ import {CustomContent} from "../../types/glsCustomContent";
 import {PrintingOptions} from "../../types/glsPrintingOptions";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createFlexDeliveryShipment",

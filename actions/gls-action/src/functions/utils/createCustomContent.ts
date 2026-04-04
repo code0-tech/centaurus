@@ -2,7 +2,7 @@ import {ActionSdk} from "@code0-tech/hercules";
 import {CustomContent} from "../../types/glsCustomContent";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createCustomContent",

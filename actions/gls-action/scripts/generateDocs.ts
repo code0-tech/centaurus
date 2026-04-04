@@ -1,5 +1,10 @@
-import {runStandardActionDocs, StandardActionDocsConfig} from "../../../src/standardActionDocs"
+import {
+    loadFunctions,
+    runStandardActionDocs,
+    StandardActionDocsConfig
+} from "../../../src/standardActionDocs"
 import {loadAllDefinitions} from "../src/helpers";
+
 
 export function createGlsDocsConfig(): StandardActionDocsConfig {
     return {
@@ -29,7 +34,8 @@ export function createGlsDocsConfig(): StandardActionDocsConfig {
         functionGroups: [
             {
                 heading: "Builder functions",
-                modules: import.meta.glob("../src/functions/utils/*.ts"),
+                loadFunctions: (sdk) =>
+                    loadFunctions(sdk, import.meta.glob("../src/functions/utils/*.ts")),
             },
             {
                 heading: "Shipment functions",
@@ -45,11 +51,14 @@ export function createGlsDocsConfig(): StandardActionDocsConfig {
 | \`customContent\`   | GLS_CUSTOM_CONTENT            | No       | Custom logo and barcode settings                   |
 
 ---`,
-                modules: import.meta.glob("../src/functions/services/*.ts"),
+
+                loadFunctions: (sdk) =>
+                    loadFunctions(sdk, import.meta.glob("../src/functions/services/*.ts")),
             },
             {
                 heading: "API functions",
-                modules: import.meta.glob("../src/functions/*.ts"),
+                loadFunctions: (sdk) =>
+                    loadFunctions(sdk, import.meta.glob("../src/functions/*.ts")),
             },
         ],
     }

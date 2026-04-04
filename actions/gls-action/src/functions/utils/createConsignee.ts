@@ -3,7 +3,7 @@ import {AddressSchema} from "../../types/glsAddress";
 import {ConsigneeSchema} from "../../types/glsConsignee";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createConsignee",

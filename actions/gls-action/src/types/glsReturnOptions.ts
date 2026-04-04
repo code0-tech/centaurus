@@ -1,4 +1,4 @@
-import {singleZodSchemaToTypescriptDef} from "../helpers";
+import {singleZodSchemaToTypescriptDef} from "../../../../src/helpers";
 import {z} from "zod";
 import {ActionSdk} from "@code0-tech/hercules";
 

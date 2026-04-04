@@ -1,5 +1,5 @@
 import {z} from "zod";
-import {zodSchemaToTypescriptDefs} from "../helpers";
+import {zodSchemaToTypescriptDefs} from "../../../../src/helpers";
 import {ShipmentSchema} from "./glsShipment";
 import {InternalUnitServiceSchema, UnitServiceSchema} from "./glsUnitService";
 import {ActionSdk} from "@code0-tech/hercules";

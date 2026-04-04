@@ -82,7 +82,7 @@ describe("reprintParcel.ts", () => {
         await withBaseFunctionMock(register.default, async (state) => {
             expect(state.registeredFunctionDefinitions).toHaveLength(1);
 
-            const [reprintParcel] = state.registeredFunctionDefinitions;
+            const [reprintParcel] = state.registeredRuntimeFunctionDefinitions;
 
             expect(reprintParcel.definition.runtimeName).toBe("reprintParcel");
 

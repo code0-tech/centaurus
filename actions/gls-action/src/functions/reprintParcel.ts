@@ -8,7 +8,7 @@ import {
 } from "../types/glsReprintParcel";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "reprintParcel",

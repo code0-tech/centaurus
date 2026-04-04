@@ -1,0 +1,998 @@
+---
+title: Functions
+description: All functions registered by the AI Action.
+---
+
+
+
+---
+
+## OpenAI Models
+
+
+### `openai/gpt-5.1` (`createModel`)
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| settings | Settings | [AI_OPENAI_SETTINGS](./types.mdx#ai_openai_settings) | Yes | The settings for this provider, for more information see the type |
+| maxOutputTokens | Max Output Tokens | number | No | Maximum number of tokens to generate |
+| temperature | Temperature | number | No | temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1 |
+| maxRetries | Maximum Retries | number | No | Maximum number of retries. Set to 0 to disable retries. Default value is 2 |
+| stopSequences | Stop sequences | string[] | No | Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text. |
+| presencePenalty | Presence Penalty | number | No | Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2 |
+| frequencyPenalty | Frequency Penalty | number | No | Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2 |
+| seed | Seed | number | No | Seed is a parameter used to make AI model outputs reproducible. |
+
+Return Type: [AI_MODEL](./types.mdx#ai_model)
+
+#
+
+Auto generated wrapper function to create this model
+
+<FunctionCard definition={
+{
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create openai - gpt-5.1"
+        }
+    ],
+    "identifier": "openai/gpt-5.1",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "identifier": "provider"
+            },
+            {
+                "identifier": "model"
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Settings"
+                    }
+                ],
+                "identifier": "settings",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The settings for this provider, for more information see the type"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Max Output Tokens"
+                    }
+                ],
+                "identifier": "maxOutputTokens",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of tokens to generate"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Temperature"
+                    }
+                ],
+                "identifier": "temperature",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum Retries"
+                    }
+                ],
+                "identifier": "maxRetries",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of retries. Set to 0 to disable retries. Default value is 2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences"
+                    }
+                ],
+                "identifier": "stopSequences",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence Penalty"
+                    }
+                ],
+                "identifier": "presencePenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency Penalty"
+                    }
+                ],
+                "identifier": "frequencyPenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed"
+                    }
+                ],
+                "identifier": "seed",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed is a parameter used to make AI model outputs reproducible."
+                    }
+                ]
+            }
+        ]
+    }
+}
+} />
+
+---
+
+## Google Models
+
+
+### `google/gemini-2.5-flash` (`createModel`)
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| settings | Settings | [AI_GOOGLE_SETTINGS](./types.mdx#ai_google_settings) | Yes | The settings for this provider, for more information see the type |
+| maxOutputTokens | Max Output Tokens | number | No | Maximum number of tokens to generate |
+| temperature | Temperature | number | No | temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1 |
+| maxRetries | Maximum Retries | number | No | Maximum number of retries. Set to 0 to disable retries. Default value is 2 |
+| stopSequences | Stop sequences | string[] | No | Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text. |
+| presencePenalty | Presence Penalty | number | No | Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2 |
+| frequencyPenalty | Frequency Penalty | number | No | Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2 |
+| seed | Seed | number | No | Seed is a parameter used to make AI model outputs reproducible. |
+
+Return Type: [AI_MODEL](./types.mdx#ai_model)
+
+#
+
+Auto generated wrapper function to create this model
+
+<FunctionCard definition={
+{
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create google - gemini-2.5-flash"
+        }
+    ],
+    "identifier": "google/gemini-2.5-flash",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "identifier": "provider"
+            },
+            {
+                "identifier": "model"
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Settings"
+                    }
+                ],
+                "identifier": "settings",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The settings for this provider, for more information see the type"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Max Output Tokens"
+                    }
+                ],
+                "identifier": "maxOutputTokens",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of tokens to generate"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Temperature"
+                    }
+                ],
+                "identifier": "temperature",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum Retries"
+                    }
+                ],
+                "identifier": "maxRetries",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of retries. Set to 0 to disable retries. Default value is 2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences"
+                    }
+                ],
+                "identifier": "stopSequences",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence Penalty"
+                    }
+                ],
+                "identifier": "presencePenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency Penalty"
+                    }
+                ],
+                "identifier": "frequencyPenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed"
+                    }
+                ],
+                "identifier": "seed",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed is a parameter used to make AI model outputs reproducible."
+                    }
+                ]
+            }
+        ]
+    }
+}
+} />
+
+---
+
+## Anthropic Models
+
+
+### `anthropic/claude-opus-4-6` (`createModel`)
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| settings | Settings | [AI_ANTHROPIC_SETTINGS](./types.mdx#ai_anthropic_settings) | Yes | The settings for this provider, for more information see the type |
+| maxOutputTokens | Max Output Tokens | number | No | Maximum number of tokens to generate |
+| temperature | Temperature | number | No | temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1 |
+| maxRetries | Maximum Retries | number | No | Maximum number of retries. Set to 0 to disable retries. Default value is 2 |
+| stopSequences | Stop sequences | string[] | No | Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text. |
+| presencePenalty | Presence Penalty | number | No | Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2 |
+| frequencyPenalty | Frequency Penalty | number | No | Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2 |
+| seed | Seed | number | No | Seed is a parameter used to make AI model outputs reproducible. |
+
+Return Type: [AI_MODEL](./types.mdx#ai_model)
+
+#
+
+Auto generated wrapper function to create this model
+
+<FunctionCard definition={
+{
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create anthropic - claude-opus-4-6"
+        }
+    ],
+    "identifier": "anthropic/claude-opus-4-6",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "identifier": "provider"
+            },
+            {
+                "identifier": "model"
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Settings"
+                    }
+                ],
+                "identifier": "settings",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The settings for this provider, for more information see the type"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Max Output Tokens"
+                    }
+                ],
+                "identifier": "maxOutputTokens",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of tokens to generate"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Temperature"
+                    }
+                ],
+                "identifier": "temperature",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum Retries"
+                    }
+                ],
+                "identifier": "maxRetries",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of retries. Set to 0 to disable retries. Default value is 2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences"
+                    }
+                ],
+                "identifier": "stopSequences",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence Penalty"
+                    }
+                ],
+                "identifier": "presencePenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency Penalty"
+                    }
+                ],
+                "identifier": "frequencyPenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed"
+                    }
+                ],
+                "identifier": "seed",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed is a parameter used to make AI model outputs reproducible."
+                    }
+                ]
+            }
+        ]
+    }
+}
+} />
+
+---
+
+### `anthropic/claude-sonnet-4-6` (`createModel`)
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| settings | Settings | [AI_ANTHROPIC_SETTINGS](./types.mdx#ai_anthropic_settings) | Yes | The settings for this provider, for more information see the type |
+| maxOutputTokens | Max Output Tokens | number | No | Maximum number of tokens to generate |
+| temperature | Temperature | number | No | temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1 |
+| maxRetries | Maximum Retries | number | No | Maximum number of retries. Set to 0 to disable retries. Default value is 2 |
+| stopSequences | Stop sequences | string[] | No | Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text. |
+| presencePenalty | Presence Penalty | number | No | Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2 |
+| frequencyPenalty | Frequency Penalty | number | No | Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2 |
+| seed | Seed | number | No | Seed is a parameter used to make AI model outputs reproducible. |
+
+Return Type: [AI_MODEL](./types.mdx#ai_model)
+
+#
+
+Auto generated wrapper function to create this model
+
+<FunctionCard definition={
+{
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create anthropic - claude-sonnet-4-6"
+        }
+    ],
+    "identifier": "anthropic/claude-sonnet-4-6",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "identifier": "provider"
+            },
+            {
+                "identifier": "model"
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Settings"
+                    }
+                ],
+                "identifier": "settings",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The settings for this provider, for more information see the type"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Max Output Tokens"
+                    }
+                ],
+                "identifier": "maxOutputTokens",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of tokens to generate"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Temperature"
+                    }
+                ],
+                "identifier": "temperature",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum Retries"
+                    }
+                ],
+                "identifier": "maxRetries",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of retries. Set to 0 to disable retries. Default value is 2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences"
+                    }
+                ],
+                "identifier": "stopSequences",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence Penalty"
+                    }
+                ],
+                "identifier": "presencePenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency Penalty"
+                    }
+                ],
+                "identifier": "frequencyPenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed"
+                    }
+                ],
+                "identifier": "seed",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed is a parameter used to make AI model outputs reproducible."
+                    }
+                ]
+            }
+        ]
+    }
+}
+} />
+
+---
+
+### `anthropic/claude-haiku-4-5` (`createModel`)
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| settings | Settings | [AI_ANTHROPIC_SETTINGS](./types.mdx#ai_anthropic_settings) | Yes | The settings for this provider, for more information see the type |
+| maxOutputTokens | Max Output Tokens | number | No | Maximum number of tokens to generate |
+| temperature | Temperature | number | No | temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1 |
+| maxRetries | Maximum Retries | number | No | Maximum number of retries. Set to 0 to disable retries. Default value is 2 |
+| stopSequences | Stop sequences | string[] | No | Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text. |
+| presencePenalty | Presence Penalty | number | No | Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2 |
+| frequencyPenalty | Frequency Penalty | number | No | Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2 |
+| seed | Seed | number | No | Seed is a parameter used to make AI model outputs reproducible. |
+
+Return Type: [AI_MODEL](./types.mdx#ai_model)
+
+#
+
+Auto generated wrapper function to create this model
+
+<FunctionCard definition={
+{
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create anthropic - claude-haiku-4-5"
+        }
+    ],
+    "identifier": "anthropic/claude-haiku-4-5",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "identifier": "provider"
+            },
+            {
+                "identifier": "model"
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Settings"
+                    }
+                ],
+                "identifier": "settings",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The settings for this provider, for more information see the type"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Max Output Tokens"
+                    }
+                ],
+                "identifier": "maxOutputTokens",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of tokens to generate"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Temperature"
+                    }
+                ],
+                "identifier": "temperature",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum Retries"
+                    }
+                ],
+                "identifier": "maxRetries",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of retries. Set to 0 to disable retries. Default value is 2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences"
+                    }
+                ],
+                "identifier": "stopSequences",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence Penalty"
+                    }
+                ],
+                "identifier": "presencePenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency Penalty"
+                    }
+                ],
+                "identifier": "frequencyPenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed"
+                    }
+                ],
+                "identifier": "seed",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed is a parameter used to make AI model outputs reproducible."
+                    }
+                ]
+            }
+        ]
+    }
+}
+} />
+
+---
+
+## Ollama
+
+
+### `ollama/selfhosted` (`createModel`)
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| settings | Settings | [AI_OLLAMA_SETTINGS](./types.mdx#ai_ollama_settings) | Yes | The settings for this provider, for more information see the type |
+| maxOutputTokens | Max Output Tokens | number | No | Maximum number of tokens to generate |
+| temperature | Temperature | number | No | temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1 |
+| maxRetries | Maximum Retries | number | No | Maximum number of retries. Set to 0 to disable retries. Default value is 2 |
+| stopSequences | Stop sequences | string[] | No | Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text. |
+| presencePenalty | Presence Penalty | number | No | Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2 |
+| frequencyPenalty | Frequency Penalty | number | No | Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2 |
+| seed | Seed | number | No | Seed is a parameter used to make AI model outputs reproducible. |
+
+Return Type: [AI_MODEL](./types.mdx#ai_model)
+
+#
+
+Auto generated wrapper function to create this model
+
+<FunctionCard definition={
+{
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create ollama - selfhosted"
+        }
+    ],
+    "identifier": "ollama/selfhosted",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "identifier": "provider"
+            },
+            {
+                "identifier": "model"
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Settings"
+                    }
+                ],
+                "identifier": "settings",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The settings for this provider, for more information see the type"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Max Output Tokens"
+                    }
+                ],
+                "identifier": "maxOutputTokens",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of tokens to generate"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Temperature"
+                    }
+                ],
+                "identifier": "temperature",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "temperature is a parameter that controls the randomness of the model’s outputs during text generation. Normally between 0 and 1"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum Retries"
+                    }
+                ],
+                "identifier": "maxRetries",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Maximum number of retries. Set to 0 to disable retries. Default value is 2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences"
+                    }
+                ],
+                "identifier": "stopSequences",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Stop sequences are specific strings (words, characters, or patterns) that tell an AI model when to stop generating text."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence Penalty"
+                    }
+                ],
+                "identifier": "presencePenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Presence penalty pushes the model to talk about new things instead of repeating existing ones. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency Penalty"
+                    }
+                ],
+                "identifier": "frequencyPenalty",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Frequency penalty is a parameter that reduces the likelihood of the model repeating the same words or phrases multiple times. Typical range of 0-2"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed"
+                    }
+                ],
+                "identifier": "seed",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Seed is a parameter used to make AI model outputs reproducible."
+                    }
+                ]
+            }
+        ]
+    }
+}
+} />
+
+---

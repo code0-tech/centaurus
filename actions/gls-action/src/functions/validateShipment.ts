@@ -8,7 +8,7 @@ import {
 } from "../types/glsValidateShipment";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "validateShipment",

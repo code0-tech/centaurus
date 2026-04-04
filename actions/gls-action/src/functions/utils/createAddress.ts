@@ -2,7 +2,7 @@ import {ActionSdk} from "@code0-tech/hercules";
 import {AddressSchema} from "../../types/glsAddress";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createAddress",

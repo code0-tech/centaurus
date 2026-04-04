@@ -3,15 +3,16 @@ import {
     ActionSdk,
     HerculesActionConfigurationDefinition,
     HerculesDataType,
-    HerculesFlowType,
-    HerculesRegisterFunctionParameter
+    HerculesFlowType, HerculesRegisterFunctionDefinition,
+    HerculesRegisterRuntimeFunctionParameter
 } from "@code0-tech/hercules";
 import {SdkMockState} from "../index.test";
 
 export const withSdkMock = async (tests: (state: SdkMockState) => void) => {
     const state = vi.hoisted(() => {
         const state: SdkMockState = {
-            registeredFunctionDefinitions: [] as HerculesRegisterFunctionParameter[],
+            registeredFunctionDefinitions: [] as HerculesRegisterFunctionDefinition[],
+            registeredRuntimeFunctionDefinitions: [] as HerculesRegisterRuntimeFunctionParameter[],
             dataTypes: [] as HerculesDataType[],
             flowTypes: [] as HerculesFlowType[],
             configDefinitions: [] as HerculesActionConfigurationDefinition[],
@@ -28,9 +29,36 @@ export const withSdkMock = async (tests: (state: SdkMockState) => void) => {
                 state.configDefinitions = configDefinitions || null
 
                 const mockedActionSdk: ActionSdk = {
+                    registerFunctionDefinitions(...functionDefinitions: HerculesRegisterFunctionDefinition[]): Promise<void> {
+                        functionDefinitions.forEach(value => {
+                            state.registeredFunctionDefinitions.push(value)
+                        })
+                        return Promise.resolve(undefined);
+                    },
+                    registerRuntimeFunctionDefinitionsAndFunctionDefinitions(...runtimeFunctionDefinitions: HerculesRegisterRuntimeFunctionParameter[]): Promise<void> {
+                        runtimeFunctionDefinitions.forEach(value => {
+                            state.registeredRuntimeFunctionDefinitions.push(value)
+                        })
+
+                        runtimeFunctionDefinitions.forEach(value => {
+                            state.registeredFunctionDefinitions.push({
+                                ...value.definition,
+                                runtimeDefinitionName: value.definition.runtimeName,
+                                parameters: value.definition.parameters.map(param =>{
+                                    return {
+                                        ...param,
+                                        runtimeDefinitionName: param.runtimeName
+                                    }
+                                })
+                            })
+                        })
+                        return Promise.resolve(undefined);
+                    },
                     config: config,
-                    registerFunctionDefinitions: (...defs: HerculesRegisterFunctionParameter[]) => {
-                        state.registeredFunctionDefinitions = defs;
+                    registerRuntimeFunctionDefinitions: (...defs: HerculesRegisterRuntimeFunctionParameter[]) => {
+                        defs.forEach(value => {
+                            state.registeredRuntimeFunctionDefinitions.push(value)
+                        })
                         return Promise.resolve();
                     },
 
