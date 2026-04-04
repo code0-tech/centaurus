@@ -8,7 +8,7 @@ export const AnthropicSettingsSchema = z.looseObject({
 
 export default (sdk: ActionSdk) => {
     return sdk.registerDataTypes({
-        type: singleZodSchemaToTypescriptDef("ANTHROPIC_SETTINGS", AnthropicSettingsSchema),
-        identifier: "ANTHROPIC_SETTINGS"
+        type: singleZodSchemaToTypescriptDef("AI_ANTHROPIC_SETTINGS", AnthropicSettingsSchema),
+        identifier: "AI_ANTHROPIC_SETTINGS"
     })
 }
