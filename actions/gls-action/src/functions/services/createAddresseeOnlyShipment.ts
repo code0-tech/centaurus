@@ -11,7 +11,7 @@ import {CustomContent} from "../../types/glsCustomContent";
 import {ReturnOptions} from "../../types/glsReturnOptions";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createAddresseeOnlyShipment",

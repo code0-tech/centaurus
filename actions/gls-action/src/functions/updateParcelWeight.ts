@@ -8,7 +8,7 @@ import {
 } from "../types/glsUpdateParcelWeight";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "updateParcelWeight",

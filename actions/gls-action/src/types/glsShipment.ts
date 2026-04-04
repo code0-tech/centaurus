@@ -1,4 +1,4 @@
-import {zodSchemaToTypescriptDefs} from "../helpers";
+import {zodSchemaToTypescriptDefs} from "../../../../src/helpers";
 import {z} from "zod";
 import {ConsigneeSchema} from "./glsConsignee";
 import {AddressSchema} from "./glsAddress";

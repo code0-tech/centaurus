@@ -2,13 +2,14 @@ import {describe, expect, it, vi} from "vitest";
 import {
     HerculesActionConfigurationDefinition,
     HerculesDataType,
-    HerculesFlowType,
-    HerculesRegisterFunctionParameter
+    HerculesFlowType, HerculesRegisterFunctionDefinition,
+    HerculesRegisterRuntimeFunctionParameter
 } from "@code0-tech/hercules";
 import {withSdkMock} from "./helpers/withSdkMock";
 
 export type SdkMockState = {
-    registeredFunctionDefinitions: HerculesRegisterFunctionParameter[] | null;
+    registeredFunctionDefinitions: HerculesRegisterFunctionDefinition[] | null;
+    registeredRuntimeFunctionDefinitions: HerculesRegisterRuntimeFunctionParameter[] | null;
     dataTypes: HerculesDataType[] | null;
     flowTypes: HerculesFlowType[] | null;
     configDefinitions: HerculesActionConfigurationDefinition[] | null;
@@ -92,7 +93,7 @@ describe("withSdkMock", () => {
                 expect(value.documentation || [], `${value.identifier}: Documentation should be set`).not.toHaveLength(0)
             })
 
-            state.registeredFunctionDefinitions?.forEach(value => {
+            state.registeredRuntimeFunctionDefinitions?.forEach(value => {
                 expect(value.definition.name || [], `${value.definition.runtimeName}: Name should be set`).not.toHaveLength(0)
                 expect(value.definition.description || [], `${value.definition.runtimeName}: Description should be set`).not.toHaveLength(0)
                 expect(value.definition.documentation || [], `${value.definition.runtimeName}: Documentation should be set`).not.toHaveLength(0)

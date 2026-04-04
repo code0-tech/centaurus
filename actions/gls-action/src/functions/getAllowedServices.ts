@@ -8,7 +8,7 @@ import {
 } from "../types/glsAllowedServices";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "getAllowedServices",

@@ -1,6 +1,6 @@
 import {ActionSdk} from "@code0-tech/hercules";
 import z from "zod"
-import {singleZodSchemaToTypescriptDef} from "../helpers";
+import {singleZodSchemaToTypescriptDef} from "../../../../src/helpers";
 
 export const AddressSchema = z.object({
     Name1: z.string().max(40).describe(`

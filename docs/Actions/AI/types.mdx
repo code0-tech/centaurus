@@ -1,0 +1,256 @@
+---
+title: Datatypes
+description: All data types registered by the AI Action.
+---
+import {TypeTable} from "fumadocs-ui/components/type-table";
+
+# AI Action Types
+
+The AI Action registers the following data types with the Hercules platform.
+
+---
+
+# AI_MODEL
+No documentation provided for this type.
+
+<TypeTable type={{
+provider: {
+                description: 'The provider, either pass in the raw provider you want to use, or use the appropriate functions to create this object',
+                deprecated: false,
+                required: true, 
+                type: '"openai" | "google" | "anthropic" | "ollama"', 
+            },
+            model: {
+                description: 'The model of the provider, either pass in the raw model you want to use, or use the appropriate functions to create this object',
+                deprecated: false,
+                required: true, 
+                type: 'string', 
+            },
+            settings: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: '{ [x: string]: unknown; }', 
+            },
+            seed: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: 'number', 
+            },
+            maxOutputTokens: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: 'number', 
+            },
+            temperature: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: 'number', 
+            },
+            maxRetries: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: 'number', 
+            },
+            stopSequences: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: 'string', 
+            },
+            presencePenalty: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: 'number', 
+            },
+            frequencyPenalty: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: 'number', 
+            },
+            }}
+/>
+            
+# AI_OPENAI_SETTINGS
+No documentation provided for this type.
+
+<TypeTable type={{
+}}
+/>
+            
+# AI_OLLAMA_SETTINGS
+No documentation provided for this type.
+
+<TypeTable type={{
+baseURL: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: 'string', 
+            },
+            }}
+/>
+            
+# AI_GOOGLE_SETTINGS
+No documentation provided for this type.
+
+<TypeTable type={{
+thinkingConfig: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+typeDescriptionLink: '#ai_google_settingsthinkingconfig',
+                type: 'AI_GOOGLE_SETTINGS$thinkingConfig', 
+            },
+            }}
+/>
+            
+# AI_GOOGLE_SETTINGS$thinkingConfig
+No documentation provided for this type.
+
+<TypeTable type={{
+thinkingBudget: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: 'number', 
+            },
+            includeThoughts: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: 'boolean', 
+            },
+            thinkingLevel: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: '"minimal" | "low" | "medium" | "high"', 
+            },
+            }}
+/>
+            
+# AI_ANTHROPIC_SETTINGS
+No documentation provided for this type.
+
+<TypeTable type={{
+}}
+/>
+            
+# AI_CONFIG_AUTH_TOKENS_TYPE
+No documentation provided for this type.
+
+<TypeTable type={{
+openai: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+typeDescriptionLink: '#ai_config_auth_tokens_typeopenai',
+                type: 'AI_CONFIG_AUTH_TOKENS_TYPE$openai', 
+            },
+            google: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+typeDescriptionLink: '#ai_config_auth_tokens_typegoogle',
+                type: 'AI_CONFIG_AUTH_TOKENS_TYPE$google', 
+            },
+            anthropic: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+typeDescriptionLink: '#ai_config_auth_tokens_typeanthropic',
+                type: 'AI_CONFIG_AUTH_TOKENS_TYPE$anthropic', 
+            },
+            ollama: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+typeDescriptionLink: '#ai_config_auth_tokens_typeollama',
+                type: 'AI_CONFIG_AUTH_TOKENS_TYPE$ollama', 
+            },
+            }}
+/>
+            
+# AI_CONFIG_AUTH_TOKENS_TYPE$ollama
+No documentation provided for this type.
+
+<TypeTable type={{
+defaultToken: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: 'string', 
+            },
+            overrides: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: '{ [key: string]: string; }', 
+            },
+            }}
+/>
+            
+# AI_CONFIG_AUTH_TOKENS_TYPE$anthropic
+No documentation provided for this type.
+
+<TypeTable type={{
+defaultToken: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: 'string', 
+            },
+            overrides: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: '{ [key: string]: string; }', 
+            },
+            }}
+/>
+            
+# AI_CONFIG_AUTH_TOKENS_TYPE$google
+No documentation provided for this type.
+
+<TypeTable type={{
+defaultToken: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: 'string', 
+            },
+            overrides: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: '{ [key: string]: string; }', 
+            },
+            }}
+/>
+            
+# AI_CONFIG_AUTH_TOKENS_TYPE$openai
+No documentation provided for this type.
+
+<TypeTable type={{
+defaultToken: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: 'string', 
+            },
+            overrides: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: '{ [key: string]: string; }', 
+            },
+            }}
+/>
+            
