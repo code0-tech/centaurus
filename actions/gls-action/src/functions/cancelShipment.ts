@@ -3,7 +3,7 @@ import {cancelShipment} from "../helpers";
 import {CancelShipmentRequestData, CancelShipmentResponseData} from "../types/glsCancelShipment";
 
 export default (sdk: ActionSdk) => {
-    return sdk.registerFunctionDefinitions(
+    return sdk.registerRuntimeFunctionDefinitionsAndFunctionDefinitions(
         {
             definition: {
                 runtimeName: "cancelShipment",

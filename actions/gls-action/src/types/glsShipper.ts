@@ -1,6 +1,6 @@
 import {z} from "zod";
 import {AddressSchema} from "./glsAddress";
-import {zodSchemaToTypescriptDefs} from "../helpers";
+import {zodSchemaToTypescriptDefs} from "../../../../src/helpers";
 import {ActionSdk} from "@code0-tech/hercules";
 
 export const ShipperSchema = z.object({

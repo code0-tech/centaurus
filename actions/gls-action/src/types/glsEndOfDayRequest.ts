@@ -1,5 +1,5 @@
 import {ActionSdk} from "@code0-tech/hercules";
-import {singleZodSchemaToTypescriptDef, zodSchemaToTypescriptDefs} from "../helpers";
+import {singleZodSchemaToTypescriptDef, zodSchemaToTypescriptDefs} from "../../../../src/helpers";
 import z from "zod";
 import {AddressSchema} from "./glsAddress";
 

@@ -6,3 +6,8 @@ services:
       context: .
       dockerfile: actions/gls-action/Dockerfile
     container_name: gls-action
+  ai-action:
+    build:
+      context: .
+      dockerfile: actions/ai-action/Dockerfile
+    container_name: ai-action

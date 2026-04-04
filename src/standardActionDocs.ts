@@ -3,8 +3,8 @@ import {
     ActionSdk,
     HerculesActionConfigurationDefinition,
     HerculesDataType,
-    HerculesFlowType,
-    HerculesRegisterFunctionParameter,
+    HerculesFlowType, HerculesRegisterFunctionDefinition,
+    HerculesRegisterRuntimeFunctionParameter, RegisteredFunction,
 } from "@code0-tech/hercules"
 import {Project, SymbolFlags, Type} from "ts-morph"
 
@@ -27,16 +27,16 @@ interface FunctionDefinitionCard {
     }
 }
 
-interface RegistryState {
+export interface RegistryState {
     dataTypes: HerculesDataType[]
     actionConfigurationDefinitions: HerculesActionConfigurationDefinition[]
-    runtimeFunctions: HerculesRegisterFunctionParameter[]
+    functions: HerculesRegisterFunctionDefinition[]
     flowTypes: HerculesFlowType[]
 }
 
 interface FunctionGroup {
     heading: string
-    modules: Record<string, () => Promise<unknown>>
+    loadFunctions: (sdk: ActionSdk) => Promise<void>,
     intro?: string
 }
 
@@ -69,14 +69,24 @@ function createRegistry(): RegistryState {
     return {
         dataTypes: [],
         actionConfigurationDefinitions: [],
-        runtimeFunctions: [],
+        functions: [],
         flowTypes: [],
     }
 }
 
 function createMockSdk(registry: RegistryState): ActionSdk {
+    const registerFunctionDefinitions = (...functionDefinitions) => {
+        registry.functions = [...functionDefinitions.map(value => {
+            return {
+                ...value,
+                isFunctionDefinition: true
+            }
+        }), ...registry.functions]
+        return Promise.resolve()
+    };
     return {
-        onError: () => {},
+        onError: () => {
+        },
         connect: () => Promise.resolve([]),
         dispatchEvent: () => Promise.resolve(),
         getProjectActionConfigurations: () => [],
@@ -98,10 +108,24 @@ function createMockSdk(registry: RegistryState): ActionSdk {
             ]
             return Promise.resolve()
         },
-        registerFunctionDefinitions: (...functionDefinitions) => {
-            registry.runtimeFunctions = [...functionDefinitions, ...registry.runtimeFunctions]
-            return Promise.resolve()
+        registerRuntimeFunctionDefinitionsAndFunctionDefinitions: async (...runtimeFunctionDefinitions) => {
+            for (const value of runtimeFunctionDefinitions) {
+                await registerFunctionDefinitions({
+                    ...value.definition,
+                    runtimeDefinitionName: value.definition.runtimeName,
+                    parameters: value.definition.parameters.map(parameter => {
+                        return {
+                            ...parameter,
+                            runtimeDefinitionName: parameter.runtimeName
+                        }
+                    })
+                } as HerculesRegisterFunctionDefinition)
+            }
         },
+        registerRuntimeFunctionDefinitions: () => {
+          return Promise.resolve()
+        },
+        registerFunctionDefinitions: registerFunctionDefinitions,
         registerFlowTypes: (...flowTypes) => {
             registry.flowTypes = [...registry.flowTypes, ...flowTypes]
             return Promise.resolve()
@@ -139,7 +163,7 @@ function breakDownType(typeName: string, code: string): Record<string, string> {
             }
 
             let typeText: string
-            if (propType.getText().startsWith("{")) {
+            if (propType.getText().startsWith("{") && !(propType.getText() === "{ [key: string]: string; }" || propType.getText() === "{ [x: string]: unknown; }")) {
                 const nestedName = `${currentName}$${name}`
                 const nestedType = buildType(propType, nestedName)
                 map[nestedName] = `export type ${nestedName} = ${nestedType};`
@@ -262,7 +286,7 @@ ${config.typesCopy.intro}
 }
 
 function getParamInfo(signature: string, paramName: string): { optional: boolean; type: string | null } {
-    const paramsMatch = signature.match(/\((.*)\)/s)
+    const paramsMatch = signature.match(/\((.*)\)/)
     if (!paramsMatch) {
         return {optional: false, type: null}
     }
@@ -289,11 +313,7 @@ function generateMarkdownTable(headers: string[], rows: string[][]): string {
     return [headerRow, separator, ...bodyRows].join("\n")
 }
 
-async function loadFunctions(
-    modules: Record<string, () => Promise<unknown>>,
-    sdk: ActionSdk,
-    registry: RegistryState,
-): Promise<void> {
+export const loadFunctions = async (sdk: ActionSdk, modules: { [x: string]: () => any; }) => {
     for (const path in modules) {
         const mod: any = await modules[path]()
         if (typeof mod.default !== "function") {
@@ -306,8 +326,6 @@ async function loadFunctions(
             console.log(`Error registering functions from ${path}:`, error)
         }
     }
-
-    registry.runtimeFunctions = [...registry.runtimeFunctions]
 }
 
 async function generateFunctions(config: StandardActionDocsConfig, sdk: ActionSdk, registry: RegistryState): Promise<string> {
@@ -322,16 +340,15 @@ ${config.functionsCopy.intro}
 `
 
     for (const group of config.functionGroups) {
-        registry.runtimeFunctions = []
-        await loadFunctions(group.modules, sdk, registry)
+        registry.functions = []
+        await group.loadFunctions(sdk)
 
         generatedDoc += `
 ## ${group.heading}
 ${group.intro ? `\n${group.intro}\n` : ""}
 `
 
-        registry.runtimeFunctions.forEach(value => {
-            const definition = value.definition
+        registry.functions.forEach(definition => {
             const card: FunctionDefinitionCard = {
                 descriptions: definition.description,
                 names: definition.name,
@@ -347,30 +364,33 @@ ${group.intro ? `\n${group.intro}\n` : ""}
             }
 
             const headers = ["Parameter", "Name", "Type", "Required", "Description"]
-            const rows: string[][] = definition.parameters.map(parameter => {
+            const rows: string[][] = definition.parameters.filter(value => !value.hidden).map(parameter => {
                 const paramInfo = getParamInfo(definition.signature, parameter.runtimeName)
                 const linkedType = getTypeLink(paramInfo.type, config)
 
                 return [
                     parameter.runtimeName,
-                    parameter.name[0].content,
+                    parameter.name?.[0]?.content,
                     linkedType?.replace(/\|/g, "\\|") || "Unknown",
                     paramInfo.optional ? "No" : "Yes",
-                    parameter.description[0].content,
+                    parameter.description?.[0]?.content,
                 ]
             })
+            const formattedName = definition.runtimeName === definition.runtimeDefinitionName ?
+                `\`${definition.runtimeName}\`` :
+                `\`${definition.runtimeName}\` (\`${definition.runtimeDefinitionName}\`)`
 
             const returnType = definition.signature.split("):")[1]?.trim()
             generatedDoc += `
-### \`${definition.runtimeName}\`
+### ${formattedName}
+
+${definition.documentation?.[0]?.content || ""}
+
+#
 
 ${generateMarkdownTable(headers, rows)}
 
 Return Type: ${getTypeLink(returnType || null, config) || "Unknown"}
-
-#
-
-${definition.documentation?.at(0)?.content || ""}
 
 <FunctionCard definition={
 ${JSON.stringify(card, null, 4)}
