@@ -1,4 +1,4 @@
-import {ActionSdk, HerculesFunctionContext} from "@code0-tech/hercules";
+import {ActionSdk} from "@code0-tech/hercules";
 import {Model} from "../../types/aiModel";
 
 
