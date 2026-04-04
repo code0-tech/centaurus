@@ -16,6 +16,10 @@ The GLS Action exposes functions grouped into three categories:
 
 ### `createShipmentUnit`
 
+Creates a GLS shipment unit (an individual parcel within a shipment).
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | weight | Weight (kg) | number | Yes | The weight of the shipment unit in kilograms. Must be a positive number and greater than 0.10 and less than 99. |
@@ -26,10 +30,6 @@ The GLS Action exposes functions grouped into three categories:
 | shipmentUnitService | Shipment unit service | [GLS_SHIPMENT_UNIT$Service](./types.mdx#gls_shipment_unitservice) | Yes | The service associated with the shipment unit. |
 
 Return Type: [GLS_SHIPMENT_UNIT](./types.mdx#gls_shipment_unit)
-
-#
-
-Creates a GLS shipment unit (an individual parcel within a shipment).
 
 <FunctionCard definition={
 {
@@ -153,15 +153,15 @@ Creates a GLS shipment unit (an individual parcel within a shipment).
 
 ### `createPrintingOptions`
 
+Creates GLS printing options that control how labels are generated.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | returnLabels | Return labels | RETURN_LABELS | Yes | The return labels to be included in the shipment. |
 
 Return Type: [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options)
-
-#
-
-Creates GLS printing options that control how labels are generated.
 
 <FunctionCard definition={
 {
@@ -210,6 +210,10 @@ Creates GLS printing options that control how labels are generated.
 
 ### `createCustomContent`
 
+Creates custom content settings for GLS labels, including logos and barcodes.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | barcodeContentType | Barcode content type | "TRACK_ID"\|"GLS_SHIPMENT_REFERENCE" | Yes | Type of content encoded in the barcode (TRACK_ID or GLS_SHIPMENT_REFERENCE). |
@@ -219,10 +223,6 @@ Creates GLS printing options that control how labels are generated.
 | barcode | Barcode | string | No | Barcode value to print on the label. |
 
 Return Type: [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content)
-
-#
-
-Creates custom content settings for GLS labels, including logos and barcodes.
 
 <FunctionCard definition={
 {
@@ -331,6 +331,10 @@ Creates custom content settings for GLS labels, including logos and barcodes.
 
 ### `createConsignee`
 
+Creates a GLS consignee (recipient) object for use in shipments.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | consigneeId | Consignee ID | string | Yes | The ID of the consignee. Max length is 40 characters. |
@@ -339,10 +343,6 @@ Creates custom content settings for GLS labels, including logos and barcodes.
 | Category | Category | "BUSINESS"\|"PRIVATE" | Yes | The category of the consignee. Can be either BUSINESS or PRIVATE. |
 
 Return Type: [GLS_CONSIGNEE](./types.mdx#gls_consignee)
-
-#
-
-Creates a GLS consignee (recipient) object for use in shipments.
 
 <FunctionCard definition={
 {
@@ -436,6 +436,10 @@ Creates a GLS consignee (recipient) object for use in shipments.
 
 ### `createAddress`
 
+Creates a GLS address object (`GLS_ADDRESS`) for use in shipments as consignee, shipper, or return address.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | Name1 | Name 1 | string | Yes | The name of the recipient or company. Max length is 40 characters. |
@@ -453,10 +457,6 @@ Creates a GLS consignee (recipient) object for use in shipments.
 | Email | Email | string | No | The email address for the address. Max length is 80 characters. |
 
 Return Type: [GLS_ADDRESS](./types.mdx#gls_address)
-
-#
-
-Creates a GLS address object (`GLS_ADDRESS`) for use in shipments as consignee, shipper, or return address.
 
 <FunctionCard definition={
 {
@@ -701,6 +701,10 @@ All shipment functions accept a common set of parameters in addition to their ty
 
 ### `createTyreShipment`
 
+Creates a shipment specifically for tyre/wheel delivery (uses the GLS TyreService).
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
@@ -709,10 +713,6 @@ All shipment functions accept a common set of parameters in addition to their ty
 | customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Creates a shipment specifically for tyre/wheel delivery (uses the GLS TyreService).
 
 <FunctionCard definition={
 {
@@ -806,6 +806,10 @@ Creates a shipment specifically for tyre/wheel delivery (uses the GLS TyreServic
 
 ### `createSignatureShipment`
 
+Creates a shipment that requires a recipient signature upon delivery.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
@@ -814,10 +818,6 @@ Creates a shipment specifically for tyre/wheel delivery (uses the GLS TyreServic
 | customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Creates a shipment that requires a recipient signature upon delivery.
 
 <FunctionCard definition={
 {
@@ -911,6 +911,10 @@ Creates a shipment that requires a recipient signature upon delivery.
 
 ### `createShopReturnShipment`
 
+Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a shop).
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | numberOfLabels | The number of labels | number | Yes | The number of labels to be created for the return shipment. |
@@ -921,10 +925,6 @@ Creates a shipment that requires a recipient signature upon delivery.
 | returnQR | Return QR | "PDF" \| "PNG" \| "ZPL" | Yes | The return QR of the shipment. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a shop).
 
 <FunctionCard definition={
 {
@@ -1048,6 +1048,10 @@ Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a
 
 ### `createShopDeliveryShipment`
 
+Delivers a parcel to a GLS Parcel Shop where the recipient can collect it.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | parcelShopId | Parcel shop Id | string | Yes | The ID of the parcel shop where the shipment should be delivered. |
@@ -1057,10 +1061,6 @@ Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a
 | customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Delivers a parcel to a GLS Parcel Shop where the recipient can collect it.
 
 <FunctionCard definition={
 {
@@ -1169,6 +1169,10 @@ Delivers a parcel to a GLS Parcel Shop where the recipient can collect it.
 
 ### `createPickAndShipShipment`
 
+Schedules a pickup from the consignee's address on a given date.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | pickupDate | Pickup date | string | Yes | The pickup date for the pick and ship shipment. |
@@ -1178,10 +1182,6 @@ Delivers a parcel to a GLS Parcel Shop where the recipient can collect it.
 | customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Schedules a pickup from the consignee's address on a given date.
 
 <FunctionCard definition={
 {
@@ -1290,6 +1290,10 @@ Schedules a pickup from the consignee's address on a given date.
 
 ### `createIdentShipment`
 
+Delivers a parcel with identity verification - the driver checks the recipient's ID document.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | birthDate | Birth date | string | Yes | The birth date for the ident shipment identification. |
@@ -1302,10 +1306,6 @@ Schedules a pickup from the consignee's address on a given date.
 | customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Delivers a parcel with identity verification - the driver checks the recipient's ID document.
 
 <FunctionCard definition={
 {
@@ -1459,6 +1459,10 @@ Delivers a parcel with identity verification - the driver checks the recipient's
 
 ### `createIdentPinShipment`
 
+Delivers a parcel with PIN and optional birthdate verification.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | pin | Pin | string | Yes | The pin for the ident pin shipment identification. |
@@ -1469,10 +1473,6 @@ Delivers a parcel with identity verification - the driver checks the recipient's
 | birthDate | Birth date | string | Yes | The birth date for the ident pin shipment identification. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Delivers a parcel with PIN and optional birthdate verification.
 
 <FunctionCard definition={
 {
@@ -1596,6 +1596,10 @@ Delivers a parcel with PIN and optional birthdate verification.
 
 ### `createGuaranteed24Shipment`
 
+Creates a shipment with guaranteed delivery within 24 hours.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
@@ -1604,10 +1608,6 @@ Delivers a parcel with PIN and optional birthdate verification.
 | customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Creates a shipment with guaranteed delivery within 24 hours.
 
 <FunctionCard definition={
 {
@@ -1701,6 +1701,10 @@ Creates a shipment with guaranteed delivery within 24 hours.
 
 ### `createFlexDeliveryShipment`
 
+Creates a shipment with flexible delivery - the recipient can redirect or reschedule delivery.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
@@ -1709,10 +1713,6 @@ Creates a shipment with guaranteed delivery within 24 hours.
 | customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Creates a shipment with flexible delivery - the recipient can redirect or reschedule delivery.
 
 <FunctionCard definition={
 {
@@ -1806,6 +1806,10 @@ Creates a shipment with flexible delivery - the recipient can redirect or resche
 
 ### `createExchangeShipment`
 
+Delivers a new parcel while simultaneously picking up an existing one (exchange).
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | address | Address | [GLS_ADDRESS](./types.mdx#gls_address) | Yes | The address of the exchange shipment. |
@@ -1816,10 +1820,6 @@ Creates a shipment with flexible delivery - the recipient can redirect or resche
 | expectedWeight | Expected weight | number | No | The expected weight for the exchange shipment. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Delivers a new parcel while simultaneously picking up an existing one (exchange).
 
 <FunctionCard definition={
 {
@@ -1943,6 +1943,10 @@ Delivers a new parcel while simultaneously picking up an existing one (exchange)
 
 ### `createDepositShipment`
 
+Delivers a parcel to a designated deposit location (e.g. a garage or shed) without requiring a signature.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | placeOfDeposit | Place of deposit | string | Yes | The place of deposit for the delivery. |
@@ -1952,10 +1956,6 @@ Delivers a new parcel while simultaneously picking up an existing one (exchange)
 | customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Delivers a parcel to a designated deposit location (e.g. a garage or shed) without requiring a signature.
 
 <FunctionCard definition={
 {
@@ -2064,6 +2064,10 @@ Delivers a parcel to a designated deposit location (e.g. a garage or shed) witho
 
 ### `createDeliverySaturdayShipment`
 
+Creates an EXPRESS shipment for Saturday delivery.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
@@ -2072,10 +2076,6 @@ Delivers a parcel to a designated deposit location (e.g. a garage or shed) witho
 | customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Creates an EXPRESS shipment for Saturday delivery.
 
 <FunctionCard definition={
 {
@@ -2169,6 +2169,10 @@ Creates an EXPRESS shipment for Saturday delivery.
 
 ### `createDeliveryNextWorkingDayShipment`
 
+Creates an EXPRESS shipment for delivery on the next working day (EOB service).
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
@@ -2177,10 +2181,6 @@ Creates an EXPRESS shipment for Saturday delivery.
 | customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Creates an EXPRESS shipment for delivery on the next working day (EOB service).
 
 <FunctionCard definition={
 {
@@ -2274,6 +2274,10 @@ Creates an EXPRESS shipment for delivery on the next working day (EOB service).
 
 ### `createDeliveryAtWorkShipment`
 
+Delivers a parcel to a specific location within a workplace (building, floor, room).
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | recipientName | Recipient name | string | Yes | The recipient name for the delivery at work shipment. |
@@ -2288,10 +2292,6 @@ Creates an EXPRESS shipment for delivery on the next working day (EOB service).
 | phonenumber | Phone number | string | No | The phone number for the delivery at work shipment. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Delivers a parcel to a specific location within a workplace (building, floor, room).
 
 <FunctionCard definition={
 {
@@ -2475,6 +2475,10 @@ Delivers a parcel to a specific location within a workplace (building, floor, ro
 
 ### `createAddresseeOnlyShipment`
 
+Creates a shipment that can only be delivered to the named addressee (no neighbor delivery).
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
@@ -2483,10 +2487,6 @@ Delivers a parcel to a specific location within a workplace (building, floor, ro
 | customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
 
 Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
-
-#
-
-Creates a shipment that can only be delivered to the named addressee (no neighbor delivery).
 
 <FunctionCard definition={
 {
@@ -2583,15 +2583,15 @@ Creates a shipment that can only be delivered to the named addressee (no neighbo
 
 ### `validateShipment`
 
+Validates a shipment against the GLS API without creating it. Use this before `createShipment` functions to catch errors early.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | data | Data | [GLS_VALIDATE_SHIPMENT_REQUEST_DATA](./types.mdx#gls_validate_shipment_request_data) | Yes | The shipment data to validate. |
 
 Return Type: [GLS_VALIDATE_SHIPMENT_RESPONSE_DATA](./types.mdx#gls_validate_shipment_response_data)
-
-#
-
-Validates a shipment against the GLS API without creating it. Use this before `createShipment` functions to catch errors early.
 
 <FunctionCard definition={
 {
@@ -2640,15 +2640,15 @@ Validates a shipment against the GLS API without creating it. Use this before `c
 
 ### `updateParcelWeight`
 
+Updates the weight of an already-created parcel. Useful when the final weight is only known after packaging.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | data | Data | [GLS_UPDATE_PARCEL_WEIGHT_REQUEST_DATA](./types.mdx#gls_update_parcel_weight_request_data) | Yes | The update parcel weight request data. |
 
 Return Type: [GLS_END_OF_DAY_RESPONSE_DATA](./types.mdx#gls_end_of_day_response_data)
-
-#
-
-Updates the weight of an already-created parcel. Useful when the final weight is only known after packaging.
 
 <FunctionCard definition={
 {
@@ -2697,15 +2697,15 @@ Updates the weight of an already-created parcel. Useful when the final weight is
 
 ### `reprintParcel`
 
+Reprints the label for an existing parcel. Use this if the original label is damaged, lost, or needs to be printed in a different format.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | data | Data | [GLS_REPRINT_PARCEL_REQUEST_DATA](./types.mdx#gls_reprint_parcel_request_data) | Yes | The reprint parcel request data. |
 
 Return Type: [GLS_REPRINT_PARCEL_RESPONSE_DATA](./types.mdx#gls_reprint_parcel_response_data)
-
-#
-
-Reprints the label for an existing parcel. Use this if the original label is damaged, lost, or needs to be printed in a different format.
 
 <FunctionCard definition={
 {
@@ -2754,15 +2754,15 @@ Reprints the label for an existing parcel. Use this if the original label is dam
 
 ### `getEndOfDayReport`
 
+Retrieves all shipments dispatched on a given date. Useful for reconciliation and end-of-day processing.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | data | Data | [GLS_END_OF_DAY_REQUEST_DATA](./types.mdx#gls_end_of_day_request_data) | Yes | The end of day report request data. |
 
 Return Type: [GLS_END_OF_DAY_RESPONSE_DATA](./types.mdx#gls_end_of_day_response_data)
-
-#
-
-Retrieves all shipments dispatched on a given date. Useful for reconciliation and end-of-day processing.
 
 <FunctionCard definition={
 {
@@ -2811,15 +2811,15 @@ Retrieves all shipments dispatched on a given date. Useful for reconciliation an
 
 ### `getAllowedServices`
 
+Returns the GLS services available for a given origin/destination country and ZIP code combination.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | data | Data | [GLS_ALLOWED_SERVICES_REQUEST_DATA](./types.mdx#gls_allowed_services_request_data) | Yes | The allowed services request data. |
 
 Return Type: [GLS_ALLOWED_SERVICES_RESPONSE_DATA](./types.mdx#gls_allowed_services_response_data)
-
-#
-
-Returns the GLS services available for a given origin/destination country and ZIP code combination.
 
 <FunctionCard definition={
 {
@@ -2868,15 +2868,15 @@ Returns the GLS services available for a given origin/destination country and ZI
 
 ### `cancelShipment`
 
+Cancels an existing shipment by its Track ID. Only possible if the parcel has not yet been scanned.
+
+#
+
 | Parameter | Name | Type | Required | Description |
 | --- | --- | --- | --- | --- |
 | data | Data | [GLS_CANCEL_SHIPMENT_REQUEST_DATA](./types.mdx#gls_cancel_shipment_request_data) | Yes | The cancel shipment request data. |
 
 Return Type: [GLS_CANCEL_SHIPMENT_RESPONSE_DATA](./types.mdx#gls_cancel_shipment_response_data)
-
-#
-
-Cancels an existing shipment by its Track ID. Only possible if the parcel has not yet been scanned.
 
 <FunctionCard definition={
 {
