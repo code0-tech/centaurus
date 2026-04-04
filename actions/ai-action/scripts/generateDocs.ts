@@ -1,6 +1,5 @@
-import {RegistryState, runStandardActionDocs, StandardActionDocsConfig} from "../../../src/standardActionDocs"
+import {runStandardActionDocs, StandardActionDocsConfig} from "../../../src/standardActionDocs"
 import {loadAllDefinitions, loadAllDefinitionsByModules} from "../src/helpers";
-import {ActionSdk} from "@code0-tech/hercules";
 
 export function generateAIConfig(): StandardActionDocsConfig {
     return {

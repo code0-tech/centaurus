@@ -2,7 +2,7 @@
 // Creates a new package inside the packages/ workspace.
 // Usage: npm run create-package -- <package-name>
 
-import {mkdir, writeFile, readFile} from "fs/promises";
+import {mkdir, writeFile} from "fs/promises";
 import {join, dirname} from "path";
 import {fileURLToPath} from "url";
 import {existsSync} from "fs";
