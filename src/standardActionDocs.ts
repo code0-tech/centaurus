@@ -112,7 +112,7 @@ function createMockSdk(registry: RegistryState): ActionSdk {
                 await registerFunctionDefinitions({
                     ...value.definition,
                     runtimeDefinitionName: value.definition.runtimeName,
-                    parameters: value.definition.parameters.map(parameter => {
+                    parameters: value.definition.parameters?.map(parameter => {
                         return {
                             ...parameter,
                             runtimeDefinitionName: parameter.runtimeName

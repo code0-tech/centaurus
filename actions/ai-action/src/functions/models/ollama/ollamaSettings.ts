@@ -6,6 +6,8 @@ export const OllamaSettingsSchema = z.looseObject({
     baseURL: z.string()
 })
 
+export type OllamaSettings = z.infer<typeof OllamaSettingsSchema>
+
 export default (sdk: ActionSdk) => {
     return sdk.registerDataTypes({
         type: singleZodSchemaToTypescriptDef("AI_OLLAMA_SETTINGS", OllamaSettingsSchema),

@@ -1,5 +1,5 @@
 import {ActionSdk} from "@code0-tech/hercules";
-import {singleZodSchemaToTypescriptDef} from "../../../../src/helpers";
+import {singleZodSchemaToTypescriptDef, zodSchemaToTypescriptDefs} from "../../../../src/helpers";
 import {z} from "zod";
 
 export const ReturnLabelsSchema = z.object({

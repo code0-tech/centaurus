@@ -15,8 +15,9 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.66",
     "@ai-sdk/google": "^3.0.57",
+    "@ai-sdk/mcp": "^1.0.32",
     "@ai-sdk/openai": "^3.0.50",
-    "ai": "^6.0.145",
+    "ai": "^6.0.146",
     "ai-sdk-ollama": "^3.8.2",
     "ollama-ai-provider-v2": "^3.5.0",
     "ts-morph": "^27.0.2"

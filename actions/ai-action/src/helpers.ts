@@ -1,6 +1,8 @@
 import {ActionSdk, HerculesFunctionContext, RuntimeErrorException} from "@code0-tech/hercules";
-import {AuthTokensConfigSchema} from "./config/authTokenConfig";
 import {Model, MODEL_REGISTRY} from "./types/aiModel";
+import {ToolsAuthConfigSchema} from "./config/toolsAuthConfig";
+import {ToolProvider, ToolProviderEnum} from "./types/aiTool";
+import {ModelAuthConfigSchema} from "./config/modelAuthConfig";
 
 export function registerDefaultCommonAiModelFunction(sdk: ActionSdk, settingsTypeName: string, provider: Model["provider"], model: Model["model"]) {
     return sdk.registerFunctionDefinitions(
@@ -17,9 +19,10 @@ export function registerDefaultCommonAiModelFunction(sdk: ActionSdk, settingsTyp
                     content: "Auto generated wrapper function to create this model"
                 }
             ],
+            linkedDataTypes: [settingsTypeName, "AI_MODEL"],
             runtimeDefinitionName: "createModel",
             runtimeName: `${provider}/${model}`,
-            signature: `(settings: ${settingsTypeName}, maxOutputTokens?: number, temperature?: number, maxRetries?: number, stopSequences?: string[], presencePenalty?: number, frequencyPenalty?: number, seed?: number): AI_MODEL`,
+            signature: `(provider: string, model: string, settings: ${settingsTypeName}, maxOutputTokens?: number, temperature?: number, maxRetries?: number, stopSequences?: string[], presencePenalty?: number, frequencyPenalty?: number, seed?: number): AI_MODEL`,
             parameters: [
                 {
                     runtimeName: "provider",
@@ -187,21 +190,35 @@ export async function loadAllDefinitionsByModules(sdk: ActionSdk, modules: { [x:
                     console.log(`Error registering functions from ${path}:`, error);
                 }
             }
+        } else if (mod.default.length === 2) {
+            for (const toolProvider of ToolProviderEnum.options) {
+                try {
+                    await mod.default(sdk, toolProvider);
+                } catch (error) {
+                    console.log(`Error registering functions from ${path}:`, error);
+                }
+            }
         }
     }
 }
 
-export function extractToken(context: HerculesFunctionContext, provider: Model["provider"], model: Model["model"]): string {
-    const config = AuthTokensConfigSchema.safeParse(context.matchedConfig.findConfig("AUTH_TOKENS"));
+export function extractToolToken(context: HerculesFunctionContext, providerName: ToolProvider) {
+    const config = ToolsAuthConfigSchema.safeParse(context.matchedConfig.findConfig("TOOLS_AUTH"))
+
+    if (!config.success) {
+        throw new RuntimeErrorException("Invalid tools auth")
+    }
+
+    return config.data[providerName].authToken
+}
+
+export function extractToken(context: HerculesFunctionContext, provider: Model["provider"]): string {
+    const config = ModelAuthConfigSchema.safeParse(context.matchedConfig.findConfig("MODEL_AUTH"));
 
     if (!config.success) {
         throw new RuntimeErrorException("Invalid Auth config")
     }
 
-    const override = config.data[provider].overrides[model];
-    if (override) {
-        return override
-    }
 
-    return config.data[provider].defaultToken
+    return config.data[provider].authToken
 }

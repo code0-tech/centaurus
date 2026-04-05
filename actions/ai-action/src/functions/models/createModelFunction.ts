@@ -6,7 +6,7 @@ export default (sdk: ActionSdk) => {
     return sdk.registerRuntimeFunctionDefinitions({
         definition: {
             runtimeName: "createModel",
-            signature: "(settings: object, maxOutputTokens?: number, temperature?: number, maxRetries?: number, stopSequences?: string[], presencePenalty?: number, frequencyPenalty?: number, seed?: number) => AI_MODEL",
+            signature: "(provider: string, model: string, settings: object, maxOutputTokens?: number, temperature?: number, maxRetries?: number, stopSequences?: string[], presencePenalty?: number, frequencyPenalty?: number, seed?: number) => AI_MODEL",
             parameters: [
                 {
                     runtimeName: "provider",

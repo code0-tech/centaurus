@@ -10,6 +10,31 @@ The AI Action registers the following data types with the Hercules platform.
 
 ---
 
+# AI_TOOL
+No documentation provided for this type.
+
+<TypeTable type={{
+providerName: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: '"github"', 
+            },
+            url: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: 'string', 
+            },
+            tools: {
+                description: 'No description set',
+                deprecated: false,
+                required: false, 
+                type: 'string', 
+            },
+            }}
+/>
+            
 # AI_MODEL
 No documentation provided for this type.
 
@@ -143,7 +168,34 @@ No documentation provided for this type.
 }}
 />
             
-# AI_CONFIG_AUTH_TOKENS_TYPE
+# AI_TOOLS_AUTH_CONFIG
+No documentation provided for this type.
+
+<TypeTable type={{
+github: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+typeDescriptionLink: '#ai_tools_auth_configgithub',
+                type: 'AI_TOOLS_AUTH_CONFIG$github', 
+            },
+            }}
+/>
+            
+# AI_TOOLS_AUTH_CONFIG$github
+No documentation provided for this type.
+
+<TypeTable type={{
+authToken: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: 'string', 
+            },
+            }}
+/>
+            
+# AI_MODEL_AUTH_CONFIG
 No documentation provided for this type.
 
 <TypeTable type={{
@@ -151,105 +203,81 @@ openai: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-typeDescriptionLink: '#ai_config_auth_tokens_typeopenai',
-                type: 'AI_CONFIG_AUTH_TOKENS_TYPE$openai', 
+typeDescriptionLink: '#ai_model_auth_configopenai',
+                type: 'AI_MODEL_AUTH_CONFIG$openai', 
             },
             google: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-typeDescriptionLink: '#ai_config_auth_tokens_typegoogle',
-                type: 'AI_CONFIG_AUTH_TOKENS_TYPE$google', 
+typeDescriptionLink: '#ai_model_auth_configgoogle',
+                type: 'AI_MODEL_AUTH_CONFIG$google', 
             },
             anthropic: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-typeDescriptionLink: '#ai_config_auth_tokens_typeanthropic',
-                type: 'AI_CONFIG_AUTH_TOKENS_TYPE$anthropic', 
+typeDescriptionLink: '#ai_model_auth_configanthropic',
+                type: 'AI_MODEL_AUTH_CONFIG$anthropic', 
             },
             ollama: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
-typeDescriptionLink: '#ai_config_auth_tokens_typeollama',
-                type: 'AI_CONFIG_AUTH_TOKENS_TYPE$ollama', 
+typeDescriptionLink: '#ai_model_auth_configollama',
+                type: 'AI_MODEL_AUTH_CONFIG$ollama', 
             },
             }}
 />
             
-# AI_CONFIG_AUTH_TOKENS_TYPE$ollama
+# AI_MODEL_AUTH_CONFIG$ollama
 No documentation provided for this type.
 
 <TypeTable type={{
-defaultToken: {
+authToken: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
                 type: 'string', 
             },
-            overrides: {
-                description: 'No description set',
-                deprecated: false,
-                required: true, 
-                type: '{ [key: string]: string; }', 
-            },
             }}
 />
             
-# AI_CONFIG_AUTH_TOKENS_TYPE$anthropic
+# AI_MODEL_AUTH_CONFIG$anthropic
 No documentation provided for this type.
 
 <TypeTable type={{
-defaultToken: {
+authToken: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
                 type: 'string', 
             },
-            overrides: {
-                description: 'No description set',
-                deprecated: false,
-                required: true, 
-                type: '{ [key: string]: string; }', 
-            },
             }}
 />
             
-# AI_CONFIG_AUTH_TOKENS_TYPE$google
+# AI_MODEL_AUTH_CONFIG$google
 No documentation provided for this type.
 
 <TypeTable type={{
-defaultToken: {
+authToken: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
                 type: 'string', 
             },
-            overrides: {
-                description: 'No description set',
-                deprecated: false,
-                required: true, 
-                type: '{ [key: string]: string; }', 
-            },
             }}
 />
             
-# AI_CONFIG_AUTH_TOKENS_TYPE$openai
+# AI_MODEL_AUTH_CONFIG$openai
 No documentation provided for this type.
 
 <TypeTable type={{
-defaultToken: {
+authToken: {
                 description: 'No description set',
                 deprecated: false,
                 required: true, 
                 type: 'string', 
-            },
-            overrides: {
-                description: 'No description set',
-                deprecated: false,
-                required: true, 
-                type: '{ [key: string]: string; }', 
             },
             }}
 />

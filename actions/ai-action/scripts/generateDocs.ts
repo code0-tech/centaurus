@@ -37,6 +37,10 @@ export function generateAIConfig(): StandardActionDocsConfig {
                 heading: "Ollama",
                 loadFunctions: async (sdk) => await loadAllDefinitionsByModules(sdk, import.meta.glob("../src/functions/models/ollama/common.ts")),
             },
+            {
+                heading: "Tools",
+                loadFunctions: async (sdk) => await loadAllDefinitionsByModules(sdk, import.meta.glob("../src/functions/tools/**/*.ts")),
+            }
         ],
     }
 }
