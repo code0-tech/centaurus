@@ -5,7 +5,8 @@ import {singleZodSchemaToTypescriptDef} from "../../../../src/helpers";
 export const TOOL_REGISTRY = {
     github: {
         url: "https://api.githubcopilot.com/mcp/",
-        tools: ["add_comment_to_pending_review",
+        tools: [
+            "add_comment_to_pending_review",
             "add_issue_comment",
             "add_reply_to_pull_request_comment",
             "assign_copilot_to_issue",

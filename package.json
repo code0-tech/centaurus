@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@code0-tech/hercules": "^0.0.3",
+    "@code0-tech/tucana": "^0.0.68",
     "axios": "^1.13.6",
     "vite": "^7.3.1",
     "zod": "^4.3.6",

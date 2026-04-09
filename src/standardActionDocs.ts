@@ -8,7 +8,7 @@ import {
 import {Project, SymbolFlags, Type} from "ts-morph"
 
 interface Translation {
-    code?: string
+    code?: "en-US" | "de-DE" | string
     content?: string
 }
 
