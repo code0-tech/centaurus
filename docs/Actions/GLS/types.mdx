@@ -964,6 +964,25 @@ Primary2D: {
             }}
 />
             
+# RETURN_LABELS
+No documentation provided for this type.
+
+<TypeTable type={{
+TemplateSet: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: '"NONE" | "D_200" | "PF_4_I" | "PF_4_I_200" | "PF_4_I_300" | "PF_8_D_200" | "T_200_BF" | "T_300_BF" | "ZPL_200" | "ZPL_200_TRACKID_EAN_128" | "ZPL_200_TRACKID_CODE_39" | "ZPL_200_REFNO_EAN_128" | "ZPL_200_REFNO_CODE_39" | "ZPL_300" | "ZPL_300_TRACKID_EAN_128" | "ZPL_300_TRACKID_CODE_39" | "ZPL_300_REFNO_EAN_128" | "ZPL_300_REFNO_CODE_39"', 
+            },
+            LabelFormat: {
+                description: 'No description set',
+                deprecated: false,
+                required: true, 
+                type: '"PDF" | "ZEBRA" | "INTERMEC" | "DATAMAX" | "TOSHIBA" | "PNG"', 
+            },
+            }}
+/>
+            
 # GLS_PRINTING_OPTIONS
 No documentation provided for this type.
 
@@ -972,8 +991,7 @@ ReturnLabels: {
                 description: 'No description set',
                 deprecated: false,
                 required: false, 
-typeDescriptionLink: '#gls_printing_optionsreturnlabels',
-                type: 'GLS_PRINTING_OPTIONS$ReturnLabels', 
+                type: 'RETURN_LABELS', 
             },
             useDefault: {
                 description: 'No description set',
@@ -1006,25 +1024,6 @@ LabelPrinter: {
                 deprecated: false,
                 required: false, 
                 type: 'string', 
-            },
-            }}
-/>
-            
-# GLS_PRINTING_OPTIONS$ReturnLabels
-No documentation provided for this type.
-
-<TypeTable type={{
-TemplateSet: {
-                description: 'No description set',
-                deprecated: false,
-                required: true, 
-                type: '"NONE" | "D_200" | "PF_4_I" | "PF_4_I_200" | "PF_4_I_300" | "PF_8_D_200" | "T_200_BF" | "T_300_BF" | "ZPL_200" | "ZPL_200_TRACKID_EAN_128" | "ZPL_200_TRACKID_CODE_39" | "ZPL_200_REFNO_EAN_128" | "ZPL_200_REFNO_CODE_39" | "ZPL_300" | "ZPL_300_TRACKID_EAN_128" | "ZPL_300_TRACKID_CODE_39" | "ZPL_300_REFNO_EAN_128" | "ZPL_300_REFNO_CODE_39"', 
-            },
-            LabelFormat: {
-                description: 'No description set',
-                deprecated: false,
-                required: true, 
-                type: '"PDF" | "ZEBRA" | "INTERMEC" | "DATAMAX" | "TOSHIBA" | "PNG"', 
             },
             }}
 />
