@@ -5,7 +5,7 @@ import {ActionSdk} from "@code0-tech/hercules";
 
 export const UnitServiceSchema = z.array(z.object({
     Cash: z.object({
-        Reason: z.string().max(160),
+        Reason: z.string().max(160).describe("@description Test"),
         Amount: z.number().min(1),
         Currency: z.string().max(3).min(3)
     }).optional(),

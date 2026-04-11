@@ -12,6 +12,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "getAllowedServices",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Returns the GLS services available for a given origin/destination country and ZIP code combination."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Get allowed services"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -21,7 +33,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Returns the allowed GLS services for a given set of parameters.",
+                        content: "Returns the GLS services available for a given origin/destination country and ZIP code combination.",
                     }
                 ],
                 signature: "(data: GLS_ALLOWED_SERVICES_REQUEST_DATA): GLS_ALLOWED_SERVICES_RESPONSE_DATA",

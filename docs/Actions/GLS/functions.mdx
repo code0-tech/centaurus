@@ -1,0 +1,2924 @@
+---
+title: Functions
+description: All functions registered by the GLS Action.
+---
+
+The GLS Action exposes functions grouped into three categories:
+
+- **Builder functions** — Construct data objects (no API call)
+- **Shipment functions** — Create different types of GLS shipments (calls GLS API)
+- **API functions** — Query or modify shipments (calls GLS API)
+
+---
+
+## Builder functions
+
+
+### `createShipmentUnit`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| weight | Weight (kg) | number | Yes | The weight of the shipment unit in kilograms. Must be a positive number and greater than 0.10 and less than 99. |
+| shipmentUnitReference | Shipment unit reference | string | No | The reference for the shipment unit. Max length is 40 characters. |
+| partnerParcelNumber | Partner parcel number | string | No | The partner parcel number for the shipment unit. Max length is 50 characters. |
+| note1 | Note 1 | string | No | Note 1 for the shipment unit. Max length is 50 characters. |
+| note2 | Note 2 | string | No | Note 2 for the shipment unit. Max length is 50 characters. |
+| shipmentUnitService | Shipment unit service | [GLS_SHIPMENT_UNIT$Service](./types.mdx#gls_shipment_unitservice) | Yes | The service associated with the shipment unit. |
+
+Return Type: [GLS_SHIPMENT_UNIT](./types.mdx#gls_shipment_unit)
+
+#
+
+Creates a GLS shipment unit (an individual parcel within a shipment).
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates a GLS shipment unit object which can be used for shipments."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create shipment unit"
+        }
+    ],
+    "identifier": "createShipmentUnit",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Weight (kg)"
+                    }
+                ],
+                "identifier": "weight",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The weight of the shipment unit in kilograms. Must be a positive number and greater than 0.10 and less than 99."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment unit reference"
+                    }
+                ],
+                "identifier": "shipmentUnitReference",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The reference for the shipment unit. Max length is 40 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Partner parcel number"
+                    }
+                ],
+                "identifier": "partnerParcelNumber",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The partner parcel number for the shipment unit. Max length is 50 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Note 1"
+                    }
+                ],
+                "identifier": "note1",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Note 1 for the shipment unit. Max length is 50 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Note 2"
+                    }
+                ],
+                "identifier": "note2",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Note 2 for the shipment unit. Max length is 50 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment unit service"
+                    }
+                ],
+                "identifier": "shipmentUnitService",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The service associated with the shipment unit."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create shipment unit"
+        }
+    ]
+}
+} />
+
+---
+
+### `createPrintingOptions`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| returnLabels | Return labels | RETURN_LABELS | Yes | The return labels to be included in the shipment. |
+
+Return Type: [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options)
+
+#
+
+Creates GLS printing options that control how labels are generated.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates a GLS printing options object which can be used when creating shipments."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create printing options"
+        }
+    ],
+    "identifier": "createPrintingOptions",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return labels"
+                    }
+                ],
+                "identifier": "returnLabels",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return labels to be included in the shipment."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create printing options"
+        }
+    ]
+}
+} />
+
+---
+
+### `createCustomContent`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| barcodeContentType | Barcode content type | "TRACK_ID"\|"GLS_SHIPMENT_REFERENCE" | Yes | Type of content encoded in the barcode (TRACK_ID or GLS_SHIPMENT_REFERENCE). |
+| customerLogo | Customer logo | string | Yes | Base64-encoded customer logo to print on the label. |
+| hideShipperAddress | Hide shipper address | boolean | No | Whether to hide the shipper address on the label. |
+| barcodeType | Barcode type | "EAN_128"\|"CODE_39" | No | Type of barcode to use (EAN_128 or CODE_39). |
+| barcode | Barcode | string | No | Barcode value to print on the label. |
+
+Return Type: [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content)
+
+#
+
+Creates custom content settings for GLS labels, including logos and barcodes.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates a GLS custom content object for shipment labels."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create custom content"
+        }
+    ],
+    "identifier": "createCustomContent",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Barcode content type"
+                    }
+                ],
+                "identifier": "barcodeContentType",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Type of content encoded in the barcode (TRACK_ID or GLS_SHIPMENT_REFERENCE)."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Customer logo"
+                    }
+                ],
+                "identifier": "customerLogo",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Base64-encoded customer logo to print on the label."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Hide shipper address"
+                    }
+                ],
+                "identifier": "hideShipperAddress",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Whether to hide the shipper address on the label."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Barcode type"
+                    }
+                ],
+                "identifier": "barcodeType",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Type of barcode to use (EAN_128 or CODE_39)."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Barcode"
+                    }
+                ],
+                "identifier": "barcode",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Barcode value to print on the label."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create custom content"
+        }
+    ]
+}
+} />
+
+---
+
+### `createConsignee`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| consigneeId | Consignee ID | string | Yes | The ID of the consignee. Max length is 40 characters. |
+| costCenter | Cost center | string | Yes | The cost center for the consignee. Max length is 80 characters. |
+| Address | Address | [GLS_ADDRESS](./types.mdx#gls_address) | Yes | The address of the consignee. |
+| Category | Category | "BUSINESS"\|"PRIVATE" | Yes | The category of the consignee. Can be either BUSINESS or PRIVATE. |
+
+Return Type: [GLS_CONSIGNEE](./types.mdx#gls_consignee)
+
+#
+
+Creates a GLS consignee (recipient) object for use in shipments.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates a GLS consignee (recipient) object for use in shipments."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create consignee"
+        }
+    ],
+    "identifier": "createConsignee",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Consignee ID"
+                    }
+                ],
+                "identifier": "consigneeId",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The ID of the consignee. Max length is 40 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Cost center"
+                    }
+                ],
+                "identifier": "costCenter",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The cost center for the consignee. Max length is 80 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Address"
+                    }
+                ],
+                "identifier": "Address",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The address of the consignee."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Category"
+                    }
+                ],
+                "identifier": "Category",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The category of the consignee. Can be either BUSINESS or PRIVATE."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create consignee"
+        }
+    ]
+}
+} />
+
+---
+
+### `createAddress`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| Name1 | Name 1 | string | Yes | The name of the recipient or company. Max length is 40 characters. |
+| CountryCode | Country code | string | Yes | The ISO alpha-2 country code. For example, DE for Germany or FR for France. |
+| City | City | string | Yes | The city of the address. Max length is 40 characters. |
+| Street | Street | string | Yes | The street name of the address. Min length is 4 characters. |
+| ZIPCode | ZIP code | string | Yes | The ZIP code of the address. Max length is 10 characters. |
+| Name2 | Name 2 | string | No | Additional name information. Max length is 40 characters. |
+| Name3 | Name 3 | string | No | Additional name information. Max length is 40 characters. |
+| Province | Province/State | string | No | The province or state of the address. Max length is 40 characters. |
+| StreetNumber | Street number | string | No | The street number of the address. Max length is 40 characters. |
+| ContactPerson | Contact person | string | No | The contact person for the address. Max length is 40 characters. |
+| FixedLinePhonenumber | Fixed line phone number | string | No | The fixed line phone number for the address. Max length is 35 characters. |
+| MobilePhonenumber | Mobile phone number | string | No | The mobile phone number for the address. Max length is 35 characters. |
+| Email | Email | string | No | The email address for the address. Max length is 80 characters. |
+
+Return Type: [GLS_ADDRESS](./types.mdx#gls_address)
+
+#
+
+Creates a GLS address object (`GLS_ADDRESS`) for use in shipments as consignee, shipper, or return address.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates a GLS address object which can be used for shipments."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create address"
+        }
+    ],
+    "identifier": "createAddress",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Name 1"
+                    }
+                ],
+                "identifier": "Name1",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The name of the recipient or company. Max length is 40 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Country code"
+                    }
+                ],
+                "identifier": "CountryCode",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The ISO alpha-2 country code. For example, DE for Germany or FR for France."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "City"
+                    }
+                ],
+                "identifier": "City",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The city of the address. Max length is 40 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Street"
+                    }
+                ],
+                "identifier": "Street",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The street name of the address. Min length is 4 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "ZIP code"
+                    }
+                ],
+                "identifier": "ZIPCode",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The ZIP code of the address. Max length is 10 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Name 2"
+                    }
+                ],
+                "identifier": "Name2",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Additional name information. Max length is 40 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Name 3"
+                    }
+                ],
+                "identifier": "Name3",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "Additional name information. Max length is 40 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Province/State"
+                    }
+                ],
+                "identifier": "Province",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The province or state of the address. Max length is 40 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Street number"
+                    }
+                ],
+                "identifier": "StreetNumber",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The street number of the address. Max length is 40 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Contact person"
+                    }
+                ],
+                "identifier": "ContactPerson",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The contact person for the address. Max length is 40 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Fixed line phone number"
+                    }
+                ],
+                "identifier": "FixedLinePhonenumber",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The fixed line phone number for the address. Max length is 35 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Mobile phone number"
+                    }
+                ],
+                "identifier": "MobilePhonenumber",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The mobile phone number for the address. Max length is 35 characters."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Email"
+                    }
+                ],
+                "identifier": "Email",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The email address for the address. Max length is 80 characters."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create address"
+        }
+    ]
+}
+} />
+
+---
+
+## Shipment functions
+
+All shipment functions accept a common set of parameters in addition to their type-specific parameters. They call the GLS ShipIT API (`POST /rs/shipments`) and return a `GLS_CREATE_PARCELS_RESPONSE`.
+
+**Common parameters for all shipment functions:**
+
+| Parameter         | Type                          | Required | Description                                        |
+|-------------------|-------------------------------|----------|----------------------------------------------------|
+| `shipment`        | GLS_SHIPMENT_WITHOUT_SERVICES | **Yes**  | Shipment data (consignee, shipper, units, product) |
+| `printingOptions` | GLS_PRINTING_OPTIONS          | **Yes**  | Label format settings                              |
+| `returnOptions`   | GLS_RETURN_OPTIONS            | No       | Whether to return print data and routing info      |
+| `customContent`   | GLS_CUSTOM_CONTENT            | No       | Custom logo and barcode settings                   |
+
+---
+
+
+### `createTyreShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Creates a shipment specifically for tyre/wheel delivery (uses the GLS TyreService).
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates a shipment specifically for tyre/wheel delivery (uses the GLS TyreService)."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create tyre shipment"
+        }
+    ],
+    "identifier": "createTyreShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create tyre shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createSignatureShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Creates a shipment that requires a recipient signature upon delivery.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates a shipment that requires a recipient signature upon delivery."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create signature shipment"
+        }
+    ],
+    "identifier": "createSignatureShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create signature shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createShopReturnShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| numberOfLabels | The number of labels | number | Yes | The number of labels to be created for the return shipment. |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+| returnQR | Return QR | "PDF" \| "PNG" \| "ZPL" | Yes | The return QR of the shipment. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a shop).
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates a return shipment from a GLS Parcel Shop (customer drops off parcel at a shop)."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create shop return shipment"
+        }
+    ],
+    "identifier": "createShopReturnShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "The number of labels"
+                    }
+                ],
+                "identifier": "numberOfLabels",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The number of labels to be created for the return shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return QR"
+                    }
+                ],
+                "identifier": "returnQR",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return QR of the shipment."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create shop return shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createShopDeliveryShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| parcelShopId | Parcel shop Id | string | Yes | The ID of the parcel shop where the shipment should be delivered. |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Delivers a parcel to a GLS Parcel Shop where the recipient can collect it.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Delivers a parcel to a GLS Parcel Shop where the recipient can collect it."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create shop delivery shipment"
+        }
+    ],
+    "identifier": "createShopDeliveryShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Parcel shop Id"
+                    }
+                ],
+                "identifier": "parcelShopId",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The ID of the parcel shop where the shipment should be delivered."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create shop delivery shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createPickAndShipShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| pickupDate | Pickup date | string | Yes | The pickup date for the pick and ship shipment. |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Schedules a pickup from the consignee's address on a given date.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Schedules a pickup from the consignee's address on a given date."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create pick and ship shipment"
+        }
+    ],
+    "identifier": "createPickAndShipShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Pickup date"
+                    }
+                ],
+                "identifier": "pickupDate",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The pickup date for the pick and ship shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create pick and ship shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createIdentShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| birthDate | Birth date | string | Yes | The birth date for the ident shipment identification. |
+| firstName | First name | string | Yes | The first name for the ident shipment identification. |
+| lastName | Last name | string | Yes | The last name for the ident shipment identification. |
+| nationality | Nationality | string | Yes | The nationality for the ident shipment identification. |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Delivers a parcel with identity verification - the driver checks the recipient's ID document.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Delivers a parcel with identity verification - the driver checks the recipient's ID document."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create ident shipment"
+        }
+    ],
+    "identifier": "createIdentShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Birth date"
+                    }
+                ],
+                "identifier": "birthDate",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The birth date for the ident shipment identification."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "First name"
+                    }
+                ],
+                "identifier": "firstName",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The first name for the ident shipment identification."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Last name"
+                    }
+                ],
+                "identifier": "lastName",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The last name for the ident shipment identification."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Nationality"
+                    }
+                ],
+                "identifier": "nationality",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The nationality for the ident shipment identification."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create ident shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createIdentPinShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| pin | Pin | string | Yes | The pin for the ident pin shipment identification. |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+| birthDate | Birth date | string | Yes | The birth date for the ident pin shipment identification. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Delivers a parcel with PIN and optional birthdate verification.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Delivers a parcel with PIN and optional birthdate verification."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create ident pin shipment"
+        }
+    ],
+    "identifier": "createIdentPinShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Pin"
+                    }
+                ],
+                "identifier": "pin",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The pin for the ident pin shipment identification."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Birth date"
+                    }
+                ],
+                "identifier": "birthDate",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The birth date for the ident pin shipment identification."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create ident pin shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createGuaranteed24Shipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Creates a shipment with guaranteed delivery within 24 hours.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates a shipment with guaranteed delivery within 24 hours."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create guaranteed 24 shipment"
+        }
+    ],
+    "identifier": "createGuaranteed24Shipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create guaranteed 24 shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createFlexDeliveryShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Creates a shipment with flexible delivery - the recipient can redirect or reschedule delivery.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates a shipment with flexible delivery - the recipient can redirect or reschedule delivery."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create flex delivery shipment"
+        }
+    ],
+    "identifier": "createFlexDeliveryShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create flex delivery shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createExchangeShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| address | Address | [GLS_ADDRESS](./types.mdx#gls_address) | Yes | The address of the exchange shipment. |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+| expectedWeight | Expected weight | number | No | The expected weight for the exchange shipment. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Delivers a new parcel while simultaneously picking up an existing one (exchange).
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Delivers a new parcel while simultaneously picking up an existing one (exchange)."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create exchange shipment"
+        }
+    ],
+    "identifier": "createExchangeShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Address"
+                    }
+                ],
+                "identifier": "address",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The address of the exchange shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Expected weight"
+                    }
+                ],
+                "identifier": "expectedWeight",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The expected weight for the exchange shipment."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create exchange shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createDepositShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| placeOfDeposit | Place of deposit | string | Yes | The place of deposit for the delivery. |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Delivers a parcel to a designated deposit location (e.g. a garage or shed) without requiring a signature.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Delivers a parcel to a designated deposit location (e.g. a garage or shed) without requiring a signature."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create deposit shipment"
+        }
+    ],
+    "identifier": "createDepositShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Place of deposit"
+                    }
+                ],
+                "identifier": "placeOfDeposit",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The place of deposit for the delivery."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create deposit shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createDeliverySaturdayShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Creates an EXPRESS shipment for Saturday delivery.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates an EXPRESS shipment for Saturday delivery."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create delivery Saturday shipment"
+        }
+    ],
+    "identifier": "createDeliverySaturdayShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create delivery Saturday shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createDeliveryNextWorkingDayShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Creates an EXPRESS shipment for delivery on the next working day (EOB service).
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates an EXPRESS shipment for delivery on the next working day (EOB service)."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create delivery next working day shipment"
+        }
+    ],
+    "identifier": "createDeliveryNextWorkingDayShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create delivery next working day shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createDeliveryAtWorkShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| recipientName | Recipient name | string | Yes | The recipient name for the delivery at work shipment. |
+| building | Building | string | Yes | The building of the delivery at work shipment. |
+| floor | Floor | number | Yes | The floor of the delivery at work shipment. |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+| alternateRecipientName | Alternate recipient name | string | No | The alternate recipient name for the delivery at work shipment. |
+| room | Room | number | No | The room of the delivery at work shipment. |
+| phonenumber | Phone number | string | No | The phone number for the delivery at work shipment. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Delivers a parcel to a specific location within a workplace (building, floor, room).
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Delivers a parcel to a specific location within a workplace (building, floor, room)."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create delivery at work shipment"
+        }
+    ],
+    "identifier": "createDeliveryAtWorkShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Recipient name"
+                    }
+                ],
+                "identifier": "recipientName",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The recipient name for the delivery at work shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Building"
+                    }
+                ],
+                "identifier": "building",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The building of the delivery at work shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Floor"
+                    }
+                ],
+                "identifier": "floor",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The floor of the delivery at work shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Alternate recipient name"
+                    }
+                ],
+                "identifier": "alternateRecipientName",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The alternate recipient name for the delivery at work shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Room"
+                    }
+                ],
+                "identifier": "room",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The room of the delivery at work shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Phone number"
+                    }
+                ],
+                "identifier": "phonenumber",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The phone number for the delivery at work shipment."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create delivery at work shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `createAddresseeOnlyShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| shipment | Shipment | [GLS_SHIPMENT](./types.mdx#gls_shipment) | Yes | The shipment for which to create the parcels. Must include all necessary information and services for the shipment. |
+| printingOptions | Printing options | [GLS_PRINTING_OPTIONS](./types.mdx#gls_printing_options) | Yes | The printing options for the shipment. Specifies options for the labels to be printed for the shipment. |
+| returnOptions | Return options | [GLS_RETURN_OPTIONS](./types.mdx#gls_return_options) | No | The return options for the shipment. Specifies options for return shipments. |
+| customContent | Custom content | [GLS_CUSTOM_CONTENT](./types.mdx#gls_custom_content) | No | The custom content for the shipment. Specifies options for custom content to be printed on the labels. |
+
+Return Type: [GLS_CREATE_PARCELS_RESPONSE](./types.mdx#gls_create_parcels_response)
+
+#
+
+Creates a shipment that can only be delivered to the named addressee (no neighbor delivery).
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Creates a shipment that can only be delivered to the named addressee (no neighbor delivery)."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Create addressee only shipment"
+        }
+    ],
+    "identifier": "createAddresseeOnlyShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Shipment"
+                    }
+                ],
+                "identifier": "shipment",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment for which to create the parcels. Must include all necessary information and services for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Printing options"
+                    }
+                ],
+                "identifier": "printingOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The printing options for the shipment. Specifies options for the labels to be printed for the shipment."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Return options"
+                    }
+                ],
+                "identifier": "returnOptions",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The return options for the shipment. Specifies options for return shipments."
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Custom content"
+                    }
+                ],
+                "identifier": "customContent",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The custom content for the shipment. Specifies options for custom content to be printed on the labels."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Create addressee only shipment"
+        }
+    ]
+}
+} />
+
+---
+
+## API functions
+
+
+### `validateShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| data | Data | [GLS_VALIDATE_SHIPMENT_REQUEST_DATA](./types.mdx#gls_validate_shipment_request_data) | Yes | The shipment data to validate. |
+
+Return Type: [GLS_VALIDATE_SHIPMENT_RESPONSE_DATA](./types.mdx#gls_validate_shipment_response_data)
+
+#
+
+Validates a shipment against the GLS API without creating it. Use this before `createShipment` functions to catch errors early.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Validates a shipment against the GLS API without creating it. Use this before `createShipment` functions to catch errors early."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Validate shipment"
+        }
+    ],
+    "identifier": "validateShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Data"
+                    }
+                ],
+                "identifier": "data",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The shipment data to validate."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Validate shipment"
+        }
+    ]
+}
+} />
+
+---
+
+### `updateParcelWeight`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| data | Data | [GLS_UPDATE_PARCEL_WEIGHT_REQUEST_DATA](./types.mdx#gls_update_parcel_weight_request_data) | Yes | The update parcel weight request data. |
+
+Return Type: [GLS_END_OF_DAY_RESPONSE_DATA](./types.mdx#gls_end_of_day_response_data)
+
+#
+
+Updates the weight of an already-created parcel. Useful when the final weight is only known after packaging.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Updates the weight of an already-created parcel. Useful when the final weight is only known after packaging."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Update parcel weight"
+        }
+    ],
+    "identifier": "updateParcelWeight",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Data"
+                    }
+                ],
+                "identifier": "data",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The update parcel weight request data."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Update parcel weight"
+        }
+    ]
+}
+} />
+
+---
+
+### `reprintParcel`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| data | Data | [GLS_REPRINT_PARCEL_REQUEST_DATA](./types.mdx#gls_reprint_parcel_request_data) | Yes | The reprint parcel request data. |
+
+Return Type: [GLS_REPRINT_PARCEL_RESPONSE_DATA](./types.mdx#gls_reprint_parcel_response_data)
+
+#
+
+Reprints the label for an existing parcel. Use this if the original label is damaged, lost, or needs to be printed in a different format.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Reprints the label for an existing parcel. Use this if the original label is damaged, lost, or needs to be printed in a different format."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Reprint parcel"
+        }
+    ],
+    "identifier": "reprintParcel",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Data"
+                    }
+                ],
+                "identifier": "data",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The reprint parcel request data."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Reprint parcel"
+        }
+    ]
+}
+} />
+
+---
+
+### `getEndOfDayReport`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| data | Data | [GLS_END_OF_DAY_REQUEST_DATA](./types.mdx#gls_end_of_day_request_data) | Yes | The end of day report request data. |
+
+Return Type: [GLS_END_OF_DAY_RESPONSE_DATA](./types.mdx#gls_end_of_day_response_data)
+
+#
+
+Retrieves all shipments dispatched on a given date. Useful for reconciliation and end-of-day processing.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Retrieves all shipments dispatched on a given date. Useful for reconciliation and end-of-day processing."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Get end of day report"
+        }
+    ],
+    "identifier": "getEndOfDayReport",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Data"
+                    }
+                ],
+                "identifier": "data",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The end of day report request data."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Get end of day report"
+        }
+    ]
+}
+} />
+
+---
+
+### `getAllowedServices`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| data | Data | [GLS_ALLOWED_SERVICES_REQUEST_DATA](./types.mdx#gls_allowed_services_request_data) | Yes | The allowed services request data. |
+
+Return Type: [GLS_ALLOWED_SERVICES_RESPONSE_DATA](./types.mdx#gls_allowed_services_response_data)
+
+#
+
+Returns the GLS services available for a given origin/destination country and ZIP code combination.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Returns the GLS services available for a given origin/destination country and ZIP code combination."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Get allowed services"
+        }
+    ],
+    "identifier": "getAllowedServices",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Data"
+                    }
+                ],
+                "identifier": "data",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The allowed services request data."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Get allowed services"
+        }
+    ]
+}
+} />
+
+---
+
+### `cancelShipment`
+
+| Parameter | Name | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| data | Data | [GLS_CANCEL_SHIPMENT_REQUEST_DATA](./types.mdx#gls_cancel_shipment_request_data) | Yes | The cancel shipment request data. |
+
+Return Type: [GLS_CANCEL_SHIPMENT_RESPONSE_DATA](./types.mdx#gls_cancel_shipment_response_data)
+
+#
+
+Cancels an existing shipment by its Track ID. Only possible if the parcel has not yet been scanned.
+
+<FunctionCard definition={
+{
+    "descriptions": [
+        {
+            "code": "en-US",
+            "content": "Cancels an existing shipment by its Track ID. Only possible if the parcel has not yet been scanned."
+        }
+    ],
+    "names": [
+        {
+            "code": "en-US",
+            "content": "Cancel shipment"
+        }
+    ],
+    "identifier": "cancelShipment",
+    "parameterDefinitions": {
+        "nodes": [
+            {
+                "names": [
+                    {
+                        "code": "en-US",
+                        "content": "Data"
+                    }
+                ],
+                "identifier": "data",
+                "descriptions": [
+                    {
+                        "code": "en-US",
+                        "content": "The cancel shipment request data."
+                    }
+                ]
+            }
+        ]
+    },
+    "displayMessages": [
+        {
+            "code": "en-US",
+            "content": "Cancel shipment"
+        }
+    ]
+}
+} />
+
+---

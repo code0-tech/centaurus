@@ -1,5 +1,5 @@
 import {ActionSdk} from "@code0-tech/hercules";
-import {singleZodSchemaToTypescriptDef} from "../helpers";
+import {singleZodSchemaToTypescriptDef, zodSchemaToTypescriptDefs} from "../helpers";
 import z from "zod";
 import {AddressSchema} from "./glsAddress";
 
@@ -50,10 +50,13 @@ export default (sdk: ActionSdk) => {
         },
         {
             identifier: "GLS_END_OF_DAY_RESPONSE_DATA",
-            type: singleZodSchemaToTypescriptDef(
+            type: zodSchemaToTypescriptDefs(
                 "GLS_END_OF_DAY_RESPONSE_DATA",
-                EndOfDayResponseDataSchema
-            ),
+                EndOfDayResponseDataSchema,
+                {
+                    GLS_ADDRESS: AddressSchema
+                }
+            ).get("GLS_END_OF_DAY_RESPONSE_DATA")!,
             name: [
                 {
                     code: "en-US",

@@ -12,6 +12,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "validateShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Validates a shipment against the GLS API without creating it. Use this before `createShipment` functions to catch errors early."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Validate shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -21,7 +33,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Validates a GLS shipment.",
+                        content: "Validates a shipment against the GLS API without creating it. Use this before `createShipment` functions to catch errors early.",
                     }
                 ],
                 signature: "(data: GLS_VALIDATE_SHIPMENT_REQUEST_DATA): GLS_VALIDATE_SHIPMENT_RESPONSE_DATA",

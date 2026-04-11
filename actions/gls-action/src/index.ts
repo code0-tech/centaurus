@@ -18,6 +18,7 @@ async function main() {
         console.error(error)
     }
 }
+
 main().catch(err => {
     console.error(err)
     process.exit(1)

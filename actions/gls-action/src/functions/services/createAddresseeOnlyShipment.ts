@@ -15,6 +15,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createAddresseeOnlyShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates a shipment that can only be delivered to the named addressee (no neighbor delivery)."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create addressee only shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -24,7 +36,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS addressee only shipment.",
+                        content: "Creates a shipment that can only be delivered to the named addressee (no neighbor delivery).",
                     }
                 ],
                 signature: `(${DEFAULT_SIGNATURE_FOR_SERVICES}): GLS_CREATE_PARCELS_RESPONSE`,
@@ -45,3 +57,4 @@ export default (sdk: ActionSdk) => {
         },
     )
 }
+

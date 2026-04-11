@@ -3,10 +3,22 @@ import {AddressSchema} from "../../types/glsAddress";
 import {ConsigneeSchema} from "../../types/glsConsignee";
 
 export default (sdk: ActionSdk) => {
-    sdk.registerFunctionDefinitions(
+    return sdk.registerFunctionDefinitions(
         {
             definition: {
                 runtimeName: "createConsignee",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates a GLS consignee (recipient) object for use in shipments."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create consignee"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -16,7 +28,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS consignee object which can be used for shipments.",
+                        content: "Creates a GLS consignee (recipient) object for use in shipments.",
                     }
                 ],
                 signature: "(consigneeId: string, costCenter: string, Address: GLS_ADDRESS, Category: \"BUSINESS\"|\"PRIVATE\"): GLS_CONSIGNEE",

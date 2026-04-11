@@ -16,6 +16,18 @@ export default (sdk: ActionSdk) => {
         {
             definition: {
                 runtimeName: "createDeliverySaturdayShipment",
+                documentation: [
+                    {
+                        code: "en-US",
+                        content: "Creates an EXPRESS shipment for Saturday delivery."
+                    }
+                ],
+                displayMessage: [
+                    {
+                        code: "en-US",
+                        content: "Create delivery Saturday shipment"
+                    }
+                ],
                 name: [
                     {
                         code: "en-US",
@@ -25,7 +37,7 @@ export default (sdk: ActionSdk) => {
                 description: [
                     {
                         code: "en-US",
-                        content: "Creates a GLS delivery Saturday shipment.",
+                        content: "Creates an EXPRESS shipment for Saturday delivery.",
                     }
                 ],
                 signature: `(${DEFAULT_SIGNATURE_FOR_SERVICES}): GLS_CREATE_PARCELS_RESPONSE`,
