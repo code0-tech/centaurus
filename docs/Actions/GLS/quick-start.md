@@ -3,15 +3,15 @@ title: Quick Start
 description: Create your first GLS shipment in a few steps.
 ---
 
-# Quick Start
-
-This guide walks you through creating your first GLS shipment using the GLS Action. By the end, you will have a working flow that creates a parcel and retrieves a shipping label.
+This guide walks you through creating your first GLS shipment using the GLS Action.
+By the end, you will have a working flow that creates a parcel and retrieves a shipping label.
 
 ---
 
 ## Step 1: Install and configure the action
 
-Follow the [Installation Guide](../../installation.md) to deploy the GLS Action, then set the following configuration values in your Hercules admin panel (or `.env` file):
+Follow the [Installation Guide](../../installation.md) to deploy the GLS Action, then set the following configuration values in
+your Hercules admin panel (or `.env` file):
 
 | Config            | Value                                                                                |
 |-------------------|--------------------------------------------------------------------------------------|
@@ -28,7 +28,7 @@ See [Configuration](configs.md) for the full list of options and how to obtain c
 
 A basic "create a GLS parcel" flow looks like this:
 
-```
+```text
 [createAddress]          → GLS_ADDRESS (recipient)
 [createAddress]          → GLS_ADDRESS (shipper)
 [createShipmentUnit]     → GLS_SHIPMENT_UNIT
@@ -38,7 +38,7 @@ A basic "create a GLS parcel" flow looks like this:
 
 ### Flow diagram
 
-```
+```text
 START
   │
   ├─ createAddress (recipient)

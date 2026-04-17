@@ -3,9 +3,8 @@ title: Configuration
 description: All configuration options for the GLS Action, including how to obtain credentials from the GLS Developer Portal.
 ---
 
-# GLS Action Configuration
-
-The GLS action requires a few credentials to authenticate with the GLS ShipIT API. These are set as **configuration values** in the Hercules admin panel (not as environment variables).
+The GLS action requires a few credentials to authenticate with the GLS ShipIT API.
+These are set as **configuration values** in the Hercules admin panel (not as environment variables).
 
 ---
 
@@ -20,7 +19,8 @@ The GLS action requires a few credentials to authenticate with the GLS ShipIT AP
 | `auth_url`        | string      | No       | `https://api.gls-group.net/oauth2/v2/token`           | GLS OAuth2 token endpoint — must end in `/token`                              |
 | `shipper`         | GLS_SHIPPER | No       | —                                                     | Default shipper address used when no shipper is provided in the shipment data |
 
-> **`contact_id`:** This identifier is required for certain shipment operations (e.g. end-of-day reports and some services). It is issued by GLS support — contact them directly to request it.
+> **`contact_id`:** This identifier is required for certain shipment operations (e.g. end-of-day reports and some services).
+> It is issued by GLS support — contact them directly to request it.
 
 ---
 
@@ -28,7 +28,7 @@ The GLS action requires a few credentials to authenticate with the GLS ShipIT AP
 
 ### Step 1 — Create a GLS Developer account
 
-1. Go to [https://dev-portal.gls-group.net/get-started](https://dev-portal.gls-group.net/get-started)
+1. Go to <https://dev-portal.gls-group.net/get-started>
 2. Click **Sign In** and register a new account, or log in with an existing GLS account
 3. Complete the registration and verify your email address
 
@@ -50,13 +50,15 @@ The GLS action requires a few credentials to authenticate with the GLS ShipIT AP
 
 ### Step 4 — Get your Contact ID (optional)
 
-The `contact_id` is not available in the developer portal. You must contact **GLS support** directly and ask them to provide you with a Contact ID linked to your GLS contract.
+The `contact_id` is not available in the developer portal.
+You must contact **GLS support** directly and ask them to provide you with a Contact ID linked to your GLS contract.
 
 ---
 
 ## API endpoints
 
-GLS provides different API endpoints depending on your region and environment. The defaults point to the global production API:
+GLS provides different API endpoints depending on your region and environment.
+The defaults point to the global production API:
 
 | Setting | Default URL |
 |---------|-------------|
@@ -71,7 +73,7 @@ If you are using a regional or sandbox endpoint, update these values accordingly
 
 The GLS Action authenticates using **OAuth2 client credentials**:
 
-```
+```text
 GLS Action
     │
     ├── POST {auth_url}
@@ -85,13 +87,16 @@ GLS Action
           Authorization: Bearer <access_token>
 ```
 
-Tokens are **cached** and automatically refreshed 60 seconds before they expire. You do not need to manage token lifecycle manually.
+Tokens are **cached** and automatically refreshed 60 seconds before they expire.
+You do not need to manage token lifecycle manually.
 
 ---
 
 ## Default shipper
 
-The optional `shipper` config allows you to set a **default sender address** that is applied to all shipments when no shipper is explicitly provided in the shipment data. This is useful when all your shipments originate from the same address.
+The optional `shipper` config allows you to set a **default sender address** that is applied to all shipments when
+no shipper is explicitly provided in the shipment data.
+This is useful when all your shipments originate from the same address.
 
 The value must be a valid `GLS_SHIPPER` object:
 

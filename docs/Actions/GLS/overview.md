@@ -4,9 +4,9 @@ description: Overview of the GLS ShipIT action — what it does, what you need t
 icon: IconHome
 ---
 
-# GLS Action
-
-The **GLS Action** integrates the [GLS ShipIT API](https://dev-portal.gls-group.net/docs/shipit-farm/1/overview) as an action. It lets you create, validate, cancel, and manage GLS parcel shipments directly from your flows — no manual API calls required.
+The **GLS Action** integrates the [GLS ShipIT API](https://dev-portal.gls-group.net/docs/shipit-farm/1/overview) as an action.
+It lets you create, validate, cancel, and manage GLS parcel shipments directly from your
+flows — no manual API calls required.
 
 ---
 
@@ -37,19 +37,20 @@ Before using the GLS Action you will need:
 
 ### GLS Developer Portal
 
-| Requirement               | How to obtain                                                                                                               |
-|---------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| `client_id`               | Create an application at [https://dev-portal.gls-group.net](https://dev-portal.gls-group.net) and find it under **My Apps** |
-| `client_secret`           | Found alongside the `client_id` in **My Apps** on the GLS developer portal                                                  |
-| `contact_id` *(optional)* | Issued by GLS support — contact them directly to request it                                                                 |
+| Requirement               | How to obtain                                                                             |
+|---------------------------|-------------------------------------------------------------------------------------------|
+| `client_id`               | Create an application at <https://dev-portal.gls-group.net> and find it under **My Apps** |
+| `client_secret`           | Found alongside the `client_id` in **My Apps** on the GLS developer portal                |
+| `contact_id` *(optional)* | Issued by GLS support — contact them directly to request it                               |
 
-> **Note:** The `contact_id` is required for some shipment operations. If you are unsure whether you need it, contact GLS support.
+> **Note:** The `contact_id` is required for some shipment operations.
+> If you are unsure whether you need it, contact GLS support.
 
 ---
 
 ## Architecture overview
 
-```
+```text
 Your Flow
        │
        ▼
@@ -62,13 +63,14 @@ Your Flow
                  └── GLS ShipIT API (/shipit-farm/v1/backend/rs/...)
 ```
 
-The action handles OAuth2 token management automatically, including caching and refresh before expiry. You only need to provide the `client_id` and `client_secret` in the action configuration.
+The action handles OAuth2 token management automatically, including caching and refresh before expiry.
+You only need to provide the `client_id` and `client_secret` in the action configuration.
 
 ---
 
 ## Data flow
 
-```
+```text
 Flow Input
     │
     ▼

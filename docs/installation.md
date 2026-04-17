@@ -2,17 +2,17 @@
 title: Installation guide for actions
 ---
 
-# Cloud edition
+## Cloud edition
 
 The cloud edition is managed by code0 and requires no installation. Contact the code0 team for access.
 
 ---
 
-# Self-hosted
+## Self-hosted
 
 To install an action on your self-hosted instance, follow these steps:
 
-## Prerequisites
+### Prerequisites
 
 Before you begin, make sure you have the following:
 
@@ -64,7 +64,7 @@ Then open `.env` in your editor and set the required variables:
 
 Example `.env` for the GLS action:
 
-```
+```text
 HERCULES_AUTH_TOKEN=your_hercules_auth_token
 HERCULES_AQUILA_URL=your-aquila-host:50051
 HERCULES_ACTION_ID=gls-action
@@ -89,7 +89,7 @@ docker compose logs -f
 
 A successful startup will show:
 
-```
+```text
 SDK connected successfully
 ```
 
@@ -97,7 +97,8 @@ SDK connected successfully
 
 ## 5. Verify the action is registered
 
-Open your Hercules/Aquila admin panel and navigate to the **Actions** section. The action should appear in the list with its registered functions and types.
+Open your Hercules/Aquila admin panel and navigate to the **Actions** section.
+The action should appear in the list with its registered functions and types.
 
 ---
 
@@ -120,4 +121,3 @@ If the action fails to start or connect, check:
 - That `HERCULES_AQUILA_URL` points to the correct host and port
 - That Docker has access to the internet (for pulling the base image)
 - The service-specific credentials are correct (see [Troubleshooting](Actions/GLS/troubleshooting.md))
-
