@@ -3,9 +3,8 @@ title: Common Use Cases
 description: End-to-end example flows using the GLS Action for real-world shipping scenarios.
 ---
 
-# Common Use Cases
-
-This page shows complete, real-world examples of flows built with the GLS Action. Each example includes a step-by-step breakdown and the data passed between functions.
+This page shows complete, real-world examples of flows built with the GLS Action.
+Each example includes a step-by-step breakdown and the data passed between functions.
 
 ---
 
@@ -15,7 +14,7 @@ This page shows complete, real-world examples of flows built with the GLS Action
 
 ### Flow
 
-```
+```text
 [createAddress] (recipient)
         │ GLS_ADDRESS
 [createAddress] (shipper)
@@ -31,8 +30,9 @@ This page shows complete, real-world examples of flows built with the GLS Action
 
 ### Step-by-step
 
-**1. Create recipient address**
-```
+#### 1. Create recipient address
+
+```text
 createAddress(
   Name1: "Jane Smith",
   CountryCode: "DE",
@@ -45,8 +45,9 @@ createAddress(
 → GLS_ADDRESS (recipient)
 ```
 
-**2. Create parcel unit**
-```
+#### 2. Create parcel unit
+
+```text
 createShipmentUnit(
   weight: 1.2,
   shipmentUnitReference: "ORDER-12345",
@@ -55,8 +56,9 @@ createShipmentUnit(
 → GLS_SHIPMENT_UNIT
 ```
 
-**3. Set printing options**
-```
+#### 3. Set printing options
+
+```text
 createPrintingOptions(
   returnLabels: {
     TemplateSet: "NONE",
@@ -66,8 +68,9 @@ createPrintingOptions(
 → GLS_PRINTING_OPTIONS
 ```
 
-**4. Create the shipment** (using default shipper from config)
-```
+#### 4. Create the shipment (using default shipper from config)
+
+```text
 createShopDeliveryShipment(
   parcelShopId: "PSH-HH-001",
   shipment: {
@@ -85,7 +88,8 @@ createShopDeliveryShipment(
 → GLS_CREATE_PARCELS_RESPONSE
 ```
 
-**5. Use the response**
+#### 5. Use the response
+
 - Store `CreatedShipment.ParcelData[0].TrackID` in your order database
 - Decode `CreatedShipment.PrintData[0].Data` (base64 PDF) and send to printer
 
@@ -97,7 +101,7 @@ createShopDeliveryShipment(
 
 ### Flow
 
-```
+```text
 [Build shipment data] → GLS_SHIPMENT
         │
 [validateShipment]
@@ -112,8 +116,9 @@ createShopDeliveryShipment(
 
 ### Example
 
-**1. Validate the shipment**
-```
+#### 1. Validate the shipment
+
+```text
 validateShipment({
   Shipment: {
     Product: "PARCEL",
@@ -133,7 +138,8 @@ validateShipment({
 → GLS_VALIDATE_SHIPMENT_RESPONSE_DATA
 ```
 
-**2. Check the result**
+#### 2. Check the result
+
 ```json
 {
   "success": true,
@@ -142,6 +148,7 @@ validateShipment({
 ```
 
 If `success` is `false`, inspect `validationResult.Issues` for details:
+
 ```json
 {
   "success": false,
@@ -165,7 +172,7 @@ If `success` is `false`, inspect `validationResult.Issues` for details:
 
 ### Flow
 
-```
+```text
 [createAddress] (your warehouse as consignee for return)
         │
 [createShipmentUnit]
@@ -180,7 +187,7 @@ If `success` is `false`, inspect `validationResult.Issues` for details:
 
 ### Example
 
-```
+```text
 createShopReturnShipment(
   numberOfLabels: 1,
   shipment: {
@@ -209,6 +216,7 @@ createShopReturnShipment(
 ```
 
 **Customer flow:**
+
 1. Receive the PDF label by email
 2. Print it (or show QR code on phone)
 3. Drop off at any GLS Parcel Shop
@@ -217,11 +225,12 @@ createShopReturnShipment(
 
 ## Use Case 4: Identity-verified delivery (age-restricted goods)
 
-**Scenario:** You are shipping age-restricted goods (e.g. alcohol, medication) and need to verify the recipient's identity on delivery.
+**Scenario:** You are shipping age-restricted goods (e.g. alcohol, medication) and need
+to verify the recipient's identity on delivery.
 
 ### Flow
 
-```
+```text
 [createShipmentUnit]
         │
 [createPrintingOptions]
@@ -232,7 +241,7 @@ createShopReturnShipment(
 
 ### Example
 
-```
+```text
 createIdentShipment(
   birthDate: "1990-05-15",
   firstName: "Hans",
@@ -261,17 +270,19 @@ createIdentShipment(
 )
 ```
 
-The GLS driver will verify the recipient's ID against the provided name, birthdate, and nationality before handing over the parcel.
+The GLS driver will verify the recipient's ID against the provided name, birthdate,
+and nationality before handing over the parcel.
 
 ---
 
 ## Use Case 5: End-of-day reconciliation
 
-**Scenario:** At the end of each business day, you want to fetch all shipments dispatched that day and reconcile them with your order management system.
+**Scenario:** At the end of each business day, you want to fetch all shipments dispatched that day and
+reconcile them with your order management system.
 
 ### Flow
 
-```
+```text
 [getEndOfDayReport({ date: "2025-01-15" })]
         │ GLS_END_OF_DAY_RESPONSE_DATA
         │
@@ -282,7 +293,7 @@ The GLS driver will verify the recipient's ID against the provided name, birthda
 
 ### Example
 
-```
+```text
 getEndOfDayReport({
   date: "2025-01-15"
 })
@@ -290,6 +301,7 @@ getEndOfDayReport({
 ```
 
 Response:
+
 ```json
 {
   "Shipments": [
@@ -315,7 +327,7 @@ Response:
 
 ### Flow
 
-```
+```text
 [reprintParcel({ TrackID, CreationDate, PrintingOptions })]
         │ GLS_REPRINT_PARCEL_RESPONSE_DATA
         │
@@ -324,7 +336,7 @@ Response:
 
 ### Example
 
-```
+```text
 reprintParcel({
   TrackID: "12345678",
   CreationDate: "2025-01-15",
@@ -342,11 +354,12 @@ reprintParcel({
 
 ## Use Case 7: Check available services for a route
 
-**Scenario:** Before creating a shipment, you want to check which GLS services are available between your depot (Berlin, DE) and a customer in France (Paris, 75001).
+**Scenario:** Before creating a shipment, you want to check which GLS services are available between your depot
+(Berlin, DE) and a customer in France (Paris, 75001).
 
 ### Flow
 
-```
+```text
 [getAllowedServices({ Source, Destination })]
         │ GLS_ALLOWED_SERVICES_RESPONSE_DATA
         │
@@ -355,7 +368,7 @@ reprintParcel({
 
 ### Example
 
-```
+```text
 getAllowedServices({
   Source: {
     CountryCode: "DE",
@@ -370,6 +383,7 @@ getAllowedServices({
 ```
 
 Response:
+
 ```json
 {
   "AllowedServices": [
@@ -392,7 +406,7 @@ Use this to dynamically enable/disable delivery options in your checkout flow.
 
 ### Flow
 
-```
+```text
 [createShipmentUnit]
         │
 [createPrintingOptions]
@@ -403,7 +417,7 @@ Use this to dynamically enable/disable delivery options in your checkout flow.
 
 ### Example
 
-```
+```text
 createDeliverySaturdayShipment(
   shipment: {
     Product: "EXPRESS",   ← required!

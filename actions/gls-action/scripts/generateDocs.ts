@@ -15,7 +15,7 @@ export function createGlsDocsConfig(): StandardActionDocsConfig {
             title: "Datatypes",
             description: "All data types registered by the GLS Action.",
             heading: "GLS Action Types",
-            intro: `The GLS Action registers the following data types with the Hercules platform. These types are used as inputs and outputs of the GLS functions and can be referenced in your flows.`,
+            intro: `The GLS Action registers the following data types with the Hercules platform.\nThese types are used as inputs and outputs of the GLS functions and can be referenced in your flows.`,
         },
         functionsCopy: {
             title: "Functions",
@@ -33,7 +33,8 @@ export function createGlsDocsConfig(): StandardActionDocsConfig {
             },
             {
                 heading: "Shipment functions",
-                intro: `All shipment functions accept a common set of parameters in addition to their type-specific parameters. They call the GLS ShipIT API (\`POST /rs/shipments\`) and return a \`GLS_CREATE_PARCELS_RESPONSE\`.
+                intro: `All shipment functions accept a common set of parameters in addition to their type-specific parameters.
+They call the GLS ShipIT API (\`POST /rs/shipments\`) and return a \`GLS_CREATE_PARCELS_RESPONSE\`.
 
 **Common parameters for all shipment functions:**
 

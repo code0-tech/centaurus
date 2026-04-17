@@ -187,9 +187,10 @@ function generateDatatypes(config: StandardActionDocsConfig, registry: RegistryS
 title: ${config.typesCopy.title}
 description: ${config.typesCopy.description}
 ---
+
 import {TypeTable} from "fumadocs-ui/components/type-table";
 
-# ${config.typesCopy.heading}
+## ${config.typesCopy.heading}
 
 ${config.typesCopy.intro}
 
@@ -243,18 +244,20 @@ ${config.typesCopy.intro}
                 typeString += `${property.getName()}: {
                 description: '${docs.description}',
                 deprecated: ${docs.deprecated},
-                required: ${!property.isOptional()}, ${docs.link ? `\ntypeDescriptionLink: '#${docs.link}',` : ""}
-                type: '${propertyTypeText}', ${docs.default ? `\ndefault: ${docs.default}` : ""}
+                required: ${!property.isOptional()},${docs.link ? `\ntypeDescriptionLink: '#${docs.link}',` : ""}
+                type: '${propertyTypeText}',${docs.default ? `\ndefault: ${docs.default}` : ""}
             },
             `
             })
 
             generatedDoc += `
-# ${key}${globalDocumentation || "\nNo documentation provided for this type."}
+## ${key}
+
+${globalDocumentation || "No documentation provided for this type."}
 
 <TypeTable type={{${typeString}}}
 />
-            `
+`
         })
     })
 
@@ -327,8 +330,7 @@ ${config.functionsCopy.intro}
 
         generatedDoc += `
 ## ${group.heading}
-${group.intro ? `\n${group.intro}\n` : ""}
-`
+${group.intro ? `\n${group.intro}\n` : ""}`
 
         registry.runtimeFunctions.forEach(value => {
             const definition = value.definition
@@ -367,8 +369,6 @@ ${group.intro ? `\n${group.intro}\n` : ""}
 ${generateMarkdownTable(headers, rows)}
 
 Return Type: ${getTypeLink(returnType || null, config) || "Unknown"}
-
-#
 
 ${definition.documentation?.at(0)?.content || ""}
 
