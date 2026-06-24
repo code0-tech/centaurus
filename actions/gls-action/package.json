@@ -1,18 +1,23 @@
 {
   "name": "@code0-tech/gls-action",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit",
     "build": "vite build",
-    "lint": "eslint .",
-    "test": "vitest run",
-    "start": "node dist/main.js",
-    "generate:docs": "npm run build && node dist/generateDocs.js"
+    "start": "node dist/index.js"
   },
   "dependencies": {
-    "ts-morph": "^27.0.2"
+    "@code0-tech/hercules": "^1.0.0",
+    "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.3"
   }
 }

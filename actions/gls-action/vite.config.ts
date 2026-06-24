@@ -1,31 +1,18 @@
-import {defineConfig} from 'vite';
-import {resolve} from 'path';
+import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
     build: {
-        target: 'node18',
-        ssr: true,
-        outDir: 'dist',
-        emptyOutDir: true,
+        target: "node18",
+        ssr: resolve(__dirname, 'src/index.ts'),
         rollupOptions: {
-            input: {
-                main: resolve(__dirname, 'src/index.ts'),
-                generateDocs: resolve(__dirname, 'scripts/generateDocs.ts')
-            },
-            external: [
-                'fs',
-                'path',
-                'os',
-                'crypto',
-                'stream',
-                'util',
-                'events',
-                'buffer',
-                'url',
-                'zlib',
-                'node:fs',
-                'node:path'
-            ]
+            external: (id) =>
+                [
+                    'fs',
+                    'path',
+                    'typescript',
+                    '@code0-tech/hercules'
+                ].includes(id) || id.startsWith('node:')
         }
     }
 });
