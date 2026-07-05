@@ -65,7 +65,7 @@ const action = new Action(
     process.env.VERSION ?? "1.0.0",
     process.env.AQUILA_URL ?? "127.0.0.1:8081",
     "code0-tech",
-    "tabler:truck-delivery",
+    "codezero:gls",
     "GLS shipping integration: create, validate, cancel, reprint, and report shipments via the GLS ShipIt API.",
     [{ code: "en-US", content: "GLS Action" }],
     [
