@@ -4,9 +4,9 @@ import { z } from "zod";
 export const CustomContentSchema = z.object({
     CustomerLogo: z.string(),
     BarcodeContentType: z.enum(["TRACK_ID", "GLS_SHIPMENT_REFERENCE"]),
-    Barcode: z.string().optional(),
-    BarcodeType: z.enum(["EAN_128", "CODE_39"]).optional(),
-    HideShipperAddress: z.boolean().optional(),
+    Barcode: z.string().nullish(),
+    BarcodeType: z.enum(["EAN_128", "CODE_39"]).nullish(),
+    HideShipperAddress: z.boolean().nullish(),
 });
 export type CustomContent = z.infer<typeof CustomContentSchema>;
 

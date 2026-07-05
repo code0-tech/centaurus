@@ -3,13 +3,13 @@ import { z } from "zod";
 import { AddressSchema } from "./glsAddress.js";
 
 export const ShipperSchema = z.object({
-    AlternativeShipperAddress: AddressSchema.optional(),
-    Address: AddressSchema.optional(),
+    AlternativeShipperAddress: AddressSchema.nullish(),
+    Address: AddressSchema.nullish(),
 });
 export type ShipperSchemaType = z.infer<typeof ShipperSchema>;
 
 export const InternalShipperSchema = ShipperSchema.extend({
-    ContactID: z.string().optional(),
+    ContactID: z.string().nullish(),
 });
 export type InternalShipper = z.infer<typeof InternalShipperSchema>;
 

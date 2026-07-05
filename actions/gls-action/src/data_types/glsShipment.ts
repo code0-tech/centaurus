@@ -7,20 +7,18 @@ import { InternalShipmentUnitSchema, ShipmentUnitSchema } from "./glsShipmentUni
 import { InternalShipperSchema, ShipperSchema } from "./glsShipper.js";
 
 export const ShipmentSchema = z.object({
-    ShipmentReference: z.string().max(40).optional(),
-    ShipmentDate: z.iso.date().optional(),
-    IncotermCode: z.int().max(99).optional(),
-    Identifier: z.string().max(40).optional(),
+    ShipmentReference: z.string().max(40).nullish(),
+    ShippingDate: z.iso.date().nullish(),
+    IncotermCode: z.int().max(99).nullish(),
+    Identifier: z.string().max(40).nullish(),
     Product: z.enum(["PARCEL", "EXPRESS"]).default("PARCEL"),
-    ExpressAltDeliveryAllowed: z.boolean().optional(),
+    ExpressAltDeliveryAllowed: z.boolean().nullish(),
     Consignee: ConsigneeSchema,
-    Shipper: ShipperSchema.optional(),
-    Carrier: z.enum(["ROYALMAIL"]).optional(),
+    Shipper: ShipperSchema.nullish(),
+    Carrier: z.enum(["ROYALMAIL"]).nullish(),
     ShipmentUnit: z.lazy(() => ShipmentUnitSchema),
     Service: z.lazy(() => ShipmentServiceSchema),
-    Return: z.object({
-        Address: AddressSchema,
-    }).optional(),
+    Return: AddressSchema.nullish(),
 });
 export type Shipment = z.infer<typeof ShipmentSchema>;
 
@@ -32,6 +30,7 @@ export const InternalShipmentSchema = ShipmentSchema.extend({
     Shipper: InternalShipperSchema,
     Service: z.lazy(() => InternalShipmentServiceSchema),
     ShipmentUnit: z.lazy(() => InternalShipmentUnitSchema),
+    Return: z.object({ Address: AddressSchema }).optional(),
 });
 
 @Identifier("GLS_SHIPMENT")

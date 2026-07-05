@@ -7,8 +7,8 @@ import { CustomContentSchema } from "./glsCustomContent.js";
 export const ShipmentRequestDataSchema = z.object({
     Shipment: ShipmentSchema,
     PrintingOptions: PrintingOptionsSchema,
-    ReturnOptions: ReturnOptionsSchema.optional(),
-    CustomContent: CustomContentSchema.optional(),
+    ReturnOptions: ReturnOptionsSchema.nullish(),
+    CustomContent: CustomContentSchema.nullish(),
 });
 export type ShipmentRequestData = z.infer<typeof ShipmentRequestDataSchema>;
 

@@ -27,12 +27,12 @@ export const ReturnLabelsSchema = z.object({
 export type ReturnLabels = z.infer<typeof ReturnLabelsSchema>;
 
 export const PrintingOptionsSchema = z.object({
-    ReturnLabels: ReturnLabelsSchema.optional(),
-    useDefault: z.string().max(7).optional(),
+    ReturnLabels: ReturnLabelsSchema.nullish(),
+    UseDefault: z.string().max(7).nullish(),
     DefinePrinter: z.object({
-        LabelPrinter: z.string().max(255).optional(),
-        DocumentPrinter: z.string().max(255).optional(),
-    }).optional(),
+        LabelPrinter: z.string().max(255).nullish(),
+        DocumentPrinter: z.string().max(255).nullish(),
+    }).nullish(),
 });
 export type PrintingOptions = z.infer<typeof PrintingOptionsSchema>;
 

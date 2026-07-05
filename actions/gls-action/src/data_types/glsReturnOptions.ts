@@ -2,8 +2,8 @@ import { DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules";
 import { z } from "zod";
 
 export const ReturnOptionsSchema = z.object({
-    ReturnPrintData: z.boolean().default(true).optional(),
-    ReturnRoutingInfo: z.boolean().default(true).optional(),
+    ReturnPrintData: z.boolean().default(true).nullish(),
+    ReturnRoutingInfo: z.boolean().default(true).nullish(),
 });
 export type ReturnOptions = z.infer<typeof ReturnOptionsSchema>;
 

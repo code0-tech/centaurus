@@ -16,14 +16,10 @@ export type AllowedServicesRequestData = z.infer<typeof AllowedServicesRequestDa
 
 export const AllowedServicesResponseDataSchema = z.object({
     AllowedServices: z.array(
-        z.union([
-            z.object({
-                ServiceName: z.string(),
-            }).strict(),
-            z.object({
-                ProductName: z.string(),
-            }).strict(),
-        ])
+        z.object({
+            ServiceName: z.string().optional(),
+            ProductName: z.string().optional(),
+        })
     ),
 });
 export type AllowedServicesResponseData = z.infer<typeof AllowedServicesResponseDataSchema>;
