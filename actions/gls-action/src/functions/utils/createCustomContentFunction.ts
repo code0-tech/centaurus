@@ -12,9 +12,9 @@ import {CustomContent} from "../../data_types/glsCustomContent.js";
 
 @Identifier("createCustomContent")
 @Signature("(barcodeContentType: \"TRACK_ID\"|\"GLS_SHIPMENT_REFERENCE\", customerLogo: string, hideShipperAddress?: boolean, barcodeType?: \"EAN_128\"|\"CODE_39\", barcode?: string): GLS_CUSTOM_CONTENT")
-@Name({code: "en-US", content: "Create custom content"})
-@DisplayIcon("tabler:truck-delivery")
-@DisplayMessage({code: "en-US", content: "Create custom content"})
+@Name({code: "en-US", content: "Create GLS custom label content"})
+@DisplayIcon("codezero:gls")
+@DisplayMessage({code: "en-US", content: "Create GLS custom label content"})
 @Documentation({
     code: "en-US",
     content: "Creates custom content settings for GLS labels, including logos and barcodes.",

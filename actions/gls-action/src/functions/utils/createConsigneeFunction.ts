@@ -13,9 +13,9 @@ import {Consignee} from "../../data_types/glsConsignee.js";
 
 @Identifier("createConsignee")
 @Signature("(Address: GLS_ADDRESS, ConsigneeID?: string, CostCenter?: string, Category?: \"BUSINESS\"|\"PRIVATE\"): GLS_CONSIGNEE")
-@Name({code: "en-US", content: "Create consignee for shipment"})
-@DisplayIcon("tabler:truck-delivery")
-@DisplayMessage({code: "en-US", content: "Create consignee for shipment"})
+@Name({code: "en-US", content: "Create GLS consignee object"})
+@DisplayIcon("codezero:gls")
+@DisplayMessage({code: "en-US", content: "Create GLS consignee object with address ${Address}"})
 @Documentation({
     code: "en-US",
     content: "Creates a GLS consignee (recipient) object for use in shipments.",

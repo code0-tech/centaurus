@@ -15,9 +15,9 @@ import {ShipmentWithoutServices} from "../../data_types/glsShipment.js";
 
 @Identifier("createShipment")
 @Signature("(Consignee: GLS_CONSIGNEE, ShipmentUnit: GLS_SHIPMENT_UNIT, Product?: \"PARCEL\"|\"EXPRESS\", ShipmentReference?: string, ShippingDate?: string, IncotermCode?: number, Identifier?: string, ExpressAltDeliveryAllowed?: boolean, Shipper?: GLS_SHIPPER, Carrier?: \"ROYALMAIL\", Return?: GLS_ADDRESS): GLS_SHIPMENT_WITHOUT_SERVICES")
-@Name({code: "en-US", content: "Create parcel shipment"})
-@DisplayIcon("tabler:truck-delivery")
-@DisplayMessage({code: "en-US", content: "Create parcel shipment"})
+@Name({code: "en-US", content: "Create GLS shipment object"})
+@DisplayIcon("codezero:gls")
+@DisplayMessage({code: "en-US", content: "Create GLS shipment to consignee ${Consignee}"})
 @Documentation({
     code: "en-US",
     content: "Creates a GLS shipment object without services for use with the create shipment functions.",

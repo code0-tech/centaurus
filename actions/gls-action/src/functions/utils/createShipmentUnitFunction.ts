@@ -13,9 +13,9 @@ import {ShipmentUnit} from "../../data_types/glsShipmentUnit.js";
 
 @Identifier("createShipmentUnit")
 @Signature("(weight: number, shipmentUnitReference?: string, partnerParcelNumber?: string, note1?: string, note2?: string, shipmentUnitService?: GLS_UNIT_SERVICE): GLS_SHIPMENT_UNIT")
-@Name({code: "en-US", content: "Create parcel shipment unit"})
-@DisplayIcon("tabler:truck-delivery")
-@DisplayMessage({code: "en-US", content: "Create parcel shipment unit"})
+@Name({code: "en-US", content: "Create GLS shipment unit object"})
+@DisplayIcon("codezero:gls")
+@DisplayMessage({code: "en-US", content: "Create GLS shipment unit object of weight ${weight}"})
 @Documentation({
     code: "en-US",
     content: "Creates a GLS shipment unit (an individual parcel within a shipment).",

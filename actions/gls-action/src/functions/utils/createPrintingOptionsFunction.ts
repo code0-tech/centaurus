@@ -12,9 +12,9 @@ import {PrintingOptions} from "../../data_types/glsPrintingOptions.js";
 
 @Identifier("createPrintingOptions")
 @Signature("(TemplateSet?: \"NONE\"|\"D_200\"|\"PF_4_I\"|\"PF_4_I_200\"|\"PF_4_I_300\"|\"PF_8_D_200\"|\"T_200_BF\"|\"T_300_BF\"|\"ZPL_200\"|\"ZPL_200_TRACKID_EAN_128\"|\"ZPL_200_TRACKID_CODE_39\"|\"ZPL_200_REFNO_EAN_128\"|\"ZPL_200_REFNO_CODE_39\"|\"ZPL_300\"|\"ZPL_300_TRACKID_EAN_128\"|\"ZPL_300_TRACKID_CODE_39\"|\"ZPL_300_REFNO_EAN_128\"|\"ZPL_300_REFNO_CODE_39\", LabelFormat?: \"PDF\"|\"ZEBRA\"|\"INTERMEC\"|\"DATAMAX\"|\"TOSHIBA\"|\"PNG\", UseDefault?: string, LabelPrinter?: string, DocumentPrinter?: string): GLS_PRINTING_OPTIONS")
-@Name({code: "en-US", content: "Create printing options"})
-@DisplayIcon("tabler:truck-delivery")
-@DisplayMessage({code: "en-US", content: "Create printing settings in format {TemplateSet} as {LabelFormat}"})
+@Name({code: "en-US", content: "Create GLS printing settings"})
+@DisplayIcon("codezero:gls")
+@DisplayMessage({code: "en-US", content: "Create GLS printing settings in format ${TemplateSet} as ${LabelFormat}"})
 @Documentation({
     code: "en-US",
     content: "Creates a GLS printing options object that controls how shipment labels are generated and printed.",
