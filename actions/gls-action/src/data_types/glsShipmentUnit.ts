@@ -1,6 +1,6 @@
-import { DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules";
-import { z } from "zod";
-import { InternalUnitServiceSchema, UnitServiceSchema } from "./glsUnitService.js";
+import {DisplayMessage, Identifier, Name, Schema} from "@code0-tech/hercules";
+import {z} from "zod";
+import {InternalUnitServiceSchema, UnitServiceSchema} from "./glsUnitService.js";
 
 export const ShipmentUnitSchema = z.array(
     z.object({
@@ -22,7 +22,8 @@ export const InternalShipmentUnitSchema = ShipmentUnitSchema.element
     .min(1);
 
 @Identifier("GLS_SHIPMENT_UNIT")
-@Name({ code: "en-US", content: "Shipment Unit" })
-@DisplayMessage({ code: "en-US", content: "Shipment Unit" })
+@Name({code: "en-US", content: "Shipment Unit"})
+@DisplayMessage({code: "en-US", content: "Shipment Unit"})
 @Schema(ShipmentUnitSchema)
-export class GlsShipmentUnitDataType {}
+export class GlsShipmentUnitDataType {
+}
