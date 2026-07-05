@@ -1,5 +1,5 @@
 import {
-    Description,
+    Description, DisplayIcon,
     DisplayMessage,
     Documentation,
     FunctionContext,
@@ -24,7 +24,8 @@ import {
 @Identifier("createFlexDeliveryShipment")
 @Signature(`(${SHARED_SERVICE_SIGNATURE}): GLS_CREATE_PARCELS_RESPONSE`)
 @Name({ code: "en-US", content: "Create flex delivery shipment" })
-@DisplayMessage({ code: "en-US", content: "Create flex delivery shipment" })
+@DisplayIcon("tabler:truck-delivery")
+@DisplayMessage({ code: "en-US", content: "Send flex delivery shipment" })
 @Documentation({
     code: "en-US",
     content: "Creates a shipment with flexible delivery - the recipient can redirect or reschedule delivery.",
@@ -45,6 +46,6 @@ export class CreateFlexDeliveryShipmentFunction {
         customContent?: CustomContent,
         returnOptions?: ReturnOptions
     ): Promise<CreateParcelsResponse> {
-        return postShipmentHelper(context, [{ FlexDeliveryService: {} }], shipment, printingOptions, customContent, returnOptions);
+        return postShipmentHelper(context, [{ Service: { ServiceName: "service_flexdelivery" } }], shipment, printingOptions, customContent, returnOptions);
     }
 }

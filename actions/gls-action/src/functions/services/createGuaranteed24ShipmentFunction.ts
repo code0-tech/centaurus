@@ -45,6 +45,6 @@ export class CreateGuaranteed24ShipmentFunction {
         customContent?: CustomContent,
         returnOptions?: ReturnOptions
     ): Promise<CreateParcelsResponse> {
-        return postShipmentHelper(context, [{ Guaranteed24Service: {} }], shipment, printingOptions, customContent, returnOptions);
+        return postShipmentHelper(context, [{ Service: { ServiceName: "service_guaranteed24" } }], shipment, printingOptions, customContent, returnOptions);
     }
 }

@@ -1,5 +1,6 @@
 import {
     Description,
+    DisplayIcon,
     DisplayMessage,
     Documentation,
     Identifier,
@@ -7,29 +8,75 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { PrintingOptions, ReturnLabels } from "../../data_types/glsPrintingOptions.js";
+import {PrintingOptions} from "../../data_types/glsPrintingOptions.js";
 
 @Identifier("createPrintingOptions")
-@Signature("(returnLabels: RETURN_LABELS): GLS_PRINTING_OPTIONS")
-@Name({ code: "en-US", content: "Create printing options" })
-@DisplayMessage({ code: "en-US", content: "Create printing options" })
+@Signature("(TemplateSet?: \"NONE\"|\"D_200\"|\"PF_4_I\"|\"PF_4_I_200\"|\"PF_4_I_300\"|\"PF_8_D_200\"|\"T_200_BF\"|\"T_300_BF\"|\"ZPL_200\"|\"ZPL_200_TRACKID_EAN_128\"|\"ZPL_200_TRACKID_CODE_39\"|\"ZPL_200_REFNO_EAN_128\"|\"ZPL_200_REFNO_CODE_39\"|\"ZPL_300\"|\"ZPL_300_TRACKID_EAN_128\"|\"ZPL_300_TRACKID_CODE_39\"|\"ZPL_300_REFNO_EAN_128\"|\"ZPL_300_REFNO_CODE_39\", LabelFormat?: \"PDF\"|\"ZEBRA\"|\"INTERMEC\"|\"DATAMAX\"|\"TOSHIBA\"|\"PNG\", UseDefault?: string, LabelPrinter?: string, DocumentPrinter?: string): GLS_PRINTING_OPTIONS")
+@Name({code: "en-US", content: "Create printing options"})
+@DisplayIcon("tabler:truck-delivery")
+@DisplayMessage({code: "en-US", content: "Create printing settings in format {TemplateSet} as {LabelFormat}"})
 @Documentation({
     code: "en-US",
-    content: "Creates GLS printing options that control how labels are generated.",
+    content: "Creates a GLS printing options object that controls how shipment labels are generated and printed.",
 })
 @Description({
     code: "en-US",
-    content: "Creates a GLS printing options object which can be used when creating shipments.",
+    content: "Creates a GLS printing options object that controls how shipment labels are generated and printed.",
 })
 @Parameter({
-    runtimeName: "returnLabels",
-    name: [{ code: "en-US", content: "Return labels" }],
-    description: [{ code: "en-US", content: "The return labels to be included in the shipment." }],
+    runtimeName: "TemplateSet",
+    name: [{code: "en-US", content: "Template set"}],
+    description: [{
+        code: "en-US",
+        content: "The label template set to use for return labels. Required together with LabelFormat to generate return labels."
+    }],
+    optional: true,
+})
+@Parameter({
+    runtimeName: "LabelFormat",
+    name: [{code: "en-US", content: "Label format"}],
+    description: [{
+        code: "en-US",
+        content: "The file format for return labels. Required together with TemplateSet to generate return labels."
+    }],
+    optional: true,
+})
+@Parameter({
+    runtimeName: "UseDefault",
+    name: [{code: "en-US", content: "Use default"}],
+    description: [{code: "en-US", content: "Identifier of the default printing profile to use. Max 7 characters."}],
+    optional: true,
+})
+@Parameter({
+    runtimeName: "LabelPrinter",
+    name: [{code: "en-US", content: "Label printer"}],
+    description: [{code: "en-US", content: "Name of the printer to use for shipment labels. Max 255 characters."}],
+    optional: true,
+})
+@Parameter({
+    runtimeName: "DocumentPrinter",
+    name: [{code: "en-US", content: "Document printer"}],
+    description: [{code: "en-US", content: "Name of the printer to use for documents. Max 255 characters."}],
+    optional: true,
 })
 export class CreatePrintingOptionsFunction {
-    run(_context: unknown, returnLabels: ReturnLabels): PrintingOptions {
+    run(
+        _context: unknown,
+        TemplateSet?: "NONE" | "D_200" | "PF_4_I" | "PF_4_I_200" | "PF_4_I_300" | "PF_8_D_200" | "T_200_BF" | "T_300_BF" | "ZPL_200" | "ZPL_200_TRACKID_EAN_128" | "ZPL_200_TRACKID_CODE_39" | "ZPL_200_REFNO_EAN_128" | "ZPL_200_REFNO_CODE_39" | "ZPL_300" | "ZPL_300_TRACKID_EAN_128" | "ZPL_300_TRACKID_CODE_39" | "ZPL_300_REFNO_EAN_128" | "ZPL_300_REFNO_CODE_39",
+        LabelFormat?: "PDF" | "ZEBRA" | "INTERMEC" | "DATAMAX" | "TOSHIBA" | "PNG",
+        UseDefault?: string,
+        LabelPrinter?: string,
+        DocumentPrinter?: string,
+    ): PrintingOptions {
         return {
-            ReturnLabels: returnLabels,
+            ...(TemplateSet && LabelFormat ? {ReturnLabels: {TemplateSet, LabelFormat}} : {}),
+            ...(UseDefault !== undefined ? {UseDefault} : {}),
+            ...((LabelPrinter || DocumentPrinter) ? {
+                DefinePrinter: {
+                    ...(LabelPrinter !== undefined ? {LabelPrinter} : {}),
+                    ...(DocumentPrinter !== undefined ? {DocumentPrinter} : {}),
+                },
+            } : {}),
         };
     }
 }

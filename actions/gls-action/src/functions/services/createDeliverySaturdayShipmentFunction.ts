@@ -43,6 +43,6 @@ export class CreateDeliverySaturdayShipmentFunction {
         if (shipment.Product != "EXPRESS") {
             throw new RuntimeError("INVALID_PRODUCT", "The product for Delivery Saturday service must be EXPRESS.");
         }
-        return postShipmentHelper(context, [{ SaturdayService: {} }], shipment, printingOptions, customContent, returnOptions);
+        return postShipmentHelper(context, [{ Service: { ServiceName: "service_Saturday" } }], shipment, printingOptions, customContent, returnOptions);
     }
 }

@@ -45,6 +45,6 @@ export class CreateSignatureShipmentFunction {
         customContent?: CustomContent,
         returnOptions?: ReturnOptions
     ): Promise<CreateParcelsResponse> {
-        return postShipmentHelper(context, [{ SignatureService: {} }], shipment, printingOptions, customContent, returnOptions);
+        return postShipmentHelper(context, [{ Service: { ServiceName: "service_signature" } }], shipment, printingOptions, customContent, returnOptions);
     }
 }

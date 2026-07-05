@@ -45,6 +45,6 @@ export class CreateTyreShipmentFunction {
         customContent?: CustomContent,
         returnOptions?: ReturnOptions
     ): Promise<CreateParcelsResponse> {
-        return postShipmentHelper(context, [{ TyreService: {} }], shipment, printingOptions, customContent, returnOptions);
+        return postShipmentHelper(context, [{ Service: { ServiceName: "service_tyre" } }], shipment, printingOptions, customContent, returnOptions);
     }
 }

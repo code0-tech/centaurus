@@ -1,5 +1,5 @@
 import {
-    Description,
+    Description, DisplayIcon,
     DisplayMessage,
     Documentation,
     Identifier,
@@ -10,9 +10,10 @@ import {
 import { Address } from "../../data_types/glsAddress.js";
 
 @Identifier("createAddress")
-@Signature("(Name1: string, CountryCode: string, City: string, Street: string, ZIPCode: string, Name2?: string, Name3?: string, Province?: string, StreetNumber?: string, ContactPerson?: string, FixedLinePhonenumber?: string, MobilePhonenumber?: string, Email?: string): GLS_ADDRESS")
+@Signature("(Name1: string, CountryCode: string, City: string, Street: string, ZIPCode: string, Name2?: string, Name3?: string, Province?: string, StreetNumber?: string, ContactPerson?: string, FixedLinePhonenumber?: string, MobilePhoneNumber?: string, Email?: string): GLS_ADDRESS")
 @Name({ code: "en-US", content: "Create address" })
-@DisplayMessage({ code: "en-US", content: "Create address" })
+@DisplayIcon("tabler:truck-delivery")
+@DisplayMessage({ code: "en-US", content: "Create address for ${Name1}" })
 @Documentation({
     code: "en-US",
     content: "Creates a GLS address object (`GLS_ADDRESS`) for use in shipments as consignee, shipper, or return address.",
@@ -74,7 +75,7 @@ import { Address } from "../../data_types/glsAddress.js";
     description: [{ code: "en-US", content: "The fixed line phone number for the address. Max length is 35 characters." }],
 })
 @Parameter({
-    runtimeName: "MobilePhonenumber",
+    runtimeName: "MobilePhoneNumber",
     name: [{ code: "en-US", content: "Mobile phone number" }],
     description: [{ code: "en-US", content: "The mobile phone number for the address. Max length is 35 characters." }],
 })
@@ -97,7 +98,7 @@ export class CreateAddressFunction {
         StreetNumber?: string,
         ContactPerson?: string,
         FixedLinePhonenumber?: string,
-        MobilePhonenumber?: string,
+        MobilePhoneNumber?: string,
         Email?: string
     ): Address {
         return {
@@ -111,7 +112,7 @@ export class CreateAddressFunction {
             StreetNumber,
             ContactPerson,
             FixedLinePhonenumber,
-            MobilePhonenumber,
+            MobilePhoneNumber,
             eMail: Email,
             ZIPCode,
         };

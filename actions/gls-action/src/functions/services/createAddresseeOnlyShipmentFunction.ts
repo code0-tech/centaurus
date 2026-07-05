@@ -45,6 +45,6 @@ export class CreateAddresseeOnlyShipmentFunction {
         customContent?: CustomContent,
         returnOptions?: ReturnOptions
     ): Promise<CreateParcelsResponse> {
-        return postShipmentHelper(context, [{ AddresseeOnlyService: {} }], shipment, printingOptions, customContent, returnOptions);
+        return postShipmentHelper(context, [{ Service: { ServiceName: "service_addresseeonly" } }], shipment, printingOptions, customContent, returnOptions);
     }
 }

@@ -1,3 +1,5 @@
+//TODO: Why is the request data here wrapped within a object and isn't a direct parameter of 3
+
 import axios from "axios";
 import {
     Description,
@@ -49,7 +51,7 @@ export class GetAllowedServicesFunction {
             if (typeof error === "string") {
                 throw new RuntimeError("ERROR_CREATING_GLS_SHIPMENT", error);
             }
-            throw new RuntimeError("ERROR_CREATING_GLS_SHIPMENT", "An error occurred while creating the shipment.");
+            throw new RuntimeError("ERROR_CREATING_GLS_SHIPMENT", "An error occurred while fetching the allowed GLS services.");
         }
     }
 }

@@ -1,5 +1,6 @@
 import {
     Description,
+    DisplayIcon,
     DisplayMessage,
     Documentation,
     Identifier,
@@ -7,13 +8,14 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { Address } from "../../data_types/glsAddress.js";
-import { Consignee } from "../../data_types/glsConsignee.js";
+import {Address} from "../../data_types/glsAddress.js";
+import {Consignee} from "../../data_types/glsConsignee.js";
 
 @Identifier("createConsignee")
-@Signature("(consigneeId: string, costCenter: string, Address: GLS_ADDRESS, Category: \"BUSINESS\"|\"PRIVATE\"): GLS_CONSIGNEE")
-@Name({ code: "en-US", content: "Create consignee" })
-@DisplayMessage({ code: "en-US", content: "Create consignee" })
+@Signature("(Address: GLS_ADDRESS, ConsigneeID?: string, CostCenter?: string, Category?: \"BUSINESS\"|\"PRIVATE\"): GLS_CONSIGNEE")
+@Name({code: "en-US", content: "Create consignee for shipment"})
+@DisplayIcon("tabler:truck-delivery")
+@DisplayMessage({code: "en-US", content: "Create consignee for shipment"})
 @Documentation({
     code: "en-US",
     content: "Creates a GLS consignee (recipient) object for use in shipments.",
@@ -23,38 +25,41 @@ import { Consignee } from "../../data_types/glsConsignee.js";
     content: "Creates a GLS consignee (recipient) object for use in shipments.",
 })
 @Parameter({
-    runtimeName: "consigneeId",
-    name: [{ code: "en-US", content: "Consignee ID" }],
-    description: [{ code: "en-US", content: "The ID of the consignee. Max length is 40 characters." }],
-})
-@Parameter({
-    runtimeName: "costCenter",
-    name: [{ code: "en-US", content: "Cost center" }],
-    description: [{ code: "en-US", content: "The cost center for the consignee. Max length is 80 characters." }],
-})
-@Parameter({
     runtimeName: "Address",
-    name: [{ code: "en-US", content: "Address" }],
-    description: [{ code: "en-US", content: "The address of the consignee." }],
+    name: [{code: "en-US", content: "Address"}],
+    description: [{code: "en-US", content: "The address of the consignee."}],
+})
+@Parameter({
+    runtimeName: "ConsigneeID",
+    name: [{code: "en-US", content: "Consignee ID"}],
+    description: [{code: "en-US", content: "A customer-defined identifier for the consignee. Max 40 characters."}],
+    optional: true,
+})
+@Parameter({
+    runtimeName: "CostCenter",
+    name: [{code: "en-US", content: "Cost center"}],
+    description: [{code: "en-US", content: "The cost center to assign to the consignee. Max 80 characters."}],
+    optional: true,
 })
 @Parameter({
     runtimeName: "Category",
-    name: [{ code: "en-US", content: "Category" }],
-    description: [{ code: "en-US", content: "The category of the consignee. Can be either BUSINESS or PRIVATE." }],
+    name: [{code: "en-US", content: "Category"}],
+    description: [{code: "en-US", content: "The category of the consignee. Can be either BUSINESS or PRIVATE."}],
+    optional: true,
 })
 export class CreateConsigneeFunction {
     run(
         _context: unknown,
-        consigneeId: string,
-        costCenter: string,
         Address: Address,
-        Category: "BUSINESS" | "PRIVATE"
+        ConsigneeID?: string,
+        CostCenter?: string,
+        Category?: "BUSINESS" | "PRIVATE",
     ): Consignee {
         return {
             Address,
+            ConsigneeID,
+            CostCenter,
             Category,
-            ConsigneeID: consigneeId,
-            CostCenter: costCenter,
         };
     }
 }

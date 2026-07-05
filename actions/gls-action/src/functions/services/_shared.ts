@@ -1,7 +1,7 @@
 import { Parameter } from "@code0-tech/hercules";
 
 export const SHARED_SERVICE_SIGNATURE =
-    "shipment: GLS_SHIPMENT_WITHOUT_SERVICES, printingOptions: GLS_PRINTING_OPTIONS, returnOptions?: GLS_RETURN_OPTIONS, customContent?: GLS_CUSTOM_CONTENT";
+    "shipment: GLS_SHIPMENT_WITHOUT_SERVICES, printingOptions: GLS_PRINTING_OPTIONS, customContent?: GLS_CUSTOM_CONTENT, returnOptions?: GLS_RETURN_OPTIONS";
 
 export const SharedShipmentParameter = Parameter({
     runtimeName: "shipment",

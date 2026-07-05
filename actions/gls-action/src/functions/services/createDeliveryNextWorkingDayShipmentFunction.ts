@@ -49,6 +49,6 @@ export class CreateDeliveryNextWorkingDayShipmentFunction {
         if (shipment.Product != "EXPRESS") {
             throw new RuntimeError("INVALID_PRODUCT", "The product for Delivery Next Working Day service must be EXPRESS.");
         }
-        return postShipmentHelper(context, [{ EOB: {} }], shipment, printingOptions, customContent, returnOptions);
+        return postShipmentHelper(context, [{ Service: { ServiceName: "service_eob" } }], shipment, printingOptions, customContent, returnOptions);
     }
 }
