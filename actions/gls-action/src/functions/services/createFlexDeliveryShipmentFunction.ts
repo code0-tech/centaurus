@@ -23,8 +23,8 @@ import {
 
 @Identifier("createFlexDeliveryShipment")
 @Signature(`(${SHARED_SERVICE_SIGNATURE}): GLS_CREATE_PARCELS_RESPONSE`)
-@Name({ code: "en-US", content: "Create flex delivery shipment" })
-@DisplayIcon("tabler:truck-delivery")
+@Name({ code: "en-US", content: "Send flex delivery shipment" })
+@DisplayIcon("codezero:gls")
 @DisplayMessage({ code: "en-US", content: "Send flex delivery shipment" })
 @Documentation({
     code: "en-US",
