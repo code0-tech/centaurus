@@ -1,51 +1,64 @@
 import "reflect-metadata";
-import { Action, CodeZeroEvent } from "@code0-tech/hercules";
+import {Action, CodeZeroEvent} from "@code0-tech/hercules";
 
-import { GlsAddressDataType } from "./data_types/glsAddress.js";
-import { GlsAllowedServicesRequestDataType, GlsAllowedServicesResponseDataType } from "./data_types/glsAllowedServices.js";
-import { GlsCancelShipmentRequestDataType, GlsCancelShipmentResponseDataType } from "./data_types/glsCancelShipment.js";
-import { GlsConsigneeDataType } from "./data_types/glsConsignee.js";
-import { GlsCreateParcelsResponseDataType } from "./data_types/glsCreateParcelsResponse.js";
-import { GlsCustomContentDataType } from "./data_types/glsCustomContent.js";
-import { GlsEndOfDayRequestDataType, GlsEndOfDayResponseDataType } from "./data_types/glsEndOfDay.js";
-import { GlsPrintingOptionsDataType, ReturnLabelsDataType } from "./data_types/glsPrintingOptions.js";
-import { GlsReprintParcelRequestDataType, GlsReprintParcelResponseDataType } from "./data_types/glsReprintParcel.js";
-import { GlsReturnOptionsDataType } from "./data_types/glsReturnOptions.js";
-import { GlsShipmentDataType, GlsShipmentWithoutServicesDataType } from "./data_types/glsShipment.js";
-import { GlsShipmentUnitDataType } from "./data_types/glsShipmentUnit.js";
-import { GlsShipperDataType } from "./data_types/glsShipper.js";
-import { GlsUnitServiceDataType } from "./data_types/glsUnitService.js";
-import { GlsUpdateParcelWeightRequestDataType, GlsUpdateParcelWeightResponseDataType } from "./data_types/glsUpdateParcelWeight.js";
-import { GlsValidateShipmentRequestDataType, GlsValidateShipmentResponseDataType } from "./data_types/glsValidateShipment.js";
+import {GlsAddressDataType} from "./data_types/glsAddress.js";
+import {
+    GlsAllowedServicesRequestDataType,
+    GlsAllowedServicesResponseDataType
+} from "./data_types/glsAllowedServices.js";
+import {GlsCancelShipmentRequestDataType, GlsCancelShipmentResponseDataType} from "./data_types/glsCancelShipment.js";
+import {GlsConsigneeDataType} from "./data_types/glsConsignee.js";
+import {GlsCreateParcelsResponseDataType} from "./data_types/glsCreateParcelsResponse.js";
+import {GlsCustomContentDataType} from "./data_types/glsCustomContent.js";
+import {GlsEndOfDayRequestDataType, GlsEndOfDayResponseDataType} from "./data_types/glsEndOfDay.js";
+import {GlsPrintingOptionsDataType, ReturnLabelsDataType} from "./data_types/glsPrintingOptions.js";
+import {GlsReprintParcelRequestDataType, GlsReprintParcelResponseDataType} from "./data_types/glsReprintParcel.js";
+import {GlsReturnOptionsDataType} from "./data_types/glsReturnOptions.js";
+import {GlsShipmentDataType, GlsShipmentWithoutServicesDataType} from "./data_types/glsShipment.js";
+import {GlsShipmentUnitDataType} from "./data_types/glsShipmentUnit.js";
+import {GlsShipperDataType} from "./data_types/glsShipper.js";
+import {GlsUnitServiceDataType} from "./data_types/glsUnitService.js";
+import {
+    GlsUpdateParcelWeightRequestDataType,
+    GlsUpdateParcelWeightResponseDataType
+} from "./data_types/glsUpdateParcelWeight.js";
+import {
+    GlsValidateShipmentRequestDataType,
+    GlsValidateShipmentResponseDataType
+} from "./data_types/glsValidateShipment.js";
 
-import { CancelShipmentFunction } from "./functions/cancelShipmentFunction.js";
-import { GetAllowedServicesFunction } from "./functions/getAllowedServicesFunction.js";
-import { GetEndOfDayReportFunction } from "./functions/getEndOfDayReportFunction.js";
-import { ReprintParcelFunction } from "./functions/reprintParcelFunction.js";
-import { UpdateParcelWeightFunction } from "./functions/updateParcelWeightFunction.js";
-import { ValidateShipmentFunction } from "./functions/validateShipmentFunction.js";
+import {CancelShipmentFunction} from "./functions/cancelShipmentFunction.js";
+import {GetAllowedServicesFunction} from "./functions/getAllowedServicesFunction.js";
+import {GetEndOfDayReportFunction} from "./functions/getEndOfDayReportFunction.js";
+import {ReprintParcelFunction} from "./functions/reprintParcelFunction.js";
+import {UpdateParcelWeightFunction} from "./functions/updateParcelWeightFunction.js";
+import {ValidateShipmentFunction} from "./functions/validateShipmentFunction.js";
 
-import { CreateAddresseeOnlyShipmentFunction } from "./functions/services/createAddresseeOnlyShipmentFunction.js";
-import { CreateDeliveryAtWorkShipmentFunction } from "./functions/services/createDeliveryAtWorkShipmentFunction.js";
-import { CreateDeliveryNextWorkingDayShipmentFunction } from "./functions/services/createDeliveryNextWorkingDayShipmentFunction.js";
-import { CreateDeliverySaturdayShipmentFunction } from "./functions/services/createDeliverySaturdayShipmentFunction.js";
-import { CreateDepositShipmentFunction } from "./functions/services/createDepositShipmentFunction.js";
-import { CreateExchangeShipmentFunction } from "./functions/services/createExchangeShipmentFunction.js";
-import { CreateFlexDeliveryShipmentFunction } from "./functions/services/createFlexDeliveryShipmentFunction.js";
-import { CreateGuaranteed24ShipmentFunction } from "./functions/services/createGuaranteed24ShipmentFunction.js";
-import { CreateIdentPinShipmentFunction } from "./functions/services/createIdentPinShipmentFunction.js";
-import { CreateIdentShipmentFunction } from "./functions/services/createIdentShipmentFunction.js";
-import { CreatePickAndShipShipmentFunction } from "./functions/services/createPickAndShipShipmentFunction.js";
-import { CreateShopDeliveryShipmentFunction } from "./functions/services/createShopDeliveryShipmentFunction.js";
-import { CreateShopReturnShipmentFunction } from "./functions/services/createShopReturnShipmentFunction.js";
-import { CreateSignatureShipmentFunction } from "./functions/services/createSignatureShipmentFunction.js";
-import { CreateTyreShipmentFunction } from "./functions/services/createTyreShipmentFunction.js";
+import {CreateAddresseeOnlyShipmentFunction} from "./functions/services/createAddresseeOnlyShipmentFunction.js";
+import {CreateDeliveryAtWorkShipmentFunction} from "./functions/services/createDeliveryAtWorkShipmentFunction.js";
+import {
+    CreateDeliveryNextWorkingDayShipmentFunction
+} from "./functions/services/createDeliveryNextWorkingDayShipmentFunction.js";
+import {CreateDeliverySaturdayShipmentFunction} from "./functions/services/createDeliverySaturdayShipmentFunction.js";
+import {CreateDepositShipmentFunction} from "./functions/services/createDepositShipmentFunction.js";
+import {CreateExchangeShipmentFunction} from "./functions/services/createExchangeShipmentFunction.js";
+import {CreateFlexDeliveryShipmentFunction} from "./functions/services/createFlexDeliveryShipmentFunction.js";
+import {CreateGuaranteed24ShipmentFunction} from "./functions/services/createGuaranteed24ShipmentFunction.js";
+import {CreateIdentPinShipmentFunction} from "./functions/services/createIdentPinShipmentFunction.js";
+import {CreateIdentShipmentFunction} from "./functions/services/createIdentShipmentFunction.js";
+import {CreatePickAndShipShipmentFunction} from "./functions/services/createPickAndShipShipmentFunction.js";
+import {CreateShopDeliveryShipmentFunction} from "./functions/services/createShopDeliveryShipmentFunction.js";
+import {CreateShopReturnShipmentFunction} from "./functions/services/createShopReturnShipmentFunction.js";
+import {CreateSignatureShipmentFunction} from "./functions/services/createSignatureShipmentFunction.js";
+import {CreateTyreShipmentFunction} from "./functions/services/createTyreShipmentFunction.js";
 
-import { CreateAddressFunction } from "./functions/utils/createAddressFunction.js";
-import { CreateConsigneeFunction } from "./functions/utils/createConsigneeFunction.js";
-import { CreateCustomContentFunction } from "./functions/utils/createCustomContentFunction.js";
-import { CreatePrintingOptionsFunction } from "./functions/utils/createPrintingOptionsFunction.js";
-import { CreateShipmentUnitFunction } from "./functions/utils/createShipmentUnitFunction.js";
+import {CreateAddressFunction} from "./functions/utils/createAddressFunction.js";
+import {CreateConsigneeFunction} from "./functions/utils/createConsigneeFunction.js";
+import {CreateCustomContentFunction} from "./functions/utils/createCustomContentFunction.js";
+import {CreatePrintingOptionsFunction} from "./functions/utils/createPrintingOptionsFunction.js";
+import {CreateShipmentFunction} from "./functions/utils/createShipmentFunction.js";
+import {CreateShipmentUnitFunction} from "./functions/utils/createShipmentUnitFunction.js";
+import {CreateShipperFunction} from "./functions/utils/createShipperFunction.js";
 
 const action = new Action(
     process.env.ACTION_ID ?? "gls-action",
@@ -168,7 +181,9 @@ action.registerRuntimeFunction(CreateAddressFunction);
 action.registerRuntimeFunction(CreateConsigneeFunction);
 action.registerRuntimeFunction(CreateCustomContentFunction);
 action.registerRuntimeFunction(CreatePrintingOptionsFunction);
+action.registerRuntimeFunction(CreateShipmentFunction);
 action.registerRuntimeFunction(CreateShipmentUnitFunction);
+action.registerRuntimeFunction(CreateShipperFunction);
 
 action.on(CodeZeroEvent.connected, () => {
     console.log("Connected to aquila");
@@ -188,5 +203,10 @@ action.connect(process.env.AUTH_TOKEN ?? "your_auth_token_here").catch((err: unk
     console.error("Failed to connect:", err);
     process.exit(1);
 });
+
+action.on(CodeZeroEvent.moduleUpdated, (message: any) => {
+    console.dir(message, {depth: null});
+    console.dir(action.configs.values(), {depth: null})
+})
 
 export { action };
