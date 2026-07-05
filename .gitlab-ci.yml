@@ -1,7 +1,49 @@
 stages:
   - test
+  - build
 
 include:
   - project: code0-tech/development/telescopium
     ref: build-branch
     file: ci-template.gitlab-ci.yml
+
+.dind:
+  variables:
+    DOCKER_MIRROR: https://mirror.gcr.io
+    DOCKER_OPTIONS: "--registry-mirror ${DOCKER_MIRROR}"
+    DOCKER_DRIVER: overlay2
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: /certs
+  services:
+    - name: docker:29.4.1-dind
+      alias: docker
+      entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_OPTIONS" ]
+
+.node-actions:
+  - gls-action
+
+test-node:
+  image: node:24.10.0
+  stage: test
+  parallel:
+    matrix:
+      - C0_ACTION: !reference [.node-actions]
+  script:
+    - cd actions/$C0_ACTION
+    - npm ci
+    - npm run typecheck
+    - npm run test
+
+build-docker:
+  extends:
+    - .dind
+  image: docker:29.4.1
+  stage: build
+  parallel:
+    matrix:
+      - C0_ACTION: !reference [.node-actions]
+  script:
+    - cd actions/$C0_ACTION
+    - echo $C0_GH_TOKEN | docker login -u $ --password-stdin ghcr.io
+    - docker build -t ghcr.io/code0-tech/centaurus/ci-builds/$C0_ACTION:0.0.0-experimental-$CI_PIPELINE_ID-$CI_COMMIT_SHA .
+    - docker push ghcr.io/code0-tech/centaurus/ci-builds/$C0_ACTION:0.0.0-experimental-$CI_PIPELINE_ID-$CI_COMMIT_SHA
