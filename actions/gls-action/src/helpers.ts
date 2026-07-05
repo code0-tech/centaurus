@@ -54,6 +54,8 @@ export const getAuthToken = async (context: FunctionContext): Promise<string> =>
         client_secret: context.matchedConfig.findConfig("client_secret") as string,
         grant_type: "client_credentials",
     };
+
+    console.log(data)
     const url = context.matchedConfig.findConfig("auth_url") as string;
 
     if (cachedToken.expiresAt > Date.now()) {
@@ -70,7 +72,7 @@ export const getAuthToken = async (context: FunctionContext): Promise<string> =>
     console.log(
         "Authentication successful, access token:",
         result.token_type,
-        result.access_token.substring(0, 10) + "..."
+        result.access_token
     );
     cachedToken = {
         token: result.access_token,
@@ -114,7 +116,7 @@ export const cancelShipment = async (
 export function getShipper(
     context: FunctionContext | undefined,
     contactID: string | undefined,
-    shipper?: ShipperSchemaType
+    shipper?: ShipperSchemaType | null
 ): InternalShipper {
     const configShipper =
         (context?.matchedConfig.findConfig("default_shipper") as ShipperSchemaType) || undefined;
@@ -152,6 +154,7 @@ export function transformValidateShipmentRequestDataToInternalFormat(
             Shipper: getShipper(context, contactID, data.Shipment.Shipper),
             Service: InternalShipmentServiceSchema.parse(data.Shipment.Service),
             ShipmentUnit: InternalShipmentUnitSchema.parse(data.Shipment.ShipmentUnit),
+            Return: data.Shipment.Return ? { Address: data.Shipment.Return } : undefined,
         },
     };
 }
@@ -169,6 +172,7 @@ export function transformShipmentRequestDataToInternalFormat(
             Shipper: getShipper(context, contactID, data.Shipment.Shipper),
             Service: InternalShipmentServiceSchema.parse(data.Shipment.Service),
             ShipmentUnit: InternalShipmentUnitSchema.parse(data.Shipment.ShipmentUnit),
+            Return: data.Shipment.Return ? { Address: data.Shipment.Return } : undefined,
         },
     };
 }
@@ -177,6 +181,7 @@ const postShipments = async (
     data: ShipmentRequestData,
     context: FunctionContext
 ): Promise<CreateParcelsResponse> => {
+    console.log(context)
     const contactID = context.matchedConfig.findConfig("contact_id") as string;
     const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
 
@@ -231,13 +236,14 @@ export async function postShipmentHelper(
             },
             context
         );
-    } catch (error) {
-        if (typeof error === "string") {
-            throw new RuntimeError("ERROR_CREATING_GLS_SHIPMENT", error);
+    } catch (error: any) {
+        if (error.response?.headers?.args) {
+            const headers = error.response.headers;
+            throw new RuntimeError("ERROR_CREATING_GLS_SHIPMENT", `GLS API error: ${headers.error}, args: ${headers.args}`);
         }
-        throw new RuntimeError(
-            "ERROR_CREATING_GLS_SHIPMENT",
-            "An error occurred while creating the shipment."
-        );
+        if (error instanceof Error) {
+            throw new RuntimeError("ERROR_CREATING_GLS_SHIPMENT", error.message);
+        }
+        throw new RuntimeError("ERROR_CREATING_GLS_SHIPMENT", "An error occurred while creating the GLS shipment.");
     }
 }
