@@ -33,24 +33,7 @@ import {GetEndOfDayReportFunction} from "./functions/getEndOfDayReportFunction.j
 import {ReprintParcelFunction} from "./functions/reprintParcelFunction.js";
 import {UpdateParcelWeightFunction} from "./functions/updateParcelWeightFunction.js";
 import {ValidateShipmentFunction} from "./functions/validateShipmentFunction.js";
-
-import {CreateAddresseeOnlyShipmentFunction} from "./functions/services/createAddresseeOnlyShipmentFunction.js";
-import {CreateDeliveryAtWorkShipmentFunction} from "./functions/services/createDeliveryAtWorkShipmentFunction.js";
-import {
-    CreateDeliveryNextWorkingDayShipmentFunction
-} from "./functions/services/createDeliveryNextWorkingDayShipmentFunction.js";
-import {CreateDeliverySaturdayShipmentFunction} from "./functions/services/createDeliverySaturdayShipmentFunction.js";
-import {CreateDepositShipmentFunction} from "./functions/services/createDepositShipmentFunction.js";
-import {CreateExchangeShipmentFunction} from "./functions/services/createExchangeShipmentFunction.js";
 import {CreateFlexDeliveryShipmentFunction} from "./functions/services/createFlexDeliveryShipmentFunction.js";
-import {CreateGuaranteed24ShipmentFunction} from "./functions/services/createGuaranteed24ShipmentFunction.js";
-import {CreateIdentPinShipmentFunction} from "./functions/services/createIdentPinShipmentFunction.js";
-import {CreateIdentShipmentFunction} from "./functions/services/createIdentShipmentFunction.js";
-import {CreatePickAndShipShipmentFunction} from "./functions/services/createPickAndShipShipmentFunction.js";
-import {CreateShopDeliveryShipmentFunction} from "./functions/services/createShopDeliveryShipmentFunction.js";
-import {CreateShopReturnShipmentFunction} from "./functions/services/createShopReturnShipmentFunction.js";
-import {CreateSignatureShipmentFunction} from "./functions/services/createSignatureShipmentFunction.js";
-import {CreateTyreShipmentFunction} from "./functions/services/createTyreShipmentFunction.js";
 
 import {CreateAddressFunction} from "./functions/utils/createAddressFunction.js";
 import {CreateConsigneeFunction} from "./functions/utils/createConsigneeFunction.js";
@@ -67,35 +50,35 @@ const action = new Action(
     "code0-tech",
     "codezero:gls",
     "GLS shipping integration: create, validate, cancel, reprint, and report shipments via the GLS ShipIt API.",
-    [{ code: "en-US", content: "GLS Action" }],
+    [{code: "en-US", content: "GLS Action"}],
     [
         {
             identifier: "auth_url",
             type: "TEXT",
             defaultValue: "https://api.gls-group.net/oauth2/v2/token",
-            name: [{ code: "en-US", content: "The Auth API url" }],
-            description: [{ code: "en-US", content: "The url of the Auth api ending in /token." }],
+            name: [{code: "en-US", content: "The Auth API url"}],
+            description: [{code: "en-US", content: "The url of the Auth api ending in /token."}],
             linkedDataTypes: ["TEXT"],
         },
         {
             identifier: "client_id",
             type: "TEXT",
-            name: [{ code: "en-US", content: "Client ID" }],
-            description: [{ code: "en-US", content: "The client id to authenticate with the GLS API." }],
+            name: [{code: "en-US", content: "Client ID"}],
+            description: [{code: "en-US", content: "The client id to authenticate with the GLS API."}],
             linkedDataTypes: ["TEXT"],
         },
         {
             identifier: "client_secret",
             type: "TEXT",
-            name: [{ code: "en-US", content: "Client secret" }],
-            description: [{ code: "en-US", content: "The client secret to authenticate with the GLS API." }],
+            name: [{code: "en-US", content: "Client secret"}],
+            description: [{code: "en-US", content: "The client secret to authenticate with the GLS API."}],
             linkedDataTypes: ["TEXT"],
         },
         {
             identifier: "contact_id",
             type: "TEXT",
             defaultValue: "",
-            name: [{ code: "en-US", content: "Contact ID" }],
+            name: [{code: "en-US", content: "Contact ID"}],
             description: [
                 {
                     code: "en-US",
@@ -109,14 +92,14 @@ const action = new Action(
             identifier: "ship_it_api_url",
             type: "TEXT",
             defaultValue: "https://api.gls-group.net/shipit-farm/v1/backend/rs",
-            name: [{ code: "en-US", content: "The ShipIt API url" }],
-            description: [{ code: "en-US", content: "The url of the GLS ShipIt API." }],
+            name: [{code: "en-US", content: "The ShipIt API url"}],
+            description: [{code: "en-US", content: "The url of the GLS ShipIt API."}],
             linkedDataTypes: ["TEXT"],
         },
         {
             identifier: "default_shipper",
             type: "GLS_SHIPPER",
-            name: [{ code: "en-US", content: "Shipper" }],
+            name: [{code: "en-US", content: "Shipper"}],
             description: [
                 {
                     code: "en-US",
@@ -161,21 +144,21 @@ action.registerRuntimeFunction(ReprintParcelFunction);
 action.registerRuntimeFunction(UpdateParcelWeightFunction);
 action.registerRuntimeFunction(ValidateShipmentFunction);
 
-action.registerRuntimeFunction(CreateAddresseeOnlyShipmentFunction);
+/*action.registerRuntimeFunction(CreateAddresseeOnlyShipmentFunction);
 action.registerRuntimeFunction(CreateDeliveryAtWorkShipmentFunction);
 action.registerRuntimeFunction(CreateDeliveryNextWorkingDayShipmentFunction);
 action.registerRuntimeFunction(CreateDeliverySaturdayShipmentFunction);
 action.registerRuntimeFunction(CreateDepositShipmentFunction);
-action.registerRuntimeFunction(CreateExchangeShipmentFunction);
+action.registerRuntimeFunction(CreateExchangeShipmentFunction);*/
 action.registerRuntimeFunction(CreateFlexDeliveryShipmentFunction);
-action.registerRuntimeFunction(CreateGuaranteed24ShipmentFunction);
+/*action.registerRuntimeFunction(CreateGuaranteed24ShipmentFunction);
 action.registerRuntimeFunction(CreateIdentPinShipmentFunction);
 action.registerRuntimeFunction(CreateIdentShipmentFunction);
 action.registerRuntimeFunction(CreatePickAndShipShipmentFunction);
 action.registerRuntimeFunction(CreateShopDeliveryShipmentFunction);
 action.registerRuntimeFunction(CreateShopReturnShipmentFunction);
 action.registerRuntimeFunction(CreateSignatureShipmentFunction);
-action.registerRuntimeFunction(CreateTyreShipmentFunction);
+action.registerRuntimeFunction(CreateTyreShipmentFunction);*/
 
 action.registerRuntimeFunction(CreateAddressFunction);
 action.registerRuntimeFunction(CreateConsigneeFunction);
@@ -209,4 +192,4 @@ action.on(CodeZeroEvent.moduleUpdated, (message: any) => {
     console.dir(action.configs.values(), {depth: null})
 })
 
-export { action };
+export {action};
