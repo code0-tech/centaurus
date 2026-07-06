@@ -1,0 +1,11 @@
+{
+  "name": "@code0-tech/centaurus",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "node scripts/for-each-action.mjs typecheck",
+    "build": "node scripts/for-each-action.mjs build",
+    "test": "node scripts/for-each-action.mjs test"
+  }
+}
