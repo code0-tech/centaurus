@@ -8,6 +8,7 @@ on:
 
 permissions:
   pull-requests: write
+  packages: write
 
 jobs:
   pipeline:
@@ -26,6 +27,7 @@ jobs:
           OVERRIDE_GITHUB_REF_NAME: ${{ github.event_name == 'push' && github.ref_name || github.event.pull_request.head.ref }}
         env:
           GLPA_C0_GH_REF: ${{ github.ref }}
+          GLPA_C0_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Find existing comment
         uses: peter-evans/find-comment@v4
