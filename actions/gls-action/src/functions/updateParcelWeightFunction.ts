@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import {
-    Description,
+    Description, DisplayIcon,
     DisplayMessage,
     Documentation,
     FunctionContext,
@@ -20,6 +20,7 @@ import {
 } from "../data_types/glsUpdateParcelWeight.js";
 
 @Identifier("updateParcelWeight")
+@DisplayIcon("codezero:gls")
 @Signature("(data: GLS_UPDATE_PARCEL_WEIGHT_REQUEST_DATA): GLS_UPDATE_PARCEL_WEIGHT_RESPONSE_DATA")
 @Name({ code: "en-US", content: "Update parcel weight" })
 @DisplayMessage({ code: "en-US", content: "Update parcel weight" })

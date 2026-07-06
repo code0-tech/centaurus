@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import {
-    Description,
+    Description, DisplayIcon,
     DisplayMessage,
     Documentation,
     FunctionContext,
@@ -20,6 +20,7 @@ import {
 } from "../data_types/glsAllowedServices.js";
 
 @Identifier("getAllowedServices")
+@DisplayIcon("codezero:gls")
 @Signature("(data: GLS_ALLOWED_SERVICES_REQUEST_DATA): GLS_ALLOWED_SERVICES_RESPONSE_DATA")
 @Name({ code: "en-US", content: "Get allowed services" })
 @DisplayMessage({ code: "en-US", content: "Get allowed services" })
@@ -49,7 +50,8 @@ export class GetAllowedServicesFunction {
             return AllowedServicesResponseDataSchema.parse(result.data);
         } catch (error) {
             if (typeof error === "string") {
-                throw new RuntimeError("ERROR_CREATING_GLS_SHIPMENT", error);
+                throw new RuntimeError("" +
+                    "ERROR_CREATING_GLS_SHIPMENT", error);
             }
             throw new RuntimeError("ERROR_CREATING_GLS_SHIPMENT", "An error occurred while fetching the allowed GLS services.");
         }

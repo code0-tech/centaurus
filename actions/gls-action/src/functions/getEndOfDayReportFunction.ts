@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import {
-    Description,
+    Description, DisplayIcon,
     DisplayMessage,
     Documentation,
     FunctionContext,
@@ -20,6 +20,7 @@ import {
 } from "../data_types/glsEndOfDay.js";
 
 @Identifier("getEndOfDayReport")
+@DisplayIcon("codezero:gls")
 @Signature("(data: GLS_END_OF_DAY_REQUEST_DATA): GLS_END_OF_DAY_RESPONSE_DATA")
 @Name({ code: "en-US", content: "Get end of day report" })
 @DisplayMessage({ code: "en-US", content: "Get end of day report" })

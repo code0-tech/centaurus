@@ -1,7 +1,7 @@
 //TODO: Why is the request data here wrapped within a object and isn't a direct parameter
 
 import {
-    Description,
+    Description, DisplayIcon,
     DisplayMessage,
     Documentation,
     FunctionContext,
@@ -18,6 +18,7 @@ import {
 } from "../data_types/glsCancelShipment.js";
 
 @Identifier("cancelShipment")
+@DisplayIcon("codezero:gls")
 @Signature("(data: GLS_CANCEL_SHIPMENT_REQUEST_DATA): GLS_CANCEL_SHIPMENT_RESPONSE_DATA")
 @Name({ code: "en-US", content: "Cancel shipment" })
 @DisplayMessage({ code: "en-US", content: "Cancel shipment" })

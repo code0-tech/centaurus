@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import {
-    Description,
+    Description, DisplayIcon,
     DisplayMessage,
     Documentation,
     FunctionContext,
@@ -20,6 +20,7 @@ import {
 } from "../data_types/glsReprintParcel.js";
 
 @Identifier("reprintParcel")
+@DisplayIcon("codezero:gls")
 @Signature("(data: GLS_REPRINT_PARCEL_REQUEST_DATA): GLS_REPRINT_PARCEL_RESPONSE_DATA")
 @Name({ code: "en-US", content: "Reprint parcel" })
 @DisplayMessage({ code: "en-US", content: "Reprint parcel" })

@@ -1,6 +1,6 @@
 import axios from "axios";
 import {
-    Description,
+    Description, DisplayIcon,
     DisplayMessage,
     Documentation,
     FunctionContext,
@@ -18,6 +18,7 @@ import {
 } from "../data_types/glsValidateShipment.js";
 
 @Identifier("validateShipment")
+@DisplayIcon("codezero:gls")
 @Signature("(data: GLS_VALIDATE_SHIPMENT_REQUEST_DATA): GLS_VALIDATE_SHIPMENT_RESPONSE_DATA")
 @Name({ code: "en-US", content: "Validate shipment" })
 @DisplayMessage({ code: "en-US", content: "Validate shipment" })
