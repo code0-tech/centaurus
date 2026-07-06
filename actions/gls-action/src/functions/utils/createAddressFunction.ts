@@ -1,0 +1,127 @@
+import {
+    Description,
+    DisplayIcon,
+    DisplayMessage,
+    Documentation,
+    Identifier,
+    Name,
+    Parameter,
+    Signature,
+} from "@code0-tech/hercules";
+import {Address} from "../../data_types/glsAddress.js";
+
+@Identifier("createAddress")
+@Signature("(Name1: string, CountryCode: string, City: string, Street: string, ZIPCode: string, Name2?: string, Name3?: string, Province?: string, StreetNumber?: string, ContactPerson?: string, FixedLinePhonenumber?: string, MobilePhoneNumber?: string, Email?: string): GLS_ADDRESS")
+@Name({code: "en-US", content: "Create GLS address object"})
+@DisplayIcon("codezero:gls")
+@DisplayMessage({code: "en-US", content: "Create GLS address object for ${Name1}"})
+@Documentation({
+    code: "en-US",
+    content: "Creates a GLS address object (`GLS_ADDRESS`) for use in shipments as consignee, shipper, or return address.",
+})
+@Description({code: "en-US", content: "Creates a GLS address object which can be used for shipments."})
+@Parameter({
+    runtimeName: "Name1",
+    name: [{code: "en-US", content: "Name 1"}],
+    description: [{code: "en-US", content: "The name of the recipient or company. Max length is 40 characters."}],
+})
+@Parameter({
+    runtimeName: "CountryCode",
+    name: [{code: "en-US", content: "Country code"}],
+    description: [{
+        code: "en-US",
+        content: "The ISO alpha-2 country code. For example, DE for Germany or FR for France."
+    }],
+})
+@Parameter({
+    runtimeName: "City",
+    name: [{code: "en-US", content: "City"}],
+    description: [{code: "en-US", content: "The city of the address. Max length is 40 characters."}],
+})
+@Parameter({
+    runtimeName: "Street",
+    name: [{code: "en-US", content: "Street"}],
+    description: [{code: "en-US", content: "The street name of the address. Min length is 4 characters."}],
+})
+@Parameter({
+    runtimeName: "ZIPCode",
+    name: [{code: "en-US", content: "ZIP code"}],
+    description: [{code: "en-US", content: "The ZIP code of the address. Max length is 10 characters."}],
+})
+@Parameter({
+    runtimeName: "Name2",
+    name: [{code: "en-US", content: "Name 2"}],
+    description: [{code: "en-US", content: "Additional name information. Max length is 40 characters."}],
+})
+@Parameter({
+    runtimeName: "Name3",
+    name: [{code: "en-US", content: "Name 3"}],
+    description: [{code: "en-US", content: "Additional name information. Max length is 40 characters."}],
+})
+@Parameter({
+    runtimeName: "Province",
+    name: [{code: "en-US", content: "Province/State"}],
+    description: [{code: "en-US", content: "The province or state of the address. Max length is 40 characters."}],
+})
+@Parameter({
+    runtimeName: "StreetNumber",
+    name: [{code: "en-US", content: "Street number"}],
+    description: [{code: "en-US", content: "The street number of the address. Max length is 40 characters."}],
+})
+@Parameter({
+    runtimeName: "ContactPerson",
+    name: [{code: "en-US", content: "Contact person"}],
+    description: [{code: "en-US", content: "The contact person for the address. Max length is 40 characters."}],
+})
+@Parameter({
+    runtimeName: "FixedLinePhonenumber",
+    name: [{code: "en-US", content: "Fixed line phone number"}],
+    description: [{
+        code: "en-US",
+        content: "The fixed line phone number for the address. Max length is 35 characters."
+    }],
+})
+@Parameter({
+    runtimeName: "MobilePhoneNumber",
+    name: [{code: "en-US", content: "Mobile phone number"}],
+    description: [{code: "en-US", content: "The mobile phone number for the address. Max length is 35 characters."}],
+})
+@Parameter({
+    runtimeName: "Email",
+    name: [{code: "en-US", content: "Email"}],
+    description: [{code: "en-US", content: "The email address for the address. Max length is 80 characters."}],
+})
+export class CreateAddressFunction {
+    run(
+        _context: unknown,
+        Name1: string,
+        CountryCode: string,
+        City: string,
+        Street: string,
+        ZIPCode: string,
+        Name2?: string,
+        Name3?: string,
+        Province?: string,
+        StreetNumber?: string,
+        ContactPerson?: string,
+        FixedLinePhonenumber?: string,
+        MobilePhoneNumber?: string,
+        Email?: string
+    ): Address {
+        return {
+            Name1,
+            Name2,
+            Name3,
+            CountryCode,
+            Province,
+            City,
+            Street,
+            StreetNumber,
+            ContactPerson,
+            FixedLinePhonenumber,
+            MobilePhoneNumber,
+            eMail: Email,
+            ZIPCode,
+        };
+    }
+}
