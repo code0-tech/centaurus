@@ -1,0 +1,2677 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Shopware Admin API",
+    "description": "This endpoint reference contains an overview of all endpoints comprising the Shopware Admin API.\n\nFor a better overview, all CRUD-endpoints are hidden by default. If you want to show also CRUD-endpoints\nadd the query parameter `type=jsonapi`.",
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/shopware/shopware/blob/trunk/LICENSE"
+    },
+    "version": "6.7.9999999-dev"
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Country": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "name",
+          "addressFormat"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of the country."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the country."
+          },
+          "iso": {
+            "description": "Internationally recognized two-letter country codes. For example, DE, IN, NO, etc.",
+            "type": "string"
+          },
+          "position": {
+            "description": "Numerical value that indicates the order in which the defined countries must be displayed in the frontend.",
+            "type": "integer",
+            "format": "int64"
+          },
+          "active": {
+            "description": "When boolean value is `true`, the country is available for selection in the storefront.",
+            "type": "boolean"
+          },
+          "shippingAvailable": {
+            "description": "The shipping availability for a country is enabled when boolean value is `true`.",
+            "type": "boolean"
+          },
+          "iso3": {
+            "description": "Internationally recognized three-letter country codes. For example, DEU, IND, NOR, etc.",
+            "type": "string"
+          },
+          "displayStateInRegistration": {
+            "description": "The country's state is displayed in the address when boolean value is `true`.",
+            "type": "boolean"
+          },
+          "forceStateInRegistration": {
+            "description": "State details in the address are force included when boolean value is `true`.",
+            "type": "boolean"
+          },
+          "checkVatIdPattern": {
+            "description": "Verify if VAT ID is valid or not.",
+            "type": "boolean"
+          },
+          "vatIdRequired": {
+            "description": "Set to true, if VAT ID is to be made mandatory.",
+            "type": "boolean"
+          },
+          "vatIdPattern": {
+            "description": "Unique VAT ID with country code and numbers, for example - GB999 9999",
+            "type": "string"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "customerTax": {
+            "required": [
+              "enabled",
+              "currencyId",
+              "amount"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "The boolean value is `true` if the tax for the customer apply."
+              },
+              "currencyId": {
+                "type": "string",
+                "description": "Unique identity of currency."
+              },
+              "amount": {
+                "type": "number",
+                "format": "float",
+                "description": "Sum of money to be paid by the customer."
+              }
+            },
+            "type": "object"
+          },
+          "companyTax": {
+            "required": [
+              "enabled",
+              "currencyId",
+              "amount"
+            ],
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "description": "The boolean value is `true`, if the tax for the company apply."
+              },
+              "currencyId": {
+                "type": "string",
+                "description": "Unique identity of currency."
+              },
+              "amount": {
+                "type": "number",
+                "format": "float",
+                "description": "Sum of money to be paid by the company."
+              }
+            },
+            "type": "object"
+          },
+          "postalCodeRequired": {
+            "description": "The postal code is made mandatory specification in the address, when boolean value is `true`.",
+            "type": "boolean"
+          },
+          "checkPostalCodePattern": {
+            "description": "Verify for valid postal code pattern.",
+            "type": "boolean"
+          },
+          "checkAdvancedPostalCodePattern": {
+            "description": "Verify for advanced postal code pattern.",
+            "type": "boolean"
+          },
+          "advancedPostalCodePattern": {
+            "description": "Wildcard formatted zip codes to allow easy searching in the frontend based on initial constants, for example - 24****, 1856**.",
+            "type": "string"
+          },
+          "addressFormat": {
+            "type": "object",
+            "description": "The address format with recipient's name, building number, street name, city, state and ZIP code on different lines as required."
+          },
+          "defaultPostalCodePattern": {
+            "description": "Default pattern of postal or zip code.",
+            "type": "string"
+          },
+          "isEu": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "translated": {
+            "type": "object",
+            "description": "Contains the translations of all translated fields."
+          },
+          "states": {
+            "description": "States/provinces/regions within the country",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CountryState"
+            }
+          },
+          "customerAddresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "orderAddresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderAddress"
+            }
+          },
+          "salesChannelDefaultAssignments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "salesChannels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "taxRules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "currencyCountryRoundings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "type": "object"
+      },
+      "CountryState": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "countryId",
+          "shortCode",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of the country's state."
+          },
+          "countryId": {
+            "description": "Unique identity of the country.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "shortCode": {
+            "description": "An abbreviation for the country's state.",
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the country's state."
+          },
+          "position": {
+            "description": "Numerical value that indicates the order in which the defined states must be displayed in the frontend.",
+            "type": "integer",
+            "format": "int64"
+          },
+          "active": {
+            "description": "When boolean value is `true`, the country's state is available for selection in the storefront.",
+            "type": "boolean"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "translated": {
+            "type": "object",
+            "description": "Contains the translations of all translated fields."
+          },
+          "country": {
+            "$ref": "#/components/schemas/Country"
+          },
+          "customerAddresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "orderAddresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderAddress"
+            }
+          }
+        },
+        "type": "object"
+      },
+      "Currency": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "factor",
+          "symbol",
+          "isoCode",
+          "itemRounding",
+          "totalRounding",
+          "shortName",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of currency."
+          },
+          "factor": {
+            "description": "Currency exchange rate.",
+            "type": "number",
+            "format": "float"
+          },
+          "symbol": {
+            "description": "A currency symbol is a graphical representation used as shorthand for a currency's name, for example US Dollar - $",
+            "type": "string"
+          },
+          "isoCode": {
+            "description": "Standard international three digit code to represent currency. For example, USD.",
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string",
+            "description": "Acronym for international currencies. For example, USD."
+          },
+          "name": {
+            "type": "string",
+            "description": "Full name of the currency. For example, US-Dollar."
+          },
+          "position": {
+            "description": "The order of the tabs for multiple currencies defined.",
+            "type": "integer",
+            "format": "int64"
+          },
+          "isSystemDefault": {
+            "description": "Runtime field, cannot be used as part of the criteria.",
+            "type": "boolean"
+          },
+          "taxFreeFrom": {
+            "description": "The value from which the tax must be exempted.",
+            "type": "number",
+            "format": "float"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "itemRounding": {
+            "required": [
+              "decimals",
+              "interval",
+              "roundForNet"
+            ],
+            "properties": {
+              "decimals": {
+                "type": "integer",
+                "format": "int64",
+                "description": "It defines the cash round off applied on the cart line items to the nearest decimal points. If set to 2, it rounds off to two significant decimal points."
+              },
+              "interval": {
+                "type": "number",
+                "format": "float",
+                "description": "The interval of item rounding defines the cash rounding interval in terms of how high or low should it be rounded. For example, 0.05 signifies the value gets rounded off to nearest 5 cents."
+              },
+              "roundForNet": {
+                "type": "boolean",
+                "description": "The cash rounding applied on net prices. "
+              }
+            },
+            "type": "object"
+          },
+          "totalRounding": {
+            "required": [
+              "decimals",
+              "interval",
+              "roundForNet"
+            ],
+            "properties": {
+              "decimals": {
+                "type": "integer",
+                "format": "int64",
+                "description": "It defines the round off amount to the nearest decimal points applied on the cart’s total amount. If set to 2, it rounds off to two significant decimal points."
+              },
+              "interval": {
+                "type": "number",
+                "format": "float",
+                "description": "The interval defines the cart’s total amount round off interval in terms of how high or low should it be rounded. For example, 0.05 signifies the value gets rounded off to nearest 5 cents."
+              },
+              "roundForNet": {
+                "type": "boolean",
+                "description": "The cash rounding applied on cart’s total net prices. "
+              }
+            },
+            "type": "object"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "translated": {
+            "type": "object",
+            "description": "Contains the translations of all translated fields."
+          },
+          "salesChannelDefaultAssignments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Order"
+            }
+          },
+          "salesChannels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "salesChannelDomains": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "promotionDiscountPrices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "productExports": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "countryRoundings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "type": "object"
+      },
+      "Order": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "billingAddressId",
+          "currencyId",
+          "languageId",
+          "salesChannelId",
+          "orderDateTime",
+          "currencyFactor",
+          "stateId",
+          "itemRounding",
+          "totalRounding"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order."
+          },
+          "versionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order version."
+          },
+          "autoIncrement": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true,
+            "description": "Internal field."
+          },
+          "orderNumber": {
+            "description": "Unique number associated with every order.",
+            "type": "string"
+          },
+          "billingAddressId": {
+            "description": "Unique identity of the billing address.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "billingAddressVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of the billing address version."
+          },
+          "primaryOrderDeliveryId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "primaryOrderDeliveryVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "primaryOrderTransactionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "primaryOrderTransactionVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "currencyId": {
+            "description": "Unique identity of the currency.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "languageId": {
+            "description": "Unique identity of the language.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "salesChannelId": {
+            "description": "Unique identity of the sales channel.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderDateTime": {
+            "description": "Timestamp when the order was placed.",
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderDate": {
+            "description": "Date when the order was placed.",
+            "type": "string",
+            "readOnly": true
+          },
+          "price": {
+            "required": [
+              "netPrice",
+              "totalPrice",
+              "positionPrice",
+              "rawTotal",
+              "taxStatus"
+            ],
+            "properties": {
+              "netPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Net price of the product."
+              },
+              "totalPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Gross price of the product."
+              },
+              "calculatedTaxes": {
+                "type": "object",
+                "description": "Contains calculated taxes based on shipping costs/methods."
+              },
+              "taxRules": {
+                "type": "object",
+                "description": "Pricing based on multiple taxes."
+              },
+              "positionPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Price of each line item in the cart multiplied by its quantity excluding charges like shipping cost, rules, taxes etc."
+              },
+              "rawTotal": {
+                "type": "number",
+                "format": "float",
+                "description": "The total value before rounding off."
+              },
+              "taxStatus": {
+                "type": "string",
+                "description": "TaxStatus takes `Free`, `Net` or `Gross` as values."
+              }
+            },
+            "type": "object"
+          },
+          "amountTotal": {
+            "description": "Gross price of the order.",
+            "type": "number",
+            "format": "float",
+            "readOnly": true
+          },
+          "amountNet": {
+            "description": "Net price of the order.",
+            "type": "number",
+            "format": "float",
+            "readOnly": true
+          },
+          "positionPrice": {
+            "description": "Price of each line item in the cart multiplied by its quantity excluding charges like shipping cost, rules, taxes etc.",
+            "type": "number",
+            "format": "float",
+            "readOnly": true
+          },
+          "taxStatus": {
+            "description": "TaxStatus takes `Free`, `Net` or `Gross` as values.",
+            "type": "string",
+            "readOnly": true
+          },
+          "shippingCosts": {
+            "required": [
+              "unitPrice",
+              "totalPrice",
+              "quantity"
+            ],
+            "properties": {
+              "unitPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Shipping cost of product per item (where, quantity=1)."
+              },
+              "totalPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Shipping cost of product based on quantity."
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Number of items of each product."
+              },
+              "calculatedTaxes": {
+                "type": "object",
+                "description": "Contains calculated taxes based on shipping costs/methods."
+              },
+              "taxRules": {
+                "type": "object",
+                "description": "Pricing based on multiple taxes."
+              },
+              "referencePrice": {
+                "type": "object",
+                "description": "Original cost price of the product."
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Price of each line item."
+                  },
+                  "discount": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Absolute discount on each line item."
+                  },
+                  "percentage": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Discount in percentage."
+                  }
+                },
+                "type": "object"
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Contains cheapest price from last 30 days as per EU law."
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "shippingTotal": {
+            "description": "Total shipping cost of the ordered product.",
+            "type": "number",
+            "format": "float",
+            "readOnly": true
+          },
+          "currencyFactor": {
+            "description": "Rate at which currency is exchanged.",
+            "type": "number",
+            "format": "float"
+          },
+          "deepLinkCode": {
+            "description": "It is a generated special code linked to email. It is used to access orders placed by guest customers.",
+            "type": "string"
+          },
+          "affiliateCode": {
+            "description": "An affiliate code is an identification option with which website operators can mark outgoing links.",
+            "type": "string"
+          },
+          "campaignCode": {
+            "description": "A campaign code is the globally unique identifier for a campaign.",
+            "type": "string"
+          },
+          "customerComment": {
+            "description": "Comments given by comments.",
+            "type": "string"
+          },
+          "internalComment": {
+            "type": "string"
+          },
+          "source": {
+            "description": "Source of orders either via normal order placement or subscriptions.",
+            "type": "string"
+          },
+          "taxCalculationType": {
+            "type": "string"
+          },
+          "stateId": {
+            "description": "Unique identity of state.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "ruleIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Unique identity of rule."
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "createdById": {
+            "description": "Unique identity of createdBy.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "updatedById": {
+            "description": "Unique identity of updatedBy.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "itemRounding": {
+            "required": [
+              "decimals",
+              "interval",
+              "roundForNet"
+            ],
+            "properties": {
+              "decimals": {
+                "type": "integer",
+                "format": "int64",
+                "description": "It defines the cash round off applied on the cart line items to the nearest decimal points. If set to 2, it rounds off to two significant decimal points."
+              },
+              "interval": {
+                "type": "number",
+                "format": "float",
+                "description": "The interval of item rounding defines the cash rounding interval in terms of how high or low should it be rounded. For example, 0.05 signifies the value gets rounded off to nearest 5 cents."
+              },
+              "roundForNet": {
+                "type": "boolean",
+                "description": "The cash rounding applied on net prices."
+              }
+            },
+            "type": "object"
+          },
+          "totalRounding": {
+            "required": [
+              "decimals",
+              "interval",
+              "roundForNet"
+            ],
+            "properties": {
+              "decimals": {
+                "type": "integer",
+                "format": "int64",
+                "description": "It defines the cash round off applied on the cart line items to the nearest decimal points. If set to 2, it rounds off to two significant decimal points."
+              },
+              "interval": {
+                "type": "number",
+                "format": "float",
+                "description": "The interval of item rounding defines the cash rounding interval in terms of how high or low should it be rounded. For example, 0.05 signifies the value gets rounded off to nearest 5 cents."
+              },
+              "roundForNet": {
+                "type": "boolean",
+                "description": "The cash rounding applied on net prices."
+              }
+            },
+            "type": "object"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "extensions": {
+            "properties": {
+              "salesChannelTracking": {
+                "properties": {
+                  "links": {
+                    "type": "object",
+                    "properties": {
+                      "related": {
+                        "type": "string",
+                        "format": "uri-reference",
+                        "example": "/order/a240fa27925a635b08dc28c9e4f9216d/salesChannelTracking"
+                      }
+                    }
+                  },
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "example": "sales_channel_tracking_order"
+                      },
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{32}$",
+                        "example": "0be2acfa806308827a1893fe389a7c8b"
+                      }
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "stateMachineState": {
+            "$ref": "#/components/schemas/StateMachineState",
+            "description": "Current order state (e.g., open, in_progress, completed, cancelled)"
+          },
+          "primaryOrderDelivery": {
+            "$ref": "#/components/schemas/OrderDelivery",
+            "description": "Primary delivery information for the order"
+          },
+          "primaryOrderTransaction": {
+            "$ref": "#/components/schemas/OrderTransaction",
+            "description": "Primary payment transaction for the order"
+          },
+          "orderCustomer": {
+            "$ref": "#/components/schemas/OrderCustomer",
+            "description": "Customer information associated with the order"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/Currency",
+            "description": "Currency used for the order"
+          },
+          "language": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "salesChannel": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "addresses": {
+            "description": "All addresses associated with the order (billing and shipping)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderAddress"
+            }
+          },
+          "billingAddress": {
+            "$ref": "#/components/schemas/OrderAddress",
+            "description": "Billing address for the order"
+          },
+          "deliveries": {
+            "description": "Delivery information including shipping address and tracking",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderDelivery"
+            }
+          },
+          "lineItems": {
+            "description": "Order line items (products, discounts, fees)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineItem"
+            }
+          },
+          "transactions": {
+            "description": "Payment transactions for the order",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTransaction"
+            }
+          },
+          "documents": {
+            "description": "Generated documents (invoices, delivery notes, credit notes)",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "tags": {
+            "description": "Tags assigned to the order for organization and filtering",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "createdBy": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "updatedBy": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "type": "object"
+      },
+      "OrderAddress": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "countryId",
+          "orderId",
+          "firstName",
+          "lastName",
+          "street",
+          "city"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order's address."
+          },
+          "versionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of OrderAddresses version."
+          },
+          "countryId": {
+            "description": "Unique identity of country.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "countryStateId": {
+            "description": "Unique identity of state.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderId": {
+            "description": "Unique identity of order.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order's version."
+          },
+          "salutationId": {
+            "description": "Unique identity of salutation.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "firstName": {
+            "description": "First name of the customer.",
+            "type": "string"
+          },
+          "lastName": {
+            "description": "Last name of the customer.",
+            "type": "string"
+          },
+          "street": {
+            "description": "Street address",
+            "type": "string"
+          },
+          "zipcode": {
+            "description": "Zip code of the country.",
+            "type": "string"
+          },
+          "city": {
+            "description": "Name of the city.",
+            "type": "string"
+          },
+          "company": {
+            "description": "Name of the company.",
+            "type": "string"
+          },
+          "department": {
+            "description": "Name of the department.",
+            "type": "string"
+          },
+          "title": {
+            "description": "Title name given to customer like DR. , Prof., etc.",
+            "type": "string"
+          },
+          "phoneNumber": {
+            "description": "Phone number of the customer.",
+            "type": "string"
+          },
+          "additionalAddressLine1": {
+            "description": "Additional address input if necessary.",
+            "type": "string"
+          },
+          "additionalAddressLine2": {
+            "description": "Additional address input if necessary.",
+            "type": "string"
+          },
+          "hash": {
+            "description": "Runtime field, cannot be used as part of the criteria.",
+            "type": "string"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "vatId": {
+            "description": "Unique identity of VAT.",
+            "type": "string",
+            "deprecated": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "country": {
+            "$ref": "#/components/schemas/Country"
+          },
+          "countryState": {
+            "$ref": "#/components/schemas/CountryState"
+          },
+          "order": {
+            "$ref": "#/components/schemas/Order"
+          },
+          "orderDeliveries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderDelivery"
+            }
+          },
+          "salutation": {
+            "$ref": "#/components/schemas/Salutation"
+          }
+        },
+        "type": "object"
+      },
+      "OrderCustomer": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "orderId",
+          "email",
+          "firstName",
+          "lastName"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order customer."
+          },
+          "versionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of OrderCustomer's version."
+          },
+          "customerId": {
+            "description": "Unique identity of customer.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderId": {
+            "description": "Unique identity of order.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order's version."
+          },
+          "email": {
+            "description": "Email address of the customer.",
+            "type": "string"
+          },
+          "salutationId": {
+            "description": "Unique identity of salutation.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "firstName": {
+            "description": "First name of the customer.",
+            "type": "string"
+          },
+          "lastName": {
+            "description": "Last name of the customer.",
+            "type": "string"
+          },
+          "company": {
+            "description": "Name of the company.",
+            "type": "string"
+          },
+          "title": {
+            "description": "Title name given to the customer like Dr, prof. etc.",
+            "type": "string"
+          },
+          "vatIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Unique identity of VAT."
+          },
+          "customerNumber": {
+            "description": "Unique number assigned to the customer.",
+            "type": "string"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "remoteAddress": {
+            "description": "Anonymous IP address of the customer for last session.",
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "order": {
+            "$ref": "#/components/schemas/Order"
+          },
+          "customer": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "salutation": {
+            "$ref": "#/components/schemas/Salutation"
+          }
+        },
+        "type": "object"
+      },
+      "OrderDelivery": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "orderId",
+          "shippingOrderAddressId",
+          "shippingMethodId",
+          "stateId",
+          "shippingDateEarliest",
+          "shippingDateLatest"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of Order's delivery."
+          },
+          "versionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of OrderDelivery's version."
+          },
+          "orderId": {
+            "description": "Unique identity of order.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order's version."
+          },
+          "shippingOrderAddressId": {
+            "description": "Unique identity of order's shipping address.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "shippingOrderAddressVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order's shipping address version."
+          },
+          "shippingMethodId": {
+            "description": "Unique identity of shipping method.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "stateId": {
+            "description": "Unique identity of state.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "trackingCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tracking code is a unique URL code assigned to each package, which allows you to monitor the movement of the parcel."
+          },
+          "shippingDateEarliest": {
+            "description": "Date and time of earliest delivery of products.",
+            "type": "string",
+            "format": "date-time"
+          },
+          "shippingDateLatest": {
+            "description": "Date and time of latest delivery of products.",
+            "type": "string",
+            "format": "date-time"
+          },
+          "shippingCosts": {
+            "required": [
+              "unitPrice",
+              "totalPrice",
+              "quantity"
+            ],
+            "properties": {
+              "unitPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Shipping cost of product per item (where, quantity=1)."
+              },
+              "totalPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Shipping cost of product based on quantity."
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Number of items of each product."
+              },
+              "calculatedTaxes": {
+                "type": "object",
+                "description": "Contains calculated taxes based on shipping costs/methods."
+              },
+              "taxRules": {
+                "type": "object",
+                "description": "Pricing based on multiple taxes."
+              },
+              "referencePrice": {
+                "type": "object",
+                "description": "Original cost price of the product."
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Price of each line item."
+                  },
+                  "discount": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Absolute discount on each line item."
+                  },
+                  "percentage": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Discount in percentage."
+                  }
+                },
+                "type": "object"
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Contains cheapest price from last 30 days as per EU law."
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "stateMachineState": {
+            "$ref": "#/components/schemas/StateMachineState",
+            "description": "Current delivery state (e.g., open, shipped, delivered, cancelled)"
+          },
+          "order": {
+            "$ref": "#/components/schemas/Order"
+          },
+          "shippingOrderAddress": {
+            "$ref": "#/components/schemas/OrderAddress",
+            "description": "Shipping address for this delivery"
+          },
+          "shippingMethod": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "positions": {
+            "description": "Line items included in this delivery",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderDeliveryPosition"
+            }
+          },
+          "primaryOrder": {
+            "$ref": "#/components/schemas/Order"
+          }
+        },
+        "type": "object"
+      },
+      "OrderDeliveryPosition": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "orderDeliveryId",
+          "orderLineItemId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order delivery position."
+          },
+          "versionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of OrderDeliveryPosition's version."
+          },
+          "orderDeliveryId": {
+            "description": "Unique identity of order delivery.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderDeliveryVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order delivery's version."
+          },
+          "orderLineItemId": {
+            "description": "Unique identity of line items in an order.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderLineItemVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of line item's version in an order."
+          },
+          "price": {
+            "required": [
+              "unitPrice",
+              "totalPrice",
+              "quantity"
+            ],
+            "properties": {
+              "unitPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Price of product per item (where, quantity=1)."
+              },
+              "totalPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Cost of product based on quantity."
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Number of items of each product."
+              },
+              "calculatedTaxes": {
+                "type": "object",
+                "description": "Contains calculated taxes based on order delivery price."
+              },
+              "taxRules": {
+                "type": "object",
+                "description": "Pricing based on multiple taxes."
+              },
+              "referencePrice": {
+                "type": "object",
+                "description": "Original cost price of the product."
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Price of each line item."
+                  },
+                  "discount": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Absolute discount on each line item."
+                  },
+                  "percentage": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Discount in percentage."
+                  }
+                },
+                "type": "object"
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Contains cheapest price from last 30 days as per EU law."
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "unitPrice": {
+            "description": "Price of product per item (where, quantity=1).",
+            "type": "number",
+            "format": "float"
+          },
+          "totalPrice": {
+            "description": "Cost of product based on quantity.",
+            "type": "number",
+            "format": "float"
+          },
+          "quantity": {
+            "description": "Number of items of each product.",
+            "type": "integer",
+            "format": "int64"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "orderDelivery": {
+            "$ref": "#/components/schemas/OrderDelivery"
+          },
+          "orderLineItem": {
+            "$ref": "#/components/schemas/OrderLineItem"
+          }
+        },
+        "type": "object"
+      },
+      "OrderLineItem": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "orderId",
+          "identifier",
+          "quantity",
+          "label",
+          "price",
+          "children",
+          "states"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of OrderLineItem."
+          },
+          "versionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of OrderLineItem's version."
+          },
+          "orderId": {
+            "description": "Unique identity of order.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order's version."
+          },
+          "productId": {
+            "description": "Unique identity of product.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "productVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of products's version."
+          },
+          "promotionId": {
+            "description": "Unique identity of product.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "parentId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of parent product."
+          },
+          "parentVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of parent's version."
+          },
+          "coverId": {
+            "description": "Unique identity of cover image.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "identifier": {
+            "description": "It is a unique identity of an item in cart before its converted to an order.",
+            "type": "string"
+          },
+          "referencedId": {
+            "description": "Unique identity of type of entity.",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "Number of items of product.",
+            "type": "integer",
+            "format": "int64"
+          },
+          "label": {
+            "description": "It is a typical product name given to the line item.",
+            "type": "string"
+          },
+          "payload": {
+            "type": "object",
+            "description": "Any data related to product is passed."
+          },
+          "good": {
+            "description": "When set to true, it indicates the line item is physical else it is virtual.",
+            "type": "boolean"
+          },
+          "removable": {
+            "description": "Allows the line item to be removable from the cart when set to true.",
+            "type": "boolean"
+          },
+          "stackable": {
+            "description": "Allows to change the quantity of the line item when set to true.",
+            "type": "boolean"
+          },
+          "position": {
+            "description": "Position of line items placed in an order.",
+            "type": "integer",
+            "format": "int64"
+          },
+          "price": {
+            "required": [
+              "unitPrice",
+              "totalPrice",
+              "quantity"
+            ],
+            "properties": {
+              "unitPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Price of product per item (where, quantity=1)."
+              },
+              "totalPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Cost of product based on quantity."
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Number of items of each product."
+              },
+              "calculatedTaxes": {
+                "type": "object",
+                "description": "Contains calculated taxes based on shipping costs/methods."
+              },
+              "taxRules": {
+                "type": "object",
+                "description": "Pricing based on multiple taxes."
+              },
+              "referencePrice": {
+                "type": "object",
+                "description": "Original cost price of the product."
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Price of each line item."
+                  },
+                  "discount": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Absolute discount on each line item."
+                  },
+                  "percentage": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Discount in percentage."
+                  }
+                },
+                "type": "object"
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float",
+                    "description": "Contains cheapest price from last 30 days as per EU law."
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "priceDefinition": {
+            "type": "object",
+            "description": "Description of how the price has to be calculated. For example, in percentage or absolute value, etc."
+          },
+          "unitPrice": {
+            "description": "Price of product per item (where, quantity=1).",
+            "type": "number",
+            "format": "float"
+          },
+          "totalPrice": {
+            "description": "Cost of product based on quantity.",
+            "type": "number",
+            "format": "float"
+          },
+          "description": {
+            "description": "Description of line items in an order.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type refers to the entity type of an item whether it is product or promotion for instance.",
+            "type": "string",
+            "enum": [
+              "product",
+              "credit",
+              "custom",
+              "promotion",
+              "container",
+              "discount",
+              "quantity"
+            ]
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "states": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "deprecated": true,
+            "description": "Internal field."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "cover": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "order": {
+            "$ref": "#/components/schemas/Order"
+          },
+          "product": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "promotion": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "orderDeliveryPositions": {
+            "description": "Delivery positions for this line item",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderDeliveryPosition"
+            }
+          },
+          "orderTransactionCaptureRefundPositions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTransactionCaptureRefundPosition"
+            }
+          },
+          "downloads": {
+            "description": "Digital downloads associated with this line item",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineItemDownload"
+            }
+          },
+          "parent": {
+            "$ref": "#/components/schemas/OrderLineItem"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineItem"
+            }
+          }
+        },
+        "type": "object"
+      },
+      "OrderLineItemDownload": {
+        "description": "Added since version: 6.4.19.0",
+        "required": [
+          "id",
+          "orderLineItemId",
+          "mediaId",
+          "position",
+          "accessGranted"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of Order line item downloaded digital products."
+          },
+          "versionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of Order line item downloaded version."
+          },
+          "orderLineItemId": {
+            "description": "Unique identity of Order line item.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderLineItemVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of Order line item's version."
+          },
+          "mediaId": {
+            "description": "Unique identity of media.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "position": {
+            "description": "The order of downloaded digital products displayed in the storefront by mentioning numerical values like 1,2,3, etc.",
+            "type": "integer",
+            "format": "int64"
+          },
+          "accessGranted": {
+            "description": "When boolean value is `true`, the digital product is allowed to download.",
+            "type": "boolean"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "orderLineItem": {
+            "$ref": "#/components/schemas/OrderLineItem"
+          },
+          "media": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "type": "object"
+      },
+      "OrderTransaction": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "orderId",
+          "paymentMethodId",
+          "amount",
+          "stateId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order transaction."
+          },
+          "versionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of OrderTransaction's version."
+          },
+          "orderId": {
+            "description": "Unique identity of an order.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of an order's version."
+          },
+          "paymentMethodId": {
+            "description": "Unique identity of payment method.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "amount": {
+            "required": [
+              "unitPrice",
+              "totalPrice",
+              "quantity"
+            ],
+            "properties": {
+              "unitPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Price of product per item (where, quantity=1)."
+              },
+              "totalPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Cost of product based on quantity."
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Number of items of each product."
+              },
+              "calculatedTaxes": {
+                "type": "object"
+              },
+              "taxRules": {
+                "type": "object"
+              },
+              "referencePrice": {
+                "type": "object"
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "discount": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "percentage": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                },
+                "type": "object"
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "validationData": {
+            "type": "object"
+          },
+          "stateId": {
+            "description": "Unique identity of state.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "stateMachineState": {
+            "$ref": "#/components/schemas/StateMachineState",
+            "description": "Current payment transaction state (e.g., open, paid, cancelled)"
+          },
+          "order": {
+            "$ref": "#/components/schemas/Order"
+          },
+          "paymentMethod": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "captures": {
+            "description": "Payment captures for this transaction",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTransactionCapture"
+            }
+          },
+          "primaryOrder": {
+            "$ref": "#/components/schemas/Order"
+          },
+          "shippingCosts": {
+            "properties": {
+              "calculatedTaxes": {
+                "description": "Contains calculated taxes based on shipping costs/methods."
+              },
+              "taxRules": {
+                "description": "Pricing based on multiple taxes."
+              },
+              "referencePrice": {
+                "description": "Original cost price of the product."
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "description": "Price of each line item."
+                  },
+                  "discount": {
+                    "description": "Absolute discount on each line item."
+                  },
+                  "percentage": {
+                    "description": "Discount in percentage."
+                  }
+                }
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "description": "Contains cheapest price from last 30 days as per EU law."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "type": "object"
+      },
+      "OrderTransactionCapture": {
+        "description": "Added since version: 6.4.12.0",
+        "required": [
+          "id",
+          "orderTransactionId",
+          "stateId",
+          "amount"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order transaction capture."
+          },
+          "versionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order transaction capture's version."
+          },
+          "orderTransactionId": {
+            "description": "Unique identity of order transaction.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderTransactionVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order transaction version."
+          },
+          "stateId": {
+            "description": "Unique identity of order state.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "externalReference": {
+            "description": "External payment provider token.",
+            "type": "string"
+          },
+          "amount": {
+            "required": [
+              "unitPrice",
+              "totalPrice",
+              "quantity"
+            ],
+            "properties": {
+              "unitPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Price of product per item (where, quantity=1)."
+              },
+              "totalPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Cost of product based on quantity."
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Number of items of each product."
+              },
+              "calculatedTaxes": {
+                "type": "object"
+              },
+              "taxRules": {
+                "type": "object"
+              },
+              "referencePrice": {
+                "type": "object"
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "discount": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "percentage": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                },
+                "type": "object"
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "stateMachineState": {
+            "$ref": "#/components/schemas/StateMachineState"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/OrderTransaction"
+          },
+          "refunds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTransactionCaptureRefund"
+            }
+          },
+          "shippingCosts": {
+            "properties": {
+              "calculatedTaxes": {
+                "description": "Contains calculated taxes based on shipping costs/methods."
+              },
+              "taxRules": {
+                "description": "Pricing based on multiple taxes."
+              },
+              "referencePrice": {
+                "description": "Original cost price of the product."
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "description": "Price of each line item."
+                  },
+                  "discount": {
+                    "description": "Absolute discount on each line item."
+                  },
+                  "percentage": {
+                    "description": "Discount in percentage."
+                  }
+                }
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "description": "Contains cheapest price from last 30 days as per EU law."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "type": "object"
+      },
+      "OrderTransactionCaptureRefund": {
+        "description": "Added since version: 6.4.12.0",
+        "required": [
+          "id",
+          "captureId",
+          "stateId",
+          "amount"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order transaction capture refund."
+          },
+          "versionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order transaction capture refund's version."
+          },
+          "captureId": {
+            "description": "Unique identity of order transaction capture.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "captureVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order transaction capture's version."
+          },
+          "stateId": {
+            "description": "Unique identity of order state.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "externalReference": {
+            "description": "External payment provider token. ",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Reason for refunding the amount for an order.",
+            "type": "string"
+          },
+          "amount": {
+            "required": [
+              "unitPrice",
+              "totalPrice",
+              "quantity"
+            ],
+            "properties": {
+              "unitPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Price of product per item (where, quantity=1)."
+              },
+              "totalPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Cost of product based on quantity."
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Number of items of each product."
+              },
+              "calculatedTaxes": {
+                "type": "object"
+              },
+              "taxRules": {
+                "type": "object"
+              },
+              "referencePrice": {
+                "type": "object"
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "discount": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "percentage": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                },
+                "type": "object"
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "stateMachineState": {
+            "$ref": "#/components/schemas/StateMachineState"
+          },
+          "transactionCapture": {
+            "$ref": "#/components/schemas/OrderTransactionCapture"
+          },
+          "positions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTransactionCaptureRefundPosition"
+            }
+          },
+          "shippingCosts": {
+            "properties": {
+              "calculatedTaxes": {
+                "description": "Contains calculated taxes based on shipping costs/methods."
+              },
+              "taxRules": {
+                "description": "Pricing based on multiple taxes."
+              },
+              "referencePrice": {
+                "description": "Original cost price of the product."
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "description": "Price of each line item."
+                  },
+                  "discount": {
+                    "description": "Absolute discount on each line item."
+                  },
+                  "percentage": {
+                    "description": "Discount in percentage."
+                  }
+                }
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "description": "Contains cheapest price from last 30 days as per EU law."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "type": "object"
+      },
+      "OrderTransactionCaptureRefundPosition": {
+        "description": "Added since version: 6.4.12.0",
+        "required": [
+          "id",
+          "refundId",
+          "orderLineItemId",
+          "amount"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order transaction capture refund position."
+          },
+          "versionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order transaction capture refund position's version."
+          },
+          "refundId": {
+            "description": "Unique identity of order transaction capture refund.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "refundVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order transaction capture refund's version."
+          },
+          "orderLineItemId": {
+            "description": "Unique identity of order line item.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "orderLineItemVersionId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of order line item version."
+          },
+          "externalReference": {
+            "description": "External payment provider token.",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Reason for refunding the amount for an order.",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "Quantity of line item to be refunded.",
+            "type": "integer",
+            "format": "int64"
+          },
+          "amount": {
+            "required": [
+              "unitPrice",
+              "totalPrice",
+              "quantity"
+            ],
+            "properties": {
+              "unitPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Price of product per item (where, quantity=1)."
+              },
+              "totalPrice": {
+                "type": "number",
+                "format": "float",
+                "description": "Cost of product based on quantity."
+              },
+              "quantity": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Number of items of each product."
+              },
+              "calculatedTaxes": {
+                "type": "object"
+              },
+              "taxRules": {
+                "type": "object"
+              },
+              "referencePrice": {
+                "type": "object"
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "discount": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "percentage": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                },
+                "type": "object"
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "type": "number",
+                    "format": "float"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "orderLineItem": {
+            "$ref": "#/components/schemas/OrderLineItem"
+          },
+          "orderTransactionCaptureRefund": {
+            "$ref": "#/components/schemas/OrderTransactionCaptureRefund"
+          },
+          "shippingCosts": {
+            "properties": {
+              "calculatedTaxes": {
+                "description": "Contains calculated taxes based on shipping costs/methods."
+              },
+              "taxRules": {
+                "description": "Pricing based on multiple taxes."
+              },
+              "referencePrice": {
+                "description": "Original cost price of the product."
+              },
+              "listPrice": {
+                "properties": {
+                  "price": {
+                    "description": "Price of each line item."
+                  },
+                  "discount": {
+                    "description": "Absolute discount on each line item."
+                  },
+                  "percentage": {
+                    "description": "Discount in percentage."
+                  }
+                }
+              },
+              "regulationPrice": {
+                "properties": {
+                  "price": {
+                    "description": "Contains cheapest price from last 30 days as per EU law."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "type": "object"
+      },
+      "Salutation": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "salutationKey",
+          "displayName",
+          "letterName"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of salutation."
+          },
+          "salutationKey": {
+            "description": "Technical name given to salutation. For example: mr",
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Name given for salutation and displayed in storefront. For example: Mr"
+          },
+          "letterName": {
+            "type": "string",
+            "description": "Name given for salutation and used in the mail templates. For example, Dear Mr"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "position": {
+            "description": "Numerical value that indicates the order in which the defined salutations must be displayed in the frontend.",
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "translated": {
+            "type": "object",
+            "description": "Contains the translations of all translated fields."
+          },
+          "customers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "customerAddresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "orderCustomers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderCustomer"
+            }
+          },
+          "orderAddresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderAddress"
+            }
+          },
+          "newsletterRecipients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "type": "object"
+      },
+      "StateMachineState": {
+        "description": "Added since version: 6.0.0.0",
+        "required": [
+          "id",
+          "technicalName",
+          "stateMachineId",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "description": "Unique identity of state machine state."
+          },
+          "technicalName": {
+            "description": "Technical name of StateMachineState.",
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of StateMachineState."
+          },
+          "stateMachineId": {
+            "description": "Unique identity of StateMachine.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "customFields": {
+            "type": "object",
+            "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "translated": {
+            "type": "object",
+            "description": "Contains the translations of all translated fields."
+          },
+          "stateMachine": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "fromStateMachineTransitions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "toStateMachineTransitions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "orderTransactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTransaction"
+            }
+          },
+          "orderDeliveries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderDelivery"
+            }
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Order"
+            }
+          },
+          "orderTransactionCaptures": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTransactionCapture"
+            }
+          },
+          "orderTransactionCaptureRefunds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderTransactionCaptureRefund"
+            }
+          },
+          "toStateMachineHistoryEntries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "fromStateMachineHistoryEntries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "type": "object"
+      }
+    }
+  }
+}
