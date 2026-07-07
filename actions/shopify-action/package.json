@@ -1,5 +1,5 @@
 {
-  "name": "@code0-tech/gls-action",
+  "name": "@code0-tech/shopify-action",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@code0-tech/hercules": "^1.0.3",
-    "axios": "^1.7.7"
+    "axios": "^1.7.7",
+    "shopify-webhook-schemas": "^0.3.7"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
