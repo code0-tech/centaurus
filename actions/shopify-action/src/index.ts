@@ -1,6 +1,20 @@
 import {Action, CodeZeroEvent} from "@code0-tech/hercules";
 import {ShopifyOrdersCreateWebhookPayload} from "./data_types/shopifyOrdersCreateWebhookPayload.ts";
+import {ShopifyOrdersPaidWebhookPayload} from "./data_types/shopifyOrdersPaidWebhookPayload.ts";
+import {ShopifyOrdersCancelledWebhookPayload} from "./data_types/shopifyOrdersCancelledWebhookPayload.ts";
+import {ShopifyOrdersUpdatedWebhookPayload} from "./data_types/shopifyOrdersUpdatedWebhookPayload.ts";
+import {ShopifyOrdersFulfilledWebhookPayload} from "./data_types/shopifyOrdersFulfilledWebhookPayload.ts";
+import {ShopifyFulfillmentsCreateWebhookPayload} from "./data_types/shopifyFulfillmentsCreateWebhookPayload.ts";
+import {ShopifyFulfillmentsUpdateWebhookPayload} from "./data_types/shopifyFulfillmentsUpdateWebhookPayload.ts";
+import {ShopifyRefundsCreateWebhookPayload} from "./data_types/shopifyRefundsCreateWebhookPayload.ts";
 import {ShopifyOrdersCreateWebhook} from "./events/shopifyOrdersCreateWebhook.ts";
+import {ShopifyOrdersPaidWebhook} from "./events/shopifyOrdersPaidWebhook.ts";
+import {ShopifyOrdersCancelledWebhook} from "./events/shopifyOrdersCancelledWebhook.ts";
+import {ShopifyOrdersUpdatedWebhook} from "./events/shopifyOrdersUpdatedWebhook.ts";
+import {ShopifyOrdersFulfilledWebhook} from "./events/shopifyOrdersFulfilledWebhook.ts";
+import {ShopifyFulfillmentsCreateWebhook} from "./events/shopifyFulfillmentsCreateWebhook.ts";
+import {ShopifyFulfillmentsUpdateWebhook} from "./events/shopifyFulfillmentsUpdateWebhook.ts";
+import {ShopifyRefundsCreateWebhook} from "./events/shopifyRefundsCreateWebhook.ts";
 
 const action = new Action(
     process.env.ACTION_ID ?? "shopify-action",
@@ -14,7 +28,21 @@ const action = new Action(
 )
 
 action.registerDataTypeClass(ShopifyOrdersCreateWebhookPayload)
+action.registerDataTypeClass(ShopifyOrdersPaidWebhookPayload)
+action.registerDataTypeClass(ShopifyOrdersCancelledWebhookPayload)
+action.registerDataTypeClass(ShopifyOrdersUpdatedWebhookPayload)
+action.registerDataTypeClass(ShopifyOrdersFulfilledWebhookPayload)
+action.registerDataTypeClass(ShopifyFulfillmentsCreateWebhookPayload)
+action.registerDataTypeClass(ShopifyFulfillmentsUpdateWebhookPayload)
+action.registerDataTypeClass(ShopifyRefundsCreateWebhookPayload)
 action.registerEventClass(ShopifyOrdersCreateWebhook)
+action.registerEventClass(ShopifyOrdersPaidWebhook)
+action.registerEventClass(ShopifyOrdersCancelledWebhook)
+action.registerEventClass(ShopifyOrdersUpdatedWebhook)
+action.registerEventClass(ShopifyOrdersFulfilledWebhook)
+action.registerEventClass(ShopifyFulfillmentsCreateWebhook)
+action.registerEventClass(ShopifyFulfillmentsUpdateWebhook)
+action.registerEventClass(ShopifyRefundsCreateWebhook)
 
 action.on(CodeZeroEvent.connected, () => {
     console.log("Connected to aquila");
