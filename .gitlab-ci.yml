@@ -22,6 +22,7 @@ include:
 .node-actions:
   - gls-action
   - shopify-action
+  - woocommerce-action
 
 test-node:
   image: node:24.10.0
