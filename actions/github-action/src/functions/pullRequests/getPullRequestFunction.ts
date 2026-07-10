@@ -1,6 +1,6 @@
 import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
-import { GitHubPullRequest, GitHubPullRequestSchema } from "../data_types/githubPullRequest.js"
-import { createGitHubClient, handleGitHubError } from "../helpers.js"
+import { GitHubPullRequest, GitHubPullRequestSchema } from "../../data_types/githubPullRequest.js"
+import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
 @Identifier("getPullRequest")
 @Signature("(owner: string, repository: string, pullRequestNumber: number): GITHUB_PULL_REQUEST")

@@ -1,7 +1,7 @@
 import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
-import { GitHubPullRequest, GitHubPullRequestSchema } from "../data_types/githubPullRequest.js"
-import { GitHubUpdatePullRequestRequest } from "../data_types/githubPullRequestRequests.js"
-import { createGitHubClient, handleGitHubError } from "../helpers.js"
+import { GitHubPullRequest, GitHubPullRequestSchema } from "../../data_types/githubPullRequest.js"
+import { GitHubUpdatePullRequestRequest } from "../../data_types/githubPullRequestRequests.js"
+import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
 @Identifier("updatePullRequest")
 @Signature("(owner: string, repository: string, pullRequestNumber: number, data: GITHUB_UPDATE_PULL_REQUEST_REQUEST): GITHUB_PULL_REQUEST")
