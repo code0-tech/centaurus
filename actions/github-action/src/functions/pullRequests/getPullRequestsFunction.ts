@@ -1,5 +1,5 @@
 import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
-import { GitHubPullRequest, GitHubPullRequestSchema } from "../../data_types/githubPullRequest.js"
+import { GitHubPullRequest, GitHubPullRequestSchema } from "../../data_types/pullRequests/githubPullRequest.js"
 import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
 type GitHubPullRequestState = "open" | "closed" | "all"

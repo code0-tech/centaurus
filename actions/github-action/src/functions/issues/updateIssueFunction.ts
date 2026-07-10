@@ -1,6 +1,6 @@
 import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
-import { GitHubIssue, GitHubIssueSchema } from "../../data_types/githubIssue.js"
-import { GitHubUpdateIssueRequest } from "../../data_types/githubIssueRequests.js"
+import { GitHubIssue, GitHubIssueSchema } from "../../data_types/issues/githubIssue.js"
+import { GitHubUpdateIssueRequest } from "../../data_types/issues/githubIssueRequests.js"
 import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
 @Identifier("updateIssue")
