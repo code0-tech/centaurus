@@ -1,6 +1,6 @@
 import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, Signature } from "@code0-tech/hercules"
-import { GitHubRepository, GitHubRepositorySchema } from "../data_types/githubRepository.js"
-import { createGitHubClient, handleGitHubError } from "../helpers.js"
+import { GitHubRepository, GitHubRepositorySchema } from "../../data_types/githubRepository.js"
+import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
 @Identifier("getRepository")
 @Signature("(owner: string, repository: string): GITHUB_REPOSITORY")

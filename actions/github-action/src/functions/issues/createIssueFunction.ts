@@ -1,7 +1,7 @@
 import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, Signature } from "@code0-tech/hercules"
-import { GitHubIssue, GitHubIssueSchema } from "../data_types/githubIssue.js"
-import { GitHubCreateIssueRequest } from "../data_types/githubIssueRequests.js"
-import { createGitHubClient, handleGitHubError } from "../helpers.js"
+import { GitHubIssue, GitHubIssueSchema } from "../../data_types/githubIssue.js"
+import { GitHubCreateIssueRequest } from "../../data_types/githubIssueRequests.js"
+import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
 @Identifier("createIssue")
 @Signature("(owner: string, repository: string, data: GITHUB_CREATE_ISSUE_REQUEST): GITHUB_ISSUE")
