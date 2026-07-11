@@ -1,5 +1,3 @@
-//TODO: Why is the request data here wrapped within a object and isn't a direct parameter
-
 import axios from "axios";
 import {
     Description, DisplayIcon,
@@ -14,14 +12,13 @@ import {
 } from "@code0-tech/hercules";
 import { getAuthToken } from "../helpers.js";
 import {
-    EndOfDayRequestData,
     EndOfDayResponseData,
     EndOfDayResponseDataSchema,
 } from "../data_types/glsEndOfDay.js";
 
 @Identifier("getEndOfDayReport")
 @DisplayIcon("codezero:gls")
-@Signature("(data: GLS_END_OF_DAY_REQUEST_DATA): GLS_END_OF_DAY_RESPONSE_DATA")
+@Signature("(date: string): GLS_END_OF_DAY_RESPONSE_DATA")
 @Name({ code: "en-US", content: "Get end of day report" })
 @DisplayMessage({ code: "en-US", content: "Get end of day report" })
 @Documentation({
@@ -33,17 +30,17 @@ import {
     content: "Retrieves all shipments dispatched on a given date. Useful for reconciliation and end-of-day processing.",
 })
 @Parameter({
-    runtimeName: "data",
-    name: [{ code: "en-US", content: "Data" }],
-    description: [{ code: "en-US", content: "The end of day report request data." }],
+    runtimeName: "date",
+    name: [{ code: "en-US", content: "Date" }],
+    description: [{ code: "en-US", content: "The dispatch date to retrieve shipments for, in ISO format (YYYY-MM-DD)." }],
 })
 export class GetEndOfDayReportFunction {
-    async run(context: FunctionContext, data: EndOfDayRequestData): Promise<EndOfDayResponseData> {
+    async run(context: FunctionContext, date: string): Promise<EndOfDayResponseData> {
         const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
 
         try {
             const result = await axios.post(
-                `${url}/rs/shipments/endofday?date=${data.date}`,
+                `${url}/rs/shipments/endofday?date=${date}`,
                 {},
                 {
                     headers: {
