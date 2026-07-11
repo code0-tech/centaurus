@@ -12,14 +12,14 @@ import {
 } from "@code0-tech/hercules";
 import { getAuthToken, transformValidateShipmentRequestDataToInternalFormat } from "../helpers.js";
 import {
-    ValidateShipmentRequestData,
     ValidateShipmentResponseData,
     ValidateShipmentResponseDataSchema,
 } from "../data_types/glsValidateShipment.js";
+import { Shipment } from "../data_types/glsShipment.js";
 
 @Identifier("validateShipment")
 @DisplayIcon("codezero:gls")
-@Signature("(data: GLS_VALIDATE_SHIPMENT_REQUEST_DATA): GLS_VALIDATE_SHIPMENT_RESPONSE_DATA")
+@Signature("(Shipment: GLS_SHIPMENT): GLS_VALIDATE_SHIPMENT_RESPONSE_DATA")
 @Name({ code: "en-US", content: "Validate shipment" })
 @DisplayMessage({ code: "en-US", content: "Validate shipment" })
 @Documentation({
@@ -31,19 +31,19 @@ import {
     content: "Validates a shipment against the GLS API without creating it.\nUse this before `createShipment` functions to catch errors early.",
 })
 @Parameter({
-    runtimeName: "data",
-    name: [{ code: "en-US", content: "Data" }],
-    description: [{ code: "en-US", content: "The shipment data to validate." }],
+    runtimeName: "Shipment",
+    name: [{ code: "en-US", content: "Shipment" }],
+    description: [{ code: "en-US", content: "The shipment to validate." }],
 })
 export class ValidateShipmentFunction {
-    async run(context: FunctionContext, data: ValidateShipmentRequestData): Promise<ValidateShipmentResponseData> {
+    async run(context: FunctionContext, Shipment: Shipment): Promise<ValidateShipmentResponseData> {
         const url = context.matchedConfig.findConfig("ship_it_api_url") as string;
         const contactID = (context.matchedConfig.findConfig("contact_id") as string) || "";
 
         try {
             const result = await axios.post(
                 `${url}/rs/shipments/validate`,
-                transformValidateShipmentRequestDataToInternalFormat(data, context, contactID),
+                transformValidateShipmentRequestDataToInternalFormat({ Shipment }, context, contactID),
                 {
                     headers: {
                         Authorization: `Bearer ${await getAuthToken(context)}`,
