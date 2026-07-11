@@ -40,26 +40,31 @@ import {
     runtimeName: "TrackID",
     name: [{ code: "en-US", content: "Track ID" }],
     description: [{ code: "en-US", content: "The Track ID of the parcel to update. Max length is 8 characters." }],
+    optional: true,
 })
 @Parameter({
     runtimeName: "ParcelNumber",
     name: [{ code: "en-US", content: "Parcel number" }],
     description: [{ code: "en-US", content: "The parcel number of the parcel to update." }],
+    optional: true,
 })
 @Parameter({
     runtimeName: "ShipmentReference",
     name: [{ code: "en-US", content: "Shipment reference" }],
     description: [{ code: "en-US", content: "The shipment reference of the parcel to update. Max length is 40 characters." }],
+    optional: true,
 })
 @Parameter({
     runtimeName: "ShipmentUnitReference",
     name: [{ code: "en-US", content: "Shipment unit reference" }],
     description: [{ code: "en-US", content: "The shipment unit reference of the parcel to update. Max length is 40 characters." }],
+    optional: true,
 })
 @Parameter({
     runtimeName: "PartnerParcelNumber",
     name: [{ code: "en-US", content: "Partner parcel number" }],
     description: [{ code: "en-US", content: "The partner parcel number of the parcel to update. Max length is 50 characters." }],
+    optional: true,
 })
 export class UpdateParcelWeightFunction {
     async run(

@@ -53,6 +53,7 @@ import {
     runtimeName: "ContactID",
     name: [{ code: "en-US", content: "Contact ID" }],
     description: [{ code: "en-US", content: "The GLS contact ID to use for the request." }],
+    optional: true,
 })
 export class GetAllowedServicesFunction {
     async run(
