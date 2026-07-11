@@ -1,7 +1,6 @@
-//TODO: Why is the request data here wrapped within a object and isn't a direct parameter
-
 import {
-    Description, DisplayIcon,
+    Description,
+    DisplayIcon,
     DisplayMessage,
     Documentation,
     FunctionContext,
@@ -11,17 +10,14 @@ import {
     RuntimeError,
     Signature,
 } from "@code0-tech/hercules";
-import { cancelShipment } from "../helpers.js";
-import {
-    CancelShipmentRequestData,
-    CancelShipmentResponseData,
-} from "../data_types/glsCancelShipment.js";
+import {cancelShipment} from "../helpers.js";
+import {CancelShipmentResponseData} from "../data_types/glsCancelShipment.js";
 
 @Identifier("cancelShipment")
 @DisplayIcon("codezero:gls")
-@Signature("(data: GLS_CANCEL_SHIPMENT_REQUEST_DATA): GLS_CANCEL_SHIPMENT_RESPONSE_DATA")
-@Name({ code: "en-US", content: "Cancel shipment" })
-@DisplayMessage({ code: "en-US", content: "Cancel shipment" })
+@Signature("(TrackID: string): GLS_CANCEL_SHIPMENT_RESPONSE_DATA")
+@Name({code: "en-US", content: "Cancel shipment"})
+@DisplayMessage({code: "en-US", content: "Cancel shipment"})
 @Documentation({
     code: "en-US",
     content: "Cancels an existing shipment by its Track ID. Only possible if the parcel has not yet been scanned.",
@@ -31,14 +27,16 @@ import {
     content: "Cancels an existing shipment by its Track ID. Only possible if the parcel has not yet been scanned.",
 })
 @Parameter({
-    runtimeName: "data",
-    name: [{ code: "en-US", content: "Data" }],
-    description: [{ code: "en-US", content: "The cancel shipment request data." }],
+    runtimeName: "TrackID",
+    name: [{code: "en-US", content: "Track ID"}],
+    description: [{code: "en-US", content: "The Track ID of the shipment to cancel."}],
 })
 export class CancelShipmentFunction {
-    async run(context: FunctionContext, data: CancelShipmentRequestData): Promise<CancelShipmentResponseData> {
+    async run(context: FunctionContext, TrackID: string): Promise<CancelShipmentResponseData> {
         try {
-            return await cancelShipment(data, context);
+            return await cancelShipment({
+                TrackID
+            }, context);
         } catch (error) {
             if (typeof error === "string") {
                 throw new RuntimeError("ERROR_CREATING_GLS_SHIPMENT", error);

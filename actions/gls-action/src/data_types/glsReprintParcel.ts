@@ -1,5 +1,6 @@
 import { DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules";
 import { z } from "zod";
+import { ReturnLabelsSchema } from "./glsPrintingOptions.js";
 
 export const ReprintParcelRequestDataSchema = z.object({
     TrackID: z.string().max(8).optional(),
@@ -9,10 +10,7 @@ export const ReprintParcelRequestDataSchema = z.object({
     PartnerParcelNumber: z.string().max(50).optional(),
     CreationDate: z.iso.date(),
     PrintingOptions: z.object({
-        ReturnLabels: z.object({
-            TemplateSet: z.enum(["NONE", "ZPL_200", "ZPL_300"]),
-            LabelFormat: z.enum(["PDF", "ZEBRA", "PNG", "PNG_200"]),
-        }),
+        ReturnLabels: ReturnLabelsSchema,
     }),
 });
 export type ReprintParcelRequestData = z.infer<typeof ReprintParcelRequestDataSchema>;
