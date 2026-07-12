@@ -8,10 +8,10 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import {PrintingOptions} from "../../data_types/glsPrintingOptions.js";
+import {LabelFormat, PrintingOptions, TemplateSet} from "../../data_types/glsPrintingOptions.js";
 
 @Identifier("createPrintingOptions")
-@Signature("(TemplateSet?: \"NONE\"|\"D_200\"|\"PF_4_I\"|\"PF_4_I_200\"|\"PF_4_I_300\"|\"PF_8_D_200\"|\"T_200_BF\"|\"T_300_BF\"|\"ZPL_200\"|\"ZPL_200_TRACKID_EAN_128\"|\"ZPL_200_TRACKID_CODE_39\"|\"ZPL_200_REFNO_EAN_128\"|\"ZPL_200_REFNO_CODE_39\"|\"ZPL_300\"|\"ZPL_300_TRACKID_EAN_128\"|\"ZPL_300_TRACKID_CODE_39\"|\"ZPL_300_REFNO_EAN_128\"|\"ZPL_300_REFNO_CODE_39\", LabelFormat?: \"PDF\"|\"ZEBRA\"|\"INTERMEC\"|\"DATAMAX\"|\"TOSHIBA\"|\"PNG\", UseDefault?: string, LabelPrinter?: string, DocumentPrinter?: string): GLS_PRINTING_OPTIONS")
+@Signature("(TemplateSet?: GLS_TEMPLATE_SET, LabelFormat?: GLS_LABEL_FORMAT, UseDefault?: string, LabelPrinter?: string, DocumentPrinter?: string): GLS_PRINTING_OPTIONS")
 @Name({code: "en-US", content: "Create GLS printing settings"})
 @DisplayIcon("codezero:gls")
 @DisplayMessage({code: "en-US", content: "Create GLS printing settings in format ${TemplateSet} as ${LabelFormat}"})
@@ -62,8 +62,8 @@ import {PrintingOptions} from "../../data_types/glsPrintingOptions.js";
 export class CreatePrintingOptionsFunction {
     run(
         _context: unknown,
-        TemplateSet?: "NONE" | "D_200" | "PF_4_I" | "PF_4_I_200" | "PF_4_I_300" | "PF_8_D_200" | "T_200_BF" | "T_300_BF" | "ZPL_200" | "ZPL_200_TRACKID_EAN_128" | "ZPL_200_TRACKID_CODE_39" | "ZPL_200_REFNO_EAN_128" | "ZPL_200_REFNO_CODE_39" | "ZPL_300" | "ZPL_300_TRACKID_EAN_128" | "ZPL_300_TRACKID_CODE_39" | "ZPL_300_REFNO_EAN_128" | "ZPL_300_REFNO_CODE_39",
-        LabelFormat?: "PDF" | "ZEBRA" | "INTERMEC" | "DATAMAX" | "TOSHIBA" | "PNG",
+        TemplateSet?: TemplateSet,
+        LabelFormat?: LabelFormat,
         UseDefault?: string,
         LabelPrinter?: string,
         DocumentPrinter?: string,

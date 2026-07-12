@@ -21,7 +21,7 @@ import { ReturnLabels } from "../data_types/glsPrintingOptions.js";
 
 @Identifier("reprintParcel")
 @DisplayIcon("codezero:gls")
-@Signature("(CreationDate: string, TemplateSet: \"NONE\"|\"D_200\"|\"PF_4_I\"|\"PF_4_I_200\"|\"PF_4_I_300\"|\"PF_8_D_200\"|\"T_200_BF\"|\"T_300_BF\"|\"ZPL_200\"|\"ZPL_200_TRACKID_EAN_128\"|\"ZPL_200_TRACKID_CODE_39\"|\"ZPL_200_REFNO_EAN_128\"|\"ZPL_200_REFNO_CODE_39\"|\"ZPL_300\"|\"ZPL_300_TRACKID_EAN_128\"|\"ZPL_300_TRACKID_CODE_39\"|\"ZPL_300_REFNO_EAN_128\"|\"ZPL_300_REFNO_CODE_39\", LabelFormat: \"PDF\"|\"ZEBRA\"|\"INTERMEC\"|\"DATAMAX\"|\"TOSHIBA\"|\"PNG\", TrackID?: string, ParcelNumber?: number, ShipmentReference?: string, ShipmentUnitReference?: string, PartnerParcelNumber?: string): GLS_REPRINT_PARCEL_RESPONSE_DATA")
+@Signature("(CreationDate: string, TemplateSet: GLS_TEMPLATE_SET, LabelFormat: GLS_LABEL_FORMAT, TrackID?: string, ParcelNumber?: number, ShipmentReference?: string, ShipmentUnitReference?: string, PartnerParcelNumber?: string): GLS_REPRINT_PARCEL_RESPONSE_DATA")
 @Name({ code: "en-US", content: "Reprint parcel" })
 @DisplayMessage({ code: "en-US", content: "Reprint parcel" })
 @Documentation({
