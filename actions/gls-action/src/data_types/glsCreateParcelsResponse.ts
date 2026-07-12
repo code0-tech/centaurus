@@ -1,5 +1,6 @@
 import { DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules";
 import { z } from "zod";
+import { LabelFormatSchema } from "./glsPrintingOptions.js";
 
 export const CreateParcelsResponseSchema = z.object({
     CreatedShipment: z.object({
@@ -26,7 +27,7 @@ export const CreateParcelsResponseSchema = z.object({
         PrintData: z.array(
             z.object({
                 Data: z.string(),
-                LabelFormat: z.enum(["PDF", "ZEBRA", "INTERMEC", "DATAMAX", "TOSHIBA", "PNG"]),
+                LabelFormat: LabelFormatSchema,
             })
         ),
         CustomerID: z.string(),

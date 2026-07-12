@@ -11,7 +11,12 @@ import {GlsConsigneeDataType} from "./data_types/glsConsignee.js";
 import {GlsCreateParcelsResponseDataType} from "./data_types/glsCreateParcelsResponse.js";
 import {GlsCustomContentDataType} from "./data_types/glsCustomContent.js";
 import {GlsEndOfDayRequestDataType, GlsEndOfDayResponseDataType} from "./data_types/glsEndOfDay.js";
-import {GlsPrintingOptionsDataType, ReturnLabelsDataType} from "./data_types/glsPrintingOptions.js";
+import {
+    GlsLabelFormatDataType,
+    GlsPrintingOptionsDataType,
+    GlsTemplateSetDataType,
+    ReturnLabelsDataType
+} from "./data_types/glsPrintingOptions.js";
 import {GlsReprintParcelRequestDataType, GlsReprintParcelResponseDataType} from "./data_types/glsReprintParcel.js";
 import {GlsReturnOptionsDataType} from "./data_types/glsReturnOptions.js";
 import {GlsShipmentDataType, GlsShipmentWithoutServicesDataType} from "./data_types/glsShipment.js";
@@ -122,7 +127,9 @@ action.registerDataTypeClass(GlsCreateParcelsResponseDataType);
 action.registerDataTypeClass(GlsCustomContentDataType);
 action.registerDataTypeClass(GlsEndOfDayRequestDataType);
 action.registerDataTypeClass(GlsEndOfDayResponseDataType);
+action.registerDataTypeClass(GlsLabelFormatDataType);
 action.registerDataTypeClass(GlsPrintingOptionsDataType);
+action.registerDataTypeClass(GlsTemplateSetDataType);
 action.registerDataTypeClass(ReturnLabelsDataType);
 action.registerDataTypeClass(GlsReprintParcelRequestDataType);
 action.registerDataTypeClass(GlsReprintParcelResponseDataType);
