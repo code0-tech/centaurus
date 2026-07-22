@@ -26,7 +26,6 @@ export function getStripeClient(context: FunctionContext): Stripe {
     }
 
     const options: Stripe.StripeConfig = {
-        typescript: true,
         appInfo: {name: "code0-centaurus-stripe-action"},
     };
     // Only pin the API version when the operator explicitly configured one;
