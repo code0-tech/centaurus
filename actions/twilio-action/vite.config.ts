@@ -11,7 +11,8 @@ export default defineConfig({
                     'fs',
                     'path',
                     'typescript',
-                    '@code0-tech/hercules'
+                    '@code0-tech/hercules',
+                    'twilio'
                 ].includes(id) || id.startsWith('node:')
         }
     }

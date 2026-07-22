@@ -41,14 +41,6 @@ const action = new Action(
             ],
             linkedDataTypes: ["TEXT"],
         },
-        {
-            identifier: "base_url",
-            type: "TEXT",
-            defaultValue: "https://api.twilio.com",
-            name: [{ code: "en-US", content: "The Twilio API url" }],
-            description: [{ code: "en-US", content: "The base url of the Twilio API." }],
-            linkedDataTypes: ["TEXT"],
-        },
     ]
 );
 

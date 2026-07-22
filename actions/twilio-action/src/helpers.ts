@@ -1,9 +1,7 @@
 import { FunctionContext, RuntimeError } from "@code0-tech/hercules";
-import axios from "axios";
+import twilio from "twilio";
 import { z } from "zod";
 import { TwilioMessage, TwilioMessageSchema } from "./data_types/twilioMessage.js";
-
-const DEFAULT_BASE_URL = "https://api.twilio.com";
 
 export const SendMessageRequestDataSchema = z.object({
     To: z.string().describe("The destination phone number or channel address (e.g. whatsapp:+1...)."),
@@ -34,7 +32,7 @@ function getCredentials(context: FunctionContext): { accountSid: string; authTok
 }
 
 /**
- * Sends a message through the Twilio Messages API.
+ * Sends a message through the Twilio Messages API using the official Twilio SDK.
  * See https://www.twilio.com/docs/messaging/api/message-resource#create-a-message-resource
  */
 export const sendMessage = async (
@@ -52,37 +50,45 @@ export const sendMessage = async (
         );
     }
 
-    const baseUrl = (context.matchedConfig.findConfig("base_url") as string) || DEFAULT_BASE_URL;
-
-    const body = new URLSearchParams();
-    body.set("To", parsed.To);
-    body.set("From", from);
-    body.set("Body", parsed.Body);
-    if (parsed.MediaUrl) {
-        body.set("MediaUrl", parsed.MediaUrl);
-    }
+    const client = twilio(accountSid, authToken);
 
     try {
-        const result = await axios.post(
-            `${baseUrl}/2010-04-01/Accounts/${accountSid}/Messages.json`,
-            body,
-            {
-                auth: { username: accountSid, password: authToken },
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            }
-        );
-        return TwilioMessageSchema.parse(result.data);
+        const message = await client.messages.create({
+            to: parsed.To,
+            from,
+            body: parsed.Body,
+            ...(parsed.MediaUrl ? { mediaUrl: [parsed.MediaUrl] } : {}),
+        });
+
+        return TwilioMessageSchema.parse({
+            sid: message.sid,
+            account_sid: message.accountSid,
+            messaging_service_sid: message.messagingServiceSid,
+            from: message.from,
+            to: message.to,
+            body: message.body,
+            status: message.status,
+            direction: message.direction,
+            num_segments: message.numSegments,
+            num_media: message.numMedia,
+            price: message.price,
+            price_unit: message.priceUnit,
+            error_code: message.errorCode,
+            error_message: message.errorMessage,
+            date_created: message.dateCreated ? message.dateCreated.toUTCString() : null,
+            date_updated: message.dateUpdated ? message.dateUpdated.toUTCString() : null,
+            date_sent: message.dateSent ? message.dateSent.toUTCString() : null,
+            api_version: message.apiVersion,
+            uri: message.uri,
+        });
     } catch (error: any) {
-        const twilioError = error.response?.data;
-        if (twilioError?.message) {
-            console.error("Error sending message to Twilio API:", twilioError.code, twilioError.message);
+        // Twilio's RestException exposes a numeric `code` and a human-readable `message`.
+        if (error?.code || error?.message) {
+            console.error("Error sending message to Twilio API:", error.code, error.message);
             throw new RuntimeError(
                 "ERROR_SENDING_TWILIO_MESSAGE",
-                `Twilio API error ${twilioError.code ?? ""}: ${twilioError.message}`
+                `Twilio API error ${error.code ?? ""}: ${error.message ?? "unknown error"}`
             );
-        }
-        if (error instanceof Error) {
-            throw new RuntimeError("ERROR_SENDING_TWILIO_MESSAGE", error.message);
         }
         throw new RuntimeError("ERROR_SENDING_TWILIO_MESSAGE", "An error occurred while sending the Twilio message.");
     }
