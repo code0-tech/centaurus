@@ -7,6 +7,7 @@ The "central" place for all actions — a monorepo containing integrations provi
 | Action | Description |
 |--------|-------------|
 | [GLS](docs/Actions/GLS/overview.md) | GLS ShipIT integration for creating and managing shipments |
+| HubSpot | HubSpot CRM integration: webhooks for contacts/deals/companies plus create, update, search, associate, and note functions |
 
 ## ENV
 
