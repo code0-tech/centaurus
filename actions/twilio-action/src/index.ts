@@ -8,10 +8,10 @@ const action = new Action(
     process.env.ACTION_ID ?? "twilio-action",
     process.env.VERSION ?? "1.0.0",
     process.env.AQUILA_URL ?? "127.0.0.1:8081",
-    "code0-tech",
-    "simple:twilio",
+    "CodeZero",
+    "tabler:message",
     "Twilio integration: send SMS, MMS, and channel messages (e.g. WhatsApp) via the Twilio Messages API.",
-    [{ code: "en-US", content: "Twilio Action" }],
+    [{ code: "en-US", content: "Twilio" }],
     [
         {
             identifier: "account_sid",

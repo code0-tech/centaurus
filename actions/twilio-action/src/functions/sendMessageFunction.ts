@@ -14,10 +14,10 @@ import { sendMessage } from "../helpers.js";
 import { TwilioMessage } from "../data_types/twilioMessage.js";
 
 @Identifier("sendMessage")
-@DisplayIcon("simple:twilio")
-@Signature("(To: string, Body: string, From?: string, MediaUrl?: string): TWILIO_MESSAGE")
+@DisplayIcon("tabler:message")
+@Signature("(ToPhoneNumber: string, Body: string, FromPhoneNumber?: string, MediaUrl?: string): TWILIO_MESSAGE")
 @Name({ code: "en-US", content: "Send message" })
-@DisplayMessage({ code: "en-US", content: "Send message to ${To}" })
+@DisplayMessage({ code: "en-US", content: "Send message to ${ToPhoneNumber}" })
 @Documentation({
     code: "en-US",
     content:
@@ -28,7 +28,7 @@ import { TwilioMessage } from "../data_types/twilioMessage.js";
     content: "Sends an SMS, MMS, or channel message through the Twilio Messages API.",
 })
 @Parameter({
-    runtimeName: "To",
+    runtimeName: "ToPhoneNumber",
     name: [{ code: "en-US", content: "To" }],
     description: [
         { code: "en-US", content: "The destination phone number in E.164 format or channel address (e.g. whatsapp:+1...)." },
@@ -40,7 +40,7 @@ import { TwilioMessage } from "../data_types/twilioMessage.js";
     description: [{ code: "en-US", content: "The text of the message to send. Up to 1600 characters." }],
 })
 @Parameter({
-    runtimeName: "From",
+    runtimeName: "FromPhoneNumber",
     name: [{ code: "en-US", content: "From" }],
     description: [
         {
@@ -60,13 +60,13 @@ import { TwilioMessage } from "../data_types/twilioMessage.js";
 export class SendMessageFunction {
     async run(
         context: FunctionContext,
-        To: string,
+        ToPhoneNumber: string,
         Body: string,
-        From?: string,
+        FromPhoneNumber?: string,
         MediaUrl?: string
     ): Promise<TwilioMessage> {
         try {
-            return await sendMessage({ To, Body, From, MediaUrl }, context);
+            return await sendMessage({ To: ToPhoneNumber, Body, From: FromPhoneNumber, MediaUrl }, context);
         } catch (error) {
             if (error instanceof RuntimeError) {
                 throw error;
