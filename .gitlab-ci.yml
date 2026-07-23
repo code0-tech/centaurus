@@ -24,6 +24,7 @@ include:
   - shopify-action
   - woocommerce-action
   - shopware-action
+  - twilio-action
 
 test-node:
   image: node:24.10.0

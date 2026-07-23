@@ -1,0 +1,27 @@
+{
+  "name": "@code0-tech/twilio-action",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "generate:twilio-schemas": "curl -fsSL --create-dirs -o schemas/twilio-api-v2010-openapi.json https://raw.githubusercontent.com/twilio/twilio-oai/main/spec/json/twilio_api_v2010.json && node scripts/filterTwilioSpec.mjs && mkdir -p src/generated && openapi-zod-client schemas/twilio-api-v2010-openapi.filtered.json -o src/generated/twilio-schemas.ts -t node_modules/openapi-zod-client/src/templates/schemas-only.hbs --export-schemas && node scripts/patchGeneratedSchemas.mjs",
+    "build": "vite build",
+    "test": "vitest run",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@code0-tech/hercules": "^1.1.1",
+    "twilio": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "openapi-zod-client": "^1.18.3",
+    "tsx": "^4.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.3",
+    "vitest": "^4.1.10"
+  }
+}
