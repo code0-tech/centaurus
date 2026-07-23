@@ -18,9 +18,6 @@ export const StripePaymentIntentSucceededWebhookPayloadSchema = z.object({
         })
         .describe("Object containing the resource relevant to the event."),
 });
-export type StripePaymentIntentSucceededWebhookPayload = z.infer<
-    typeof StripePaymentIntentSucceededWebhookPayloadSchema
->;
 
 @Identifier("StripePaymentIntentSucceededWebhookPayload")
 @Name({code: "en-US", content: "StripePaymentIntentSucceededWebhookPayload"})

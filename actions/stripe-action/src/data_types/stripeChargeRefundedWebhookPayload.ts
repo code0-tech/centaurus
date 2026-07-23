@@ -35,7 +35,6 @@ export const StripeChargeRefundedWebhookPayloadSchema = z.object({
         })
         .describe("Object containing the resource relevant to the event."),
 });
-export type StripeChargeRefundedWebhookPayload = z.infer<typeof StripeChargeRefundedWebhookPayloadSchema>;
 
 @Identifier("StripeChargeRefundedWebhookPayload")
 @Name({code: "en-US", content: "StripeChargeRefundedWebhookPayload"})
