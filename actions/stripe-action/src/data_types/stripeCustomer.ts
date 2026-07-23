@@ -1,21 +1,15 @@
 import {DisplayMessage, Identifier, Name, Schema} from "@code0-tech/hercules";
 import {z} from "zod";
+import {schemas} from "../generated/stripe-schemas.ts";
 
-// Focused view of the Stripe Customer object. Only the fields commonly used in
-// automations are modelled; zod strips any additional fields the API returns.
-// See https://docs.stripe.com/api/customers/object
-export const StripeCustomerSchema = z.object({
-    id: z.string().describe("Unique identifier of the customer (cus_...)."),
-    object: z.string().describe("String representing the object's type. Always 'customer'."),
-    email: z.string().nullish().describe("The customer's email address."),
-    name: z.string().nullish().describe("The customer's full name or business name."),
-    description: z.string().nullish().describe("An arbitrary string attached to the customer."),
-    phone: z.string().nullish().describe("The customer's phone number."),
-    currency: z.string().nullish().describe("Three-letter ISO currency code for the customer's default currency."),
-    created: z.number().describe("Time at which the customer was created (Unix timestamp in seconds)."),
-    livemode: z.boolean().nullish().describe("Whether the object exists in live mode or test mode."),
-    metadata: z.record(z.string(), z.string()).nullish().describe("Set of key-value pairs attached to the customer."),
-});
+/**
+ * STRIPE_CUSTOMER is generated from Stripe's official OpenAPI spec
+ * (stripe/openapi, openapi/spec3.sdk.json). The spec is filtered down to the
+ * `customer` component (see scripts/filterStripeSpec.mjs) and converted to a
+ * zod schema by openapi-zod-client. Regenerate with
+ * `npm run generate:stripe-schemas`.
+ */
+export const StripeCustomerSchema = schemas.customer;
 export type StripeCustomer = z.infer<typeof StripeCustomerSchema>;
 
 @Identifier("STRIPE_CUSTOMER")

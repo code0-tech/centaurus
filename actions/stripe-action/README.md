@@ -34,10 +34,21 @@ Node.js SDK.
 
 ## Data type schemas
 
-The `@Schema` data types currently ship hand-written `zod` schemas (see
-`src/data_types/`). These can be regenerated from Stripe's official OpenAPI
-spec instead — the same approach used by `woocommerce-action` and
-`shopware-action`.
+The `@Schema` data types use `zod` schemas generated from Stripe's official
+OpenAPI spec — the same approach used by `twilio-action`, `woocommerce-action`
+and `shopware-action`. The generated schemas live in
+`src/generated/stripe-schemas.ts` and each data type re-exposes one, e.g.:
+
+```ts
+import {schemas} from "../generated/stripe-schemas.ts";
+export const StripeCustomerSchema = schemas.customer;
+```
+
+Webhook payloads wrap a resource schema in the Stripe event envelope
+(`{ id, object: "event", type, data: { object: <resource> }, … }`), with
+`data.object` set to `schemas.payment_intent` / `schemas.charge`.
+
+To regenerate after a Stripe API update:
 
 ```bash
 npm run generate:stripe-schemas
@@ -50,18 +61,5 @@ schemas the action exposes (`scripts/filterStripeSpec.mjs` keeps `customer`,
 emit `src/generated/stripe-schemas.ts`, then applies the zod v4 fix-ups in
 `scripts/patchGeneratedSchemas.mjs`.
 
-To switch a data type over to the generated schema, replace its hand-written
-`zod` object with the generated one, e.g.:
-
-```ts
-import {schemas} from "../generated/stripe-schemas.ts";
-export const StripeCustomerSchema = schemas.customer;
-```
-
-Webhook payloads wrap a resource schema in the Stripe event envelope
-(`{ id, object: "event", type, data: { object: <resource> }, … }`), so after
-generation they become `data.object = schemas.payment_intent` /
-`schemas.charge`.
-
-> Requires network access to `registry.npmjs.org` (for `openapi-zod-client`)
-> and `raw.githubusercontent.com` (for the spec).
+> Regeneration requires network access to `registry.npmjs.org` (for
+> `openapi-zod-client`) and `raw.githubusercontent.com` (for the spec).
