@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "typecheck": "tsc --noEmit",
+    "generate:stripe-schemas": "curl -fsSL --create-dirs -o schemas/stripe-openapi.json https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.sdk.json && node scripts/filterStripeSpec.mjs && mkdir -p src/generated && openapi-zod-client schemas/stripe-openapi.filtered.json -o src/generated/stripe-schemas.ts -t node_modules/openapi-zod-client/src/templates/schemas-only.hbs --export-schemas && node scripts/patchGeneratedSchemas.mjs",
     "build": "vite build",
     "test": "vitest run",
     "start": "node dist/index.js"
@@ -17,6 +18,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "openapi-zod-client": "^1.18.3",
     "tsx": "^4.0.0",
     "typescript": "^5.9.3",
     "vite": "^8.0.3",

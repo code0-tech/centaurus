@@ -31,3 +31,37 @@ incoming webhook events.
 
 All API calls use the official [`stripe`](https://www.npmjs.com/package/stripe)
 Node.js SDK.
+
+## Data type schemas
+
+The `@Schema` data types currently ship hand-written `zod` schemas (see
+`src/data_types/`). These can be regenerated from Stripe's official OpenAPI
+spec instead — the same approach used by `woocommerce-action` and
+`shopware-action`.
+
+```bash
+npm run generate:stripe-schemas
+```
+
+This downloads Stripe's `spec3.sdk.json`, filters it down to the resource
+schemas the action exposes (`scripts/filterStripeSpec.mjs` keeps `customer`,
+`payment_intent`, `refund`, `charge`), runs
+[`openapi-zod-client`](https://www.npmjs.com/package/openapi-zod-client) to
+emit `src/generated/stripe-schemas.ts`, then applies the zod v4 fix-ups in
+`scripts/patchGeneratedSchemas.mjs`.
+
+To switch a data type over to the generated schema, replace its hand-written
+`zod` object with the generated one, e.g.:
+
+```ts
+import {schemas} from "../generated/stripe-schemas.ts";
+export const StripeCustomerSchema = schemas.customer;
+```
+
+Webhook payloads wrap a resource schema in the Stripe event envelope
+(`{ id, object: "event", type, data: { object: <resource> }, … }`), so after
+generation they become `data.object = schemas.payment_intent` /
+`schemas.charge`.
+
+> Requires network access to `registry.npmjs.org` (for `openapi-zod-client`)
+> and `raw.githubusercontent.com` (for the spec).
