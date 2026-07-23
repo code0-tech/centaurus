@@ -25,6 +25,7 @@ include:
   - woocommerce-action
   - shopware-action
   - twilio-action
+  - hubspot-action
 
 test-node:
   image: node:24.10.0
