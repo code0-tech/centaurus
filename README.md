@@ -7,6 +7,7 @@ The "central" place for all actions — a monorepo containing integrations provi
 | Action | Description |
 |--------|-------------|
 | [GLS](docs/Actions/GLS/overview.md) | GLS ShipIT integration for creating and managing shipments |
+| SMTP | Send emails (with attachments) through any SMTP server via nodemailer |
 
 ## ENV
 
