@@ -5,6 +5,7 @@ import { SmtpAttachmentDataType } from "./data_types/smtpAttachment.js";
 import { SmtpEnvelopeDataType, SmtpSendResultDataType } from "./data_types/smtpSendResult.js";
 import { SendEmailFunction } from "./functions/sendEmailFunction.js";
 import { SendEmailWithAttachmentsFunction } from "./functions/sendEmailWithAttachmentsFunction.js";
+import { CreateAttachmentFunction } from "./functions/utils/createAttachmentFunction.js";
 
 const action = new Action(
     process.env.ACTION_ID ?? "smtp-action",
@@ -71,6 +72,7 @@ action.registerDataTypeClass(SmtpSendResultDataType);
 
 action.registerRuntimeFunction(SendEmailFunction);
 action.registerRuntimeFunction(SendEmailWithAttachmentsFunction);
+action.registerRuntimeFunction(CreateAttachmentFunction);
 
 action.on(CodeZeroEvent.connected, () => {
     console.log("Connected to aquila");
