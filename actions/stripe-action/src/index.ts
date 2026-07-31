@@ -17,10 +17,10 @@ import {StripePaymentIntentSucceededWebhook} from "./events/stripePaymentIntentS
 import {StripeChargeRefundedWebhook} from "./events/stripeChargeRefundedWebhook.ts";
 
 const action = new Action(
-    process.env.ACTION_ID ?? "testing-action",
+    process.env.ACTION_ID ?? "stripe-action",
     process.env.VERSION ?? "1.0.0",
     process.env.AQUILA_URL ?? "127.0.0.1:8081",
-    "code0-tech",
+    "codezero",
     "simple:stripe",
     "Stripe payments integration: manage customers, payment intents and refunds, and react to Stripe webhook events.",
     [{code: "en-US", content: "Stripe"}],
