@@ -25,6 +25,7 @@ include:
   - woocommerce-action
   - shopware-action
   - twilio-action
+  - stripe-action
 
 test-node:
   image: node:24.10.0

@@ -4,10 +4,11 @@ import { schemas } from "../generated/twilio-schemas.js";
 
 /**
  * TWILIO_MESSAGE is generated from Twilio's official OpenAPI spec
- * (twilio/twilio-oai, spec/json/twilio_api_v2010.json). The spec is filtered
- * down to the `api.v2010.account.message` component and re-exposed as
- * `TwilioMessage` (see scripts/filterTwilioSpec.mjs), then converted to a zod
- * schema by openapi-zod-client. Regenerate with `npm run generate:twilio-schemas`.
+ * (twilio/twilio-oai, spec/json/twilio_api_v2010.json). The spec is reduced to
+ * the `api.v2010.account.message` component (re-exposed as `TwilioMessage`) plus
+ * everything it references via the shared scripts/openapi-filter.mjs, then
+ * converted to zod by the shared scripts/openapi-to-zod.mjs. Regenerate with
+ * `npm run generate:twilio-schemas`.
  */
 export const TwilioMessageSchema = schemas.TwilioMessage;
 export type TwilioMessage = z.infer<typeof TwilioMessageSchema>;

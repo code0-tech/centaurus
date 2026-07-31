@@ -55,7 +55,7 @@ const action = new Action(
     "code0-tech",
     "codezero:gls",
     "GLS shipping integration: create, validate, cancel, reprint, and report shipments via the GLS ShipIt API.",
-    [{code: "en-US", content: "GLS Action"}],
+    [{code: "en-US", content: "GLS"}],
     [
         {
             identifier: "auth_url",
