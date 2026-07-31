@@ -6,6 +6,7 @@ import {StripePaymentIntentDataType} from "./data_types/stripePaymentIntent.ts";
 import {StripeRefundDataType} from "./data_types/stripeRefund.ts";
 import {StripePaymentIntentSucceededWebhookPayload} from "./data_types/stripePaymentIntentSucceededWebhookPayload.ts";
 import {StripeChargeRefundedWebhookPayload} from "./data_types/stripeChargeRefundedWebhookPayload.ts";
+import {registerGeneratedRecursiveDataTypes} from "./data_types/generatedRecursiveDataTypes.ts";
 
 import {CreateCustomerFunction} from "./functions/createCustomerFunction.ts";
 import {CreatePaymentIntentFunction} from "./functions/createPaymentIntentFunction.ts";
@@ -16,13 +17,13 @@ import {StripePaymentIntentSucceededWebhook} from "./events/stripePaymentIntentS
 import {StripeChargeRefundedWebhook} from "./events/stripeChargeRefundedWebhook.ts";
 
 const action = new Action(
-    process.env.ACTION_ID ?? "stripe-action",
+    process.env.ACTION_ID ?? "testing-action",
     process.env.VERSION ?? "1.0.0",
     process.env.AQUILA_URL ?? "127.0.0.1:8081",
     "code0-tech",
     "simple:stripe",
     "Stripe payments integration: manage customers, payment intents and refunds, and react to Stripe webhook events.",
-    [{code: "en-US", content: "Stripe Action"}],
+    [{code: "en-US", content: "Stripe"}],
     [
         {
             identifier: "secret_key",
@@ -73,6 +74,10 @@ action.registerDataTypeClass(StripePaymentIntentDataType);
 action.registerDataTypeClass(StripeRefundDataType);
 action.registerDataTypeClass(StripePaymentIntentSucceededWebhookPayload);
 action.registerDataTypeClass(StripeChargeRefundedWebhookPayload);
+
+// Register a data type for every recursive Stripe schema so hercules can emit a
+// type string for the curated resources above (see the module's doc comment).
+registerGeneratedRecursiveDataTypes(action);
 
 action.registerRuntimeFunction(CreateCustomerFunction);
 action.registerRuntimeFunction(CreatePaymentIntentFunction);
