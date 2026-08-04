@@ -15,20 +15,20 @@ import { SmtpSendResult } from "../data_types/smtpSendResult.js";
 
 @Identifier("sendEmail")
 @DisplayIcon("tabler:mail")
-@Signature("(To: string, Subject: string, Text: string, Html?: string, From?: string, Cc?: string, Bcc?: string, ReplyTo?: string): SMTP_SEND_RESULT")
+@Signature("(Recipients: string, Subject: string, Text: string, Html?: string, From?: string, CarbonCopy?: string, Bcc?: string, ReplyTo?: string): SMTP_SEND_RESULT")
 @Name({ code: "en-US", content: "Send email" })
-@DisplayMessage({ code: "en-US", content: "Send email to ${To}" })
+@DisplayMessage({ code: "en-US", content: "Send email to ${Recipients}" })
 @Documentation({
     code: "en-US",
     content:
-        "Sends an email through the configured SMTP server using nodemailer.\nProvide `Html` to send a rich body alongside the plain text, and `From` to override the action's default sender. `To`, `Cc`, and `Bcc` accept comma-separated address lists.",
+        "Sends an email through the configured SMTP server using nodemailer.\nProvide `Html` to send a rich body alongside the plain text, and `From` to override the action's default sender. `Recipients`, `CarbonCopy`, and `Bcc` accept comma-separated address lists.",
 })
 @Description({
     code: "en-US",
     content: "Sends an email through the configured SMTP server.",
 })
 @Parameter({
-    runtimeName: "To",
+    runtimeName: "Recipients",
     name: [{ code: "en-US", content: "To" }],
     description: [{ code: "en-US", content: "Comma-separated list of recipient email addresses." }],
 })
@@ -55,7 +55,7 @@ import { SmtpSendResult } from "../data_types/smtpSendResult.js";
     optional: true,
 })
 @Parameter({
-    runtimeName: "Cc",
+    runtimeName: "CarbonCopy",
     name: [{ code: "en-US", content: "CC" }],
     description: [{ code: "en-US", content: "Comma-separated list of CC recipients." }],
     optional: true,
@@ -75,17 +75,17 @@ import { SmtpSendResult } from "../data_types/smtpSendResult.js";
 export class SendEmailFunction {
     async run(
         context: FunctionContext,
-        To: string,
+        Recipients: string,
         Subject: string,
         Text: string,
         Html?: string,
         From?: string,
-        Cc?: string,
+        CarbonCopy?: string,
         Bcc?: string,
         ReplyTo?: string
     ): Promise<SmtpSendResult> {
         try {
-            return await sendEmail({ To, Subject, Text, Html, From, Cc, Bcc, ReplyTo }, context);
+            return await sendEmail({ To:Recipients, Subject, Text, Html, From, Cc: CarbonCopy, Bcc, ReplyTo }, context);
         } catch (error) {
             if (error instanceof RuntimeError) {
                 throw error;
