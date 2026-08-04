@@ -2,10 +2,13 @@ import "reflect-metadata";
 import { Action, CodeZeroEvent } from "@code0-tech/hercules";
 
 import { SmtpAttachmentDataType } from "./data_types/smtpAttachment.js";
+import { SmtpEmailReceivedPayloadDataType, SmtpEmailSentPayloadDataType } from "./data_types/smtpEmailTriggerPayload.js";
 import { SmtpEnvelopeDataType, SmtpSendResultDataType } from "./data_types/smtpSendResult.js";
 import { SendEmailFunction } from "./functions/sendEmailFunction.js";
 import { SendEmailWithAttachmentsFunction } from "./functions/sendEmailWithAttachmentsFunction.js";
 import { CreateAttachmentFunction } from "./functions/utils/createAttachmentFunction.js";
+import { SmtpEmailReceivedTrigger } from "./events/smtpEmailReceivedTrigger.js";
+import { SmtpEmailSentTrigger } from "./events/smtpEmailSentTrigger.js";
 
 const action = new Action(
     process.env.ACTION_ID ?? "smtp-action",
@@ -69,10 +72,14 @@ const action = new Action(
 action.registerDataTypeClass(SmtpAttachmentDataType);
 action.registerDataTypeClass(SmtpEnvelopeDataType);
 action.registerDataTypeClass(SmtpSendResultDataType);
+action.registerDataTypeClass(SmtpEmailReceivedPayloadDataType);
+action.registerDataTypeClass(SmtpEmailSentPayloadDataType);
 
 action.registerRuntimeFunction(SendEmailFunction);
 action.registerRuntimeFunction(SendEmailWithAttachmentsFunction);
 action.registerRuntimeFunction(CreateAttachmentFunction);
+action.registerEventClass(SmtpEmailReceivedTrigger);
+action.registerEventClass(SmtpEmailSentTrigger);
 
 action.on(CodeZeroEvent.connected, () => {
     console.log("Connected to aquila");
