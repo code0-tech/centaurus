@@ -82,13 +82,13 @@ action.on(CodeZeroEvent.error, (error: Error) => {
     console.error("Stream error:", error.message);
     console.log("Attempting to reconnect in 5s...");
     setTimeout(() => {
-        action.connect(process.env.AUTH_TOKEN ?? "your_auth_token_here").catch((err: Error) => {
+        action.connect(process.env.AUTH_TOKEN ?? "smtp-action").catch((err: Error) => {
             action.emit(CodeZeroEvent.error, err);
         });
     }, 5000);
 });
 
-action.connect(process.env.AUTH_TOKEN ?? "your_auth_token_here").catch((err: Error) => {
+action.connect(process.env.AUTH_TOKEN ?? "smtp-action").catch((err: Error) => {
     action.emit(CodeZeroEvent.error, err);
 });
 
