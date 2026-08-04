@@ -16,20 +16,20 @@ import { SmtpAttachment } from "../data_types/smtpAttachment.js";
 
 @Identifier("sendEmailWithAttachments")
 @DisplayIcon("tabler:mail")
-@Signature("(To: string, Subject: string, Text: string, Attachments: SMTP_ATTACHMENT, Html?: string, From?: string, Cc?: string, Bcc?: string): SMTP_SEND_RESULT")
+@Signature("(Recipients: string, Subject: string, Text: string, Attachments: SMTP_ATTACHMENT, Html?: string, From?: string, CarbonCopy?: string, Bcc?: string): SMTP_SEND_RESULT")
 @Name({ code: "en-US", content: "Send email with attachments" })
-@DisplayMessage({ code: "en-US", content: "Send email with attachments to ${To}" })
+@DisplayMessage({ code: "en-US", content: "Send email with attachments to ${Recipients}" })
 @Documentation({
     code: "en-US",
     content:
-        "Sends an email with one or more attachments through the configured SMTP server.\nBuild each attachment with the `createAttachment` function. `To`, `Cc`, and `Bcc` accept comma-separated address lists.",
+        "Sends an email with one or more attachments through the configured SMTP server.\nBuild each attachment with the `createAttachment` function. `Recipients`, `CarbonCopy`, and `Bcc` accept comma-separated address lists.",
 })
 @Description({
     code: "en-US",
     content: "Sends an email with attachments through the configured SMTP server.",
 })
 @Parameter({
-    runtimeName: "To",
+    runtimeName: "Recipients",
     name: [{ code: "en-US", content: "To" }],
     description: [{ code: "en-US", content: "Comma-separated list of recipient email addresses." }],
 })
@@ -61,7 +61,7 @@ import { SmtpAttachment } from "../data_types/smtpAttachment.js";
     optional: true,
 })
 @Parameter({
-    runtimeName: "Cc",
+    runtimeName: "CarbonCopy",
     name: [{ code: "en-US", content: "CC" }],
     description: [{ code: "en-US", content: "Comma-separated list of CC recipients." }],
     optional: true,
@@ -75,18 +75,18 @@ import { SmtpAttachment } from "../data_types/smtpAttachment.js";
 export class SendEmailWithAttachmentsFunction {
     async run(
         context: FunctionContext,
-        To: string,
+        Recipients: string,
         Subject: string,
         Text: string,
         Attachments: SmtpAttachment[],
         Html?: string,
         From?: string,
-        Cc?: string,
+        CarbonCopy?: string,
         Bcc?: string
     ): Promise<SmtpSendResult> {
         try {
             return await sendEmail(
-                { To, Subject, Text, Html, From, Cc, Bcc, Attachments: Attachments ?? [] },
+                { To:Recipients, Subject, Text, Html, From, Cc:CarbonCopy, Bcc, Attachments: Attachments ?? [] },
                 context
             );
         } catch (error) {
