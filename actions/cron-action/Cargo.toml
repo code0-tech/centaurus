@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-hercules = { path = "../../../hercules/rust/hercules" }
+hercules = { git = "https://github.com/code0-tech/hercules.git", branch = "#22-primitive-rust-sdk" }
 tucana = { version = "0.0.80", default-features = false }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
 tokio-stream = "0.1"
