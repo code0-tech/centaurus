@@ -3,7 +3,12 @@
 use hercules::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[hercules::data_type(identifier = "CRON_MINUTE", name(en_US = "Cron Minute"))]
+#[hercules::data_type(
+    identifier = "CRON_MINUTE",
+    name(en_US = "Cron Minute"),
+    display_message(en_US = "Cron Minute"),
+    alias(en_US = "cron;code;schedule;timer;clock;minute")
+)]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 pub struct CronMinute(
@@ -13,7 +18,12 @@ pub struct CronMinute(
     pub String,
 );
 
-#[hercules::data_type(identifier = "CRON_HOUR", name(en_US = "Cron Hour"))]
+#[hercules::data_type(
+    identifier = "CRON_HOUR",
+    name(en_US = "Cron Hour"),
+    display_message(en_US = "Cron Hour"),
+    alias(en_US = "cron;code;schedule;timer;clock;hour")
+)]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 pub struct CronHour(
@@ -23,7 +33,12 @@ pub struct CronHour(
     pub String,
 );
 
-#[hercules::data_type(identifier = "CRON_DAY_OF_MONTH", name(en_US = "Cron Day of Month"))]
+#[hercules::data_type(
+    identifier = "CRON_DAY_OF_MONTH",
+    name(en_US = "Cron Day of Month"),
+    display_message(en_US = "Cron Day of Month"),
+    alias(en_US = "cron;code;schedule;timer;clock;month;day")
+)]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 pub struct CronDayOfMonth(
@@ -33,7 +48,12 @@ pub struct CronDayOfMonth(
     pub String,
 );
 
-#[hercules::data_type(identifier = "CRON_MONTH", name(en_US = "Cron Month"))]
+#[hercules::data_type(
+    identifier = "CRON_MONTH",
+    name(en_US = "Cron Month"),
+    display_message(en_US = "Cron Month"),
+    alias(en_US = "cron;code;schedule;timer;clock;month")
+)]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 pub struct CronMonth(
@@ -43,10 +63,17 @@ pub struct CronMonth(
     pub String,
 );
 
-#[hercules::data_type(identifier = "CRON_DAY_OF_WEEK", name(en_US = "Cron Day of Week"))]
+#[hercules::data_type(
+    identifier = "CRON_DAY_OF_WEEK",
+    name(en_US = "Cron Day of Week"),
+    display_message(en_US = "Cron Day of Week"),
+    alias(en_US = "cron;code;schedule;timer;clock;day;week")
+)]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 pub struct CronDayOfWeek(
-    #[schemars(regex(pattern = r"^(\*|([0-7])(-([0-7]))?)(\/([0-7]))?(,(\*|([0-7])(-([0-7]))?)(\/([0-7]))?)*$"))]
+    #[schemars(regex(
+        pattern = r"^(\*|([0-7])(-([0-7]))?)(\/([0-7]))?(,(\*|([0-7])(-([0-7]))?)(\/([0-7]))?)*$"
+    ))]
     pub String,
 );

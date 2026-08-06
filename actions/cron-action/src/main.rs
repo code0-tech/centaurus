@@ -30,14 +30,33 @@ fn build_action() -> Action {
 
 #[tokio::main]
 async fn main() -> hercules::Result<()> {
-    // RUST_LOG=hercules=debug,cron_action=debug cargo run
-    env_logger::init();
+    // Defaults to info-level logs for this action and the SDK even without
+    // RUST_LOG set; override with e.g. RUST_LOG=hercules=debug,cron_action=debug.
+    env_logger::Builder::from_env(
+        env_logger::Env::default().default_filter_or("cron_action=info,hercules=info"),
+    )
+    .init();
+
+    let mut args = std::env::args().skip(1);
+    if args.next().as_deref() == Some("export") {
+        let dir = args
+            .next()
+            .unwrap_or_else(|| "./out/draco-cron".to_string());
+        build_action()
+            .export(&dir)
+            .unwrap_or_else(|err| panic!("failed to export to {dir:?}: {err}"));
+        println!("wrote module definitions to {dir}");
+        return Ok(());
+    }
 
     let action = build_action();
     let mut events = action.subscribe();
 
+    let aquila_url = env("HERCULES_AQUILA_URL", "127.0.0.1:8081");
+    log::info!("connecting to Aquila at {aquila_url}");
+
     let connected = action
-        .connect(env("HERCULES_AUTH_TOKEN", "token"), None)
+        .connect(env("HERCULES_AUTH_TOKEN", "value"), None)
         .await
         .unwrap_or_else(|err| panic!("failed to connect to Aquila: {err}"));
 

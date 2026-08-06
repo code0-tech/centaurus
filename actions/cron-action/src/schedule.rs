@@ -5,8 +5,8 @@ use std::str::FromStr;
 
 use chrono::{DateTime, Datelike, Timelike, Utc};
 use cron::Schedule;
-use hercules::wire::ActionFlow;
 use hercules::Connected;
+use hercules::wire::ActionFlow;
 use tucana::shared::value::Kind;
 
 const TICK_EXPRESSION: &str = "0 * * * * *";
@@ -25,7 +25,7 @@ pub async fn run(connected: Connected) {
         }
 
         let flows = connected.flows();
-        log::debug!("tick at {next}: checking {} flow(s)", flows.len());
+        log::info!("tick at {next}: checking {} flow(s)", flows.len());
 
         for flow in flows {
             if !matches_schedule(&flow, next) {
@@ -36,11 +36,12 @@ pub async fn run(connected: Connected) {
             let connected = connected.clone();
             let flow_id = flow.flow_id.to_string();
             tokio::spawn(async move {
-                if let Err(err) = connected
+                match connected
                     .execute_flow(flow_id.clone(), serde_json::Value::Null)
                     .await
                 {
-                    log::error!("failed to execute flow {flow_id}: {err}");
+                    Ok(result) => log::info!("flow {flow_id} executed successfully: {result:?}"),
+                    Err(err) => log::error!("failed to execute flow {flow_id}: {err}"),
                 }
             });
         }
@@ -60,19 +61,30 @@ fn setting(flow: &ActionFlow, id: &str) -> Option<String> {
 }
 
 fn matches_schedule(flow: &ActionFlow, now: DateTime<Utc>) -> bool {
-    let Some(minute) = setting(flow, "cronMinute") else {
+    let Some(minute) = setting(flow, "cron_minute") else {
+        log::warn!("flow {} is missing the cron_minute setting", flow.flow_id);
         return false;
     };
-    let Some(hour) = setting(flow, "cronHour") else {
+    let Some(hour) = setting(flow, "cron_hour") else {
+        log::warn!("flow {} is missing the cron_hour setting", flow.flow_id);
         return false;
     };
-    let Some(dom) = setting(flow, "cronDayOfMonth") else {
+    let Some(dom) = setting(flow, "cron_day_of_month") else {
+        log::warn!(
+            "flow {} is missing the cron_day_of_month setting",
+            flow.flow_id
+        );
         return false;
     };
-    let Some(month) = setting(flow, "cronMonth") else {
+    let Some(month) = setting(flow, "cron_month") else {
+        log::warn!("flow {} is missing the cron_month setting", flow.flow_id);
         return false;
     };
-    let Some(dow) = setting(flow, "cronDayOfWeek") else {
+    let Some(dow) = setting(flow, "cron_day_of_week") else {
+        log::warn!(
+            "flow {} is missing the cron_day_of_week setting",
+            flow.flow_id
+        );
         return false;
     };
 
@@ -91,9 +103,16 @@ fn matches_schedule(flow: &ActionFlow, now: DateTime<Utc>) -> bool {
         return false;
     };
 
-    now.year() == next.year()
+    let matches = now.year() == next.year()
         && now.month() == next.month()
         && now.day() == next.day()
         && now.hour() == next.hour()
-        && now.minute() == next.minute()
+        && now.minute() == next.minute();
+
+    log::debug!(
+        "flow {} expression {expression:?} next run {next}, matches {now}: {matches}",
+        flow.flow_id
+    );
+
+    matches
 }
