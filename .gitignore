@@ -3,3 +3,4 @@ actions/*/dist/
 *.tsbuildinfo
 .idea
 .env
+**/target
