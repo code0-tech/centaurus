@@ -1,7 +1,7 @@
-//! `rest::control::respond` — the function a flow calls to send its HTTP
+//! `rest::control::respond`: the function a flow calls to send its HTTP
 //! response. Dispatched to this action like any other remote function
 //! (`taurus` routes it here because the flow definition's `definitionSource`
-//! points at this action); `Respond::run` just hands the payload to whichever
+//! points at this action). `Respond::run` just hands the payload to whichever
 //! `server.rs` HTTP handler is still waiting on `FunctionContext::execution_id`.
 
 use std::collections::HashMap;
@@ -17,7 +17,7 @@ use crate::pending::{self, PendingResponses, RespondPayload, RespondSignal};
     signature = "<S extends HTTP_SCHEMA>(http_status_code: HTTP_STATUS_CODE, http_schema: S, payload: HTTP_PAYLOAD<S>, headers?: OBJECT<{}>): void",
     name(en_US = "Respond"),
     description(
-        en_US = "Processes an HTTP response and returns it to the requesting client. This function typically completes the HTTP request–response cycle by delivering the server's final output, such as headers, status codes, and body content, back to the client."
+        en_US = "Processes an HTTP response and returns it to the requesting client. This function typically completes the HTTP request–response cycle by delivering the server’s final output, such as headers, status codes, and body content, back to the client."
     ),
     display_message(
         en_US = "Sends response with status ${http_status_code} and payload ${payload}"
@@ -74,6 +74,11 @@ impl RuntimeFunctionHandler for Respond {
         let payload: PlainValue = args.get("payload")?;
         let headers: HashMap<String, String> = args.get("headers").unwrap_or_default();
 
+        log::info!(
+            "respond called for execution {}: status {status_code}",
+            context.execution_id
+        );
+
         match pending::take(&self.pending, &context.execution_id) {
             Some(tx) => {
                 let _ = tx.send(RespondSignal::Respond(RespondPayload {
@@ -83,8 +88,15 @@ impl RuntimeFunctionHandler for Respond {
                     headers,
                 }));
             }
-            None => log::warn!(
-                "respond called for execution {} with no waiting HTTP connection (already responded, or the request already timed out)",
+            // Not every execution of a flow that calls `respond` came from
+            // an HTTP request waiting on a response. A manual/test
+            // execution triggered outside `server.rs` has no such
+            // connection to begin with, which is expected, not a failure.
+            // (An HTTP request whose connection already timed out, or that
+            // already got its response via an earlier `respond` call in the
+            // same flow, lands here too and is equally harmless.)
+            None => log::info!(
+                "respond called for execution {} with no waiting HTTP connection",
                 context.execution_id
             ),
         }

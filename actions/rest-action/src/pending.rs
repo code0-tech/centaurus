@@ -1,6 +1,6 @@
 //! Correlates a `respond` function call (identified by
 //! `FunctionContext::execution_id`) back to the HTTP connection that's
-//! still waiting on it — see `functions.rs` (the sender side) and
+//! still waiting on it. See `functions.rs` (the sender side) and
 //! `server.rs` (the receiver side, plus the "flow finished with no respond
 //! call" -> 204 fallback).
 
@@ -38,7 +38,7 @@ pub fn register(
 }
 
 /// Removes and returns the waiter for `execution_id`, if one is still
-/// registered — `None` means someone else (a `respond` call, or the flow
+/// registered. `None` means someone else (a `respond` call, or the flow
 /// finishing) already claimed it first.
 pub fn take(
     pending: &PendingResponses,

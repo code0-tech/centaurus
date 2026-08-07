@@ -15,6 +15,11 @@
     display_message(en_US = "Webhook on ${http_method} at ${http_url}"),
     alias(en_US = "webhook;http;rest;route;web"),
     display_icon = "tabler:world-www",
+    // The event's settings already contribute HTTP_SCHEMA/HTTP_URL/HTTP_METHOD/
+    // REST_AUTH_TYPE/REST_AUTH_VALUE; REST_ADAPTER_INPUT is the type of the
+    // value the event produces as flow input, not any one setting's type, so
+    // it has to be declared explicitly here.
+    linked_data_type_identifiers("REST_ADAPTER_INPUT"),
     editable
 )]
 #[setting(

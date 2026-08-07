@@ -3,7 +3,7 @@
 //! `format_for_content_type` mapping and the same lupus engine, so every
 //! format lupus supports (JSON, XML, HTML, CSV, form-urlencoded, plain
 //! text) works identically for parsing an incoming request body and for
-//! encoding an outgoing response body — there's no format one side accepts
+//! encoding an outgoing response body, so there's no format one side accepts
 //! that the other rejects.
 
 use hyper::{

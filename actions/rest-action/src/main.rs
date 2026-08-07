@@ -21,12 +21,13 @@ fn env(key: &str, default: &str) -> String {
     std::env::var(key).unwrap_or_else(|_| default.to_string())
 }
 
-/// `HttpMethod`/`HttpUrl`/... and `RestRuntimeEvent` never appear below —
-/// attaching `#[hercules::data_type]` / `#[hercules::runtime_event]`
-/// registered each of them automatically as part of `Action::new` (see
-/// `hercules::registration`). `Respond` is the one exception: it needs the
-/// shared `pending` map injected at construction time, so it's registered
-/// by hand below instead (see its `manual` attribute).
+/// `RestAuthType`/`RestAuthValue`/`RestAdapterInput` and `RestRuntimeEvent`
+/// never appear below. Attaching `#[hercules::data_type]` /
+/// `#[hercules::runtime_event]` registered each of them automatically as
+/// part of `Action::new` (see `hercules::registration`). `Respond` is the
+/// one exception: it needs the shared `pending` map injected at
+/// construction time, so it's registered by hand below instead (see its
+/// `manual` attribute).
 fn build_action(pending: pending::PendingResponses) -> Action {
     let mut action = Action::new(
         env("HERCULES_ACTION_ID", "rest-action"),
@@ -83,7 +84,12 @@ async fn main() -> hercules::Result<()> {
         .parse()
         .unwrap_or_else(|err| panic!("invalid HTTP_SERVER_HOST/HTTP_SERVER_PORT: {err}"));
 
-    tokio::spawn(server::serve(addr, connected, pending));
+    let execution_timeout_secs: u64 = env("HERCULES_EXECUTION_TIMEOUT_SECS", "30")
+        .parse()
+        .unwrap_or_else(|err| panic!("invalid HERCULES_EXECUTION_TIMEOUT_SECS: {err}"));
+    let execution_timeout = std::time::Duration::from_secs(execution_timeout_secs);
+
+    tokio::spawn(server::serve(addr, connected, pending, execution_timeout));
 
     while let Some(event) = events.next().await {
         match event {

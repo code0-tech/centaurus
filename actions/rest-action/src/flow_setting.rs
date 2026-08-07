@@ -1,6 +1,6 @@
 //! Reads a typed value out of an `ActionFlow`'s settings by identifier.
 //! Shared by route matching (`route.rs`), auth (`auth/`), and schema
-//! validation (`server.rs`) — none of which care about HTTP transport, just
+//! validation (`server.rs`), none of which care about HTTP transport, just
 //! "what did this flow configure for setting X".
 
 use tucana::aquila::ActionFlow;

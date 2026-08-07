@@ -7,6 +7,7 @@
 use std::convert::Infallible;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use std::time::Duration;
 
 use hercules::Connected;
 use http_body_util::{BodyExt, Full};
@@ -27,6 +28,7 @@ pub async fn serve(
     addr: SocketAddr,
     connected: Connected,
     pending: PendingResponses,
+    execution_timeout: Duration,
 ) -> std::io::Result<()> {
     let listener = TcpListener::bind(addr).await?;
     log::info!("listening for webhook requests on {addr}");
@@ -38,7 +40,9 @@ pub async fn serve(
         let pending = Arc::clone(&pending);
 
         tokio::spawn(async move {
-            let svc = service_fn(move |req| handle(req, connected.clone(), Arc::clone(&pending)));
+            let svc = service_fn(move |req| {
+                handle(req, connected.clone(), Arc::clone(&pending), execution_timeout)
+            });
 
             if let Err(err) = http1::Builder::new().serve_connection(io, svc).await {
                 log::debug!("connection from {peer_addr} closed with error: {err:?}");
@@ -51,16 +55,19 @@ async fn handle(
     req: Request<Incoming>,
     connected: Connected,
     pending: PendingResponses,
+    execution_timeout: Duration,
 ) -> Result<Response<Full<Bytes>>, Infallible> {
     let method = req.method().clone();
     let path = req.uri().path().to_string();
     let query = req.uri().query().map(str::to_owned);
     let headers = req.headers().clone();
 
+    log::info!("{method} {path}: request received");
+
     let body_bytes = match BodyExt::collect(req.into_body()).await {
         Ok(collected) => collected.to_bytes().to_vec(),
         Err(err) => {
-            log::error!("failed to read request body: {err}");
+            log::error!("{method} {path}: failed to read request body: {err}");
             return Ok(response::error_to_http_response(
                 StatusCode::BAD_REQUEST,
                 "Failed to read request body",
@@ -70,13 +77,24 @@ async fn handle(
 
     let flows = connected.flows();
     let Some(flow) = route::find_matching_flow(&flows, &method, &path) else {
+        log::info!(
+            "{method} {path}: no flow matched, checked {} flow(s)",
+            flows.len()
+        );
         return Ok(response::error_to_http_response(
             StatusCode::NOT_FOUND,
             "No flow found for path",
         ));
     };
 
+    log::info!("{method} {path}: matched flow {}", flow.flow_id);
+
     if let Err(err) = auth::validate_flow_auth(&flow, &headers) {
+        log::warn!(
+            "{method} {path}: flow {} rejected: {}",
+            flow.flow_id,
+            err.message()
+        );
         let mut response = response::error_to_http_response(err.status_code(), err.message());
         response
             .headers_mut()
@@ -87,7 +105,10 @@ async fn handle(
     let request_body_value = match content_type::parse_body_from_headers(&headers, &body_bytes) {
         Ok(value) => value,
         Err(err) => {
-            log::warn!("failed to parse request body: {err}");
+            log::warn!(
+                "{method} {path}: flow {} failed to parse request body: {err}",
+                flow.flow_id
+            );
             let status = match err {
                 content_type::BodyParseError::UnsupportedContentType { .. } => {
                     StatusCode::UNSUPPORTED_MEDIA_TYPE
@@ -103,7 +124,7 @@ async fn handle(
         validation::validate_body_against_schema(input_schema, request_body_value.as_ref())
     {
         log::warn!(
-            "request body failed input schema validation: flow_id={} error={err}",
+            "{method} {path}: flow {} failed input schema validation: {err}",
             flow.flow_id
         );
         return Ok(response::error_to_http_response(
@@ -116,7 +137,16 @@ async fn handle(
         input::build_flow_input(&flow, &path, query.as_deref(), &headers, request_body_value);
     let payload = tucana::shared::helper::value::to_json_value(flow_input);
 
-    Ok(execute_and_await_response(connected, pending, flow.flow_id, payload).await)
+    Ok(execute_and_await_response(
+        connected,
+        pending,
+        flow.flow_id,
+        payload,
+        &method,
+        &path,
+        execution_timeout,
+    )
+    .await)
 }
 
 async fn execute_and_await_response(
@@ -124,10 +154,15 @@ async fn execute_and_await_response(
     pending: PendingResponses,
     flow_id: i64,
     payload: hercules::PlainValue,
+    method: &hyper::Method,
+    path: &str,
+    execution_timeout: Duration,
 ) -> Response<Full<Bytes>> {
     let execution_id = connected.reserve_execution_id();
     let (tx, rx) = oneshot::channel();
     pending::register(&pending, execution_id.clone(), tx);
+
+    log::info!("{method} {path}: flow {flow_id} executing as {execution_id}");
 
     {
         let connected = connected.clone();
@@ -146,18 +181,41 @@ async fn execute_and_await_response(
         });
     }
 
-    match rx.await {
-        Ok(RespondSignal::Respond(payload)) => response::respond_payload_to_http_response(payload),
-        Ok(RespondSignal::FlowFinished(Ok(_))) => response::no_content_response(),
-        Ok(RespondSignal::FlowFinished(Err(err))) => {
-            log::error!("flow {flow_id} (execution {execution_id}) failed: {err}");
+    match tokio::time::timeout(execution_timeout, rx).await {
+        Err(_) => {
+            // Nobody claimed the entry within the deadline; remove it so a
+            // late `respond` call or flow completion doesn't find it and
+            // send into the void.
+            pending::take(&pending, &execution_id);
+            log::warn!(
+                "{method} {path}: flow {flow_id} (execution {execution_id}) timed out after {execution_timeout:?} waiting for a result"
+            );
+            response::error_to_http_response(StatusCode::GATEWAY_TIMEOUT, "Flow execution timed out")
+        }
+        Ok(Ok(RespondSignal::Respond(payload))) => {
+            log::info!(
+                "{method} {path}: flow {flow_id} (execution {execution_id}) responded with status {}",
+                payload.status_code
+            );
+            response::respond_payload_to_http_response(payload)
+        }
+        Ok(Ok(RespondSignal::FlowFinished(Ok(_)))) => {
+            log::info!(
+                "{method} {path}: flow {flow_id} (execution {execution_id}) finished without calling respond, answering 204"
+            );
+            response::no_content_response()
+        }
+        Ok(Ok(RespondSignal::FlowFinished(Err(err)))) => {
+            log::error!("{method} {path}: flow {flow_id} (execution {execution_id}) failed: {err}");
             response::error_to_http_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Internal server error",
             )
         }
-        Err(_) => {
-            log::error!("pending response for execution {execution_id} was dropped unexpectedly");
+        Ok(Err(_)) => {
+            log::error!(
+                "{method} {path}: pending response for flow {flow_id} (execution {execution_id}) was dropped unexpectedly"
+            );
             response::error_to_http_response(
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Internal server error",
