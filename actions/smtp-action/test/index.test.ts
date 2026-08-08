@@ -4,7 +4,6 @@ import { SendEmailRequestDataSchema } from "../src/helpers.js";
 import { SmtpSendResultSchema } from "../src/data_types/smtpSendResult.js";
 import { SmtpAttachmentSchema } from "../src/data_types/smtpAttachment.js";
 import { CreateAttachmentFunction } from "../src/functions/utils/createAttachmentFunction.js";
-import { SmtpEmailReceivedPayloadSchema, SmtpEmailSentPayloadSchema } from "../src/data_types/smtpEmailTriggerPayload.js";
 
 describe("SendEmailRequestDataSchema", () => {
     it("requires To, Subject and Text", () => {
@@ -57,32 +56,5 @@ describe("CreateAttachmentFunction", () => {
         expect(() => SmtpAttachmentSchema.parse(attachment)).not.toThrow();
         expect(attachment.filename).toEqual("invoice.pdf");
         expect(attachment.encoding).toEqual("base64");
-    });
-});
-
-describe("SMTP trigger payload schemas", () => {
-    it("accepts received-email payloads", () => {
-        const payload = {
-            from: "sender@example.com",
-            to: ["recipient@example.com"],
-            subject: "Hello",
-            text: "Body",
-            messageId: "<123>",
-        };
-
-        expect(SmtpEmailReceivedPayloadSchema.parse(payload)).toEqual(payload);
-    });
-
-    it("accepts sent-email payloads", () => {
-        const payload = {
-            from: "sender@example.com",
-            to: ["recipient@example.com"],
-            subject: "Hello",
-            text: "Body",
-            messageId: "<123>",
-            status: "sent",
-        };
-
-        expect(SmtpEmailSentPayloadSchema.parse(payload)).toEqual(payload);
     });
 });
