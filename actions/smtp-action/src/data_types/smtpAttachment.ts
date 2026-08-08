@@ -11,8 +11,8 @@ import { z } from "zod";
 export const SmtpAttachmentSchema = z.object({
     filename: z.string().describe("The file name shown to the recipient, e.g. \"invoice.pdf\"."),
     content: z.string().describe("The attachment content as a string. Interpreted using the encoding field."),
-    contentType: z.string().optional().describe("The MIME type of the attachment, e.g. \"application/pdf\". Derived from the filename when omitted."),
-    encoding: z.string().optional().describe("How to decode content, e.g. \"base64\" or \"utf-8\". Defaults to utf-8."),
+    contentType: z.string().nullish().describe("The MIME type of the attachment, e.g. \"application/pdf\". Derived from the filename when omitted."),
+    encoding: z.string().nullish().describe("How to decode content, e.g. \"base64\" or \"utf-8\". Defaults to utf-8."),
 });
 export type SmtpAttachment = z.infer<typeof SmtpAttachmentSchema>;
 

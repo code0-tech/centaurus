@@ -13,12 +13,12 @@ export const SendEmailRequestDataSchema = z.object({
     To: z.string().describe("Comma-separated list of recipient email addresses."),
     Subject: z.string().describe("The subject line of the email."),
     Text: z.string().describe("The plain-text body of the email."),
-    Html: z.string().optional().describe("Optional HTML body. When set it is sent alongside the plain-text body."),
-    From: z.string().optional().describe("The sender address. Falls back to the configured default sender when omitted."),
-    Cc: z.string().optional().describe("Comma-separated list of CC recipients."),
-    Bcc: z.string().optional().describe("Comma-separated list of BCC recipients."),
-    ReplyTo: z.string().optional().describe("The Reply-To address for the email."),
-    Attachments: z.array(SmtpAttachmentSchema).optional().describe("Files to attach to the email."),
+    Html: z.string().nullish().describe("Optional HTML body. When set it is sent alongside the plain-text body."),
+    From: z.string().nullish().describe("The sender address. Falls back to the configured default sender when omitted."),
+    Cc: z.string().nullish().describe("Comma-separated list of CC recipients."),
+    Bcc: z.string().nullish().describe("Comma-separated list of BCC recipients."),
+    ReplyTo: z.string().nullish().describe("The Reply-To address for the email."),
+    Attachments: z.array(SmtpAttachmentSchema).or(SmtpAttachmentSchema).nullish().describe("Files to attach to the email."),
 });
 export type SendEmailRequestData = z.infer<typeof SendEmailRequestDataSchema>;
 
@@ -103,6 +103,10 @@ export const sendEmail = async (
     const parsed = SendEmailRequestDataSchema.parse(data);
     const transport = getTransport(context);
     const from = resolveFrom(context, parsed.From);
+
+    if (parsed.Attachments && !Array.isArray(parsed.Attachments)) {
+        parsed.Attachments = [parsed.Attachments];
+    }
 
     try {
         const info = await transport.sendMail({
