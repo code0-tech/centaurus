@@ -78,7 +78,7 @@ export class SendEmailWithAttachmentsFunction {
         Recipients: string,
         Subject: string,
         Text: string,
-        Attachments: SmtpAttachment[],
+        Attachments: SmtpAttachment[] | SmtpAttachment,
         Html?: string,
         From?: string,
         CarbonCopy?: string,
