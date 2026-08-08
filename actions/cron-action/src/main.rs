@@ -22,7 +22,7 @@ fn build_action() -> Action {
     // Each flow's schedule only needs to be evaluated by one instance;
     // splitting avoids every instance firing the same flow independently.
     .scaling(ScalingOption::Split)
-    .author("code0-tech")
+    .author("CodeZero")
     .icon("tabler:file-time")
     .documentation("Scheduled Flow using Cron-Jobs.")
     .name([Translation::new("en-US", "Cron")])
