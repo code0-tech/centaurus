@@ -17,7 +17,7 @@ const action = new Action(
     "code0-tech",
     "tabler:mail",
     "SMTP integration: send transactional and notification emails (with attachments) through any SMTP server via nodemailer.",
-    [{ code: "en-US", content: "SMTP" }],
+    [{ code: "en-US", content: "Email" }],
     [
         {
             identifier: "host",
