@@ -37,7 +37,7 @@ fn build_action(pending: pending::PendingResponses) -> Action {
     // Every instance needs to be reachable to serve HTTP traffic, so every
     // instance gets every flow rather than splitting them up.
     .scaling(ScalingOption::Disabled)
-    .author("code0-tech")
+    .author("CodeZero")
     .icon("tabler:world-www")
     .documentation("Webhook triggered by an incoming HTTP request.")
     .name([Translation::new("en-US", "Webhook")]);

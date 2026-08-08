@@ -52,7 +52,8 @@ pub struct CronDayOfMonth(
     identifier = "CRON_MONTH",
     name(en_US = "Cron Month"),
     display_message(en_US = "Cron Month"),
-    alias(en_US = "cron;code;schedule;timer;clock;month")
+    alias(en_US = "cron;code;schedule;timer;clock;month"),
+    type_override = "string | 'JAN' | 'FEB' | 'MAR' | 'APR' | 'MAY' | 'JUN' | 'JUL' | 'AUG' | 'SEP' | 'OCT' | 'NOV' | 'DEC' "
 )]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
@@ -67,7 +68,8 @@ pub struct CronMonth(
     identifier = "CRON_DAY_OF_WEEK",
     name(en_US = "Cron Day of Week"),
     display_message(en_US = "Cron Day of Week"),
-    alias(en_US = "cron;code;schedule;timer;clock;day;week")
+    alias(en_US = "cron;code;schedule;timer;clock;day;week"),
+    type_override = "string | 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN'"
 )]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
