@@ -19,7 +19,7 @@ import { SendDiscordWebhookFunction } from "./functions/sendDiscordWebhookFuncti
 const action = new Action(
     process.env.ACTION_ID ?? "discord-action",
     process.env.VERSION ?? "1.0.0",
-    process.env.AQUILA_URL ?? "192.168.2.105:8081",
+    process.env.AQUILA_URL ?? "127.0.0.1:8081",
     "code0-tech",
     "simple:discord",
     "Discord integration: create webhook URLs, construct rich embeds, and send webhooks.",
