@@ -9,7 +9,7 @@ hercules = { git = "https://github.com/code0-tech/hercules.git", branch = "#22-p
 tucana = { version = "0.0.80", default-features = false }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time"] }
 tokio-stream = "0.1"
-tokio-tungstenite = "0.30"
+tokio-tungstenite = { version = "0.30", features = ["rustls-tls-webpki-roots"] }
 futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
 http = "1"
 serde = { version = "1", features = ["derive"] }

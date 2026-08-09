@@ -33,6 +33,32 @@ pub(super) fn matches_authorization(
     }
 }
 
+/// Builds the `Authorization` header value to *send* on an outbound client
+/// handshake, given the flow's configured auth type/value — the inverse of
+/// [`matches_authorization`], which *validates* an inbound one.
+///
+/// `BearerJwt` and `BearerStatic` are handled identically here: this action
+/// doesn't mint JWTs (it only validates HS256 signatures on the inbound
+/// side, see `jwt.rs`), so a `Bearer JWT`-configured outbound connection just
+/// sends the configured value verbatim as the bearer token, same as
+/// `Bearer static`. The operator is expected to supply an already-encoded
+/// token in that case.
+pub(super) fn build_authorization_header(
+    auth_type: AuthenticationType,
+    auth_value: &Value,
+) -> Option<String> {
+    match auth_type {
+        AuthenticationType::BearerJwt | AuthenticationType::BearerStatic => {
+            value_as_string(auth_value).map(|token| format!("Bearer {}", token.trim()))
+        }
+        AuthenticationType::Basic => {
+            let credentials = basic_credentials(auth_value)?;
+            let encoded = base64::engine::general_purpose::STANDARD.encode(credentials.as_bytes());
+            Some(format!("Basic {encoded}"))
+        }
+    }
+}
+
 fn basic_credentials(value: &Value) -> Option<String> {
     if let Some(credentials) = value_as_string(value) {
         return Some(credentials.trim().to_string());

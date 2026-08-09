@@ -9,8 +9,12 @@ pub(super) enum FlowAuthConfig {
     Invalid,
 }
 
-pub(super) fn flow_auth_config(flow: &ActionFlow) -> FlowAuthConfig {
-    let Some(raw_auth_type) = flow_setting::as_string(flow, "ws_auth") else {
+/// `auth_setting_id` is the flow setting carrying the auth type (`"ws_auth"`
+/// for the inbound handshake, `"ws_client_auth"` for an outbound client
+/// connection's handshake — see `auth/mod.rs`'s `validate_flow_auth` and
+/// `client_authorization_header` respectively).
+pub(super) fn flow_auth_config(flow: &ActionFlow, auth_setting_id: &str) -> FlowAuthConfig {
+    let Some(raw_auth_type) = flow_setting::as_string(flow, auth_setting_id) else {
         return FlowAuthConfig::Unauthenticated;
     };
 

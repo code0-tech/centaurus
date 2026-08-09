@@ -43,6 +43,64 @@ pub fn any_flow_matches_path(flows: &[ActionFlow], path: &str) -> bool {
         || !find_matching_error_flows(flows, path).is_empty()
 }
 
+pub const CLIENT_CONNECT_URL_SETTING: &str = "ws_client_connect_url";
+pub const CLIENT_MESSAGE_URL_SETTING: &str = "ws_client_message_url";
+pub const CLIENT_DISCONNECT_URL_SETTING: &str = "ws_client_disconnect_url";
+pub const CLIENT_ERROR_URL_SETTING: &str = "ws_client_error_url";
+
+/// Client-mode matching (`client.rs`): unlike the inbound side, a client
+/// connection isn't reached by an inbound path, so there's no pattern to
+/// compile — the target URL is matched literally, scoped to the connecting
+/// flow's project (two different projects independently targeting the same
+/// external URL shouldn't see each other's events).
+pub fn find_matching_client_connect_flows(
+    flows: &[ActionFlow],
+    project_slug: &str,
+    url: &str,
+) -> Vec<ActionFlow> {
+    find_matching_client_flows(flows, CLIENT_CONNECT_URL_SETTING, project_slug, url)
+}
+
+pub fn find_matching_client_message_flows(
+    flows: &[ActionFlow],
+    project_slug: &str,
+    url: &str,
+) -> Vec<ActionFlow> {
+    find_matching_client_flows(flows, CLIENT_MESSAGE_URL_SETTING, project_slug, url)
+}
+
+pub fn find_matching_client_disconnect_flows(
+    flows: &[ActionFlow],
+    project_slug: &str,
+    url: &str,
+) -> Vec<ActionFlow> {
+    find_matching_client_flows(flows, CLIENT_DISCONNECT_URL_SETTING, project_slug, url)
+}
+
+pub fn find_matching_client_error_flows(
+    flows: &[ActionFlow],
+    project_slug: &str,
+    url: &str,
+) -> Vec<ActionFlow> {
+    find_matching_client_flows(flows, CLIENT_ERROR_URL_SETTING, project_slug, url)
+}
+
+fn find_matching_client_flows(
+    flows: &[ActionFlow],
+    url_setting_id: &str,
+    project_slug: &str,
+    url: &str,
+) -> Vec<ActionFlow> {
+    flows
+        .iter()
+        .filter(|flow| {
+            flow.project_slug == project_slug
+                && flow_setting::as_string(flow, url_setting_id) == Some(url)
+        })
+        .cloned()
+        .collect()
+}
+
 /// Reads back the named `:param` captures for `path` against whichever of
 /// `flow`'s path settings (`path_setting_id`) matched it — used to populate
 /// a data type's `path_params` field, mirroring rest-action's

@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use http::{HeaderMap, HeaderValue, header::AUTHORIZATION};
 use tucana::aquila::ActionFlow;
 
-use self::credentials::matches_authorization;
+use self::credentials::{build_authorization_header, matches_authorization};
 use self::settings::{FlowAuthConfig, flow_auth_config};
 pub use self::types::AuthenticationError;
 use crate::flow_setting;
@@ -24,7 +24,7 @@ pub fn validate_flow_auth(
     headers: &HeaderMap<HeaderValue>,
     query_params: &HashMap<String, String>,
 ) -> Result<(), AuthenticationError> {
-    let auth_type = match flow_auth_config(flow) {
+    let auth_type = match flow_auth_config(flow, "ws_auth") {
         FlowAuthConfig::Unauthenticated => return Ok(()),
         FlowAuthConfig::Invalid => {
             log::warn!(
@@ -61,6 +61,36 @@ pub fn validate_flow_auth(
         );
         Err(AuthenticationError::invalid_for(auth_type))
     }
+}
+
+/// Builds the `Authorization` header value to send on an outbound client
+/// handshake (`client.rs`) from a flow's `ws_client_auth`/
+/// `ws_client_auth_value` settings, if configured — the outbound-mode
+/// counterpart of [`validate_flow_auth`]. Returns `None` if the flow has no
+/// (or an invalid) auth configuration, in which case the handshake is simply
+/// sent without an `Authorization` header.
+pub fn client_authorization_header(flow: &ActionFlow) -> Option<String> {
+    let auth_type = match flow_auth_config(flow, "ws_client_auth") {
+        FlowAuthConfig::Unauthenticated => return None,
+        FlowAuthConfig::Invalid => {
+            log::warn!(
+                "client auth config invalid: flow_id={} reason=invalid_ws_client_auth",
+                flow.flow_id
+            );
+            return None;
+        }
+        FlowAuthConfig::Authenticated(auth_type) => auth_type,
+    };
+
+    let Some(auth_value) = flow_setting::value(flow, "ws_client_auth_value") else {
+        log::warn!(
+            "client auth config missing value: flow_id={} reason=missing_ws_client_auth_value",
+            flow.flow_id
+        );
+        return None;
+    };
+
+    build_authorization_header(auth_type, auth_value)
 }
 
 /// The effective `Authorization`-style header value: the real header if

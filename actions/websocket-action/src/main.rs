@@ -1,4 +1,5 @@
 mod auth;
+mod client;
 mod data_types;
 mod events;
 mod flow_setting;
@@ -10,6 +11,7 @@ mod server;
 use hercules::{Action, HerculesEvent, ScalingOption, Translation};
 use tokio_stream::StreamExt;
 
+use client::ClientManager;
 use functions::Send;
 use outbound::new_outbound_connections;
 
@@ -81,7 +83,16 @@ async fn main() -> hercules::Result<()> {
         .parse()
         .unwrap_or_else(|err| panic!("invalid WEBSOCKET_SERVER_HOST/WEBSOCKET_SERVER_PORT: {err}"));
 
-    tokio::spawn(server::serve(addr, connected, outbound));
+    tokio::spawn(server::serve(addr, connected.clone(), outbound.clone()));
+
+    // Outbound (client) connections are driven purely by the flow event
+    // stream below rather than a one-time scan of `connected.flows()` at
+    // startup: every flow that ends up in `connected.flows()` got there via
+    // a `FlowUpserted` event first (see `hercules::Connected::flows`'s
+    // doc), and `subscribe()` above was called before `connect()`, so no
+    // flow — including ones that already existed before this instance
+    // connected — can be missed here.
+    let client_manager = ClientManager::new();
 
     while let Some(event) = events.next().await {
         match event {
@@ -89,9 +100,11 @@ async fn main() -> hercules::Result<()> {
             HerculesEvent::Error(error) => panic!("Aquila stream error: {error}"),
             HerculesEvent::FlowUpserted(flow) => {
                 log::info!("flow {} was created/updated", flow.flow_id);
+                client_manager.reconcile(&flow, &connected, &outbound);
             }
             HerculesEvent::FlowDeleted(flow_id) => {
                 log::info!("flow {flow_id} was deleted");
+                client_manager.remove(flow_id);
             }
             _ => {}
         }
