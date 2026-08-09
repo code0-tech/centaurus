@@ -30,6 +30,7 @@ include:
 .rust-actions:
   - cron-action
   - rest-action
+  - mcp-action
 
 test-node:
   image: node:24.10.0
