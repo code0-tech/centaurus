@@ -755,6 +755,7 @@ version = "0.0.0"
 dependencies = [
  "env_logger",
  "hercules",
+ "http",
  "http-body-util",
  "hyper",
  "hyper-util",

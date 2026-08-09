@@ -1,8 +1,10 @@
 mod server;
 mod tools;
 
-use hercules::{Action, HerculesEvent, ScalingOption, Translation};
+use hercules::{Action, ConfigurationDefinition, HerculesEvent, ScalingOption, Translation};
 use tokio_stream::StreamExt;
+
+use crate::tools::TOKEN_CONFIG_ID;
 
 fn env(key: &str, default: &str) -> String {
     std::env::var(key).unwrap_or_else(|_| default.to_string())
@@ -21,6 +23,15 @@ fn build_action() -> Action {
     .icon("tabler:tool")
     .documentation("Exposes every flow connected to this action as an MCP tool.")
     .name([Translation::new("en-US", "MCP")])
+    .configuration(
+        ConfigurationDefinition::new(TOKEN_CONFIG_ID, "string")
+            .name([Translation::new("en-US", "Token")])
+            .description([Translation::new(
+                "en-US",
+                "Bearer token clients must send to call a tool. Leave empty to allow unauthenticated calls.",
+            )])
+            .optional(true),
+    )
 }
 
 #[tokio::main]
