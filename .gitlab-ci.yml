@@ -27,6 +27,10 @@ include:
   - twilio-action
   - stripe-action
 
+.rust-actions:
+  - cron-action
+  - rest-action
+
 test-node:
   image: node:24.10.0
   stage: test
@@ -47,6 +51,7 @@ build-docker:
   parallel:
     matrix:
       - C0_ACTION: !reference [.node-actions]
+      - C0_ACTION: !reference [.rust-actions]
   script:
     - cd actions/$C0_ACTION
     - echo $C0_GH_TOKEN | docker login -u $ --password-stdin ghcr.io
