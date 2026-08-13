@@ -12,7 +12,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@code0-tech/hercules": "^1.1.1",
+    "@code0-tech/hercules": "^1.1.2",
     "discord.js": "^14.18.0"
   },
   "devDependencies": {
