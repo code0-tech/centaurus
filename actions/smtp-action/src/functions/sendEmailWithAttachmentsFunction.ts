@@ -9,14 +9,14 @@ import {
     Parameter,
     RuntimeError,
     Signature,
+    File,
 } from "@code0-tech/hercules";
 import { sendEmail } from "../helpers.js";
 import { SmtpSendResult } from "../data_types/smtpSendResult.js";
-import { SmtpAttachment } from "../data_types/smtpAttachment.js";
 
 @Identifier("sendEmailWithAttachments")
 @DisplayIcon("tabler:mail")
-@Signature("(Recipients: string, Subject: string, Text: string, Attachments: SMTP_ATTACHMENT, Html?: string, From?: string, CarbonCopy?: string, Bcc?: string): SMTP_SEND_RESULT")
+@Signature("(Recipients: string, Subject: string, Text: string, Attachments: FILE<string>[], Html?: string, From?: string, CarbonCopy?: string, Bcc?: string): SMTP_SEND_RESULT")
 @Name({ code: "en-US", content: "Send email with attachments" })
 @DisplayMessage({ code: "en-US", content: "Send email with attachments to ${Recipients}" })
 @Documentation({
@@ -78,7 +78,7 @@ export class SendEmailWithAttachmentsFunction {
         Recipients: string,
         Subject: string,
         Text: string,
-        Attachments: SmtpAttachment[] | SmtpAttachment,
+        Attachments:  File<string>[],
         Html?: string,
         From?: string,
         CarbonCopy?: string,
@@ -86,7 +86,12 @@ export class SendEmailWithAttachmentsFunction {
     ): Promise<SmtpSendResult> {
         try {
             return await sendEmail(
-                { To:Recipients, Subject, Text, Html, From, Cc:CarbonCopy, Bcc, Attachments: Attachments ?? [] },
+                { To:Recipients, Subject, Text, Html, From, Cc:CarbonCopy, Bcc, Attachments: Attachments.map(file => ({
+                    filename: "test.txt",
+                    content: file.value,
+                    contentType: file.contentType as string,
+                    encoding: file.valueType
+                })) ?? [] },
                 context
             );
         } catch (error) {

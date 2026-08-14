@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { SendEmailRequestDataSchema } from "../src/helpers.js";
 import { SmtpSendResultSchema } from "../src/data_types/smtpSendResult.js";
 import { SmtpAttachmentSchema } from "../src/data_types/smtpAttachment.js";
-import { CreateAttachmentFunction } from "../src/functions/utils/createAttachmentFunction.js";
 
 describe("SendEmailRequestDataSchema", () => {
     it("requires To, Subject and Text", () => {
@@ -41,20 +40,5 @@ describe("SmtpSendResultSchema", () => {
         const parsed = SmtpSendResultSchema.parse(result);
         expect(parsed.messageId).toEqual(result.messageId);
         expect(parsed.accepted).toEqual(["a@example.com"]);
-    });
-});
-
-describe("CreateAttachmentFunction", () => {
-    it("builds a valid SMTP_ATTACHMENT object", () => {
-        const attachment = new CreateAttachmentFunction().run(
-            undefined,
-            "invoice.pdf",
-            "JVBERi0=",
-            "application/pdf",
-            "base64"
-        );
-        expect(() => SmtpAttachmentSchema.parse(attachment)).not.toThrow();
-        expect(attachment.filename).toEqual("invoice.pdf");
-        expect(attachment.encoding).toEqual("base64");
     });
 });
