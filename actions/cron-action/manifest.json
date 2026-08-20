@@ -1,0 +1,11 @@
+{
+  "name": "cron-action",
+  "identifier": "cron-action",
+  "description": "Scheduled Flow using Cron-Jobs.",
+  "provides": "cron-action",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/cron-action"
+    }
+  }
+}

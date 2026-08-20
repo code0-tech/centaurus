@@ -1,0 +1,13 @@
+{
+  "name": "gls-action",
+  "identifier": "gls-action",
+  "description": "GLS shipping integration: create, validate, cancel, reprint, and report shipments via the GLS ShipIt API.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/gls-action"
+    }
+  },
+  "dependencies": {
+    "capabilities": ["rest-action"]
+  }
+}

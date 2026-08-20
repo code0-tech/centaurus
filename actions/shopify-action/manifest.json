@@ -1,0 +1,13 @@
+{
+  "name": "shopify-action",
+  "identifier": "shopify-action",
+  "description": "",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/shopify-action"
+    }
+  },
+  "dependencies": {
+    "capabilities": []
+  }
+}

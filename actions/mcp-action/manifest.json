@@ -1,0 +1,11 @@
+{
+  "name": "mcp-action",
+  "identifier": "mcp-action",
+  "description": "Exposes every flow connected to this action as an MCP tool.",
+  "provides": "mcp-action",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/mcp-action"
+    }
+  }
+}
