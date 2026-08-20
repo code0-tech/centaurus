@@ -7,7 +7,5 @@
       "image": "ghcr.io/code0-tech/centaurus/ci-builds/twilio-action"
     }
   },
-  "dependencies": {
-    "capabilities": []
-  }
+  "dependencies": []
 }

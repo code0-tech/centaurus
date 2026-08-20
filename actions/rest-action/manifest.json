@@ -2,7 +2,6 @@
   "name": "rest",
   "identifier": "rest-action",
   "description": "Webhook triggered by an incoming HTTP request.",
-  "provides": "rest-action",
   "deployment": {
     "docker": {
       "image": "ghcr.io/code0-tech/centaurus/ci-builds/rest-action"
