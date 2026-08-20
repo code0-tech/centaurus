@@ -8,6 +8,6 @@
     }
   },
   "dependencies": {
-    "capabilities": []
+    "capabilities": ["rest-action"]
   }
 }
