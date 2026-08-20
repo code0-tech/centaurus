@@ -1,5 +1,5 @@
 {
-  "name": "twilio-action",
+  "name": "twilio",
   "identifier": "twilio-action",
   "description": "Twilio integration: send SMS, MMS, and channel messages (e.g. WhatsApp) via the Twilio Messages API.",
   "deployment": {

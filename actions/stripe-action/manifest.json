@@ -1,5 +1,5 @@
 {
-  "name": "stripe-action",
+  "name": "stripe",
   "identifier": "stripe-action",
   "description": "Stripe payments integration: manage customers, payment intents and refunds, and react to Stripe webhook events.",
   "deployment": {

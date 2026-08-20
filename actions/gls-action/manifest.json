@@ -1,5 +1,5 @@
 {
-  "name": "gls-action",
+  "name": "gls",
   "identifier": "gls-action",
   "description": "GLS shipping integration: create, validate, cancel, reprint, and report shipments via the GLS ShipIt API.",
   "deployment": {

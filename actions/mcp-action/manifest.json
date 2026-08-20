@@ -1,5 +1,5 @@
 {
-  "name": "mcp-action",
+  "name": "mcp",
   "identifier": "mcp-action",
   "description": "Exposes every flow connected to this action as an MCP tool.",
   "provides": "mcp-action",

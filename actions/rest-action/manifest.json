@@ -1,5 +1,5 @@
 {
-  "name": "rest-action",
+  "name": "rest",
   "identifier": "rest-action",
   "description": "Webhook triggered by an incoming HTTP request.",
   "provides": "rest-action",

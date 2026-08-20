@@ -1,5 +1,5 @@
 {
-  "name": "cron-action",
+  "name": "cron",
   "identifier": "cron-action",
   "description": "Scheduled Flow using Cron-Jobs.",
   "provides": "cron-action",
