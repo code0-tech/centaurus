@@ -1,0 +1,13 @@
+{
+  "name": "woocommerce",
+  "identifier": "woocommerce-action",
+  "description": "",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/woocommerce-action"
+    }
+  },
+  "dependencies": [
+    "rest-action"
+  ]
+}

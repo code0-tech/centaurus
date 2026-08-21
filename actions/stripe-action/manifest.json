@@ -1,0 +1,13 @@
+{
+  "name": "stripe",
+  "identifier": "stripe-action",
+  "description": "Stripe payments integration: manage customers, payment intents and refunds, and react to Stripe webhook events.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/stripe-action"
+    }
+  },
+  "dependencies": [
+    "rest-action"
+  ]
+}

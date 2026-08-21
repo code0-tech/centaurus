@@ -1,0 +1,10 @@
+{
+  "name": "twilio",
+  "identifier": "twilio-action",
+  "description": "Twilio integration: send SMS, MMS, and channel messages (e.g. WhatsApp) via the Twilio Messages API.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/twilio-action"
+    }
+  },
+}

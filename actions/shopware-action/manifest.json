@@ -1,0 +1,13 @@
+{
+  "name": "shopware",
+  "identifier": "shopware-action",
+  "description": "",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/shopware-action"
+    }
+  },
+  "dependencies": [
+    "rest-action"
+  ]
+}
