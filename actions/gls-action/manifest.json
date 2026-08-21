@@ -7,7 +7,4 @@
       "image": "ghcr.io/code0-tech/centaurus/ci-builds/gls-action"
     }
   },
-  "dependencies": [
-    "rest-action"
-  ]
 }
