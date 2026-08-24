@@ -1,6 +1,7 @@
 stages:
   - test
   - build
+  - manifest
 
 include:
   - project: code0-tech/development/telescopium
@@ -49,12 +50,58 @@ build-docker:
     - .dind
   image: docker:29.4.1
   stage: build
+  tags:
+    - c0-$PLATFORM
+  parallel:
+    matrix:
+      - C0_ACTION: !reference [.node-actions]
+        PLATFORM: [amd64, arm64]
+      - C0_ACTION: !reference [.rust-actions]
+        PLATFORM: [amd64, arm64]
+  before_script:
+    - echo $C0_GH_TOKEN | docker login -u $ --password-stdin ghcr.io
+    - docker context create build-context
+    - docker buildx create --name container-builder --driver docker-container --bootstrap --use build-context
+  script:
+    - cd actions/$C0_ACTION
+    - >
+      docker buildx build
+      -t ghcr.io/code0-tech/centaurus/ci-builds/$C0_ACTION
+      --output type=registry,push-by-digest=true
+      --metadata-file manifest-${CI_JOB_ID}.json
+      .
+  artifacts:
+    paths:
+      - actions/$C0_ACTION/manifest-*.json
+    expire_in: 1 day
+
+manifest-docker:
+  extends:
+    - .dind
+  image: docker:29.4.1
+  stage: manifest
+  tags:
+    - c0-amd64
   parallel:
     matrix:
       - C0_ACTION: !reference [.node-actions]
       - C0_ACTION: !reference [.rust-actions]
+  needs:
+    - job: build-docker
+      parallel:
+        matrix:
+          - C0_ACTION: [ '$[[ matrix.C0_ACTION ]]' ]
+            PLATFORM: [amd64, arm64]
+  before_script:
+    - apk add --no-cache jq
+    - echo $C0_GH_TOKEN | docker login -u $ --password-stdin ghcr.io
   script:
     - cd actions/$C0_ACTION
-    - echo $C0_GH_TOKEN | docker login -u $ --password-stdin ghcr.io
-    - docker build -t ghcr.io/code0-tech/centaurus/ci-builds/$C0_ACTION:0.0.0-experimental-$CI_PIPELINE_ID-$CI_COMMIT_SHA .
-    - docker push ghcr.io/code0-tech/centaurus/ci-builds/$C0_ACTION:0.0.0-experimental-$CI_PIPELINE_ID-$CI_COMMIT_SHA
+    - |
+      refs=""
+      for manifest in manifest-*.json; do
+        name=$(jq -r '."image.name"' "$manifest")
+        digest=$(jq -r '."containerimage.digest"' "$manifest")
+        refs="$refs $name@$digest"
+      done
+      docker buildx imagetools create -t "ghcr.io/code0-tech/centaurus/ci-builds/$C0_ACTION:0.0.0-experimental-$CI_PIPELINE_ID-$CI_COMMIT_SHA" $refs
