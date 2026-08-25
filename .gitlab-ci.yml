@@ -67,14 +67,14 @@ build-docker:
     - CACHE_TO=""
     - |
       if [ "$CI_COMMIT_BRANCH" = "main" ]; then
-        CACHE_TO="--cache-to type=registry,ref=ghcr.io/code0-tech/centaurus/ci-cache/$C0_ACTION:$PLATFORM,mode=max"
+        CACHE_TO="--cache-to type=registry,ref=ghcr.io/code0-tech/centaurus/ci-cache:$C0_ACTION-$PLATFORM,mode=max"
       fi
     - >
       docker buildx build
       -t ghcr.io/code0-tech/centaurus/ci-builds/$C0_ACTION
       --output type=registry,push-by-digest=true
       --metadata-file manifest-${CI_JOB_ID}.json
-      --cache-from type=registry,ref=ghcr.io/code0-tech/centaurus/ci-cache/$C0_ACTION:$PLATFORM
+      --cache-from type=registry,ref=ghcr.io/code0-tech/centaurus/ci-cache:$C0_ACTION-$PLATFORM
       $CACHE_TO
       .
   artifacts:
