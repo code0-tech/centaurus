@@ -36,10 +36,6 @@ include:
 test-node:
   image: node:24.10.0
   stage: test
-  rules:
-    - changes:
-        - .gitlab-ci.yml
-        - actions/$C0_ACTION/**/*
   parallel:
     matrix:
       - C0_ACTION: !reference [.node-actions]
@@ -56,10 +52,6 @@ build-docker:
   stage: build
   tags:
     - c0-$PLATFORM
-  rules:
-    - changes:
-        - .gitlab-ci.yml
-        - actions/$C0_ACTION/**/*
   parallel:
     matrix:
       - C0_ACTION: !reference [.node-actions]
@@ -97,10 +89,6 @@ manifest-docker:
   stage: manifest
   tags:
     - c0-amd64
-  rules:
-    - changes:
-        - .gitlab-ci.yml
-        - actions/$C0_ACTION/**/*
   parallel:
     matrix:
       - C0_ACTION: !reference [.node-actions]
