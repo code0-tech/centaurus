@@ -1,7 +1,7 @@
 mod server;
 mod tools;
 
-use hercules::{Action, ConfigurationDefinition, HerculesEvent, ScalingOption, Translation};
+use hercules_sdk::{Action, ConfigurationDefinition, HerculesEvent, ScalingOption, Translation};
 use tokio_stream::StreamExt;
 
 use crate::tools::TOKEN_CONFIG_ID;
@@ -35,7 +35,7 @@ fn build_action() -> Action {
 }
 
 #[tokio::main]
-async fn main() -> hercules::Result<()> {
+async fn main() -> hercules_sdk::Result<()> {
     env_logger::Builder::from_env(
         env_logger::Env::default().default_filter_or("mcp_action=info,hercules=info"),
     )

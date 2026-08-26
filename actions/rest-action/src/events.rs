@@ -5,7 +5,7 @@
 //! this action as an `ActionFlow` with these six settings filled in per
 //! flow. `server.rs` matches incoming requests against those settings.
 
-#[hercules::runtime_event(
+#[hercules_sdk::runtime_event(
     identifier = "REST",
     signature = "<A extends REST_AUTH_TYPE, T>(http_schema: HTTP_SCHEMA, http_url: HTTP_URL, http_method: HTTP_METHOD, http_auth: A, http_auth_value: REST_AUTH_VALUE<A>, input_schema: TYPE<T>): REST_ADAPTER_INPUT<T>",
     name(en_US = "Webhook"),

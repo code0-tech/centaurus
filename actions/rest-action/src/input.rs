@@ -1,22 +1,21 @@
 //! Builds the flow input value (`payload`/`headers`/`query_params`/
 //! `path_params`, matching `REST_ADAPTER_INPUT`) from an incoming request.
-//! Ported from draco's REST adapter unchanged.
+//! Ported from draco's REST adapter, adjusted to take `path_params` as
+//! already-extracted by `registry.rs::CompiledRoute::path_params` (from the
+//! single regex match that also confirmed the route), rather than
+//! re-deriving them from `flow`+`path` here.
 
 use hyper::{HeaderMap, header::HeaderValue};
 use std::collections::HashMap;
-use tucana::aquila::ActionFlow;
 use tucana::shared::{Struct, Value, helper::value::ToValue, value::Kind};
 
-use crate::route;
-
 pub fn build_flow_input(
-    flow: &ActionFlow,
-    path: &str,
+    path_params: HashMap<String, String>,
     query: Option<&str>,
     headers: &HeaderMap<HeaderValue>,
     payload: Option<Value>,
 ) -> Value {
-    let mut fields = HashMap::new();
+    let mut fields = HashMap::with_capacity(4);
 
     if let Some(payload) = payload {
         fields.insert(String::from("payload"), payload);
@@ -32,7 +31,7 @@ pub fn build_flow_input(
     );
     fields.insert(
         String::from("path_params"),
-        string_map_to_value(route::extract_path_params(flow, path)),
+        string_map_to_value(path_params),
     );
 
     Value {
@@ -41,16 +40,15 @@ pub fn build_flow_input(
 }
 
 fn header_map(headers: &HeaderMap<HeaderValue>) -> HashMap<String, String> {
-    headers
-        .iter()
-        .map(|(name, value)| {
-            let value = value
-                .to_str()
-                .map(str::to_owned)
-                .unwrap_or_else(|_| String::from_utf8_lossy(value.as_bytes()).into_owned());
-            (name.as_str().to_owned(), value)
-        })
-        .collect()
+    let mut map = HashMap::with_capacity(headers.len());
+    for (name, value) in headers.iter() {
+        let value = value
+            .to_str()
+            .map(str::to_owned)
+            .unwrap_or_else(|_| String::from_utf8_lossy(value.as_bytes()).into_owned());
+        map.insert(name.as_str().to_owned(), value);
+    }
+    map
 }
 
 fn query_params(query: Option<&str>) -> HashMap<String, String> {
@@ -80,8 +78,7 @@ fn string_map_to_value(map: HashMap<String, String>) -> Value {
 mod tests {
     use super::{build_flow_input, query_params, string_map_to_value};
     use hyper::HeaderMap;
-    use tucana::aquila::ActionFlow;
-    use tucana::shared::{FlowSetting, Struct, Value, value::Kind};
+    use tucana::shared::{Struct, Value, value::Kind};
 
     #[test]
     fn query_params_are_percent_decoded() {
@@ -112,23 +109,12 @@ mod tests {
 
     #[test]
     fn flow_input_contains_query_and_path_params() {
-        let flow = ActionFlow {
-            flow_id: 1,
-            project_slug: "project".to_string(),
-            settings: vec![FlowSetting {
-                database_id: None,
-                flow_setting_id: "http_url".to_string(),
-                value: Some(Value {
-                    kind: Some(Kind::StringValue("/users/:user_id".to_string())),
-                }),
-                cast: None,
-            }],
-            ..Default::default()
-        };
+        let path_params = [("user_id".to_string(), "42".to_string())]
+            .into_iter()
+            .collect();
 
         let input = build_flow_input(
-            &flow,
-            "/project/users/42",
+            path_params,
             Some("search=hello+world"),
             &HeaderMap::new(),
             None,

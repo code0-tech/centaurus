@@ -1,9 +1,9 @@
 //! The five standard cron expression fields.
 
-use hercules::JsonSchema;
+use hercules_sdk::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[hercules::data_type(
+#[hercules_sdk::data_type(
     identifier = "CRON_MINUTE",
     name(en_US = "Cron Minute"),
     display_message(en_US = "Cron Minute"),
@@ -18,7 +18,7 @@ pub struct CronMinute(
     pub String,
 );
 
-#[hercules::data_type(
+#[hercules_sdk::data_type(
     identifier = "CRON_HOUR",
     name(en_US = "Cron Hour"),
     display_message(en_US = "Cron Hour"),
@@ -33,7 +33,7 @@ pub struct CronHour(
     pub String,
 );
 
-#[hercules::data_type(
+#[hercules_sdk::data_type(
     identifier = "CRON_DAY_OF_MONTH",
     name(en_US = "Cron Day of Month"),
     display_message(en_US = "Cron Day of Month"),
@@ -48,7 +48,7 @@ pub struct CronDayOfMonth(
     pub String,
 );
 
-#[hercules::data_type(
+#[hercules_sdk::data_type(
     identifier = "CRON_MONTH",
     name(en_US = "Cron Month"),
     display_message(en_US = "Cron Month"),
@@ -64,7 +64,7 @@ pub struct CronMonth(
     pub String,
 );
 
-#[hercules::data_type(
+#[hercules_sdk::data_type(
     identifier = "CRON_DAY_OF_WEEK",
     name(en_US = "Cron Day of Week"),
     display_message(en_US = "Cron Day of Week"),
