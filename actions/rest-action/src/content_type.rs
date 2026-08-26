@@ -85,6 +85,17 @@ pub fn parse_body_from_headers(
     parse_body(get_content_type(headers), body)
 }
 
+thread_local! {
+    // `lupus::Codec` trait objects aren't `Send + Sync` (the trait doesn't
+    // require it, even though every concrete codec lupus ships is a
+    // zero-sized, stateless struct) — so `Engine` can't be shared behind a
+    // single `'static` reference across worker threads. A thread-local
+    // built once per tokio worker thread and reused across every request
+    // that thread handles is the thread-safe way to still avoid
+    // reconstructing the codec map on every non-JSON request.
+    static ENGINE: lupus::Engine = lupus::Engine::with_default_codecs();
+}
+
 pub fn parse_body(
     content_type: Option<&str>,
     body: &[u8],
@@ -101,14 +112,28 @@ pub fn parse_body(
         None => lupus::Format::Text,
     };
 
-    let encoded = lupus::Engine::with_default_codecs()
-        .convert(
-            body,
-            format,
-            lupus::Format::Protobuf,
-            &lupus::DecodeContext,
-            &lupus::EncodeContext::default(),
-        )
+    // JSON is the dominant content type, and going through lupus's generic
+    // engine for it means two extra JSON (de)serialize passes and a `Data`
+    // tree in between, just to end up back at a `tucana::shared::Value` —
+    // something `from_json_value` already does directly. Every other format
+    // (XML, HTML, CSV, form-urlencoded, plain text) still goes through the
+    // shared `Engine`.
+    if format == lupus::Format::Json {
+        let json: serde_json::Value =
+            serde_json::from_slice(body).map_err(BodyParseError::InvalidJson)?;
+        return Ok(Some(tucana::shared::helper::value::from_json_value(json)));
+    }
+
+    let encoded = ENGINE
+        .with(|engine| {
+            engine.convert(
+                body,
+                format,
+                lupus::Format::Protobuf,
+                &lupus::DecodeContext,
+                &lupus::EncodeContext::default(),
+            )
+        })
         .map_err(|err| BodyParseError::Conversion {
             content_type: content_type.unwrap_or("<missing>").to_string(),
             source: err,
@@ -123,15 +148,22 @@ pub fn encode_body(content_type: Option<&str>, value: Value) -> Result<Vec<u8>, 
     let format = format_for_content_type(content_type)
         .map_err(|observed| BodyEncodeError::UnsupportedContentType { observed })?;
 
+    if format == lupus::Format::Json {
+        let json = tucana::shared::helper::value::to_json_value(value);
+        return serde_json::to_vec(&json).map_err(BodyEncodeError::InvalidJson);
+    }
+
     let protobuf = serde_json::to_vec(&value).map_err(BodyEncodeError::InvalidJson)?;
-    lupus::Engine::with_default_codecs()
-        .convert(
-            &protobuf,
-            lupus::Format::Protobuf,
-            format,
-            &lupus::DecodeContext,
-            &lupus::EncodeContext::default(),
-        )
+    ENGINE
+        .with(|engine| {
+            engine.convert(
+                &protobuf,
+                lupus::Format::Protobuf,
+                format,
+                &lupus::DecodeContext,
+                &lupus::EncodeContext::default(),
+            )
+        })
         .map_err(|err| BodyEncodeError::Conversion {
             content_type: content_type.to_string(),
             source: err,
@@ -172,6 +204,61 @@ fn get_content_type(headers: &HeaderMap<HeaderValue>) -> Option<&str> {
 mod tests {
     use super::*;
     use tucana::shared::{NumberValue, Struct, number_value, value::Kind};
+
+    /// Regression guard: the JSON fast path (`format == Json` short-circuit
+    /// in `parse_body`/`encode_body`) must keep producing exactly what the
+    /// generic `lupus::Engine` round trip it bypasses would have produced.
+    fn generic_engine_parse(body: &[u8]) -> Value {
+        let encoded = ENGINE
+            .with(|engine| {
+                engine.convert(
+                    body,
+                    lupus::Format::Json,
+                    lupus::Format::Protobuf,
+                    &lupus::DecodeContext,
+                    &lupus::EncodeContext::default(),
+                )
+            })
+            .unwrap();
+        serde_json::from_slice(&encoded).unwrap()
+    }
+
+    fn generic_engine_encode(value: Value) -> Vec<u8> {
+        let protobuf = serde_json::to_vec(&value).unwrap();
+        ENGINE
+            .with(|engine| {
+                engine.convert(
+                    &protobuf,
+                    lupus::Format::Protobuf,
+                    lupus::Format::Json,
+                    &lupus::DecodeContext,
+                    &lupus::EncodeContext::default(),
+                )
+            })
+            .unwrap()
+    }
+
+    #[test]
+    fn json_fast_path_parse_matches_generic_engine() {
+        let body = br#"{"hello":"world","count":3,"tags":["a","b"],"nested":{"ok":true}}"#;
+        let fast = parse_body(Some("application/json"), body).unwrap().unwrap();
+        let generic = generic_engine_parse(body);
+        assert_eq!(fast, generic);
+    }
+
+    #[test]
+    fn json_fast_path_encode_matches_generic_engine() {
+        let value = tucana::shared::helper::value::from_json_value(serde_json::json!({
+            "hello": "world",
+            "count": 3,
+            "tags": ["a", "b"],
+        }));
+        let fast = encode_body(Some("application/json"), value.clone()).unwrap();
+        let generic = generic_engine_encode(value);
+        let fast_json: serde_json::Value = serde_json::from_slice(&fast).unwrap();
+        let generic_json: serde_json::Value = serde_json::from_slice(&generic).unwrap();
+        assert_eq!(fast_json, generic_json);
+    }
 
     #[test]
     fn parse_json_body_to_struct_value() {

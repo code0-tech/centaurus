@@ -6,13 +6,13 @@
 
 use std::collections::HashMap;
 
-use hercules::{
+use hercules_sdk::{
     Arguments, FunctionContext, PlainValue, Result, RuntimeFunctionHandler, async_trait,
 };
 
 use crate::pending::{self, PendingResponses, RespondPayload, RespondSignal};
 
-#[hercules::runtime_function(
+#[hercules_sdk::runtime_function(
     identifier = "rest::control::respond",
     signature = "<S extends HTTP_SCHEMA>(http_status_code: HTTP_STATUS_CODE, http_schema: S, payload: HTTP_PAYLOAD<S>, headers?: OBJECT<{}>): void",
     name(en_US = "Respond"),

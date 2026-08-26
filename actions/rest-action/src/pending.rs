@@ -7,7 +7,7 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use hercules::{PlainValue, Result};
+use hercules_sdk::{PlainValue, Result};
 use tokio::sync::oneshot;
 
 pub struct RespondPayload {

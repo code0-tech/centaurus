@@ -1,9 +1,9 @@
-//! Data types specific to this adapter. 
+//! Data types specific to this adapter.
 
-use hercules::JsonSchema;
+use hercules_sdk::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[hercules::data_type(
+#[hercules_sdk::data_type(
     identifier = "REST_AUTH_TYPE",
     name(en_US = "Webhook credential variant"),
     display_message(en_US = "Webhook credential variant"),
@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 #[serde(transparent)]
 pub struct RestAuthType(pub String);
 
-#[hercules::data_type(
+#[hercules_sdk::data_type(
     identifier = "REST_AUTH_VALUE",
     name(en_US = "Webhook credential value"),
     display_message(en_US = "Webhook credential value"),
@@ -32,7 +32,7 @@ pub struct RestAuthType(pub String);
 #[serde(transparent)]
 pub struct RestAuthValue(pub serde_json::Value);
 
-#[hercules::data_type(
+#[hercules_sdk::data_type(
     identifier = "REST_ADAPTER_INPUT",
     name(en_US = "Rest Adapter Input"),
     display_message(en_US = "Rest Adapter Input"),
