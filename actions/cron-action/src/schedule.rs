@@ -5,8 +5,8 @@ use std::str::FromStr;
 
 use chrono::{DateTime, Datelike, Timelike, Utc};
 use cron::Schedule;
-use hercules::Connected;
-use hercules::wire::ActionFlow;
+use hercules_sdk::Connected;
+use hercules_sdk::wire::ActionFlow;
 use tucana::shared::value::Kind;
 
 const TICK_EXPRESSION: &str = "0 * * * * *";

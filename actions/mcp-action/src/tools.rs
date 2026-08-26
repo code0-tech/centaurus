@@ -10,7 +10,7 @@
 
 use std::sync::Arc;
 
-use hercules::Connected;
+use hercules_sdk::Connected;
 use rmcp::ErrorData as McpError;
 use rmcp::RoleServer;
 use rmcp::handler::server::ServerHandler;

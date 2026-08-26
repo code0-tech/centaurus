@@ -2,7 +2,7 @@ mod data_types;
 mod events;
 mod schedule;
 
-use hercules::{Action, HerculesEvent, ScalingOption, Translation};
+use hercules_sdk::{Action, HerculesEvent, ScalingOption, Translation};
 use tokio_stream::StreamExt;
 
 fn env(key: &str, default: &str) -> String {
@@ -10,9 +10,9 @@ fn env(key: &str, default: &str) -> String {
 }
 
 /// `CronMinute`/`CronHour`/... and `CronRuntimeEvent` never appear below —
-/// attaching `#[hercules::data_type]` / `#[hercules::runtime_event]`
+/// attaching `#[hercules_sdk::data_type]` / `#[hercules_sdk::runtime_event]`
 /// registered each of them automatically as part of `Action::new` (see
-/// `hercules::registration`).
+/// `hercules_sdk::registration`).
 fn build_action() -> Action {
     Action::new(
         env("HERCULES_ACTION_ID", "cron-action"),
@@ -29,7 +29,7 @@ fn build_action() -> Action {
 }
 
 #[tokio::main]
-async fn main() -> hercules::Result<()> {
+async fn main() -> hercules_sdk::Result<()> {
     // Defaults to info-level logs for this action and the SDK even without
     // RUST_LOG set; override with e.g. RUST_LOG=hercules=debug,cron_action=debug.
     env_logger::Builder::from_env(

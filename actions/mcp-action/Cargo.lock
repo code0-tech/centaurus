@@ -485,9 +485,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
-name = "hercules"
-version = "0.0.0"
-source = "git+https://github.com/code0-tech/hercules.git?branch=%2322-primitive-rust-sdk#c6ec1336b39e246cc739ab698291e06fd1f08978"
+name = "hercules-macros"
+version = "1.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "197c2299ba6864ce41bb0d688b3d6ca69b3819dfaaeade8f4575d8ee630666f8"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "hercules-sdk"
+version = "1.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0f1372cb2ee4f0a3abe0a0a5e9e956f89beeca01f10d7da9a357a8ffae889edb"
 dependencies = [
  "async-trait",
  "hercules-macros",
@@ -502,16 +514,6 @@ dependencies = [
  "tonic",
  "tucana",
  "uuid",
-]
-
-[[package]]
-name = "hercules-macros"
-version = "0.0.0"
-source = "git+https://github.com/code0-tech/hercules.git?branch=%2322-primitive-rust-sdk#c6ec1336b39e246cc739ab698291e06fd1f08978"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
 ]
 
 [[package]]
@@ -754,7 +756,7 @@ name = "mcp-action"
 version = "0.0.0"
 dependencies = [
  "env_logger",
- "hercules",
+ "hercules-sdk",
  "http",
  "http-body-util",
  "hyper",
@@ -1512,9 +1514,9 @@ checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
 
 [[package]]
 name = "tucana"
-version = "0.0.80"
+version = "0.0.82"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c0cfe93386a4f88e5ea97e6ce64b72b975a8bb5464062cb66aad12e46544b959"
+checksum = "9f2eb0829308e8695969b580f1ff4c80f0e2c5e6b6b7f49aeb751d458410e93a"
 dependencies = [
  "pbjson",
  "pbjson-build",

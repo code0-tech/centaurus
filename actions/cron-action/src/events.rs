@@ -5,7 +5,7 @@
 //! to this action as an `ActionFlow` with these five settings filled in per
 //! flow.
 
-#[hercules::runtime_event(
+#[hercules_sdk::runtime_event(
     identifier = "CRON",
     signature = "(cron_minute: CRON_MINUTE, cron_hour: CRON_HOUR, cron_day_of_month: CRON_DAY_OF_MONTH, cron_month: CRON_MONTH, cron_day_of_week: CRON_DAY_OF_WEEK): void",
     name(en_US = "Cron Job"),
