@@ -636,9 +636,9 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "hercules-macros"
-version = "1.4.4"
+version = "1.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "197c2299ba6864ce41bb0d688b3d6ca69b3819dfaaeade8f4575d8ee630666f8"
+checksum = "d15dea904df8795e741dcfe0fcf9b28a22270a212dbd6717503db9a38f07db00"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -647,9 +647,9 @@ dependencies = [
 
 [[package]]
 name = "hercules-sdk"
-version = "1.4.4"
+version = "1.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f1372cb2ee4f0a3abe0a0a5e9e956f89beeca01f10d7da9a357a8ffae889edb"
+checksum = "50699d0ffac1ef25476196207de6f20c92d6c11a7ac95c974f1b437f935ced6f"
 dependencies = [
  "async-trait",
  "hercules-macros",

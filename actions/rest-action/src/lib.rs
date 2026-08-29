@@ -44,11 +44,15 @@ fn env(key: &str, default: &str) -> String {
 /// construction time, so it's registered by hand below instead (see its
 /// `manual` attribute).
 fn build_action(pending: pending::PendingResponses) -> Action {
+    let request_queue_capacity: usize = env("HERCULES_REQUEST_QUEUE_CAPACITY", "256")
+        .parse()
+        .unwrap_or_else(|err| panic!("invalid HERCULES_REQUEST_QUEUE_CAPACITY: {err}"));
     let mut action = Action::new(
         env("HERCULES_ACTION_ID", "rest-action"),
         env("HERCULES_SDK_VERSION", "0.0.0"),
     )
     .aquila_url(env("HERCULES_AQUILA_URL", "127.0.0.1:8081"))
+    .request_queue_capacity(request_queue_capacity)
     // Every instance needs to be reachable to serve HTTP traffic, so every
     // instance gets every flow rather than splitting them up.
     .scaling(ScalingOption::Disabled)
@@ -133,6 +137,10 @@ pub async fn run() -> hercules_sdk::Result<()> {
         .parse()
         .unwrap_or_else(|err| panic!("invalid HERCULES_EXECUTION_TIMEOUT_SECS: {err}"));
     let execution_timeout = std::time::Duration::from_secs(execution_timeout_secs);
+    let queue_write_timeout_ms: u64 = env("HERCULES_REST_QUEUE_WRITE_TIMEOUT_MS", "1000")
+        .parse()
+        .unwrap_or_else(|err| panic!("invalid HERCULES_REST_QUEUE_WRITE_TIMEOUT_MS: {err}"));
+    let queue_write_timeout = std::time::Duration::from_millis(queue_write_timeout_ms);
 
     // Seeded once here from `Connected::flows()` (not per request — see
     // `registry.rs`), then kept current purely by `FlowUpserted`/
@@ -157,6 +165,7 @@ pub async fn run() -> hercules_sdk::Result<()> {
         connected,
         pending,
         execution_timeout,
+        queue_write_timeout,
         registry: Arc::clone(&registry),
         admission,
         limits,

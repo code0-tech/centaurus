@@ -37,6 +37,7 @@ pub struct ServerState {
     pub connected: Connected,
     pub pending: PendingResponses,
     pub execution_timeout: Duration,
+    pub queue_write_timeout: Duration,
     pub registry: Arc<RwLock<Arc<RouteRegistry>>>,
     pub admission: Admission,
     pub limits: BodyLimits,
@@ -79,12 +80,14 @@ async fn handle(
         connected,
         pending,
         execution_timeout,
+        queue_write_timeout,
         registry,
         admission,
         limits,
         ..
     } = state;
     let execution_timeout = *execution_timeout;
+    let queue_write_timeout = *queue_write_timeout;
     let (parts, body) = req.into_parts();
     let method = parts.method;
     let path = parts.uri.path().to_string();
@@ -136,7 +139,7 @@ async fn handle(
     // parsing, schema validation, flow dispatch) — routing and auth above
     // are cheap and shouldn't be denied just because executions are
     // saturated.
-    let Some(permit) = admission.try_acquire() else {
+    let Some(permit) = admission.acquire().await else {
         log::warn!(
             "{method} {path}: flow {} rejected: execution admission saturated",
             flow.flow_id
@@ -243,6 +246,7 @@ async fn handle(
         payload,
         route: format!("{method} {path}"),
         execution_timeout,
+        queue_write_timeout,
         permit,
         retry_after_secs: admission.retry_after_secs(),
     })
@@ -312,6 +316,7 @@ struct ExecutionRequest {
     payload: hercules_sdk::PlainValue,
     route: String,
     execution_timeout: Duration,
+    queue_write_timeout: Duration,
     permit: tokio::sync::OwnedSemaphorePermit,
     retry_after_secs: u64,
 }
@@ -324,6 +329,7 @@ async fn execute_and_await_response(request: ExecutionRequest) -> Response<Full<
         payload,
         route,
         execution_timeout,
+        queue_write_timeout,
         permit,
         retry_after_secs,
     } = request;
@@ -351,7 +357,12 @@ async fn execute_and_await_response(request: ExecutionRequest) -> Response<Full<
             // implies).
             let _permit = permit;
             let result = connected
-                .execute_flow_with_id(execution_id.clone(), flow_id.to_string(), payload)
+                .execute_flow_with_id_wait_for_capacity(
+                    execution_id.clone(),
+                    flow_id.to_string(),
+                    payload,
+                    queue_write_timeout,
+                )
                 .await;
             // If `respond` was already called, it already claimed this
             // entry, so this only fires for the "flow finished without
