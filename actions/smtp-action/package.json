@@ -12,7 +12,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@code0-tech/hercules": "^1.1.1",
+    "@code0-tech/hercules": "^1.4.5",
     "nodemailer": "^6.9.16"
   },
   "devDependencies": {
