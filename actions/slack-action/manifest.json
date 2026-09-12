@@ -1,0 +1,10 @@
+{
+  "name": "slack",
+  "identifier": "slack-action",
+  "description": "Slack integration: post and update messages, react to Slack events, and drive channel, user and file operations via the Slack Web API.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/slack-action"
+    }
+  }
+}
