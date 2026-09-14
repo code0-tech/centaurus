@@ -5,18 +5,20 @@ import { Description, DisplayIcon, DisplayMessage, EventSetting, Identifier, Nam
 @Name({ code: "en-US", content: "GitHub pull request opened" })
 @Description({ code: "en-US", content: "Triggered when a GitHub pull request is opened." })
 @DisplayMessage({ code: "en-US", content: "GitHub pull request opened on ${httpURL}" })
-@Signature("<A extends REST_AUTH_TYPE>(httpSchema: HTTP_SCHEMA, httpURL: HTTP_URL, httpMethod: HTTP_METHOD, httpAuth: A, httpAuthValue: REST_AUTH_VALUE<A>, input_schema?: GitHubPullRequestOpenedWebhookPayload): REST_ADAPTER_INPUT<GitHubPullRequestOpenedWebhookPayload>")
+@Signature(
+    "<A extends REST_AUTH_TYPE>(httpSchema: HTTP_SCHEMA, httpURL: HTTP_URL, httpMethod: HTTP_METHOD, httpAuth: A, httpAuthValue: REST_AUTH_VALUE<A>, input_schema?: GitHubPullRequestOpenedWebhookPayload): REST_ADAPTER_INPUT<GitHubPullRequestOpenedWebhookPayload>"
+)
 @EventSetting({
     identifier: "input_schema",
     hidden: true,
 })
 @EventSetting({
-    identifier: "httpMethod",
+    identifier: "http_method",
     hidden: true,
     defaultValue: "POST",
 })
 @EventSetting({
-    identifier: "httpSchema",
+    identifier: "http_schema",
     hidden: true,
     defaultValue: "application/json",
 })
