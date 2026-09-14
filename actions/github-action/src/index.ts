@@ -98,18 +98,17 @@ import { DeleteMilestoneFunction } from "./functions/milestones/deleteMilestoneF
 import { GetMilestoneFunction } from "./functions/milestones/getMilestoneFunction.js"
 import { GetMilestonesFunction } from "./functions/milestones/getMilestonesFunction.js"
 import { UpdateMilestoneFunction } from "./functions/milestones/updateMilestoneFunction.js"
+import { GitHubRepositoryPushWebhook } from "./events/githubRepositoryPushWebhook.js"
+import { GitHubPullRequestOpenedWebhook } from "./events/githubPullRequestOpenedWebhook.js"
+import { GitHubPullRequestClosedWebhook } from "./events/githubPullRequestClosedWebhook.js"
+import { GitHubIssueOpenedWebhook } from "./events/githubIssueOpenedWebhook.js"
+import { GitHubIssueClosedWebhook } from "./events/githubIssueClosedWebhook.js"
 
 // import { GitHubPushWebhookPayloadDataType } from "./data_types/webhooks/githubPush.js"
 // import { GitHubIssueClosedWebhookPayloadDataType } from "./data_types/webhooks/githubIssueClosedWebhookPayload.js"
 // import { GitHubIssueOpenedWebhookPayloadDataType } from "./data_types/webhooks/githubIssueOpenedWebhookPayload.js"
 // import { GitHubPullRequestClosedWebhookPayloadDataType } from "./data_types/webhooks/githubPullRequestClosedWebhookPayload.js"
 // import { GitHubPullRequestOpenedWebhookPayloadDataType } from "./data_types/webhooks/githubPullRequestOpenedWebhookPayload.js"
-//
-// import { GitHubIssueClosedWebhook } from "./events/githubIssueClosedWebhook.js"
-// import { GitHubIssueOpenedWebhook } from "./events/githubIssueOpenedWebhook.js"
-// import { GitHubPullRequestClosedWebhook } from "./events/githubPullRequestClosedWebhook.js"
-// import { GitHubPullRequestOpenedWebhook } from "./events/githubPullRequestOpenedWebhook.js"
-// import { GitHubRepositoryPushWebhook } from "./events/githubRepositoryPushWebhook.js"
 
 const action = new Action(
     process.env.ACTION_ID ?? "github-action",
@@ -256,11 +255,11 @@ action.registerRuntimeFunction(CreatePullRequestReviewCommentFunction)
 action.registerRuntimeFunction(UpdatePullRequestReviewCommentFunction)
 action.registerRuntimeFunction(DeletePullRequestReviewCommentFunction)
 
-// action.registerEventClass(GitHubRepositoryPushWebhook)
-// action.registerEventClass(GitHubPullRequestOpenedWebhook)
-// action.registerEventClass(GitHubPullRequestClosedWebhook)
-// action.registerEventClass(GitHubIssueOpenedWebhook)
-// action.registerEventClass(GitHubIssueClosedWebhook)
+action.registerEventClass(GitHubRepositoryPushWebhook)
+action.registerEventClass(GitHubPullRequestOpenedWebhook)
+action.registerEventClass(GitHubPullRequestClosedWebhook)
+action.registerEventClass(GitHubIssueOpenedWebhook)
+action.registerEventClass(GitHubIssueClosedWebhook)
 
 action.on(CodeZeroEvent.connected, () => {
     console.log("Connected to Aquila")
@@ -271,13 +270,13 @@ action.on(CodeZeroEvent.error, (error: Error) => {
     console.log("Attempting to reconnect in 5s...")
 
     setTimeout(() => {
-        action.connect(process.env.AUTH_TOKEN ?? "token_abc1234").catch((reconnectError: unknown) => {
+        action.connect(process.env.AUTH_TOKEN ?? "eioiN3UuNRXTNIcmoT01Gs4hVnsXhnf11NhooosxUx35MNAzUeTb1uMlO6NZaOLu").catch((reconnectError: unknown) => {
             console.error("Reconnect failed:", reconnectError)
         })
     }, 5000)
 })
 
-action.connect(process.env.AUTH_TOKEN ?? "token_abc1234").catch((error: unknown) => {
+action.connect(process.env.AUTH_TOKEN ?? "eioiN3UuNRXTNIcmoT01Gs4hVnsXhnf11NhooosxUx35MNAzUeTb1uMlO6NZaOLu").catch((error: unknown) => {
     console.error("Failed to connect:", error)
     process.exit(1)
 })
