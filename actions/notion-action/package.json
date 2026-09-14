@@ -1,0 +1,31 @@
+{
+  "name": "@code0-tech/notion-action",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "generate:notion-schemas": "node scripts/generate-openapi.mjs && node ../../scripts/openapi-to-zod.mjs schemas/notion-openapi.json src/generated/notion-schemas.ts",
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "start": "node --env-file-if-exists=.env dist/index.js"
+  },
+  "dependencies": {
+    "@code0-tech/hercules": "1.4.5",
+    "@code0-tech/tucana": "0.0.82",
+    "@notionhq/client": "4.0.2",
+    "reflect-metadata": "^0.2.2",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.9.3",
+    "typescript-json-schema": "0.68.0",
+    "vite": "^8.0.3",
+    "vitest": "^4.1.10"
+  }
+}

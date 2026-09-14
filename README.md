@@ -8,6 +8,7 @@ The "central" place for all actions — a monorepo containing integrations provi
 |--------|-------------|
 | [GLS](docs/Actions/GLS/overview.md) | GLS ShipIT integration for creating and managing shipments |
 | [Stripe](actions/stripe-action/README.md) | Stripe payments integration for managing customers, payment intents and refunds |
+| [Notion](actions/notion-action/README.md) | Notion pages and databases, block writing, search and polling triggers |
 
 ## ENV
 
