@@ -104,11 +104,11 @@ import { GitHubPullRequestClosedWebhook } from "./events/githubPullRequestClosed
 import { GitHubIssueOpenedWebhook } from "./events/githubIssueOpenedWebhook.js"
 import { GitHubIssueClosedWebhook } from "./events/githubIssueClosedWebhook.js"
 
-// import { GitHubPushWebhookPayloadDataType } from "./data_types/webhooks/githubPush.js"
-// import { GitHubIssueClosedWebhookPayloadDataType } from "./data_types/webhooks/githubIssueClosedWebhookPayload.js"
-// import { GitHubIssueOpenedWebhookPayloadDataType } from "./data_types/webhooks/githubIssueOpenedWebhookPayload.js"
-// import { GitHubPullRequestClosedWebhookPayloadDataType } from "./data_types/webhooks/githubPullRequestClosedWebhookPayload.js"
-// import { GitHubPullRequestOpenedWebhookPayloadDataType } from "./data_types/webhooks/githubPullRequestOpenedWebhookPayload.js"
+import { GitHubPushWebhookPayloadDataType } from "./data_types/webhooks/githubPush.js"
+import { GitHubIssueClosedWebhookPayloadDataType } from "./data_types/webhooks/githubIssueClosedWebhookPayload.js"
+import { GitHubIssueOpenedWebhookPayloadDataType } from "./data_types/webhooks/githubIssueOpenedWebhookPayload.js"
+import { GitHubPullRequestClosedWebhookPayloadDataType } from "./data_types/webhooks/githubPullRequestClosedWebhookPayload.js"
+import { GitHubPullRequestOpenedWebhookPayloadDataType } from "./data_types/webhooks/githubPullRequestOpenedWebhookPayload.js"
 
 const action = new Action(
     process.env.ACTION_ID ?? "github-action",
@@ -186,12 +186,11 @@ action.registerDataTypeClass(GitHubUpdatePullRequestRequestDataType)
 action.registerDataTypeClass(GitHubCreatePullRequestReviewRequestDataType)
 action.registerDataTypeClass(GitHubSubmitPullRequestReviewRequestDataType)
 action.registerDataTypeClass(GitHubDismissPullRequestReviewRequestDataType)
-
-// action.registerDataTypeClass(GitHubPushWebhookPayloadDataType)
-// action.registerDataTypeClass(GitHubIssueOpenedWebhookPayloadDataType)
-// action.registerDataTypeClass(GitHubIssueClosedWebhookPayloadDataType)
-// action.registerDataTypeClass(GitHubPullRequestOpenedWebhookPayloadDataType)
-// action.registerDataTypeClass(GitHubPullRequestClosedWebhookPayloadDataType)
+action.registerDataTypeClass(GitHubPushWebhookPayloadDataType)
+action.registerDataTypeClass(GitHubIssueOpenedWebhookPayloadDataType)
+action.registerDataTypeClass(GitHubIssueClosedWebhookPayloadDataType)
+action.registerDataTypeClass(GitHubPullRequestOpenedWebhookPayloadDataType)
+action.registerDataTypeClass(GitHubPullRequestClosedWebhookPayloadDataType)
 
 action.registerRuntimeFunction(GetRepositoryFunction)
 action.registerRuntimeFunction(GetRepositoryBranchesFunction)
@@ -270,13 +269,13 @@ action.on(CodeZeroEvent.error, (error: Error) => {
     console.log("Attempting to reconnect in 5s...")
 
     setTimeout(() => {
-        action.connect(process.env.AUTH_TOKEN ?? "eioiN3UuNRXTNIcmoT01Gs4hVnsXhnf11NhooosxUx35MNAzUeTb1uMlO6NZaOLu").catch((reconnectError: unknown) => {
+        action.connect(process.env.AUTH_TOKEN ?? "LbB9OjWWNyug7haCCjP59tOwNRK1FS4Y6wdSYKOhxQddDppRjDX8zCQN1JX1KsUo").catch((reconnectError: unknown) => {
             console.error("Reconnect failed:", reconnectError)
         })
     }, 5000)
 })
 
-action.connect(process.env.AUTH_TOKEN ?? "eioiN3UuNRXTNIcmoT01Gs4hVnsXhnf11NhooosxUx35MNAzUeTb1uMlO6NZaOLu").catch((error: unknown) => {
+action.connect(process.env.AUTH_TOKEN ?? "LbB9OjWWNyug7haCCjP59tOwNRK1FS4Y6wdSYKOhxQddDppRjDX8zCQN1JX1KsUo").catch((error: unknown) => {
     console.error("Failed to connect:", error)
     process.exit(1)
 })
