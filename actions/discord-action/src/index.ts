@@ -1,67 +1,79 @@
 import "reflect-metadata";
 import { Action, CodeZeroEvent } from "@code0-tech/hercules";
 
-import {
-    DiscordEmbedAuthorDataType,
-    DiscordEmbedDataType,
-    DiscordEmbedFooterDataType,
-} from "./data_types/discordEmbed.js";
-import {
-    DiscordWebhookResponseDataType,
-} from "./data_types/discordWebhook.js";
+import { initDiscordClient } from "./client.js";
 
-import { CreateDiscordEmbedAuthorFunction } from "./functions/createDiscordEmbedAuthorFunction.js";
-import { CreateDiscordEmbedFooterFunction } from "./functions/createDiscordEmbedFooterFunction.js";
-import { CreateDiscordEmbedFunction } from "./functions/createDiscordEmbedFunction.js";
-import { CreateDiscordWebhookUrlFunction } from "./functions/createDiscordWebhookUrlFunction.js";
-import { SendDiscordWebhookFunction } from "./functions/sendDiscordWebhookFunction.js";
+import {
+    DiscordEmbedField,
+    DiscordEmbedFooter,
+    DiscordEmbedAuthor,
+    DiscordEmbed,
+} from "./data_types/discordEmbed.js";
+import { DiscordChannelType, DiscordChannel } from "./data_types/discordChannel.js";
+import { DiscordAttachment } from "./data_types/discordAttachment.js";
+import { DiscordCommandInteraction } from "./data_types/discordCommandInteraction.js";
+import { DiscordMessage } from "./data_types/discordMessage.js";
+import { DiscordGuild } from "./data_types/discordGuild.js";
+import { DiscordGuildMember } from "./data_types/discordGuildMember.js";
+import { DiscordReaction } from "./data_types/discordReaction.js";
+import { DiscordUser } from "./data_types/discordUser.js";
+import { DiscordRole } from "./data_types/discordRole.js";
+
+import { DiscordSendMessageFunction } from "./functions/messaging/discordSendMessage.js";
+import { DiscordSendDirectMessageFunction } from "./functions/messaging/discordSendDirectMessage.js";
+import { DiscordReplyToMessageFunction } from "./functions/messaging/discordReplyToMessage.js";
+import { DiscordEditMessageFunction } from "./functions/messaging/discordEditMessage.js";
+import { DiscordDeleteMessageFunction } from "./functions/messaging/discordDeleteMessage.js";
+import { DiscordAddReactionFunction } from "./functions/messaging/discordAddReaction.js";
+import { DiscordAddRoleToMemberFunction } from "./functions/members/discordAddRoleToMember.js";
+import { DiscordRemoveRoleFromMemberFunction } from "./functions/members/discordRemoveRoleFromMember.js";
+
+import { DiscordMessageCreated } from "./events/discordMessageCreated.js";
+import { DiscordReactionAdded } from "./events/discordReactionAdded.js";
+import { DiscordMemberJoined } from "./events/discordMemberJoined.js";
+import { DiscordMemberLeft } from "./events/discordMemberLeft.js";
+import { DiscordSlashCommandInvoked } from "./events/discordSlashCommandInvoked.js";
 
 const action = new Action(
-    process.env.ACTION_ID ?? "discord-action",
+    process.env.ACTION_ID ?? "testing-action",
     process.env.VERSION ?? "1.0.0",
     process.env.AQUILA_URL ?? "127.0.0.1:8081",
     "code0-tech",
     "simple:discord",
-    "Discord integration: create webhook URLs, construct rich embeds, and send webhooks.",
+    "Discord bot integration: send and manage messages, reactions, and roles, and react to Discord events.",
     [{ code: "en-US", content: "Discord" }],
-    [
-        {
-            identifier: "webhook_url",
-            type: "TEXT",
-            defaultValue: "",
-            name: [{ code: "en-US", content: "Webhook URL" }],
-            description: [{ code: "en-US", content: "Default Discord Webhook URL to use as fallback." }],
-            linkedDataTypes: ["TEXT"],
-        },
-        {
-            identifier: "username",
-            type: "TEXT",
-            defaultValue: "",
-            name: [{ code: "en-US", content: "Username" }],
-            description: [{ code: "en-US", content: "Default username for the Discord webhook poster." }],
-            linkedDataTypes: ["TEXT"],
-        },
-        {
-            identifier: "avatar_url",
-            type: "TEXT",
-            defaultValue: "",
-            name: [{ code: "en-US", content: "Avatar URL" }],
-            description: [{ code: "en-US", content: "Default avatar image URL for the Discord webhook poster." }],
-            linkedDataTypes: ["TEXT"],
-        },
-    ]
+    []
 );
 
-action.registerDataTypeClass(DiscordEmbedFooterDataType);
-action.registerDataTypeClass(DiscordEmbedAuthorDataType);
-action.registerDataTypeClass(DiscordEmbedDataType);
-action.registerDataTypeClass(DiscordWebhookResponseDataType);
+action.registerDataTypeClass(DiscordEmbedField);
+action.registerDataTypeClass(DiscordEmbedFooter);
+action.registerDataTypeClass(DiscordEmbedAuthor);
+action.registerDataTypeClass(DiscordEmbed);
+action.registerDataTypeClass(DiscordChannelType);
+action.registerDataTypeClass(DiscordChannel);
+action.registerDataTypeClass(DiscordAttachment);
+action.registerDataTypeClass(DiscordCommandInteraction);
+action.registerDataTypeClass(DiscordMessage);
+action.registerDataTypeClass(DiscordGuild);
+action.registerDataTypeClass(DiscordGuildMember);
+action.registerDataTypeClass(DiscordReaction);
+action.registerDataTypeClass(DiscordUser);
+action.registerDataTypeClass(DiscordRole);
 
-action.registerRuntimeFunction(CreateDiscordWebhookUrlFunction);
-action.registerRuntimeFunction(CreateDiscordEmbedFooterFunction);
-action.registerRuntimeFunction(CreateDiscordEmbedAuthorFunction);
-action.registerRuntimeFunction(CreateDiscordEmbedFunction);
-action.registerRuntimeFunction(SendDiscordWebhookFunction);
+action.registerRuntimeFunction(DiscordSendMessageFunction);
+action.registerRuntimeFunction(DiscordSendDirectMessageFunction);
+action.registerRuntimeFunction(DiscordReplyToMessageFunction);
+action.registerRuntimeFunction(DiscordEditMessageFunction);
+action.registerRuntimeFunction(DiscordDeleteMessageFunction);
+action.registerRuntimeFunction(DiscordAddReactionFunction);
+action.registerRuntimeFunction(DiscordAddRoleToMemberFunction);
+action.registerRuntimeFunction(DiscordRemoveRoleFromMemberFunction);
+
+action.registerRuntimeEventClass(DiscordMessageCreated);
+action.registerRuntimeEventClass(DiscordReactionAdded);
+action.registerRuntimeEventClass(DiscordMemberJoined);
+action.registerRuntimeEventClass(DiscordMemberLeft);
+action.registerRuntimeEventClass(DiscordSlashCommandInvoked);
 
 action.on(CodeZeroEvent.connected, () => {
     console.log("Connected to aquila");
@@ -78,6 +90,12 @@ action.on(CodeZeroEvent.error, (error: Error) => {
 });
 
 action.connect(process.env.AUTH_TOKEN ?? "your_auth_token_here").catch((err: Error) => {
+    action.emit(CodeZeroEvent.error, err);
+});
+
+initDiscordClient(process.env.DISCORD_BOT_TOKEN ?? "your_discord_bot_token_here", (err) => {
+    action.emit(CodeZeroEvent.error, err);
+}).catch((err: Error) => {
     action.emit(CodeZeroEvent.error, err);
 });
 
