@@ -7,7 +7,7 @@
 
 #[hercules_sdk::runtime_event(
     identifier = "REST",
-    signature = "<A extends REST_AUTH_TYPE, T>(http_schema: HTTP_SCHEMA, http_url: HTTP_URL, http_method: HTTP_METHOD, http_auth: A, http_auth_value: REST_AUTH_VALUE<A>, input_schema: TYPE<T>): REST_ADAPTER_INPUT<T>",
+    signature = "<A extends REST_AUTH_TYPE, T extends TYPE>(http_schema: HTTP_SCHEMA, http_url: HTTP_URL, http_method: HTTP_METHOD, http_auth: A, http_auth_value: REST_AUTH_VALUE<A>, input_schema: T): REST_ADAPTER_INPUT<T>",
     name(en_US = "Webhook"),
     description(
         en_US = "A Webhook is an HTTP endpoint that listens for incoming requests from external services or clients, allowing you to react to events in real time using standard HTTP methods like GET, POST, PUT, and DELETE."
