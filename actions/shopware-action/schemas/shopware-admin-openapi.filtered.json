@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.2.0",
   "info": {
     "title": "Shopware Admin API",
     "description": "This endpoint reference contains an overview of all endpoints comprising the Shopware Admin API.\n\nFor a better overview, all CRUD-endpoints are hidden by default. If you want to show also CRUD-endpoints\nadd the query parameter `type=jsonapi`.",
@@ -2358,6 +2358,10 @@
             "type": "string",
             "pattern": "^[0-9a-f]{32}$"
           },
+          "extensionName": {
+            "description": "Name of the plugin or app that owns this custom field set.",
+            "type": "string"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -3165,10 +3169,10 @@
         "description": "Added since version: 6.0.0.0",
         "required": [
           "id",
-          "documentTypeId",
           "orderId",
           "config",
-          "deepLinkCode"
+          "deepLinkCode",
+          "documentTypeId"
         ],
         "properties": {
           "id": {
@@ -3176,10 +3180,9 @@
             "pattern": "^[0-9a-f]{32}$",
             "description": "Unique identity of document."
           },
-          "documentTypeId": {
-            "type": "string",
-            "pattern": "^[0-9a-f]{32}$",
-            "description": "Unique identity of document type."
+          "typeName": {
+            "description": "Technical name of the document type.",
+            "type": "string"
           },
           "referencedDocumentId": {
             "type": "string",
@@ -3228,6 +3231,12 @@
             "type": "object",
             "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
           },
+          "documentTypeId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "deprecated": true,
+            "description": "Unique identity of document type."
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",
@@ -3237,9 +3246,6 @@
             "type": "string",
             "format": "date-time",
             "readOnly": true
-          },
-          "documentType": {
-            "$ref": "#/components/schemas/DocumentType"
           },
           "order": {
             "$ref": "#/components/schemas/Order"
@@ -3265,6 +3271,9 @@
               "$ref": "#/components/schemas/DocumentFile"
             }
           },
+          "documentType": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
           "fileType": {
             "description": "Type of file like PDF."
           }
@@ -3275,8 +3284,8 @@
         "description": "Added since version: 6.0.0.0",
         "required": [
           "id",
-          "documentTypeId",
-          "name"
+          "name",
+          "documentTypeId"
         ],
         "properties": {
           "id": {
@@ -3284,10 +3293,9 @@
             "pattern": "^[0-9a-f]{32}$",
             "description": "Unique identity of the document base config."
           },
-          "documentTypeId": {
-            "description": "Unique identity of the document type.",
-            "type": "string",
-            "pattern": "^[0-9a-f]{32}$"
+          "typeName": {
+            "description": "Technical name of the document type.",
+            "type": "string"
           },
           "logoId": {
             "description": "Unique identity of the company logo.",
@@ -3305,6 +3313,9 @@
           "filenameSuffix": {
             "description": "A suffix name added to the file name separated by an underscore.",
             "type": "string"
+          },
+          "filenameInfixes": {
+            "type": "object"
           },
           "global": {
             "description": "When set to `true`, the document can be used across all sales channels.",
@@ -3365,13 +3376,16 @@
             "deprecated": true,
             "description": "Specifies detailed information about the component."
           },
+          "documentTypeId": {
+            "description": "Unique identity of the document type.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "deprecated": true
+          },
           "updatedAt": {
             "type": "string",
             "format": "date-time",
             "readOnly": true
-          },
-          "documentType": {
-            "$ref": "#/components/schemas/DocumentType"
           },
           "logo": {
             "$ref": "#/components/schemas/Media",
@@ -3382,6 +3396,9 @@
             "items": {
               "$ref": "#/components/schemas/DocumentBaseConfigSalesChannel"
             }
+          },
+          "documentType": {
+            "$ref": "#/components/schemas/DocumentType"
           }
         },
         "type": "object"
@@ -3408,10 +3425,15 @@
             "type": "string",
             "pattern": "^[0-9a-f]{32}$"
           },
+          "typeName": {
+            "description": "Technical name of the document type.",
+            "type": "string"
+          },
           "documentTypeId": {
             "description": "Unique identity of document type.",
             "type": "string",
-            "pattern": "^[0-9a-f]{32}$"
+            "pattern": "^[0-9a-f]{32}$",
+            "deprecated": true
           },
           "createdAt": {
             "type": "string",
@@ -3423,14 +3445,14 @@
             "format": "date-time",
             "readOnly": true
           },
-          "documentType": {
-            "$ref": "#/components/schemas/DocumentType"
-          },
           "documentBaseConfig": {
             "$ref": "#/components/schemas/DocumentBaseConfig"
           },
           "salesChannel": {
             "$ref": "#/components/schemas/SalesChannel"
+          },
+          "documentType": {
+            "$ref": "#/components/schemas/DocumentType"
           }
         },
         "type": "object"
@@ -3449,14 +3471,17 @@
             "pattern": "^[0-9a-f]{32}$"
           },
           "documentId": {
+            "description": "Unique identity of the document.",
             "type": "string",
             "pattern": "^[0-9a-f]{32}$"
           },
           "mediaId": {
+            "description": "Unique identity of the media.",
             "type": "string",
             "pattern": "^[0-9a-f]{32}$"
           },
           "documentFormat": {
+            "description": "Document format of the document file.",
             "type": "string"
           },
           "createdAt": {
@@ -3848,11 +3873,11 @@
         "required": [
           "id",
           "technicalName",
-          "label",
           "sourceEntity",
           "fileType",
           "delimiter",
-          "enclosure"
+          "enclosure",
+          "label"
         ],
         "properties": {
           "id": {
@@ -3862,10 +3887,6 @@
           },
           "technicalName": {
             "type": "string"
-          },
-          "label": {
-            "type": "string",
-            "description": "Label given to ImportExportProfile."
           },
           "type": {
             "description": "Import-export type can be orders, customers, categories.",
@@ -3900,6 +3921,10 @@
           "config": {
             "type": "object",
             "description": "Specifies detailed information about the component."
+          },
+          "label": {
+            "type": "string",
+            "description": "Label given to ImportExportProfile."
           },
           "createdAt": {
             "type": "string",
@@ -4181,6 +4206,10 @@
             "type": "string"
           },
           "active": {
+            "type": "boolean"
+          },
+          "translationAutoUpdate": {
+            "description": "Whether the scheduled task keeps the community translations of this language up to date. Enabled by default and only applied to linked languages.",
             "type": "boolean"
           },
           "customFields": {
@@ -7811,11 +7840,13 @@
           },
           "managedByComposer": {
             "description": "A property to check whether it is installed via composer or not.",
-            "type": "boolean"
+            "type": "boolean",
+            "readOnly": true
           },
           "path": {
             "description": "A relative URL to the plugin.",
-            "type": "string"
+            "type": "string",
+            "readOnly": true
           },
           "author": {
             "description": "Creator of the plugin.",
@@ -8169,6 +8200,15 @@
             "description": "Unique number that describes the manufacturer.",
             "type": "string"
           },
+          "guaranteeMonths": {
+            "description": "Commercial durability guarantee duration in months.",
+            "type": "integer",
+            "format": "int64"
+          },
+          "guaranteeConfirmed": {
+            "description": "Merchant confirmation that the producer commercial durability guarantee information is accurate and has been made available.",
+            "type": "boolean"
+          },
           "ean": {
             "description": "Indicates EAN of the product.",
             "type": "string"
@@ -8329,6 +8369,11 @@
           "description": {
             "type": "string",
             "description": "Description of the product."
+          },
+          "descriptionTeaser": {
+            "description": "Read-only, HTML-stripped excerpt of the description, derived on write.",
+            "type": "string",
+            "readOnly": true
           },
           "metaTitle": {
             "type": "string",
@@ -8931,6 +8976,11 @@
           },
           "generatedAt": {
             "description": "Date and time when the product exports was last generated.",
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextGenerationAt": {
+            "description": "Date and time when the next cron-driven generation becomes eligible.",
             "type": "string",
             "format": "date-time"
           },
@@ -9588,6 +9638,10 @@
           },
           "internal": {
             "description": "When the boolean value is `true` indicating that it is for internal use only and will not appear in product stream listings.",
+            "type": "boolean"
+          },
+          "displayAsGroup": {
+            "description": "When enabled, matching variants are grouped according to the product presentation setting. Disable to show them individually.",
             "type": "boolean"
           },
           "createdAt": {
@@ -10709,6 +10763,10 @@
           "measurementUnits": {
             "$ref": "#/components/schemas/MeasurementUnits"
           },
+          "businessTimeZone": {
+            "description": "Business timezone used for sales-channel-specific rendering. Added since version: 6.7.13.0.",
+            "type": "string"
+          },
           "name": {
             "type": "string",
             "description": "Name of the sales channel."
@@ -10741,12 +10799,18 @@
             "description": "When `true`, it indicates that the sales channel is undergoing maintenance, and shopping is temporarily unavailable during this period.",
             "type": "boolean"
           },
+          "maintenanceIpAllowlist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "maintenanceIpWhitelist": {
             "type": "array",
             "items": {
-              "type": "object",
-              "additionalProperties": false
+              "type": "string"
             },
+            "deprecated": true,
             "description": "List of IP addresseS used when the maintenance mode is active."
           },
           "customFields": {
@@ -11070,6 +11134,12 @@
               "$ref": "#/components/schemas/ProductExport"
             }
           },
+          "salesChannelFiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SalesChannelFile"
+            }
+          },
           "analytics": {
             "$ref": "#/components/schemas/SalesChannelAnalytics"
           },
@@ -11206,6 +11276,10 @@
             "description": "This is used to toggle the language configurations, say between DE and DE-DE for instance.",
             "type": "boolean"
           },
+          "isExternalStorefront": {
+            "description": "Whether the domain points to an external (headless) storefront.",
+            "type": "boolean"
+          },
           "customFields": {
             "type": "object",
             "description": "Additional fields that offer a possibility to add own fields for the different program-areas."
@@ -11240,6 +11314,56 @@
             "items": {
               "$ref": "#/components/schemas/ProductExport"
             }
+          }
+        },
+        "type": "object"
+      },
+      "SalesChannelFile": {
+        "description": "Added since version: 6.7.12.0",
+        "required": [
+          "id",
+          "salesChannelId",
+          "fileFamily",
+          "fileName",
+          "enabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "salesChannelId": {
+            "description": "Unique identity of the configured sales channel.",
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "fileFamily": {
+            "description": "File family below Resources/views/files.",
+            "type": "string"
+          },
+          "fileName": {
+            "description": "Normalized public file path without a leading slash.",
+            "type": "string"
+          },
+          "enabled": {
+            "description": "Controls whether the file is served for this sales channel.",
+            "type": "boolean"
+          },
+          "templateOverrides": {
+            "type": "object"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "salesChannel": {
+            "$ref": "#/components/schemas/SalesChannel"
           }
         },
         "type": "object"
@@ -11518,6 +11642,10 @@
           },
           "isValid": {
             "description": "Created SEO URL template can be made usable by setting `isValid` to true.",
+            "type": "boolean"
+          },
+          "isHeadless": {
+            "description": "Whether the template applies to headless (API type) sales channels. Derived from the route family.",
             "type": "boolean"
           },
           "customFields": {
@@ -11978,6 +12106,10 @@
             "pattern": "^[0-9a-f]{32}$"
           },
           "internalComment": {
+            "type": "string"
+          },
+          "sourceType": {
+            "description": "Type of the API context source which triggered the transition.",
             "type": "string"
           },
           "createdAt": {
