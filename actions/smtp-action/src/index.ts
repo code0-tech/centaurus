@@ -1,8 +1,7 @@
 import "reflect-metadata";
 import { Action, CodeZeroEvent } from "@code0-tech/hercules";
 
-import { SmtpAttachmentDataType } from "./data_types/smtpAttachment.js";
-import { SmtpEnvelopeDataType, SmtpSendResultDataType } from "./data_types/smtpSendResult.js";
+import { SmtpSendResultDataType } from "./data_types/smtpSendResult.js";
 import { SendEmailFunction } from "./functions/sendEmailFunction.js";
 import { SendEmailWithAttachmentsFunction } from "./functions/sendEmailWithAttachmentsFunction.js";
 
@@ -65,8 +64,6 @@ const action = new Action(
     ]
 );
 
-action.registerDataTypeClass(SmtpAttachmentDataType);
-action.registerDataTypeClass(SmtpEnvelopeDataType);
 action.registerDataTypeClass(SmtpSendResultDataType);
 
 action.registerRuntimeFunction(SendEmailFunction);

@@ -61,7 +61,7 @@ import { SmtpSendResult } from "../data_types/smtpSendResult.js";
     optional: true,
 })
 @Parameter({
-    runtimeName: "Cc",
+    runtimeName: "CarbonCopy",
     name: [{ code: "en-US", content: "CC" }],
     description: [{ code: "en-US", content: "Comma-separated list of CC recipients." }],
     optional: true,

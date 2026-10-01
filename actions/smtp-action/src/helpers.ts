@@ -1,26 +1,6 @@
-import { FunctionContext, RuntimeError } from "@code0-tech/hercules";
+import { FunctionContext, RuntimeError, File } from "@code0-tech/hercules";
 import nodemailer, { type Transporter } from "nodemailer";
-import { z } from "zod";
-import { SmtpAttachmentSchema } from "./data_types/smtpAttachment.js";
 import { SmtpSendResult, SmtpSendResultSchema } from "./data_types/smtpSendResult.js";
-
-/**
- * Request payload accepted by {@link sendEmail}. Recipient fields (To/Cc/Bcc)
- * are comma-separated address lists so they can be passed as plain strings from
- * a flow.
- */
-export const SendEmailRequestDataSchema = z.object({
-    To: z.string().describe("Comma-separated list of recipient email addresses."),
-    Subject: z.string().describe("The subject line of the email."),
-    Text: z.string().describe("The plain-text body of the email."),
-    Html: z.string().nullish().describe("Optional HTML body. When set it is sent alongside the plain-text body."),
-    From: z.string().nullish().describe("The sender address. Falls back to the configured default sender when omitted."),
-    Cc: z.string().nullish().describe("Comma-separated list of CC recipients."),
-    Bcc: z.string().nullish().describe("Comma-separated list of BCC recipients."),
-    ReplyTo: z.string().nullish().describe("The Reply-To address for the email."),
-    Attachments: z.array(SmtpAttachmentSchema).or(SmtpAttachmentSchema).nullish().describe("Files to attach to the email."),
-});
-export type SendEmailRequestData = z.infer<typeof SendEmailRequestDataSchema>;
 
 /**
  * Splits a comma-separated address string into a trimmed, non-empty array.
@@ -97,34 +77,43 @@ function normalizeAddress(address: unknown): string {
  * the result onto the SMTP_SEND_RESULT data type.
  */
 export const sendEmail = async (
-    data: SendEmailRequestData,
+    data:{
+        To: string,
+        Subject: string,
+        Text: string,
+        Html?: string,
+        From?: string,
+        Cc?: string,
+        Bcc?: string,
+        Attachments?:  File<string>[],
+        ReplyTo?: string
+    },
     context: FunctionContext
 ): Promise<SmtpSendResult> => {
-    const parsed = SendEmailRequestDataSchema.parse(data);
     const transport = getTransport(context);
-    const from = resolveFrom(context, parsed.From);
+    const from = resolveFrom(context, data.From);
 
-    if (parsed.Attachments && !Array.isArray(parsed.Attachments)) {
-        parsed.Attachments = [parsed.Attachments];
+    if (data.Attachments && !Array.isArray(data.Attachments)) {
+        data.Attachments = [data.Attachments];
     }
 
     try {
         const info = await transport.sendMail({
             from,
-            to: toAddressList(parsed.To),
-            cc: toAddressList(parsed.Cc),
-            bcc: toAddressList(parsed.Bcc),
-            replyTo: parsed.ReplyTo,
-            subject: parsed.Subject,
-            text: parsed.Text,
-            ...(parsed.Html ? { html: parsed.Html } : {}),
-            ...(parsed.Attachments && parsed.Attachments.length > 0
+            to: toAddressList(data.To),
+            cc: toAddressList(data.Cc),
+            bcc: toAddressList(data.Bcc),
+            replyTo: data.ReplyTo,
+            subject: data.Subject,
+            text: data.Text,
+            ...(data.Html ? { html: data.Html } : {}),
+            ...(data.Attachments && data.Attachments.length > 0
                 ? {
-                      attachments: parsed.Attachments.map((attachment) => ({
-                          filename: attachment.filename,
-                          content: attachment.content,
-                          contentType: attachment.contentType,
-                          encoding: attachment.encoding,
+                      attachments: data.Attachments.map((attachment:File<string>) => ({
+                          filename: attachment.fileName,
+                          content: attachment.value,
+                          contentType: attachment.contentType as string,
+                          encoding: attachment.valueType,
                       })),
                   }
                 : {}),
@@ -137,10 +126,8 @@ export const sendEmail = async (
             accepted: (info.accepted ?? []).map(normalizeAddress),
             rejected: (info.rejected ?? []).map(normalizeAddress),
             response: info.response ?? "",
-            envelope: {
-                from: normalizeAddress(envelope.from),
-                to: Array.isArray(envelope.to) ? envelope.to.map(normalizeAddress) : [normalizeAddress(envelope.to)].filter((a) => a.length > 0),
-            },
+            from: normalizeAddress(envelope.from),
+            to: Array.isArray(envelope.to) ? envelope.to.map(normalizeAddress) : [normalizeAddress(envelope.to)].filter((a) => a.length > 0)
         });
     } catch (error: unknown) {
         if (error instanceof RuntimeError) {
