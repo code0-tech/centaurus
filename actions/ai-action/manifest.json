@@ -1,0 +1,10 @@
+{
+  "name": "ai",
+  "identifier": "ai-action",
+  "description": "AI agent integration: build LangChain agents from a model, tools (flows and MCP servers), middleware and a system prompt.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/ai-action"
+    }
+  }
+}
