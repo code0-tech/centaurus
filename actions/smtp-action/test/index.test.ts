@@ -9,10 +9,13 @@ describe("SmtpSendResultSchema", () => {
             accepted: ["a@example.com"],
             rejected: [],
             response: "250 2.0.0 OK",
-            envelope: { from: "no-reply@example.com", to: ["a@example.com"] },
+            from: "no-reply@example.com",
+            to: ["a@example.com"],
         };
         const parsed = SmtpSendResultSchema.parse(result);
         expect(parsed.messageId).toEqual(result.messageId);
         expect(parsed.accepted).toEqual(["a@example.com"]);
+        expect(parsed.from).toEqual("no-reply@example.com");
+        expect(parsed.to).toEqual(["a@example.com"]);
     });
 });
