@@ -86,12 +86,7 @@ export class SendEmailWithAttachmentsFunction {
     ): Promise<SmtpSendResult> {
         try {
             return await sendEmail(
-                { To:Recipients, Subject, Text, Html, From, Cc:CarbonCopy, Bcc, Attachments: Attachments.map(file => ({
-                    filename: file.fileName,
-                    content: file.value,
-                    contentType: file.contentType as string,
-                    encoding: file.valueType
-                })) ?? [] },
+                { To:Recipients, Subject, Text, Html, From, Cc:CarbonCopy, Bcc, Attachments: Attachments ?? [] },
                 context
             );
         } catch (error) {
