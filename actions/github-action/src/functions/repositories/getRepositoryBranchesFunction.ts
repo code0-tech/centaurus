@@ -1,17 +1,32 @@
-import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
-import { GitHubRepositoryBranch, GitHubRepositoryBranchSchema } from "../../data_types/repositories/githubRepositoryBranch.js"
+import { Description, DisplayIcon, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
+import { GitHubRepositoryBranchSummary, GitHubRepositoryBranchSummarySchema } from "../../data_types/repositories/githubRepositoryBranch.js"
 import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
 @Identifier("getRepositoryBranches")
-@Signature("(owner: string, repository: string, page?: number, perPage?: number): GITHUB_REPOSITORY_BRANCH[]")
+@Signature("(owner: string, repository: string, page?: number, perPage?: number): GITHUB_REPOSITORY_BRANCH_SUMMARY[]")
 @Name({ code: "en-US", content: "Get repository branches" })
 @DisplayMessage({ code: "en-US", content: "Get GitHub repository branches" })
+@DisplayIcon("tabler:brand-github")
 @Documentation({ code: "en-US", content: "Returns branches of a GitHub repository." })
 @Description({ code: "en-US", content: "Returns GitHub repository branches." })
-@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }] })
-@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }] })
+@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }], description: [{ code: "en-US", content: "Repository owner or organization." }] })
+@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }], description: [{ code: "en-US", content: "Repository name." }] })
+@Parameter({
+    runtimeName: "page",
+    name: [{ code: "en-US", content: "Page" }],
+    description: [{ code: "en-US", content: "Page number to return. Defaults to 1." }],
+    optional: true,
+    defaultValue: 1,
+})
+@Parameter({
+    runtimeName: "perPage",
+    name: [{ code: "en-US", content: "Results per page" }],
+    description: [{ code: "en-US", content: "Number of results per page, from 1 to 100. Defaults to 30." }],
+    optional: true,
+    defaultValue: 30,
+})
 export class GetRepositoryBranchesFunction {
-    async run(context: FunctionContext, owner: string, repository: string, page = 1, perPage = 30): Promise<GitHubRepositoryBranch[]> {
+    async run(context: FunctionContext, owner: string, repository: string, page = 1, perPage = 30): Promise<GitHubRepositoryBranchSummary[]> {
         if (!Number.isInteger(page) || page < 1) throw new RuntimeError("GITHUB_INVALID_PAGE", "Page must be a positive integer.")
         if (!Number.isInteger(perPage) || perPage < 1 || perPage > 100)
             throw new RuntimeError("GITHUB_INVALID_PER_PAGE", "Results per page must be an integer from 1 to 100.")
@@ -21,7 +36,7 @@ export class GetRepositoryBranchesFunction {
             const response = await client.get(`/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}/branches`, {
                 params: { page, per_page: perPage },
             })
-            return GitHubRepositoryBranchSchema.array().parse(response.data)
+            return GitHubRepositoryBranchSummarySchema.array().parse(response.data)
         } catch (error) {
             return handleGitHubError(error)
         }

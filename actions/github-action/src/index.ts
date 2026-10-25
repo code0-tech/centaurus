@@ -1,42 +1,25 @@
 import "reflect-metadata"
 import { Action, CodeZeroEvent } from "@code0-tech/hercules"
 import { GitHubIssueDataType } from "./data_types/issues/githubIssue.js"
-import { GitHubAddAssigneesRequestDataType } from "./data_types/issues/githubAssigneesRequest.js"
-import { GitHubCreateBranchRequestDataType } from "./data_types/repositories/githubBranchRequests.js"
-import { GitHubCheckRunDataType, GitHubCommitStatusDataType } from "./data_types/ciAutomation/githubCiAutomation.js"
 import {
-    GitHubCreateCheckRunRequestDataType,
-    GitHubCreateCommitStatusRequestDataType,
-    GitHubUpdateCheckRunRequestDataType,
-} from "./data_types/ciAutomation/githubCiAutomationRequests.js"
+    GitHubLabelReferenceDataType,
+    GitHubMilestoneReferenceDataType,
+    GitHubUserReferenceDataType,
+} from "./data_types/references/githubReferences.js"
+import { GitHubCheckRunDataType, GitHubCommitStatusDataType } from "./data_types/ciAutomation/githubCiAutomation.js"
 import { GitHubCommitDataType } from "./data_types/repositories/githubCommit.js"
 import { GitHubIssueCommentDataType } from "./data_types/issueComments/githubIssueComment.js"
-import { GitHubCreateIssueCommentRequestDataType, GitHubUpdateIssueCommentRequestDataType } from "./data_types/issueComments/githubIssueCommentRequests.js"
-import { GitHubCreateIssueRequestDataType, GitHubUpdateIssueRequestDataType } from "./data_types/issues/githubIssueRequests.js"
 import { GitHubLabelDataType } from "./data_types/labels/githubLabel.js"
-import { GitHubIssueLabelsRequestDataType } from "./data_types/labels/githubLabelRequests.js"
 import { GitHubMilestoneDataType } from "./data_types/milestones/githubMilestone.js"
-import { GitHubCreateMilestoneRequestDataType, GitHubUpdateMilestoneRequestDataType } from "./data_types/milestones/githubMilestoneRequests.js"
-import { GitHubPullRequestDataType } from "./data_types/pullRequests/githubPullRequest.js"
-import { GitHubPullRequestMergeRequestDataType, GitHubPullRequestMergeResultDataType } from "./data_types/pullRequests/githubPullRequestMergeRequest.js"
+import { GitHubPullRequestDataType, GitHubPullRequestSummaryDataType } from "./data_types/pullRequests/githubPullRequest.js"
+import { GitHubPullRequestMergeResultDataType } from "./data_types/pullRequests/githubPullRequestMergeResult.js"
 import { GitHubPullRequestReviewCommentDataType } from "./data_types/pullRequestReviewComments/githubPullRequestReviewComment.js"
-import {
-    GitHubCreatePullRequestReviewCommentRequestDataType,
-    GitHubUpdatePullRequestReviewCommentRequestDataType,
-} from "./data_types/pullRequestReviewComments/githubPullRequestReviewCommentRequests.js"
 import { GitHubPullRequestReviewDataType } from "./data_types/pullRequestReviews/githubPullRequestReview.js"
-import {
-    GitHubCreatePullRequestReviewRequestDataType,
-    GitHubDismissPullRequestReviewRequestDataType,
-    GitHubSubmitPullRequestReviewRequestDataType,
-} from "./data_types/pullRequestReviews/githubPullRequestReviewRequests.js"
-import { GitHubCreatePullRequestRequestDataType, GitHubUpdatePullRequestRequestDataType } from "./data_types/pullRequests/githubPullRequestRequests.js"
 import { GitHubReleaseDataType } from "./data_types/releases/githubRelease.js"
-import { GitHubCreateReleaseRequestDataType, GitHubUpdateReleaseRequestDataType } from "./data_types/releases/githubReleaseRequests.js"
 import { GitHubRepositoryDataType } from "./data_types/repositories/githubRepository.js"
-import { GitHubRepositoryBranchDataType } from "./data_types/repositories/githubRepositoryBranch.js"
+import { GitHubRepositoryBranchDataType, GitHubRepositoryBranchSummaryDataType } from "./data_types/repositories/githubRepositoryBranch.js"
 import { GitHubWorkflowDataType, GitHubWorkflowRunDataType } from "./data_types/ciAutomation/githubWorkflow.js"
-import { GitHubDispatchWorkflowRequestDataType } from "./data_types/ciAutomation/githubWorkflowRequests.js"
+import { GitHubWorkflowInputsDataType } from "./data_types/ciAutomation/githubWorkflowInputs.js"
 import { CreateIssueCommentFunction } from "./functions/issueComments/createIssueCommentFunction.js"
 import { DeleteIssueCommentFunction } from "./functions/issueComments/deleteIssueCommentFunction.js"
 import { GetIssueCommentsFunction } from "./functions/issueComments/getIssueCommentsFunction.js"
@@ -149,48 +132,33 @@ const action = new Action(
 
 action.registerDataTypeClass(GitHubRepositoryDataType)
 action.registerDataTypeClass(GitHubRepositoryBranchDataType)
-action.registerDataTypeClass(GitHubCreateBranchRequestDataType)
+action.registerDataTypeClass(GitHubRepositoryBranchSummaryDataType)
 action.registerDataTypeClass(GitHubCommitDataType)
 action.registerDataTypeClass(GitHubReleaseDataType)
-action.registerDataTypeClass(GitHubCreateReleaseRequestDataType)
-action.registerDataTypeClass(GitHubUpdateReleaseRequestDataType)
 action.registerDataTypeClass(GitHubCommitStatusDataType)
 action.registerDataTypeClass(GitHubCheckRunDataType)
-action.registerDataTypeClass(GitHubCreateCommitStatusRequestDataType)
-action.registerDataTypeClass(GitHubCreateCheckRunRequestDataType)
-action.registerDataTypeClass(GitHubUpdateCheckRunRequestDataType)
 action.registerDataTypeClass(GitHubWorkflowDataType)
 action.registerDataTypeClass(GitHubWorkflowRunDataType)
-action.registerDataTypeClass(GitHubDispatchWorkflowRequestDataType)
+action.registerDataTypeClass(GitHubWorkflowInputsDataType)
+action.registerDataTypeClass(GitHubUserReferenceDataType)
 action.registerDataTypeClass(GitHubIssueDataType)
 action.registerDataTypeClass(GitHubIssueCommentDataType)
 action.registerDataTypeClass(GitHubLabelDataType)
-action.registerDataTypeClass(GitHubIssueLabelsRequestDataType)
+action.registerDataTypeClass(GitHubLabelReferenceDataType)
 action.registerDataTypeClass(GitHubMilestoneDataType)
-action.registerDataTypeClass(GitHubCreateMilestoneRequestDataType)
-action.registerDataTypeClass(GitHubUpdateMilestoneRequestDataType)
-action.registerDataTypeClass(GitHubCreateIssueRequestDataType)
-action.registerDataTypeClass(GitHubUpdateIssueRequestDataType)
-action.registerDataTypeClass(GitHubCreateIssueCommentRequestDataType)
-action.registerDataTypeClass(GitHubUpdateIssueCommentRequestDataType)
-action.registerDataTypeClass(GitHubAddAssigneesRequestDataType)
+action.registerDataTypeClass(GitHubMilestoneReferenceDataType)
 action.registerDataTypeClass(GitHubPullRequestDataType)
+action.registerDataTypeClass(GitHubPullRequestSummaryDataType)
 action.registerDataTypeClass(GitHubPullRequestMergeResultDataType)
-action.registerDataTypeClass(GitHubPullRequestMergeRequestDataType)
 action.registerDataTypeClass(GitHubPullRequestReviewDataType)
 action.registerDataTypeClass(GitHubPullRequestReviewCommentDataType)
-action.registerDataTypeClass(GitHubCreatePullRequestReviewCommentRequestDataType)
-action.registerDataTypeClass(GitHubUpdatePullRequestReviewCommentRequestDataType)
-action.registerDataTypeClass(GitHubCreatePullRequestRequestDataType)
-action.registerDataTypeClass(GitHubUpdatePullRequestRequestDataType)
-action.registerDataTypeClass(GitHubCreatePullRequestReviewRequestDataType)
-action.registerDataTypeClass(GitHubSubmitPullRequestReviewRequestDataType)
-action.registerDataTypeClass(GitHubDismissPullRequestReviewRequestDataType)
 action.registerDataTypeClass(GitHubPushWebhookPayloadDataType)
 action.registerDataTypeClass(GitHubIssueOpenedWebhookPayloadDataType)
 action.registerDataTypeClass(GitHubIssueClosedWebhookPayloadDataType)
 action.registerDataTypeClass(GitHubPullRequestOpenedWebhookPayloadDataType)
 action.registerDataTypeClass(GitHubPullRequestClosedWebhookPayloadDataType)
+
+// Data types for the component schemas nested inside the ones above, generated from the description.
 
 action.registerRuntimeFunction(GetRepositoryFunction)
 action.registerRuntimeFunction(GetRepositoryBranchesFunction)
@@ -260,6 +228,8 @@ action.registerEventClass(GitHubPullRequestClosedWebhook)
 action.registerEventClass(GitHubIssueOpenedWebhook)
 action.registerEventClass(GitHubIssueClosedWebhook)
 
+const authToken = process.env.AUTH_TOKEN ?? ""
+
 action.on(CodeZeroEvent.connected, () => {
     console.log("Connected to Aquila")
 })
@@ -269,13 +239,13 @@ action.on(CodeZeroEvent.error, (error: Error) => {
     console.log("Attempting to reconnect in 5s...")
 
     setTimeout(() => {
-        action.connect(process.env.AUTH_TOKEN ?? "LbB9OjWWNyug7haCCjP59tOwNRK1FS4Y6wdSYKOhxQddDppRjDX8zCQN1JX1KsUo").catch((reconnectError: unknown) => {
+        action.connect(authToken).catch((reconnectError: unknown) => {
             console.error("Reconnect failed:", reconnectError)
         })
     }, 5000)
 })
 
-action.connect(process.env.AUTH_TOKEN ?? "LbB9OjWWNyug7haCCjP59tOwNRK1FS4Y6wdSYKOhxQddDppRjDX8zCQN1JX1KsUo").catch((error: unknown) => {
+action.connect(authToken).catch((error: unknown) => {
     console.error("Failed to connect:", error)
     process.exit(1)
 })

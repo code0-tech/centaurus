@@ -1,4 +1,4 @@
-import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
+import { Description, DisplayIcon, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
 import { GitHubIssueComment, GitHubIssueCommentSchema } from "../../data_types/issueComments/githubIssueComment.js"
 import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
@@ -6,11 +6,26 @@ import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 @Signature("(owner: string, repository: string, issueNumber: number, page?: number, perPage?: number): GITHUB_ISSUE_COMMENT[]")
 @Name({ code: "en-US", content: "Get issue comments" })
 @DisplayMessage({ code: "en-US", content: "Get GitHub issue comments" })
+@DisplayIcon("tabler:brand-github")
 @Documentation({ code: "en-US", content: "Returns comments for an issue or pull request conversation." })
 @Description({ code: "en-US", content: "Returns GitHub issue comments." })
-@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }] })
-@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }] })
-@Parameter({ runtimeName: "issueNumber", name: [{ code: "en-US", content: "Issue number" }] })
+@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }], description: [{ code: "en-US", content: "Repository owner or organization." }] })
+@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }], description: [{ code: "en-US", content: "Repository name." }] })
+@Parameter({ runtimeName: "issueNumber", name: [{ code: "en-US", content: "Issue number" }], description: [{ code: "en-US", content: "Number of the issue." }] })
+@Parameter({
+    runtimeName: "page",
+    name: [{ code: "en-US", content: "Page" }],
+    description: [{ code: "en-US", content: "Page number to return. Defaults to 1." }],
+    optional: true,
+    defaultValue: 1,
+})
+@Parameter({
+    runtimeName: "perPage",
+    name: [{ code: "en-US", content: "Results per page" }],
+    description: [{ code: "en-US", content: "Number of results per page, from 1 to 100. Defaults to 30." }],
+    optional: true,
+    defaultValue: 30,
+})
 export class GetIssueCommentsFunction {
     async run(context: FunctionContext, owner: string, repository: string, issueNumber: number, page = 1, perPage = 30): Promise<GitHubIssueComment[]> {
         if (!Number.isInteger(issueNumber) || issueNumber < 1) throw new RuntimeError("GITHUB_INVALID_ISSUE_NUMBER", "Issue number must be a positive integer.")

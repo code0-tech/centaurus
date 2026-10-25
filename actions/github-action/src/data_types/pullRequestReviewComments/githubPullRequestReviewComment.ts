@@ -1,10 +1,8 @@
 import { DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules"
-import type { Endpoints } from "@octokit/types"
 import { z } from "zod"
+import { schemas } from "../../generated/github-schemas.js"
 
-export const GitHubPullRequestReviewCommentSchema = z.looseObject({}) as unknown as z.ZodType<
-    Endpoints["GET /repos/{owner}/{repo}/pulls/comments/{comment_id}"]["response"]["data"]
->
+export const GitHubPullRequestReviewCommentSchema = schemas["pull-request-review-comment"]
 export type GitHubPullRequestReviewComment = z.infer<typeof GitHubPullRequestReviewCommentSchema>
 
 @Identifier("GITHUB_PULL_REQUEST_REVIEW_COMMENT")

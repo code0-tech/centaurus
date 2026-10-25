@@ -1,15 +1,16 @@
-import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
+import { Description, DisplayIcon, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
 import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
 @Identifier("cancelWorkflowRun")
 @Signature("(owner: string, repository: string, runId: number): void")
 @Name({ code: "en-US", content: "Cancel workflow run" })
 @DisplayMessage({ code: "en-US", content: "Cancel GitHub workflow run" })
+@DisplayIcon("tabler:brand-github")
 @Documentation({ code: "en-US", content: "Cancels a GitHub Actions workflow run." })
 @Description({ code: "en-US", content: "Cancels a GitHub workflow run." })
-@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }] })
-@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }] })
-@Parameter({ runtimeName: "runId", name: [{ code: "en-US", content: "Run ID" }] })
+@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }], description: [{ code: "en-US", content: "Repository owner or organization." }] })
+@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }], description: [{ code: "en-US", content: "Repository name." }] })
+@Parameter({ runtimeName: "runId", name: [{ code: "en-US", content: "Run ID" }], description: [{ code: "en-US", content: "Identifier of the workflow run." }] })
 export class CancelWorkflowRunFunction {
     async run(context: FunctionContext, owner: string, repository: string, runId: number): Promise<void> {
         if (!Number.isInteger(runId) || runId < 1) throw new RuntimeError("GITHUB_INVALID_WORKFLOW_RUN_ID", "Workflow run ID must be a positive integer.")

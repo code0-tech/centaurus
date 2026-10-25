@@ -1,8 +1,8 @@
 import { DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules"
-import type { Endpoints } from "@octokit/types"
 import { z } from "zod"
+import { schemas } from "../../generated/github-schemas.js"
 
-export const GitHubReleaseSchema = z.looseObject({}) as unknown as z.ZodType<Endpoints["GET /repos/{owner}/{repo}/releases/{release_id}"]["response"]["data"]>
+export const GitHubReleaseSchema = schemas["release"]
 export type GitHubRelease = z.infer<typeof GitHubReleaseSchema>
 
 @Identifier("GITHUB_RELEASE")

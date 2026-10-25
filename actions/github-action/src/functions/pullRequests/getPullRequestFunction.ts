@@ -1,4 +1,4 @@
-import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
+import { Description, DisplayIcon, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
 import { GitHubPullRequest, GitHubPullRequestSchema } from "../../data_types/pullRequests/githubPullRequest.js"
 import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
@@ -6,6 +6,7 @@ import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 @Signature("(owner: string, repository: string, pullRequestNumber: number): GITHUB_PULL_REQUEST")
 @Name({ code: "en-US", content: "Get pull request" })
 @DisplayMessage({ code: "en-US", content: "Get GitHub pull request" })
+@DisplayIcon("tabler:brand-github")
 @Documentation({
     code: "en-US",
     content: "Returns a single pull request from a GitHub repository by its repository-local number.",

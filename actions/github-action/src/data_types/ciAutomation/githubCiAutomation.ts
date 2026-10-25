@@ -1,11 +1,11 @@
 import { DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules"
-import type { Endpoints } from "@octokit/types"
 import { z } from "zod"
+import { schemas } from "../../generated/github-schemas.js"
 
-export const GitHubCommitStatusSchema = z.looseObject({}) as unknown as z.ZodType<Endpoints["POST /repos/{owner}/{repo}/statuses/{sha}"]["response"]["data"]>
+export const GitHubCommitStatusSchema = schemas["status"]
 export type GitHubCommitStatus = z.infer<typeof GitHubCommitStatusSchema>
 
-export const GitHubCheckRunSchema = z.looseObject({}) as unknown as z.ZodType<Endpoints["POST /repos/{owner}/{repo}/check-runs"]["response"]["data"]>
+export const GitHubCheckRunSchema = schemas["check-run"]
 export type GitHubCheckRun = z.infer<typeof GitHubCheckRunSchema>
 
 @Identifier("GITHUB_COMMIT_STATUS")

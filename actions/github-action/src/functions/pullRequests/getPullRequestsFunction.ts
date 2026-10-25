@@ -1,13 +1,14 @@
-import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
-import { GitHubPullRequest, GitHubPullRequestSchema } from "../../data_types/pullRequests/githubPullRequest.js"
+import { Description, DisplayIcon, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
+import { GitHubPullRequestSummary, GitHubPullRequestSummarySchema } from "../../data_types/pullRequests/githubPullRequest.js"
 import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
 type GitHubPullRequestState = "open" | "closed" | "all"
 
 @Identifier("getPullRequests")
-@Signature('(owner: string, repository: string, state?: "open"|"closed"|"all", page?: number, perPage?: number): GITHUB_PULL_REQUEST[]')
+@Signature('(owner: string, repository: string, state?: "open"|"closed"|"all", page?: number, perPage?: number): GITHUB_PULL_REQUEST_SUMMARY[]')
 @Name({ code: "en-US", content: "Get pull requests" })
 @DisplayMessage({ code: "en-US", content: "Get GitHub pull requests" })
+@DisplayIcon("tabler:brand-github")
 @Documentation({
     code: "en-US",
     content: "Returns a page of pull requests from a GitHub repository.",
@@ -30,16 +31,22 @@ type GitHubPullRequestState = "open" | "closed" | "all"
     runtimeName: "state",
     name: [{ code: "en-US", content: "State" }],
     description: [{ code: "en-US", content: "Filter by open, closed, or all pull requests. Defaults to open." }],
+    optional: true,
+    defaultValue: "open",
 })
 @Parameter({
     runtimeName: "page",
     name: [{ code: "en-US", content: "Page" }],
     description: [{ code: "en-US", content: "Page number to return. Defaults to 1." }],
+    optional: true,
+    defaultValue: 1,
 })
 @Parameter({
     runtimeName: "perPage",
     name: [{ code: "en-US", content: "Results per page" }],
     description: [{ code: "en-US", content: "Number of results per page, from 1 to 100. Defaults to 30." }],
+    optional: true,
+    defaultValue: 30,
 })
 export class GetPullRequestsFunction {
     async run(
@@ -49,7 +56,7 @@ export class GetPullRequestsFunction {
         state: GitHubPullRequestState = "open",
         page = 1,
         perPage = 30
-    ): Promise<GitHubPullRequest[]> {
+    ): Promise<GitHubPullRequestSummary[]> {
         if (!Number.isInteger(page) || page < 1) {
             throw new RuntimeError("GITHUB_INVALID_PAGE", "Page must be a positive integer.")
         }
@@ -67,7 +74,7 @@ export class GetPullRequestsFunction {
                 },
             })
 
-            return GitHubPullRequestSchema.array().parse(response.data)
+            return GitHubPullRequestSummarySchema.array().parse(response.data)
         } catch (error) {
             return handleGitHubError(error)
         }

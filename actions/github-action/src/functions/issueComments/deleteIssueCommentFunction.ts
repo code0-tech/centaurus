@@ -1,15 +1,16 @@
-import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
+import { Description, DisplayIcon, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
 import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
 @Identifier("deleteIssueComment")
 @Signature("(owner: string, repository: string, commentId: number): void")
 @Name({ code: "en-US", content: "Delete issue comment" })
 @DisplayMessage({ code: "en-US", content: "Delete GitHub issue comment" })
+@DisplayIcon("tabler:brand-github")
 @Documentation({ code: "en-US", content: "Deletes an issue comment." })
 @Description({ code: "en-US", content: "Deletes a GitHub issue comment." })
-@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }] })
-@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }] })
-@Parameter({ runtimeName: "commentId", name: [{ code: "en-US", content: "Comment ID" }] })
+@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }], description: [{ code: "en-US", content: "Repository owner or organization." }] })
+@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }], description: [{ code: "en-US", content: "Repository name." }] })
+@Parameter({ runtimeName: "commentId", name: [{ code: "en-US", content: "Comment ID" }], description: [{ code: "en-US", content: "Identifier of the comment." }] })
 export class DeleteIssueCommentFunction {
     async run(context: FunctionContext, owner: string, repository: string, commentId: number): Promise<void> {
         if (!Number.isInteger(commentId) || commentId < 1) throw new RuntimeError("GITHUB_INVALID_COMMENT_ID", "Comment ID must be a positive integer.")

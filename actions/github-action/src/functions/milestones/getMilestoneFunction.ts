@@ -1,4 +1,4 @@
-import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
+import { Description, DisplayIcon, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
 import { GitHubMilestone, GitHubMilestoneSchema } from "../../data_types/milestones/githubMilestone.js"
 import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
@@ -6,11 +6,12 @@ import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 @Signature("(owner: string, repository: string, milestoneNumber: number): GITHUB_MILESTONE")
 @Name({ code: "en-US", content: "Get milestone" })
 @DisplayMessage({ code: "en-US", content: "Get GitHub milestone" })
+@DisplayIcon("tabler:brand-github")
 @Documentation({ code: "en-US", content: "Returns a GitHub milestone." })
 @Description({ code: "en-US", content: "Returns a GitHub milestone." })
-@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }] })
-@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }] })
-@Parameter({ runtimeName: "milestoneNumber", name: [{ code: "en-US", content: "Milestone number" }] })
+@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }], description: [{ code: "en-US", content: "Repository owner or organization." }] })
+@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }], description: [{ code: "en-US", content: "Repository name." }] })
+@Parameter({ runtimeName: "milestoneNumber", name: [{ code: "en-US", content: "Milestone number" }], description: [{ code: "en-US", content: "Number of the milestone." }] })
 export class GetMilestoneFunction {
     async run(context: FunctionContext, owner: string, repository: string, milestoneNumber: number): Promise<GitHubMilestone> {
         if (!Number.isInteger(milestoneNumber) || milestoneNumber < 1)

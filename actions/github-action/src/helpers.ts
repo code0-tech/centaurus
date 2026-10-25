@@ -1,5 +1,10 @@
 import axios, { AxiosError } from "axios"
 import { FunctionContext, RuntimeError } from "@code0-tech/hercules"
+import {
+    GitHubLabelReference,
+    GitHubMilestoneReference,
+    GitHubUserReference,
+} from "./data_types/references/githubReferences.js"
 
 export function createGitHubClient(context: FunctionContext) {
     const token = context.matchedConfig.findConfig("github_token") as string
@@ -37,4 +42,31 @@ export function handleGitHubError(error: unknown): never {
     }
 
     throw new RuntimeError("GITHUB_API_ERROR", String(error))
+}
+
+/** Drops the fields the caller left empty so optional parameters are not sent as nulls. */
+export function requestBody(fields: Record<string, unknown>): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(fields).filter(([, value]) => value !== undefined && value !== null))
+}
+
+/** Resolves a label reference to the label name GitHub expects in request bodies. */
+export function labelName(label: GitHubLabelReference): string {
+    const name = typeof label === "string" ? label : label.name
+    if (!name) throw new RuntimeError("GITHUB_INVALID_LABEL", "A label needs a name.")
+    return name
+}
+
+/** Resolves a user reference to the login GitHub expects in request bodies. */
+export function userLogin(user: GitHubUserReference): string {
+    const login = typeof user === "string" ? user : user?.login
+    if (!login) throw new RuntimeError("GITHUB_INVALID_ASSIGNEE", "An assignee needs a username.")
+    return login
+}
+
+/** Resolves a milestone reference to the milestone number GitHub expects in request bodies. */
+export function milestoneNumber(milestone: GitHubMilestoneReference | undefined): number | undefined {
+    if (milestone === undefined || milestone === null) return undefined
+    const number = typeof milestone === "number" ? milestone : milestone.number
+    if (number === undefined) throw new RuntimeError("GITHUB_INVALID_MILESTONE", "A milestone needs a number.")
+    return number
 }

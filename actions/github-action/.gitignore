@@ -1,3 +1,7 @@
 .env
 node_modules/
 dist/
+
+# The upstream spec is re-downloaded by generate:github-schemas.
+# Only the filtered subset the action actually uses is committed.
+schemas/github-openapi.json

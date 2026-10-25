@@ -1,4 +1,4 @@
-import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, Signature } from "@code0-tech/hercules"
+import { Description, DisplayIcon, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, Signature } from "@code0-tech/hercules"
 import { GitHubRepository, GitHubRepositorySchema } from "../../data_types/repositories/githubRepository.js"
 import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
@@ -6,6 +6,7 @@ import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 @Signature("(owner: string, repository: string): GITHUB_REPOSITORY")
 @Name({ code: "en-US", content: "Get repository" })
 @DisplayMessage({ code: "en-US", content: "Get GitHub repository" })
+@DisplayIcon("tabler:brand-github")
 @Documentation({
     code: "en-US",
     content: "Returns information about a GitHub repository.",

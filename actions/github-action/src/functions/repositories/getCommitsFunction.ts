@@ -1,4 +1,4 @@
-import { Description, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
+import { Description, DisplayIcon, DisplayMessage, Documentation, FunctionContext, Identifier, Name, Parameter, RuntimeError, Signature } from "@code0-tech/hercules"
 import { GitHubCommit, GitHubCommitSchema } from "../../data_types/repositories/githubCommit.js"
 import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 
@@ -6,11 +6,26 @@ import { createGitHubClient, handleGitHubError } from "../../helpers.js"
 @Signature("(owner: string, repository: string, sha?: string, page?: number, perPage?: number): GITHUB_COMMIT[]")
 @Name({ code: "en-US", content: "Get commits" })
 @DisplayMessage({ code: "en-US", content: "Get GitHub commits" })
+@DisplayIcon("tabler:brand-github")
 @Documentation({ code: "en-US", content: "Returns commits from a GitHub repository." })
 @Description({ code: "en-US", content: "Returns GitHub commits." })
-@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }] })
-@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }] })
-@Parameter({ runtimeName: "sha", name: [{ code: "en-US", content: "SHA or branch" }] })
+@Parameter({ runtimeName: "owner", name: [{ code: "en-US", content: "Owner" }], description: [{ code: "en-US", content: "Repository owner or organization." }] })
+@Parameter({ runtimeName: "repository", name: [{ code: "en-US", content: "Repository" }], description: [{ code: "en-US", content: "Repository name." }] })
+@Parameter({ runtimeName: "sha", name: [{ code: "en-US", content: "SHA or branch" }], description: [{ code: "en-US", content: "Commit SHA the branch points at." }], optional: true })
+@Parameter({
+    runtimeName: "page",
+    name: [{ code: "en-US", content: "Page" }],
+    description: [{ code: "en-US", content: "Page number to return. Defaults to 1." }],
+    optional: true,
+    defaultValue: 1,
+})
+@Parameter({
+    runtimeName: "perPage",
+    name: [{ code: "en-US", content: "Results per page" }],
+    description: [{ code: "en-US", content: "Number of results per page, from 1 to 100. Defaults to 30." }],
+    optional: true,
+    defaultValue: 30,
+})
 export class GetCommitsFunction {
     async run(context: FunctionContext, owner: string, repository: string, sha?: string, page = 1, perPage = 30): Promise<GitHubCommit[]> {
         if (!Number.isInteger(page) || page < 1) throw new RuntimeError("GITHUB_INVALID_PAGE", "Page must be a positive integer.")
