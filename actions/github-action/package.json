@@ -9,6 +9,7 @@
         "generate:github-schemas": "curl -fsSL --create-dirs -o schemas/github-openapi.json https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json && node ../../scripts/openapi-filter.mjs schemas/github-openapi.json schemas/github-openapi.filtered.json --roots status,check-run,workflow,workflow-run,issue-comment,issue,label,milestone,pull-request-review-comment,pull-request-review,pull-request,pull-request-simple,pull-request-merge-result,release,commit,full-repository,short-branch,branch-with-protection,git-ref,webhook-issues-closed,webhook-issues-opened,webhook-pull-request-closed,webhook-pull-request-opened,webhook-push && node ../../scripts/openapi-to-zod.mjs schemas/github-openapi.filtered.json src/generated/github-schemas.ts",
         "typecheck": "tsc --noEmit",
         "build": "vite build",
+        "test": "vitest run",
         "start": "node dist/index.js"
     },
     "dependencies": {
@@ -19,6 +20,7 @@
         "@types/node": "^22.0.0",
         "tsx": "^4.0.0",
         "typescript": "^5.9.3",
-        "vite": "^8.0.3"
+        "vite": "^8.0.3",
+        "vitest": "^4.1.10"
     }
 }
