@@ -28,6 +28,7 @@ include:
   - twilio-action
   - stripe-action
   - smtp-action
+  - github-action
 
 .rust-actions:
   - cron-action

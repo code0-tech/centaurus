@@ -1,10 +1,10 @@
-FROM node:24-alpine
+FROM node:24.10.0-alpine
 
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
