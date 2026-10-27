@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios"
+import { z } from "zod"
 import { FunctionContext, RuntimeError } from "@code0-tech/hercules"
 import {
     GitHubLabelReference,
@@ -21,6 +22,21 @@ export function createGitHubClient(context: FunctionContext) {
 }
 
 export function handleGitHubError(error: unknown): never {
+    // Errors we raised ourselves already carry the right code (an invalid
+    // assignee, label or milestone) - keep it instead of relabelling them.
+    if (error instanceof RuntimeError) {
+        throw error
+    }
+
+    // A failed response parse is a schema problem on our side, not an API
+    // failure - report it as such instead of hiding it behind GITHUB_API_ERROR.
+    if (error instanceof z.ZodError) {
+        throw new RuntimeError(
+            "GITHUB_UNEXPECTED_RESPONSE",
+            `The GitHub API returned a response that does not match the expected shape: ${error.message}`
+        )
+    }
+
     if (error instanceof AxiosError) {
         const message =
             typeof error.response?.data === "object" && error.response?.data !== null && "message" in error.response.data

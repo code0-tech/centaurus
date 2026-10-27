@@ -118,6 +118,32 @@ const isNullable = (node) =>
     (Array.isArray(node.type) && node.type.includes("null")) ||
     (Array.isArray(node.enum) && node.enum.includes(null));
 
+// Same question, but following `$ref` chains and anyOf/oneOf branches, because
+// a property is often just a reference to a schema that carries the
+// nullability (GitHub's `assignee` -> `nullable-simple-user`, for instance).
+const isNullableDeep = (node, seen = new Set()) => {
+    if (!node || typeof node !== "object" || Array.isArray(node)) {
+        return false;
+    }
+    if (isNullable(node)) {
+        return true;
+    }
+    if (typeof node.$ref === "string") {
+        if (seen.has(node.$ref)) {
+            return false;
+        }
+        seen.add(node.$ref);
+        const match = node.$ref.match(/^#\/components\/schemas\/(.+)$/);
+        return match ? isNullableDeep(schemas[match[1]], seen) : false;
+    }
+    for (const key of ["anyOf", "oneOf"]) {
+        if (Array.isArray(node[key]) && node[key].some((branch) => isNullableDeep(branch, seen))) {
+            return true;
+        }
+    }
+    return false;
+};
+
 // Reject unknown keywords so new spec constructs surface at generation time.
 const assertKnown = (node) => {
     for (const key of Object.keys(node)) {
@@ -171,19 +197,25 @@ const objectExpr = (node) => {
     if (properties && Object.keys(properties).length > 0) {
         const entries = Object.entries(properties).map(([key, value]) => {
             const inner = toZod(value);
-            return `${lit(key)}: ${required.has(key) ? inner : `${inner}.optional()`}`;
+            // A field the spec declares nullable is also treated as absent-able:
+            // specs routinely mark such fields required while the API omits them
+            // entirely (GitHub's deprecated `assignee` on an issue). Requiring
+            // the key would reject an otherwise valid payload, and `null` and
+            // "not there" mean the same thing to a workflow either way.
+            const optional = !required.has(key) || isNullableDeep(value);
+            return `${lit(key)}: ${optional ? `${inner}.optional()` : inner}`;
         });
         const object = `z.object({${entries.join(", ")}})`;
         if (additional === false) {
             return `${object}.strict()`;
         }
-        if ((additional && typeof additional === "object") || pattern) {
-            return `${object}.catchall(${openValue()})`;
-        }
         // A declared shape stays closed even where the spec would allow extra
-        // keys: the platform suggests fields from the type, so an index
-        // signature offers nothing to suggest and hides the real shape. Unknown
-        // keys are dropped on parse rather than carried along untyped.
+        // keys (`additionalProperties` / `patternProperties`): the platform
+        // suggests fields from the type, so an index signature offers nothing
+        // to suggest and hides the real shape. It would also clash with the
+        // optional members themselves - `string | undefined` is not assignable
+        // to a `string` index signature (TS2411). Unknown keys are dropped on
+        // parse rather than carried along untyped.
         return object;
     }
 
