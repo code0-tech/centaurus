@@ -19,7 +19,7 @@ use crate::pending::{self, PendingResponses, RespondPayload, RespondSignal};
     description(
         en_US = "Processes an HTTP response and returns it to the requesting client. This function typically completes the HTTP request–response cycle by delivering the server’s final output, such as headers, status codes, and body content, back to the client."
     ),
-    design = "end"
+    design = "end",
     display_message(
         en_US = "Sends response with status ${http_status_code} and payload ${payload}"
     ),
