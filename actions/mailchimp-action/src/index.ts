@@ -91,11 +91,11 @@ action.registerRuntimeFunction(SendCampaignFunction);
 action.registerRuntimeFunction(GetAudienceFunction);
 action.registerRuntimeFunction(CreateMergeFieldsFunction);
 
-action.registerEventClass(MailchimpSubscribed);
-action.registerEventClass(MailchimpUnsubscribed);
-action.registerEventClass(MailchimpProfileUpdated);
-action.registerEventClass(MailchimpEmailCleaned);
-action.registerEventClass(MailchimpCampaignSent);
+// action.registerEventClass(MailchimpSubscribed);
+// action.registerEventClass(MailchimpUnsubscribed);
+// action.registerEventClass(MailchimpProfileUpdated);
+// action.registerEventClass(MailchimpEmailCleaned);
+// action.registerEventClass(MailchimpCampaignSent);
 
 action.on(CodeZeroEvent.connected, () => {
     console.log("Connected to aquila");
@@ -105,13 +105,13 @@ action.on(CodeZeroEvent.error, (error: Error) => {
     console.error("Stream error:", error.message);
     console.log("Attempting to reconnect in 5s...");
     setTimeout(() => {
-        action.connect(process.env.AUTH_TOKEN ?? "your_auth_token_here").catch((err: Error) => {
+        action.connect("etPFK0AloPM9bSCM2GUJUmsd8NtQae6zc551MeAwEkesmlcVqjvEgwknOBREBdAW").catch((err: Error) => {
             action.emit(CodeZeroEvent.error, err);
         })
     }, 5000);
 });
 
-action.connect(process.env.AUTH_TOKEN ?? "your_auth_token_here").catch((err: Error) => {
+action.connect("etPFK0AloPM9bSCM2GUJUmsd8NtQae6zc551MeAwEkesmlcVqjvEgwknOBREBdAW").catch((err: Error) => {
     action.emit(CodeZeroEvent.error, err);
 });
 

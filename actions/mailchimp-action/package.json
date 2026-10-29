@@ -12,8 +12,9 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@code0-tech/hercules": "^1.1.1",
-    "@mailchimp/mailchimp_marketing": "^3.0.80"
+    "@code0-tech/hercules": "^1.6.0",
+    "@mailchimp/mailchimp_marketing": "^3.0.80",
+    "zod": "~4.4.3"
   },
   "devDependencies": {
     "@types/mailchimp__mailchimp_marketing": "^3.0.22",

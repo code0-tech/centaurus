@@ -11,7 +11,7 @@ export const MailchimpProfileWebhookPayloadSchema = z.object({
         email: z.string().describe("The member's email address."),
         email_type: z.string().optional(),
         ip_opt: z.string().optional(),
-        merges: z.record(z.string(), z.any()).optional().describe("The member's merge fields after the update."),
+        merges: z.record(z.string(), z.unknown()).optional().describe("The member's merge fields after the update."),
     }),
 });
 export type MailchimpProfileWebhookPayloadType = z.infer<typeof MailchimpProfileWebhookPayloadSchema>;

@@ -6,7 +6,7 @@ import {MailchimpMemberSchema} from "./mailchimpMember.ts";
 export const MailchimpMemberListSchema = z.object({
     members: z.array(MailchimpMemberSchema),
     list_id: z.string().optional().describe("The audience (list) id these members belong to."),
-    total_items: z.number().optional().describe("The total number of items matching the query, regardless of pagination."),
+    total_items: z.int().optional().describe("The total number of items matching the query, regardless of pagination."),
 });
 export type MailchimpMemberList = z.infer<typeof MailchimpMemberListSchema>;
 

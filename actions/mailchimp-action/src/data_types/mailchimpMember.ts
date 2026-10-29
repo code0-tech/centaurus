@@ -10,14 +10,14 @@ export const MailchimpMemberSchema = z.object({
     status: z
         .enum(["subscribed", "unsubscribed", "cleaned", "pending", "transactional"])
         .describe("The member's subscription status."),
-    merge_fields: z.record(z.string(), z.any()).optional().describe("A dictionary of merge fields keyed by tag name."),
+    merge_fields: z.record(z.string(), z.unknown()).optional().describe("A dictionary of merge fields keyed by tag name."),
     tags: z.array(MailchimpTagSchema).optional().describe("Tags applied to the member."),
     list_id: z.string().optional().describe("The audience (list) id this member belongs to."),
     unique_email_id: z.string().optional(),
-    web_id: z.number().optional().describe("The ID used in the Mailchimp web application."),
+    web_id: z.int().optional().describe("The ID used in the Mailchimp web application."),
     timestamp_signup: z.string().nullish().describe("The date/time the member signed up, in ISO 8601 format."),
     timestamp_opt: z.string().nullish().describe("The date/time the member confirmed their opt-in status."),
-    member_rating: z.number().optional().describe("A rating from 1-5 of the member's engagement."),
+    member_rating: z.int().optional().describe("A rating from 1-5 of the member's engagement."),
     last_changed: z.string().optional().describe("The date/time the member's info was last changed."),
     language: z.string().nullish().describe("The ISO 639-1 language code the member selected."),
     vip: z.boolean().optional().describe("Whether the member is a VIP."),

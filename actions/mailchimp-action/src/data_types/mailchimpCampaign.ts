@@ -4,14 +4,14 @@ import {z} from "zod";
 // See https://mailchimp.com/developer/marketing/api/campaigns/get-campaign-info/
 export const MailchimpCampaignSchema = z.object({
     id: z.string().describe("The campaign id."),
-    web_id: z.number().optional().describe("The ID used in the Mailchimp web application."),
+    web_id: z.int().optional().describe("The ID used in the Mailchimp web application."),
     type: z.string().optional().describe("The campaign type, e.g. 'regular'."),
     status: z.string().optional().describe("The campaign status, e.g. 'save', 'sending', 'sent'."),
     recipients: z
         .object({
             list_id: z.string().optional(),
             list_name: z.string().optional(),
-            recipient_count: z.number().optional(),
+            recipient_count: z.int().optional(),
         })
         .optional(),
     settings: z

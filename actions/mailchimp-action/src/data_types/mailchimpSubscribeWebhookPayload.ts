@@ -16,7 +16,7 @@ export const MailchimpSubscribeWebhookPayloadSchema = z.object({
         ip_opt: z.string().optional().describe("The IP address used to opt in."),
         ip_signup: z.string().optional().describe("The IP address used to sign up."),
         web_id: z.string().optional(),
-        merges: z.record(z.string(), z.any()).optional().describe("The member's merge fields at the time of the event."),
+        merges: z.record(z.string(), z.unknown()).optional().describe("The member's merge fields at the time of the event."),
     }),
 });
 export type MailchimpSubscribeWebhookPayloadType = z.infer<typeof MailchimpSubscribeWebhookPayloadSchema>;

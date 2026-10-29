@@ -21,13 +21,13 @@ export const MailchimpAudienceSchema = z.object({
         .describe("The contact information the audience is using, required by CAN-SPAM."),
     stats: z
         .object({
-            member_count: z.number().optional(),
-            unsubscribe_count: z.number().optional(),
-            cleaned_count: z.number().optional(),
-            member_count_since_send: z.number().optional(),
-            campaign_count: z.number().optional(),
+            member_count: z.int().optional(),
+            unsubscribe_count: z.int().optional(),
+            cleaned_count: z.int().optional(),
+            member_count_since_send: z.int().optional(),
+            campaign_count: z.int().optional(),
             campaign_last_sent: z.string().nullish(),
-            merge_field_count: z.number().optional(),
+            merge_field_count: z.int().optional(),
             avg_sub_rate: z.number().optional(),
             avg_unsub_rate: z.number().optional(),
             target_sub_rate: z.number().optional(),
@@ -39,7 +39,7 @@ export const MailchimpAudienceSchema = z.object({
         .optional()
         .describe("Stats for the audience."),
     date_created: z.string().optional(),
-    list_rating: z.number().optional(),
+    list_rating: z.int().optional(),
     visibility: z.string().optional().describe("Whether this audience is 'pub'lic or 'prv'ate."),
 });
 export type MailchimpAudience = z.infer<typeof MailchimpAudienceSchema>;

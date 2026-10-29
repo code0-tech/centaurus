@@ -12,7 +12,7 @@ export const MailchimpUnsubscribeWebhookPayloadSchema = z.object({
         list_id: z.string().optional().describe("The audience (list) id this event fired for."),
         email: z.string().describe("The member's email address."),
         email_type: z.string().optional(),
-        merges: z.record(z.string(), z.any()).optional(),
+        merges: z.record(z.string(), z.unknown()).optional(),
         ip_opt: z.string().optional(),
         campaign_id: z.string().optional().describe("The campaign id that led to the unsubscribe, if any."),
     }),
