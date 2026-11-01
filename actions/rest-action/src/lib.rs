@@ -24,6 +24,7 @@ use std::sync::{Arc, RwLock};
 
 use hercules_sdk::{Action, HerculesEvent, ScalingOption, Translation};
 use tokio_stream::StreamExt;
+use tucana::shared::{Endpoint, ModuleDefinition, module_definition};
 
 use admission::Admission;
 use functions::Respond;
@@ -32,8 +33,72 @@ use metrics::Metrics;
 use pending::new_pending_responses;
 use registry::RouteRegistry;
 
+/// Matches the flow type identifier the draco REST adapter used to publish
+/// this same endpoint definition under, so Aquila/Sagittarius-side consumers
+/// of `Module.definitions` don't need to special-case which adapter sent it.
+const REST_FLOW_TYPE_IDENTIFIER: &str = "REST";
+const REST_ENDPOINT_TEMPLATE: &str = "/${{project_slug}}${{httpURL}}";
+
 fn env(key: &str, default: &str) -> String {
     std::env::var(key).unwrap_or_else(|_| default.to_string())
+}
+
+/// The externally reachable address for this action's HTTP server,
+/// published to Aquila as a `ModuleDefinition::Endpoint` (see
+/// `module_definition`) so it can be used to build webhook URLs.
+///
+/// `host`/`port` are what this process binds to; `external_host`/
+/// `external_port` are what's actually reachable from outside (e.g. behind a
+/// load balancer or port mapping), defaulting to `host`/`port` when unset —
+/// the same convention the old draco REST adapter used.
+struct HttpServerConfig {
+    host: String,
+    port: u16,
+    external_host: String,
+    external_port: u16,
+    protocol: &'static str,
+}
+
+impl HttpServerConfig {
+    fn from_env() -> Self {
+        let host = env("HTTP_SERVER_HOST", "0.0.0.0");
+        let port: u16 = env("HTTP_SERVER_PORT", "8080")
+            .parse()
+            .unwrap_or_else(|err| panic!("invalid HTTP_SERVER_PORT: {err}"));
+        let external_host = env("EXTERNAL_HTTP_SERVER_HOST", &host);
+        let external_port: u16 = env("EXTERNAL_HTTP_SERVER_PORT", &port.to_string())
+            .parse()
+            .unwrap_or_else(|err| panic!("invalid EXTERNAL_HTTP_SERVER_PORT: {err}"));
+        let https_configured: bool = env("HTTPS_CONFIGURED", "false")
+            .parse()
+            .unwrap_or_else(|err| panic!("invalid HTTPS_CONFIGURED: {err}"));
+
+        Self {
+            host,
+            port,
+            external_host,
+            external_port,
+            protocol: if https_configured { "https" } else { "http" },
+        }
+    }
+
+    fn bind_addr(&self) -> std::net::SocketAddr {
+        format!("{}:{}", self.host, self.port)
+            .parse()
+            .unwrap_or_else(|err| panic!("invalid HTTP_SERVER_HOST/HTTP_SERVER_PORT: {err}"))
+    }
+
+    fn module_definition(&self) -> ModuleDefinition {
+        ModuleDefinition {
+            flow_type_identifier: vec![REST_FLOW_TYPE_IDENTIFIER.to_string()],
+            value: Some(module_definition::Value::Endpoint(Endpoint {
+                host: self.external_host.clone(),
+                port: i64::from(self.external_port),
+                endpoint: REST_ENDPOINT_TEMPLATE.to_string(),
+                protocol: self.protocol.to_string(),
+            })),
+        }
+    }
 }
 
 /// `RestAuthType`/`RestAuthValue`/`RestAdapterInput` and `RestRuntimeEvent`
@@ -43,7 +108,10 @@ fn env(key: &str, default: &str) -> String {
 /// one exception: it needs the shared `pending` map injected at
 /// construction time, so it's registered by hand below instead (see its
 /// `manual` attribute).
-fn build_action(pending: pending::PendingResponses) -> Action {
+fn build_action(
+    pending: pending::PendingResponses,
+    http_server_config: &HttpServerConfig,
+) -> Action {
     let request_queue_capacity: usize = env("HERCULES_REQUEST_QUEUE_CAPACITY", "256")
         .parse()
         .unwrap_or_else(|err| panic!("invalid HERCULES_REQUEST_QUEUE_CAPACITY: {err}"));
@@ -59,7 +127,8 @@ fn build_action(pending: pending::PendingResponses) -> Action {
     .author("CodeZero")
     .icon("tabler:world-www")
     .documentation("Webhook triggered by an incoming HTTP request.")
-    .name([Translation::new("en-US", "Webhook")]);
+    .name([Translation::new("en-US", "Webhook")])
+    .definition(http_server_config.module_definition());
 
     action.register_runtime_function(Respond::new(pending));
     action
@@ -103,20 +172,21 @@ pub async fn run() -> hercules_sdk::Result<()> {
     .init();
 
     let pending = new_pending_responses();
+    let http_server_config = HttpServerConfig::from_env();
 
     let mut args = std::env::args().skip(1);
     if args.next().as_deref() == Some("export") {
         let dir = args
             .next()
             .unwrap_or_else(|| "./out/draco-rest".to_string());
-        build_action(pending)
+        build_action(pending, &http_server_config)
             .export(&dir)
             .unwrap_or_else(|err| panic!("failed to export to {dir:?}: {err}"));
         println!("wrote module definitions to {dir}");
         return Ok(());
     }
 
-    let action = build_action(pending.clone());
+    let action = build_action(pending.clone(), &http_server_config);
     let mut events = action.subscribe();
 
     let aquila_url = env("HERCULES_AQUILA_URL", "127.0.0.1:8081");
@@ -127,11 +197,7 @@ pub async fn run() -> hercules_sdk::Result<()> {
         .await
         .unwrap_or_else(|err| panic!("failed to connect to Aquila: {err}"));
 
-    let host = env("HTTP_SERVER_HOST", "0.0.0.0");
-    let port = env("HTTP_SERVER_PORT", "8080");
-    let addr = format!("{host}:{port}")
-        .parse()
-        .unwrap_or_else(|err| panic!("invalid HTTP_SERVER_HOST/HTTP_SERVER_PORT: {err}"));
+    let addr = http_server_config.bind_addr();
 
     let execution_timeout_secs: u64 = env("HERCULES_EXECUTION_TIMEOUT_SECS", "30")
         .parse()
@@ -218,4 +284,56 @@ pub async fn run() -> hercules_sdk::Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn module_definition_publishes_the_external_endpoint() {
+        let config = HttpServerConfig {
+            host: "0.0.0.0".to_string(),
+            port: 8080,
+            external_host: "hooks.example.com".to_string(),
+            external_port: 443,
+            protocol: "https",
+        };
+
+        let module = build_action(new_pending_responses(), &config).build_module();
+
+        assert_eq!(module.definitions.len(), 1);
+        let definition = &module.definitions[0];
+        assert_eq!(definition.flow_type_identifier, [REST_FLOW_TYPE_IDENTIFIER]);
+        assert_eq!(
+            definition.value,
+            Some(module_definition::Value::Endpoint(Endpoint {
+                host: "hooks.example.com".to_string(),
+                port: 443,
+                endpoint: REST_ENDPOINT_TEMPLATE.to_string(),
+                protocol: "https".to_string(),
+            }))
+        );
+    }
+
+    #[test]
+    fn external_host_and_port_default_to_the_bind_address() {
+        let config = HttpServerConfig {
+            host: "0.0.0.0".to_string(),
+            port: 8080,
+            external_host: "0.0.0.0".to_string(),
+            external_port: 8080,
+            protocol: "http",
+        };
+
+        let module = build_action(new_pending_responses(), &config).build_module();
+
+        let Some(module_definition::Value::Endpoint(endpoint)) = &module.definitions[0].value
+        else {
+            panic!("expected an Endpoint definition");
+        };
+        assert_eq!(endpoint.host, "0.0.0.0");
+        assert_eq!(endpoint.port, 8080);
+        assert_eq!(endpoint.protocol, "http");
+    }
 }
