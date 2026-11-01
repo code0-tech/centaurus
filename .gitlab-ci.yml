@@ -27,12 +27,14 @@ include:
   - shopware-action
   - twilio-action
   - stripe-action
+  - smtp-action
+  - sftp-action
+  - github-action
 
 .rust-actions:
   - cron-action
   - rest-action
   - mcp-action
-  - sftp-action
 
 test-node:
   image: node:24.10.0

@@ -7,7 +7,13 @@
 
 #[hercules_sdk::runtime_event(
     identifier = "REST",
-    signature = "<A extends REST_AUTH_TYPE, T extends TYPE>(http_schema: HTTP_SCHEMA, http_url: HTTP_URL, http_method: HTTP_METHOD, http_auth: A, http_auth_value: REST_AUTH_VALUE<A>, input_schema: T): REST_ADAPTER_INPUT<T>",
+    // Only the URL and the method are genuinely required: a bodyless
+    // request (`GET`, `DELETE`, `HEAD`) has no content type and no body to
+    // describe, so `http_schema` and `input_schema` have to be optional here
+    // too, not just on their `#[setting]`s — otherwise the signature demands
+    // values the request can never carry, and `T` collapses to `undefined`
+    // (`REST_ADAPTER_INPUT<undefined>.payload`) when no input schema is set.
+    signature = "<A extends REST_AUTH_TYPE, T extends TYPE>(http_url: HTTP_URL, http_method: HTTP_METHOD, http_schema?: HTTP_SCHEMA, http_auth?: A, http_auth_value?: REST_AUTH_VALUE<A>, input_schema?: T): REST_ADAPTER_INPUT<T>",
     name(en_US = "Webhook"),
     description(
         en_US = "A Webhook is an HTTP endpoint that listens for incoming requests from external services or clients, allowing you to react to events in real time using standard HTTP methods like GET, POST, PUT, and DELETE."
@@ -23,14 +29,6 @@
     editable
 )]
 #[setting(
-    identifier = "http_schema",
-    name(en_US = "Content Type"),
-    description(
-        en_US = "Specifies the MIME type of the incoming request payload, such as application/json, application/xml, or text/plain. This determines the expected format of the payload parameter."
-    ),
-    linked_data_type_identifiers("HTTP_SCHEMA")
-)]
-#[setting(
     identifier = "http_url",
     unique = "project",
     name(en_US = "URL"),
@@ -42,6 +40,15 @@
     name(en_US = "Method"),
     description(en_US = "Specifies the HTTP request method (e.g., GET, POST, PUT, DELETE)."),
     linked_data_type_identifiers("HTTP_METHOD")
+)]
+#[setting(
+    identifier = "http_schema",
+    name(en_US = "Content Type"),
+    description(
+        en_US = "Specifies the MIME type of the incoming request payload, such as application/json, application/xml, or text/plain. This determines the expected format of the payload parameter."
+    ),
+    linked_data_type_identifiers("HTTP_SCHEMA"),
+    optional
 )]
 #[setting(
     identifier = "http_auth",

@@ -43,7 +43,9 @@ async fn main() -> hercules_sdk::Result<()> {
 
     let mut args = std::env::args().skip(1);
     if args.next().as_deref() == Some("export") {
-        let dir = args.next().unwrap_or_else(|| "./out/mcp-action".to_string());
+        let dir = args
+            .next()
+            .unwrap_or_else(|| "./out/mcp-action".to_string());
         build_action()
             .export(&dir)
             .unwrap_or_else(|err| panic!("failed to export to {dir:?}: {err}"));
@@ -75,7 +77,10 @@ async fn main() -> hercules_sdk::Result<()> {
             HerculesEvent::Connected => log::info!("connected to Aquila"),
             HerculesEvent::Error(error) => panic!("Aquila stream error: {error}"),
             HerculesEvent::FlowUpserted(flow) => {
-                log::info!("flow {} was created/updated, now exposed as a tool", flow.flow_id);
+                log::info!(
+                    "flow {} was created/updated, now exposed as a tool",
+                    flow.flow_id
+                );
             }
             HerculesEvent::FlowDeleted(flow_id) => {
                 log::info!("flow {flow_id} was deleted, no longer exposed as a tool");
