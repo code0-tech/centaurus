@@ -5,18 +5,18 @@ import {Description, DisplayIcon, DisplayMessage, EventSetting, Identifier, Name
 @Name({ code: "en-US", content: "Shopify orders cancelled" })
 @Description({ code: "en-US", content: "Triggered when an order is cancelled in Shopify." })
 @DisplayMessage({ code: "en-US", content: "Shopify orders cancelled on ${httpURL}" })
-@Signature("<A extends REST_AUTH_TYPE>(httpSchema: HTTP_SCHEMA, httpURL: HTTP_URL, httpMethod: HTTP_METHOD, httpAuth: A, httpAuthValue: REST_AUTH_VALUE<A>, input_schema?: ShopifyOrdersCancelledWebhookPayload): REST_ADAPTER_INPUT<ShopifyOrdersCancelledWebhookPayload>")
+@Signature("<A extends REST_AUTH_TYPE>(http_schema: HTTP_SCHEMA, http_url: HTTP_URL, http_method: HTTP_METHOD, http_auth: A, http_auth_value: REST_AUTH_VALUE<A>, input_schema?: ShopifyOrdersCancelledWebhookPayload): REST_ADAPTER_INPUT<ShopifyOrdersCancelledWebhookPayload>")
 @EventSetting({
     identifier: "input_schema",
     hidden: true
 })
 @EventSetting({
-    identifier: "httpMethod",
+    identifier: "http_method",
     hidden: true,
     defaultValue: "POST"
 })
 @EventSetting({
-    identifier: "httpSchema",
+    identifier: "http_schema",
     hidden: true,
     defaultValue: "application/json"
 })

@@ -28,11 +28,14 @@ include:
   - twilio-action
   - stripe-action
   - s3-action
+  - smtp-action
+  - github-action
 
 .rust-actions:
   - cron-action
   - rest-action
   - mcp-action
+  - smtp-action
 
 test-node:
   image: node:24.10.0
