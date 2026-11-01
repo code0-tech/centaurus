@@ -7,18 +7,20 @@
 use std::collections::HashMap;
 
 use hercules_sdk::{
-    Arguments, FunctionContext, PlainValue, Result, RuntimeFunctionHandler, async_trait,
+    Arguments, FunctionContext, PlainValue, Result, RuntimeFunctionHandler, RuntimeFunctionReturn,
+    async_trait,
 };
 
 use crate::pending::{self, PendingResponses, RespondPayload, RespondSignal};
 
 #[hercules_sdk::runtime_function(
     identifier = "rest::control::respond",
-    signature = "<S extends HTTP_SCHEMA>(http_status_code: HTTP_STATUS_CODE, http_schema: S, payload: HTTP_PAYLOAD<S>, headers?: OBJECT<{}>): void",
+    signature = "<S extends HTTP_SCHEMA>(http_status_code: HTTP_STATUS_CODE, http_schema: S, payload: HTTP_PAYLOAD<S>, headers?: OBJECT<{ [key: string]: string }>): void",
     name(en_US = "Respond"),
     description(
         en_US = "Processes an HTTP response and returns it to the requesting client. This function typically completes the HTTP request–response cycle by delivering the server’s final output, such as headers, status codes, and body content, back to the client."
     ),
+    design = "end",
     display_message(
         en_US = "Sends response with status ${http_status_code} and payload ${payload}"
     ),
@@ -68,7 +70,11 @@ impl Respond {
 
 #[async_trait]
 impl RuntimeFunctionHandler for Respond {
-    async fn run(&self, context: &FunctionContext, args: &Arguments) -> Result<PlainValue> {
+    async fn run(
+        &self,
+        context: &FunctionContext,
+        args: &Arguments,
+    ) -> Result<RuntimeFunctionReturn> {
         let status_code: i64 = args.get("http_status_code")?;
         let content_type: String = args.get("http_schema")?;
         let payload: PlainValue = args.get("payload")?;
@@ -101,6 +107,6 @@ impl RuntimeFunctionHandler for Respond {
             ),
         }
 
-        Ok(PlainValue::Null)
+        Ok(PlainValue::Null.into())
     }
 }

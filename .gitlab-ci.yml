@@ -27,7 +27,9 @@ include:
   - shopware-action
   - twilio-action
   - stripe-action
+  - smtp-action
   - google-sheets-action
+  - github-action
 
 .rust-actions:
   - cron-action

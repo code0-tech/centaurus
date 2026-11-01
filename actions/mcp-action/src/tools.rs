@@ -15,8 +15,8 @@ use rmcp::ErrorData as McpError;
 use rmcp::RoleServer;
 use rmcp::handler::server::ServerHandler;
 use rmcp::model::{
-    CallToolRequestParams, CallToolResult, Implementation, ListToolsResult,
-    PaginatedRequestParams, ProtocolVersion, ServerCapabilities, ServerInfo, Tool,
+    CallToolRequestParams, CallToolResult, Implementation, ListToolsResult, PaginatedRequestParams,
+    ProtocolVersion, ServerCapabilities, ServerInfo, Tool,
 };
 use rmcp::service::RequestContext;
 use serde_json::{Map, Value};
@@ -57,7 +57,11 @@ fn parse_tool_name(name: &str) -> Option<i64> {
 /// `http::request::Parts` in the request context's extensions.
 fn bearer_token(context: &RequestContext<RoleServer>) -> Option<String> {
     let parts = context.extensions.get::<http::request::Parts>()?;
-    let header = parts.headers.get(http::header::AUTHORIZATION)?.to_str().ok()?;
+    let header = parts
+        .headers
+        .get(http::header::AUTHORIZATION)?
+        .to_str()
+        .ok()?;
     header.strip_prefix("Bearer ").map(str::to_string)
 }
 
@@ -119,15 +123,20 @@ impl ServerHandler for FlowToolServer {
         let required_token = self
             .connected
             .config(flow.project_id)
-            .and_then(|config| config.get(TOKEN_CONFIG_ID).and_then(Value::as_str).map(str::to_string))
+            .and_then(|config| {
+                config
+                    .get(TOKEN_CONFIG_ID)
+                    .and_then(Value::as_str)
+                    .map(str::to_string)
+            })
             .filter(|token| !token.is_empty());
-        if let Some(required_token) = required_token {
-            if bearer_token(&context).as_deref() != Some(required_token.as_str()) {
-                return Err(McpError::invalid_request(
-                    "missing or invalid bearer token for this tool",
-                    None,
-                ));
-            }
+        if let Some(required_token) = required_token
+            && bearer_token(&context).as_deref() != Some(required_token.as_str())
+        {
+            return Err(McpError::invalid_request(
+                "missing or invalid bearer token for this tool",
+                None,
+            ));
         }
 
         let flow_id = flow.flow_id;
@@ -135,7 +144,11 @@ impl ServerHandler for FlowToolServer {
 
         log::info!("executing flow {flow_id} via tool {:?}", request.name);
 
-        match self.connected.execute_flow(flow_id.to_string(), payload).await {
+        match self
+            .connected
+            .execute_flow(flow_id.to_string(), payload)
+            .await
+        {
             Ok(value) => Ok(CallToolResult::structured(value)),
             Err(err) => {
                 log::warn!("flow {flow_id} failed: {err}");

@@ -18,6 +18,7 @@ import {ShopwareSalutation} from "./data_types/shopwareSalutation.ts";
 import {ShopwareCurrency} from "./data_types/shopwareCurrency.ts";
 import {ShopwareCountry} from "./data_types/shopwareCountry.ts";
 import {ShopwareCountryState} from "./data_types/shopwareCountryState.ts";
+import {registerGeneratedRecursiveDataTypes} from "./data_types/generatedRecursiveDataTypes.ts";
 import {ShopwareOrderPlacedWebhook} from "./events/shopwareOrderPlacedWebhook.ts";
 import {ShopwareOrderCancelledWebhook} from "./events/shopwareOrderCancelledWebhook.ts";
 import {ShopwareOrderPaidWebhook} from "./events/shopwareOrderPaidWebhook.ts";
@@ -52,6 +53,11 @@ action.registerDataTypeClass(ShopwareCountryState)
 action.registerDataTypeClass(ShopwareOrderPlacedWebhookPayload)
 action.registerDataTypeClass(ShopwareOrderCancelledWebhookPayload)
 action.registerDataTypeClass(ShopwareOrderPaidWebhookPayload)
+
+// Register a data type for every recursive Shopware schema so hercules can emit a
+// type string for the curated resources above (see the module's doc comment).
+registerGeneratedRecursiveDataTypes(action)
+
 action.registerEventClass(ShopwareOrderPlacedWebhook)
 action.registerEventClass(ShopwareOrderCancelledWebhook)
 action.registerEventClass(ShopwareOrderPaidWebhook)

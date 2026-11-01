@@ -2,7 +2,7 @@
 // Regenerate with the action's `generate:*-schemas` npm script.
 import {z} from "zod";
 
-const TwilioMessage = z.lazy(() => z.object({"body": z.string().nullable().optional(), "num_segments": z.string().nullable().optional(), "direction": message_enum_direction.optional(), "from": z.string().nullable().optional(), "to": z.string().nullable().optional(), "date_updated": z.string().nullable().optional(), "price": z.string().nullable().optional(), "error_message": z.string().nullable().optional(), "uri": z.string().nullable().optional(), "account_sid": z.string().nullable().optional(), "num_media": z.string().nullable().optional(), "status": message_enum_status.optional(), "messaging_service_sid": z.string().nullable().optional(), "sid": z.string().nullable().optional(), "date_sent": z.string().nullable().optional(), "date_created": z.string().nullable().optional(), "error_code": z.number().int().nullable().optional(), "price_unit": z.string().nullable().optional(), "api_version": z.string().nullable().optional(), "subresource_uris": z.record(z.string(), z.any()).nullable().optional()}).passthrough());
+const TwilioMessage = z.lazy(() => z.object({"body": z.string().nullable().optional(), "num_segments": z.string().nullable().optional(), "direction": message_enum_direction.optional(), "from": z.string().nullable().optional(), "to": z.string().nullable().optional(), "date_updated": z.string().nullable().optional(), "price": z.string().nullable().optional(), "error_message": z.string().nullable().optional(), "uri": z.string().nullable().optional(), "account_sid": z.string().nullable().optional(), "num_media": z.string().nullable().optional(), "status": message_enum_status.optional(), "messaging_service_sid": z.string().nullable().optional(), "sid": z.string().nullable().optional(), "date_sent": z.string().nullable().optional(), "date_created": z.string().nullable().optional(), "error_code": z.number().int().nullable().optional(), "price_unit": z.string().nullable().optional(), "api_version": z.string().nullable().optional(), "subresource_uris": z.record(z.string(), z.any()).nullable().optional()}));
 const message_enum_direction = z.lazy(() => z.enum(["inbound", "outbound-api", "outbound-call", "outbound-reply"]));
 const message_enum_status = z.lazy(() => z.enum(["queued", "sending", "sent", "failed", "delivered", "undelivered", "receiving", "received", "accepted", "scheduled", "read", "partially_delivered", "canceled"]));
 
@@ -11,3 +11,6 @@ export const schemas = {
   message_enum_direction,
   message_enum_status,
 };
+
+export const recursiveSchemaNames = [
+] as const;

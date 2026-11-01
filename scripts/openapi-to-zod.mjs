@@ -14,10 +14,12 @@
 // run out of heap on large specs such as Stripe's.
 //
 // Nested objects therefore become real typed structures rather than untyped
-// passthrough objects. The only remaining "open" values are fields the spec
-// itself leaves shapeless (an object with no declared properties); those become
-// `z.record(z.string(), z.any())` — a typed arbitrary object, never an empty
-// `z.object({}).passthrough()`.
+// passthrough objects. An object that declares properties stays closed, so the
+// emitted type carries exactly the fields the spec names - the platform
+// suggests fields from that type, and an index signature would both hide the
+// real shape and offer nothing to suggest. The only remaining "open" values are
+// fields the spec itself leaves shapeless (an object with no declared
+// properties); those become `z.record(z.string(), z.any())`.
 //
 // The generator aims to handle every type-affecting construct of the OpenAPI
 // 3.0 / 3.1 Schema Object: $ref, type (incl. "null" and type arrays), enum,
@@ -116,6 +118,32 @@ const isNullable = (node) =>
     (Array.isArray(node.type) && node.type.includes("null")) ||
     (Array.isArray(node.enum) && node.enum.includes(null));
 
+// Same question, but following `$ref` chains and anyOf/oneOf branches, because
+// a property is often just a reference to a schema that carries the
+// nullability (GitHub's `assignee` -> `nullable-simple-user`, for instance).
+const isNullableDeep = (node, seen = new Set()) => {
+    if (!node || typeof node !== "object" || Array.isArray(node)) {
+        return false;
+    }
+    if (isNullable(node)) {
+        return true;
+    }
+    if (typeof node.$ref === "string") {
+        if (seen.has(node.$ref)) {
+            return false;
+        }
+        seen.add(node.$ref);
+        const match = node.$ref.match(/^#\/components\/schemas\/(.+)$/);
+        return match ? isNullableDeep(schemas[match[1]], seen) : false;
+    }
+    for (const key of ["anyOf", "oneOf"]) {
+        if (Array.isArray(node[key]) && node[key].some((branch) => isNullableDeep(branch, seen))) {
+            return true;
+        }
+    }
+    return false;
+};
+
 // Reject unknown keywords so new spec constructs surface at generation time.
 const assertKnown = (node) => {
     for (const key of Object.keys(node)) {
@@ -169,16 +197,26 @@ const objectExpr = (node) => {
     if (properties && Object.keys(properties).length > 0) {
         const entries = Object.entries(properties).map(([key, value]) => {
             const inner = toZod(value);
-            return `${lit(key)}: ${required.has(key) ? inner : `${inner}.optional()`}`;
+            // A field the spec declares nullable is also treated as absent-able:
+            // specs routinely mark such fields required while the API omits them
+            // entirely (GitHub's deprecated `assignee` on an issue). Requiring
+            // the key would reject an otherwise valid payload, and `null` and
+            // "not there" mean the same thing to a workflow either way.
+            const optional = !required.has(key) || isNullableDeep(value);
+            return `${lit(key)}: ${optional ? `${inner}.optional()` : inner}`;
         });
         const object = `z.object({${entries.join(", ")}})`;
         if (additional === false) {
             return `${object}.strict()`;
         }
-        if ((additional && typeof additional === "object") || pattern) {
-            return `${object}.catchall(${openValue()})`;
-        }
-        return `${object}.passthrough()`; // allow unknown extra keys
+        // A declared shape stays closed even where the spec would allow extra
+        // keys (`additionalProperties` / `patternProperties`): the platform
+        // suggests fields from the type, so an index signature offers nothing
+        // to suggest and hides the real shape. It would also clash with the
+        // optional members themselves - `string | undefined` is not assignable
+        // to a `string` index signature (TS2411). Unknown keys are dropped on
+        // parse rather than carried along untyped.
+        return object;
     }
 
     // No declared properties: a typed map or a shapeless open object.
@@ -221,24 +259,29 @@ const localTypeExpr = (node) => {
     return "z.any()";
 };
 
+// Whether a node carries constraints of its own next to a combinator. Those
+// apply on top of the composed schemas, so they must not be dropped.
+const hasLocalShape = (node) =>
+    node.properties || node.items || node.additionalProperties !== undefined ||
+    (node.type && node.type !== "object" && node.type !== "array");
+
 // Core expression for a node, before nullability is applied.
 const coreExpr = (node) => {
     if (node.allOf) {
         const members = node.allOf.map(toZod);
         // allOf may also carry local constraints alongside the composed schemas.
-        const hasLocalShape =
-            node.properties || node.items || node.additionalProperties !== undefined ||
-            (node.type && node.type !== "object" && node.type !== "array");
-        if (hasLocalShape) {
+        if (hasLocalShape(node)) {
             members.push(localTypeExpr(node));
         }
         return intersection(members);
     }
-    if (node.anyOf) {
-        return union(node.anyOf.map(toZod));
-    }
-    if (node.oneOf) {
-        return union(node.oneOf.map(toZod));
+    // A node may list its properties and additionally require one of several
+    // variants (GitHub's check run bodies do). The value has to satisfy both,
+    // so the local shape intersects the union instead of being replaced by it.
+    const branches = node.anyOf ?? node.oneOf;
+    if (branches) {
+        const composed = union(branches.map(toZod));
+        return hasLocalShape(node) ? intersection([localTypeExpr(node), composed]) : composed;
     }
     if (typeof node.$ref === "string") {
         return refName(node.$ref);
