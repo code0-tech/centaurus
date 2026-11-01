@@ -27,6 +27,7 @@ include:
   - shopware-action
   - twilio-action
   - stripe-action
+  - s3-action
 
 .rust-actions:
   - cron-action
