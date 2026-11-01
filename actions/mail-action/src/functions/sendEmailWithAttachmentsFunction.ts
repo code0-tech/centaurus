@@ -12,11 +12,11 @@ import {
     File,
 } from "@code0-tech/hercules";
 import { sendEmail } from "../helpers.js";
-import { SmtpSendResult } from "../data_types/smtpSendResult.js";
+import { MailSendResult } from "../data_types/mailSendResult.js";
 
 @Identifier("sendEmailWithAttachments")
 @DisplayIcon("tabler:mail")
-@Signature("(Recipients: string, Subject: string, Text: string, Attachments: FILE<string>[], Html?: string, From?: string, CarbonCopy?: string, Bcc?: string): SMTP_SEND_RESULT")
+@Signature("(Recipients: string, Subject: string, Text: string, Attachments: FILE<string>[], Html?: string, From?: string, CarbonCopy?: string, Bcc?: string): MAIL_SEND_RESULT")
 @Name({ code: "en-US", content: "Send email with attachments" })
 @DisplayMessage({ code: "en-US", content: "Send email with attachments to ${Recipients}" })
 @Documentation({
@@ -83,7 +83,7 @@ export class SendEmailWithAttachmentsFunction {
         From?: string,
         CarbonCopy?: string,
         Bcc?: string
-    ): Promise<SmtpSendResult> {
+    ): Promise<MailSendResult> {
         try {
             return await sendEmail(
                 { To:Recipients, Subject, Text, Html, From, Cc:CarbonCopy, Bcc, Attachments: Attachments ?? [] },

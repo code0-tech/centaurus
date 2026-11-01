@@ -8,7 +8,7 @@ The "central" place for all actions — a monorepo containing integrations provi
 |--------|-------------|
 | [GLS](docs/Actions/GLS/overview.md) | GLS ShipIT integration for creating and managing shipments |
 | [Stripe](actions/stripe-action/README.md) | Stripe payments integration for managing customers, payment intents and refunds |
-| SMTP | Send emails (with attachments) through any SMTP server via nodemailer |
+| [Mail](actions/mail-action/README.md) | Send mail via SMTP and receive mail via an IMAP trigger |
 ## ENV
 
 All actions share the following base environment variables, which connect them to the Hercules/Aquila infrastructure:
