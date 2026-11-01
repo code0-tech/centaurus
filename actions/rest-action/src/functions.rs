@@ -7,7 +7,8 @@
 use std::collections::HashMap;
 
 use hercules_sdk::{
-    Arguments, FunctionContext, PlainValue, Result, RuntimeFunctionHandler, async_trait,
+    Arguments, FunctionContext, PlainValue, Result, RuntimeFunctionHandler, RuntimeFunctionReturn,
+    async_trait,
 };
 
 use crate::pending::{self, PendingResponses, RespondPayload, RespondSignal};
@@ -69,7 +70,11 @@ impl Respond {
 
 #[async_trait]
 impl RuntimeFunctionHandler for Respond {
-    async fn run(&self, context: &FunctionContext, args: &Arguments) -> Result<PlainValue> {
+    async fn run(
+        &self,
+        context: &FunctionContext,
+        args: &Arguments,
+    ) -> Result<RuntimeFunctionReturn> {
         let status_code: i64 = args.get("http_status_code")?;
         let content_type: String = args.get("http_schema")?;
         let payload: PlainValue = args.get("payload")?;
@@ -102,6 +107,6 @@ impl RuntimeFunctionHandler for Respond {
             ),
         }
 
-        Ok(PlainValue::Null)
+        Ok(PlainValue::Null.into())
     }
 }
