@@ -29,6 +29,7 @@ include:
   - stripe-action
   - smtp-action
   - github-action
+  - notion-action
 
 .rust-actions:
   - cron-action
