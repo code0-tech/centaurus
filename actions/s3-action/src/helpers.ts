@@ -66,6 +66,28 @@ export function resolveBucket(context: FunctionContext, bucket?: string): string
 }
 
 /**
+ * Builds the object key for an uploaded file. The key is the file's own
+ * `fileName` (the FILE value always carries one), optionally placed under a
+ * key prefix so several files can be uploaded into the same "folder". The
+ * prefix and file name are joined with a single `/` unless the prefix is empty
+ * or already ends with one.
+ */
+export function resolveObjectKey(fileName: string, prefix?: string): string {
+    const name = fileName || "";
+    if (!name) {
+        throw new RuntimeError(
+            "S3_MISSING_FILE_NAME",
+            "A file to upload is missing its file name; cannot derive an object key for it."
+        );
+    }
+    const normalizedPrefix = prefix || "";
+    if (!normalizedPrefix) {
+        return name;
+    }
+    return normalizedPrefix.endsWith("/") ? `${normalizedPrefix}${name}` : `${normalizedPrefix}/${name}`;
+}
+
+/**
  * Maps an error thrown by the AWS SDK (or anything else) into a Hercules
  * RuntimeError with a stable code and a human readable message.
  */

@@ -9,7 +9,7 @@ DigitalOcean Spaces, ...) by pointing the `endpoint` config at that provider.
 
 | Function | Description |
 |----------|-------------|
-| `putObject` | Upload an object, creating or overwriting it. |
+| `putObject` | Upload one or more objects, creating or overwriting them. Each object's key is the file's own name, optionally under a `KeyPrefix`. |
 | `getObject` | Download an object's content and metadata. |
 | `deleteObject` | Delete an object. |
 | `listObjects` | List objects in a bucket, optionally filtered by prefix. |

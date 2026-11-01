@@ -7,7 +7,7 @@ import { S3ObjectContentSchema } from "../src/data_types/s3ObjectContent.js";
 import { S3DeleteResultSchema } from "../src/data_types/s3DeleteResult.js";
 import { S3ObjectListSchema } from "../src/data_types/s3ObjectList.js";
 import { S3PresignedUrlSchema } from "../src/data_types/s3PresignedUrl.js";
-import { getS3Client, resolveBucket } from "../src/helpers.js";
+import { getS3Client, resolveBucket, resolveObjectKey } from "../src/helpers.js";
 
 function makeContext(configValues: Record<string, unknown>): FunctionContext {
     return {
@@ -98,6 +98,24 @@ describe("resolveBucket", () => {
     it("throws when no bucket is available", () => {
         const context = makeContext({});
         expect(() => resolveBucket(context)).toThrow(RuntimeError);
+    });
+});
+
+describe("resolveObjectKey", () => {
+    it("uses the file name alone when no prefix is given", () => {
+        expect(resolveObjectKey("report.json")).toEqual("report.json");
+    });
+
+    it("joins a prefix and file name with a single slash", () => {
+        expect(resolveObjectKey("report.json", "reports")).toEqual("reports/report.json");
+    });
+
+    it("does not double the slash when the prefix already ends with one", () => {
+        expect(resolveObjectKey("report.json", "reports/")).toEqual("reports/report.json");
+    });
+
+    it("throws when the file has no name to derive a key from", () => {
+        expect(() => resolveObjectKey("", "reports/")).toThrow(RuntimeError);
     });
 });
 

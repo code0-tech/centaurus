@@ -11,32 +11,44 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getS3Client, resolveBucket, toRuntimeError } from "../helpers.js";
+import { getS3Client, resolveBucket, resolveObjectKey, toRuntimeError } from "../helpers.js";
 import { S3Object, S3ObjectSchema } from "../data_types/s3Object.js";
 
 @Identifier("putObject")
 @DisplayIcon("simple:amazons3")
-@Signature("(Key: string, File: FILE, Bucket?: string): S3_OBJECT")
-@Name({ code: "en-US", content: "Upload object" })
-@DisplayMessage({ code: "en-US", content: "Upload object ${Key}" })
+@Signature('(Files: FILE<"*/*">[], KeyPrefix?: string, Bucket?: string): S3_OBJECT[]')
+@Name({ code: "en-US", content: "Upload objects" })
+@DisplayMessage({ code: "en-US", content: "Upload objects under ${KeyPrefix}" })
 @Documentation({
     code: "en-US",
     content:
-        "Uploads an object to S3 (or an S3-compatible provider), creating it or overwriting an existing object with the same key. `File` is a standard FILE value (base64-encoded content plus an optional content type).",
+        "Uploads one or more objects to S3 (or an S3-compatible provider), creating them or overwriting existing objects with the same key. Each object's key is the uploaded file's own name, optionally placed under `KeyPrefix` (e.g. `reports/`). `Files` are standard FILE values (base64-encoded content plus a file name and optional content type).",
 })
 @Description({
     code: "en-US",
-    content: "Uploads an object to S3.",
+    content: "Uploads one or more objects to S3.",
 })
 @Parameter({
-    runtimeName: "Key",
-    name: [{ code: "en-US", content: "Key" }],
-    description: [{ code: "en-US", content: "The object key (path) to write to within the bucket." }],
+    runtimeName: "Files",
+    name: [{ code: "en-US", content: "Files" }],
+    description: [
+        {
+            code: "en-US",
+            content: "The files to upload, as standard FILE values. Each file's name becomes its object key.",
+        },
+    ],
 })
 @Parameter({
-    runtimeName: "File",
-    name: [{ code: "en-US", content: "File" }],
-    description: [{ code: "en-US", content: "The file content to upload, as a standard FILE value." }],
+    runtimeName: "KeyPrefix",
+    name: [{ code: "en-US", content: "Key prefix" }],
+    description: [
+        {
+            code: "en-US",
+            content:
+                "Optional key prefix (folder) the files are uploaded under, e.g. `reports/`. Joined to each file name with a `/`. Omit to upload at the bucket root under each file's name.",
+        },
+    ],
+    optional: true,
 })
 @Parameter({
     runtimeName: "Bucket",
@@ -47,31 +59,38 @@ import { S3Object, S3ObjectSchema } from "../data_types/s3Object.js";
     optional: true,
 })
 export class PutObjectFunction {
-    async run(context: FunctionContext, Key: string, File: File, Bucket?: string): Promise<S3Object> {
+    async run(context: FunctionContext, Files: File<"*/*">[], KeyPrefix?: string, Bucket?: string): Promise<S3Object[]> {
         const bucket = resolveBucket(context, Bucket);
         const client = getS3Client(context);
-        const body = Buffer.from(File.value, "base64");
-        // `File.contentType` is generic/unknown at the schema level (hercules'
-        // FILE value doesn't parameterize it), but it's a string at runtime.
-        const contentType = typeof File.contentType === "string" ? File.contentType : undefined;
+        const files = Files ?? [];
 
         try {
-            const result = await client.send(
-                new PutObjectCommand({
-                    Bucket: bucket,
-                    Key,
-                    Body: body,
-                    ...(contentType ? { ContentType: contentType } : {}),
+            return await Promise.all(
+                files.map(async (file) => {
+                    const key = resolveObjectKey(file.fileName, KeyPrefix);
+                    const body = Buffer.from(file.value, "base64");
+                    // `file.contentType` is generic/unknown at the schema level (hercules'
+                    // FILE value doesn't parameterize it), but it's a string at runtime.
+                    const contentType = typeof file.contentType === "string" ? file.contentType : undefined;
+
+                    const result = await client.send(
+                        new PutObjectCommand({
+                            Bucket: bucket,
+                            Key: key,
+                            Body: body,
+                            ...(contentType ? { ContentType: contentType } : {}),
+                        })
+                    );
+
+                    return S3ObjectSchema.parse({
+                        Key: key,
+                        Bucket: bucket,
+                        ETag: result.ETag,
+                        Location: `${bucket}/${key}`,
+                        VersionId: result.VersionId,
+                    });
                 })
             );
-
-            return S3ObjectSchema.parse({
-                Key,
-                Bucket: bucket,
-                ETag: result.ETag,
-                Location: `${bucket}/${Key}`,
-                VersionId: result.VersionId,
-            });
         } catch (error) {
             throw toRuntimeError("S3_PUT_OBJECT_FAILED", error);
         }
