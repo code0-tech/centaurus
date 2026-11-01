@@ -5,7 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-hercules-sdk = { version = "1.7.1" }
+hercules-sdk = { version = "1.7.2" }
 tucana = { version = "0.0.83", default-features = false }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time"] }
 tokio-stream = "0.1"
