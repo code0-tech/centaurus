@@ -1,5 +1,5 @@
 {
-  "name": "@code0-tech/smtp-action",
+  "name": "@code0-tech/mail-action",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -13,9 +13,12 @@
   },
   "dependencies": {
     "@code0-tech/hercules": "^1.6.0",
+    "imapflow": "^2.10.0",
+    "mailparser": "^3.14.1",
     "nodemailer": "^6.9.16"
   },
   "devDependencies": {
+    "@types/mailparser": "^3.4.0",
     "@types/node": "^22.0.0",
     "@types/nodemailer": "^6.4.16",
     "tsx": "^4.0.0",

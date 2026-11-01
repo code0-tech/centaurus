@@ -1,6 +1,6 @@
 import { FunctionContext, RuntimeError, File } from "@code0-tech/hercules";
 import nodemailer, { type Transporter } from "nodemailer";
-import { SmtpSendResult, SmtpSendResultSchema } from "./data_types/smtpSendResult.js";
+import { MailSendResult, MailSendResultSchema } from "./data_types/mailSendResult.js";
 
 /**
  * Splits a comma-separated address string into a trimmed, non-empty array.
@@ -74,7 +74,7 @@ function normalizeAddress(address: unknown): string {
 
 /**
  * Sends an email through the configured SMTP server using nodemailer and maps
- * the result onto the SMTP_SEND_RESULT data type.
+ * the result onto the MAIL_SEND_RESULT data type.
  */
 export const sendEmail = async (
     data:{
@@ -89,7 +89,7 @@ export const sendEmail = async (
         ReplyTo?: string
     },
     context: FunctionContext
-): Promise<SmtpSendResult> => {
+): Promise<MailSendResult> => {
     const transport = getTransport(context);
     const from = resolveFrom(context, data.From);
 
@@ -121,7 +121,7 @@ export const sendEmail = async (
 
         const envelope = (info.envelope ?? {}) as { from?: unknown; to?: unknown };
 
-        return SmtpSendResultSchema.parse({
+        return MailSendResultSchema.parse({
             messageId: info.messageId ?? "",
             accepted: (info.accepted ?? []).map(normalizeAddress),
             rejected: (info.rejected ?? []).map(normalizeAddress),
