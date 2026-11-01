@@ -50,6 +50,7 @@ export class DeleteObjectFunction {
             return S3DeleteResultSchema.parse({
                 Key,
                 Bucket: bucket,
+                Deleted: true,
                 DeleteMarker: result.DeleteMarker,
                 VersionId: result.VersionId,
             });

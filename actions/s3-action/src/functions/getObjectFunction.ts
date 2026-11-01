@@ -20,7 +20,8 @@ import { S3ObjectContent, S3ObjectContentSchema } from "../data_types/s3ObjectCo
 @DisplayMessage({ code: "en-US", content: "Download object ${Key}" })
 @Documentation({
     code: "en-US",
-    content: "Downloads an object from S3 and returns its content as UTF-8 text alongside its metadata.",
+    content:
+        "Downloads an object from S3 and returns its content as a standard FILE value (base64-encoded content plus content type), so it can be passed directly to other functions/actions that accept a FILE.",
 })
 @Description({
     code: "en-US",
@@ -46,13 +47,17 @@ export class GetObjectFunction {
 
         try {
             const result = await client.send(new GetObjectCommand({ Bucket: bucket, Key }));
-            const content = await result.Body?.transformToString("utf-8");
+            const bytes = (await result.Body?.transformToByteArray()) ?? new Uint8Array();
 
             return S3ObjectContentSchema.parse({
                 Key,
                 Bucket: bucket,
-                Content: content ?? "",
-                ContentType: result.ContentType,
+                File: {
+                    contentType: result.ContentType,
+                    fileName: Key.split("/").pop() || Key,
+                    valueType: "base64",
+                    value: Buffer.from(bytes).toString("base64"),
+                },
                 ContentLength: result.ContentLength,
                 ETag: result.ETag,
                 LastModified: result.LastModified?.toISOString(),

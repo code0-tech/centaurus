@@ -15,17 +15,16 @@ import { FunctionContext, RuntimeError } from "@code0-tech/hercules";
 let cached: { accessKeyId: string; secretAccessKey: string; region: string; endpoint: string; client: S3Client } | null =
     null;
 
+/**
+ * access_key_id / secret_access_key are optional: when either is left
+ * unconfigured, the AWS SDK's default credential provider chain is used
+ * instead (environment variables, shared config/credentials file, or an
+ * IAM role), which is the common setup when this action runs inside AWS
+ * (EC2/ECS/EKS) rather than with a static key pair.
+ */
 export function getS3Client(context: FunctionContext): S3Client {
-    const accessKeyId = context.matchedConfig.findConfig("access_key_id") as string;
-    const secretAccessKey = context.matchedConfig.findConfig("secret_access_key") as string;
-
-    if (!accessKeyId || !secretAccessKey) {
-        throw new RuntimeError(
-            "S3_MISSING_CREDENTIALS",
-            "No S3 credentials configured. Set the 'access_key_id' and 'secret_access_key' configs."
-        );
-    }
-
+    const accessKeyId = (context.matchedConfig.findConfig("access_key_id") as string) || "";
+    const secretAccessKey = (context.matchedConfig.findConfig("secret_access_key") as string) || "";
     const region = (context.matchedConfig.findConfig("region") as string) || "us-east-1";
     const endpoint = (context.matchedConfig.findConfig("endpoint") as string) || "";
 
@@ -41,7 +40,7 @@ export function getS3Client(context: FunctionContext): S3Client {
 
     const client = new S3Client({
         region,
-        credentials: { accessKeyId, secretAccessKey },
+        ...(accessKeyId && secretAccessKey ? { credentials: { accessKeyId, secretAccessKey } } : {}),
         // A custom endpoint is only set for S3-compatible providers (MinIO,
         // R2, Spaces, ...), which virtually always require path-style
         // addressing. Real AWS S3 keeps using virtual-hosted-style requests.

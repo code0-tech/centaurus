@@ -35,22 +35,27 @@ describe("S3ObjectSchema", () => {
 });
 
 describe("S3ObjectContentSchema", () => {
-    it("parses a representative get-object result", () => {
+    it("parses a representative get-object result with a base64 FILE value", () => {
         const parsed = S3ObjectContentSchema.parse({
             Key: "reports/2026-11-01.json",
             Bucket: "my-bucket",
-            Content: '{"status":"ok"}',
-            ContentType: "application/json",
+            File: {
+                contentType: "application/json",
+                fileName: "2026-11-01.json",
+                valueType: "base64",
+                value: Buffer.from('{"status":"ok"}').toString("base64"),
+            },
             ContentLength: 16,
         });
-        expect(parsed.Content).toEqual('{"status":"ok"}');
+        expect(Buffer.from(parsed.File.value, "base64").toString("utf-8")).toEqual('{"status":"ok"}');
     });
 });
 
 describe("S3DeleteResultSchema", () => {
     it("parses a representative delete result", () => {
-        const parsed = S3DeleteResultSchema.parse({ Key: "obsolete.txt", Bucket: "my-bucket" });
+        const parsed = S3DeleteResultSchema.parse({ Key: "obsolete.txt", Bucket: "my-bucket", Deleted: true });
         expect(parsed.Bucket).toEqual("my-bucket");
+        expect(parsed.Deleted).toBe(true);
     });
 });
 
@@ -97,9 +102,12 @@ describe("resolveBucket", () => {
 });
 
 describe("getS3Client", () => {
-    it("throws when credentials are not configured", () => {
+    it("builds a client via the default credential provider chain when none are configured", () => {
+        // access_key_id/secret_access_key are optional: with neither set, the
+        // AWS SDK falls back to its default credential provider chain (env
+        // vars, shared config, or an IAM role) instead of throwing.
         const context = makeContext({});
-        expect(() => getS3Client(context)).toThrow(RuntimeError);
+        expect(() => getS3Client(context)).not.toThrow();
     });
 
     it("builds a client when credentials are configured", () => {

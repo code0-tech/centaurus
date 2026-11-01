@@ -10,6 +10,7 @@ export const S3ObjectListSchema = z.object({
             Size: z.number().optional(),
             ETag: z.string().optional(),
             LastModified: z.string().optional(),
+            StorageClass: z.string().optional(),
         })
     ),
     IsTruncated: z.boolean().optional(),

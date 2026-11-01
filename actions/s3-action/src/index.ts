@@ -25,15 +25,29 @@ const action = new Action(
         {
             identifier: "access_key_id",
             type: "TEXT",
+            optional: true,
             name: [{ code: "en-US", content: "Access key ID" }],
-            description: [{ code: "en-US", content: "The access key ID used to authenticate with the S3 API." }],
+            description: [
+                {
+                    code: "en-US",
+                    content:
+                        "The access key ID used to authenticate with the S3 API. Leave empty to fall back to the AWS SDK's default credential provider chain (environment variables, shared config file, or an IAM role).",
+                },
+            ],
             linkedDataTypes: ["TEXT"],
         },
         {
             identifier: "secret_access_key",
             type: "TEXT",
+            optional: true,
             name: [{ code: "en-US", content: "Secret access key" }],
-            description: [{ code: "en-US", content: "The secret access key used to authenticate with the S3 API." }],
+            description: [
+                {
+                    code: "en-US",
+                    content:
+                        "The secret access key used to authenticate with the S3 API. Leave empty to fall back to the AWS SDK's default credential provider chain.",
+                },
+            ],
             linkedDataTypes: ["TEXT"],
         },
         {

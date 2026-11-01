@@ -82,6 +82,7 @@ export class ListObjectsFunction {
                     Size: object.Size,
                     ETag: object.ETag,
                     LastModified: object.LastModified?.toISOString(),
+                    StorageClass: object.StorageClass,
                 })),
                 IsTruncated: result.IsTruncated,
                 NextContinuationToken: result.NextContinuationToken,

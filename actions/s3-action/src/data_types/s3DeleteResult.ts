@@ -4,6 +4,7 @@ import { z } from "zod";
 export const S3DeleteResultSchema = z.object({
     Key: z.string(),
     Bucket: z.string(),
+    Deleted: z.boolean(),
     DeleteMarker: z.boolean().optional(),
     VersionId: z.string().optional(),
 });
