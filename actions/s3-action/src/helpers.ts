@@ -4,13 +4,16 @@ import { FunctionContext, RuntimeError } from "@code0-tech/hercules";
 /**
  * Builds (and caches) an S3 client from the action configuration.
  *
- * The client is cached per (accessKeyId, region, endpoint) combination so
- * repeated function invocations reuse the same instance and connection pool.
+ * The client is cached per (accessKeyId, secretAccessKey, region, endpoint)
+ * combination so repeated function invocations reuse the same instance and
+ * connection pool, while a credential or region change (e.g. key rotation)
+ * still produces a fresh client instead of silently reusing a stale one.
  * Uses the official `@aws-sdk/client-s3`, which works against AWS S3 and any
  * S3-compatible provider (MinIO, Cloudflare R2, DigitalOcean Spaces, ...) by
  * pointing `endpoint` at that provider.
  */
-let cached: { accessKeyId: string; region: string; endpoint: string; client: S3Client } | null = null;
+let cached: { accessKeyId: string; secretAccessKey: string; region: string; endpoint: string; client: S3Client } | null =
+    null;
 
 export function getS3Client(context: FunctionContext): S3Client {
     const accessKeyId = context.matchedConfig.findConfig("access_key_id") as string;
@@ -26,7 +29,13 @@ export function getS3Client(context: FunctionContext): S3Client {
     const region = (context.matchedConfig.findConfig("region") as string) || "us-east-1";
     const endpoint = (context.matchedConfig.findConfig("endpoint") as string) || "";
 
-    if (cached && cached.accessKeyId === accessKeyId && cached.region === region && cached.endpoint === endpoint) {
+    if (
+        cached &&
+        cached.accessKeyId === accessKeyId &&
+        cached.secretAccessKey === secretAccessKey &&
+        cached.region === region &&
+        cached.endpoint === endpoint
+    ) {
         return cached.client;
     }
 
@@ -38,7 +47,7 @@ export function getS3Client(context: FunctionContext): S3Client {
         // addressing. Real AWS S3 keeps using virtual-hosted-style requests.
         ...(endpoint ? { endpoint, forcePathStyle: true } : {}),
     });
-    cached = { accessKeyId, region, endpoint, client };
+    cached = { accessKeyId, secretAccessKey, region, endpoint, client };
     return client;
 }
 
