@@ -27,6 +27,7 @@ include:
   - shopware-action
   - twilio-action
   - stripe-action
+  - s3-action
   - smtp-action
   - github-action
 
