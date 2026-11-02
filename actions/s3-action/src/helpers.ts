@@ -2,20 +2,15 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { FunctionContext, RuntimeError } from "@code0-tech/hercules";
 
 /**
- * Builds (and caches) an S3 client from the action configuration.
+ * Builds an S3 client from the action configuration.
  *
- * The client is cached per (accessKeyId, secretAccessKey, region, endpoint)
- * combination so repeated function invocations reuse the same instance and
- * connection pool, while a credential or region change (e.g. key rotation)
- * still produces a fresh client instead of silently reusing a stale one.
+ * A fresh client is built per call: a single action process serves many flows,
+ * each with its own matched config (different credentials, region or endpoint),
+ * so there is no single client that can be safely reused across invocations.
  * Uses the official `@aws-sdk/client-s3`, which works against AWS S3 and any
  * S3-compatible provider (MinIO, Cloudflare R2, DigitalOcean Spaces, ...) by
  * pointing `endpoint` at that provider.
- */
-let cached: { accessKeyId: string; secretAccessKey: string; region: string; endpoint: string; client: S3Client } | null =
-    null;
-
-/**
+ *
  * access_key_id / secret_access_key are optional: when either is left
  * unconfigured, the AWS SDK's default credential provider chain is used
  * instead (environment variables, shared config/credentials file, or an
@@ -28,17 +23,7 @@ export function getS3Client(context: FunctionContext): S3Client {
     const region = (context.matchedConfig.findConfig("region") as string) || "us-east-1";
     const endpoint = (context.matchedConfig.findConfig("endpoint") as string) || "";
 
-    if (
-        cached &&
-        cached.accessKeyId === accessKeyId &&
-        cached.secretAccessKey === secretAccessKey &&
-        cached.region === region &&
-        cached.endpoint === endpoint
-    ) {
-        return cached.client;
-    }
-
-    const client = new S3Client({
+    return new S3Client({
         region,
         ...(accessKeyId && secretAccessKey ? { credentials: { accessKeyId, secretAccessKey } } : {}),
         // A custom endpoint is only set for S3-compatible providers (MinIO,
@@ -46,8 +31,6 @@ export function getS3Client(context: FunctionContext): S3Client {
         // addressing. Real AWS S3 keeps using virtual-hosted-style requests.
         ...(endpoint ? { endpoint, forcePathStyle: true } : {}),
     });
-    cached = { accessKeyId, secretAccessKey, region, endpoint, client };
-    return client;
 }
 
 /**

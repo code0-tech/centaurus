@@ -12,14 +12,14 @@ import {
     RuntimeError,
     Signature,
 } from "@code0-tech/hercules";
-import { getS3Client, resolveBucket, toRuntimeError } from "../helpers.js";
-import { S3PresignedUrl, S3PresignedUrlSchema } from "../data_types/s3PresignedUrl.js";
+import { getS3Client, resolveBucket, toRuntimeError } from "../../helpers.js";
+import { S3PresignedUrl, S3PresignedUrlSchema } from "../../data_types/s3PresignedUrl.js";
 
-@Identifier("createPresignedUrl")
-@DisplayIcon("simple:amazons3")
+@Identifier("createObjectPresignedUrl")
+@DisplayIcon("tabler:bucket")
 @Signature('(Key: string, Operation?: "get"|"put", ExpiresInSeconds?: number, Bucket?: string): S3_PRESIGNED_URL')
-@Name({ code: "en-US", content: "Create presigned URL" })
-@DisplayMessage({ code: "en-US", content: "Create presigned URL for ${Key}" })
+@Name({ code: "en-US", content: "Create object presigned URL" })
+@DisplayMessage({ code: "en-US", content: "Create object presigned URL for ${Key}" })
 @Documentation({
     code: "en-US",
     content:
@@ -54,7 +54,7 @@ import { S3PresignedUrl, S3PresignedUrlSchema } from "../data_types/s3PresignedU
     ],
     optional: true,
 })
-export class CreatePresignedUrlFunction {
+export class CreateObjectPresignedUrlFunction {
     async run(
         context: FunctionContext,
         Key: string,
@@ -84,7 +84,7 @@ export class CreatePresignedUrlFunction {
                 ExpiresInSeconds: expiresIn,
             });
         } catch (error) {
-            throw toRuntimeError("S3_CREATE_PRESIGNED_URL_FAILED", error);
+            throw toRuntimeError("S3_CREATE_OBJECT_PRESIGNED_URL_FAILED", error);
         }
     }
 }

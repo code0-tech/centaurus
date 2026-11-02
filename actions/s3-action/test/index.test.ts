@@ -4,6 +4,7 @@ import type { FunctionContext } from "@code0-tech/hercules";
 import { RuntimeError } from "@code0-tech/hercules";
 import { S3ObjectSchema } from "../src/data_types/s3Object.js";
 import { S3ObjectContentSchema } from "../src/data_types/s3ObjectContent.js";
+import { S3ObjectDataSchema } from "../src/data_types/s3ObjectData.js";
 import { S3DeleteResultSchema } from "../src/data_types/s3DeleteResult.js";
 import { S3ObjectListSchema } from "../src/data_types/s3ObjectList.js";
 import { S3PresignedUrlSchema } from "../src/data_types/s3PresignedUrl.js";
@@ -48,6 +49,19 @@ describe("S3ObjectContentSchema", () => {
             ContentLength: 16,
         });
         expect(Buffer.from(parsed.File.value, "base64").toString("utf-8")).toEqual('{"status":"ok"}');
+    });
+});
+
+describe("S3ObjectDataSchema", () => {
+    it("parses a representative get-object result with a raw text body", () => {
+        const parsed = S3ObjectDataSchema.parse({
+            Key: "reports/2026-11-01.json",
+            Bucket: "my-bucket",
+            Data: '{"status":"ok"}',
+            ContentType: "application/json",
+            ContentLength: 16,
+        });
+        expect(parsed.Data).toEqual('{"status":"ok"}');
     });
 });
 

@@ -10,21 +10,21 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getS3Client, resolveBucket, toRuntimeError } from "../helpers.js";
-import { S3DeleteResult, S3DeleteResultSchema } from "../data_types/s3DeleteResult.js";
+import { getS3Client, resolveBucket, toRuntimeError } from "../../helpers.js";
+import { S3DeleteResult, S3DeleteResultSchema } from "../../data_types/s3DeleteResult.js";
 
-@Identifier("deleteObject")
-@DisplayIcon("simple:amazons3")
+@Identifier("deleteFile")
+@DisplayIcon("tabler:bucket")
 @Signature("(Key: string, Bucket?: string): S3_DELETE_RESULT")
-@Name({ code: "en-US", content: "Delete object" })
-@DisplayMessage({ code: "en-US", content: "Delete object ${Key}" })
+@Name({ code: "en-US", content: "Delete file" })
+@DisplayMessage({ code: "en-US", content: "Delete file ${Key}" })
 @Documentation({
     code: "en-US",
-    content: "Deletes an object from S3. Deleting a key that does not exist is not an error.",
+    content: "Deletes a file from S3 by its key. Deleting a key that does not exist is not an error.",
 })
 @Description({
     code: "en-US",
-    content: "Deletes an object from S3.",
+    content: "Deletes a file from S3.",
 })
 @Parameter({
     runtimeName: "Key",
@@ -39,7 +39,7 @@ import { S3DeleteResult, S3DeleteResultSchema } from "../data_types/s3DeleteResu
     ],
     optional: true,
 })
-export class DeleteObjectFunction {
+export class DeleteFileFunction {
     async run(context: FunctionContext, Key: string, Bucket?: string): Promise<S3DeleteResult> {
         const bucket = resolveBucket(context, Bucket);
         const client = getS3Client(context);
@@ -55,7 +55,7 @@ export class DeleteObjectFunction {
                 VersionId: result.VersionId,
             });
         } catch (error) {
-            throw toRuntimeError("S3_DELETE_OBJECT_FAILED", error);
+            throw toRuntimeError("S3_DELETE_FILE_FAILED", error);
         }
     }
 }

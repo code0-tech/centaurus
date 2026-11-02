@@ -11,22 +11,22 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getS3Client, resolveBucket, resolveObjectKey, toRuntimeError } from "../helpers.js";
-import { S3Object, S3ObjectSchema } from "../data_types/s3Object.js";
+import { getS3Client, resolveBucket, resolveObjectKey, toRuntimeError } from "../../helpers.js";
+import { S3Object, S3ObjectSchema } from "../../data_types/s3Object.js";
 
-@Identifier("putObject")
-@DisplayIcon("simple:amazons3")
+@Identifier("uploadFiles")
+@DisplayIcon("tabler:bucket")
 @Signature('(Files: FILE<"*/*">[], KeyPrefix?: string, Bucket?: string): S3_OBJECT[]')
-@Name({ code: "en-US", content: "Upload objects" })
-@DisplayMessage({ code: "en-US", content: "Upload objects under ${KeyPrefix}" })
+@Name({ code: "en-US", content: "Upload files" })
+@DisplayMessage({ code: "en-US", content: "Upload files under ${KeyPrefix}" })
 @Documentation({
     code: "en-US",
     content:
-        "Uploads one or more objects to S3 (or an S3-compatible provider), creating them or overwriting existing objects with the same key. Each object's key is the uploaded file's own name, optionally placed under `KeyPrefix` (e.g. `reports/`). `Files` are standard FILE values (base64-encoded content plus a file name and optional content type).",
+        "Uploads one or more files (standard hercules FILE values: base64 content plus a file name and optional content type) to S3, creating them or overwriting existing objects with the same key. Each file's key is its own name, optionally placed under `KeyPrefix` (e.g. `reports/`). To upload raw data at an explicit key, use `Upload object` instead.",
 })
 @Description({
     code: "en-US",
-    content: "Uploads one or more objects to S3.",
+    content: "Uploads one or more files to S3.",
 })
 @Parameter({
     runtimeName: "Files",
@@ -58,7 +58,7 @@ import { S3Object, S3ObjectSchema } from "../data_types/s3Object.js";
     ],
     optional: true,
 })
-export class PutObjectFunction {
+export class UploadFilesFunction {
     async run(context: FunctionContext, Files: File<"*/*">[], KeyPrefix?: string, Bucket?: string): Promise<S3Object[]> {
         const bucket = resolveBucket(context, Bucket);
         const client = getS3Client(context);
@@ -92,7 +92,7 @@ export class PutObjectFunction {
                 })
             );
         } catch (error) {
-            throw toRuntimeError("S3_PUT_OBJECT_FAILED", error);
+            throw toRuntimeError("S3_UPLOAD_FILES_FAILED", error);
         }
     }
 }

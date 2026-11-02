@@ -3,23 +3,32 @@ import { Action, CodeZeroEvent } from "@code0-tech/hercules";
 
 import { S3ObjectDataType } from "./data_types/s3Object.js";
 import { S3ObjectContentDataType } from "./data_types/s3ObjectContent.js";
+import { S3ObjectDataDataType } from "./data_types/s3ObjectData.js";
 import { S3DeleteResultDataType } from "./data_types/s3DeleteResult.js";
 import { S3ObjectListDataType } from "./data_types/s3ObjectList.js";
 import { S3PresignedUrlDataType } from "./data_types/s3PresignedUrl.js";
 
-import { PutObjectFunction } from "./functions/putObjectFunction.js";
-import { GetObjectFunction } from "./functions/getObjectFunction.js";
-import { DeleteObjectFunction } from "./functions/deleteObjectFunction.js";
-import { ListObjectsFunction } from "./functions/listObjectsFunction.js";
-import { CreatePresignedUrlFunction } from "./functions/createPresignedUrlFunction.js";
+// Object function set: S3-native primitives (explicit key + raw data).
+import { UploadObjectFunction } from "./functions/objects/uploadObjectFunction.js";
+import { DownloadObjectFunction } from "./functions/objects/downloadObjectFunction.js";
+import { DeleteObjectFunction } from "./functions/objects/deleteObjectFunction.js";
+import { ListObjectsFunction } from "./functions/objects/listObjectsFunction.js";
+import { CreateObjectPresignedUrlFunction } from "./functions/objects/createPresignedUrlFunction.js";
+
+// File function set: hercules FILE values (keys derived from file names).
+import { UploadFilesFunction } from "./functions/files/uploadFilesFunction.js";
+import { DownloadFileFunction } from "./functions/files/downloadFileFunction.js";
+import { DeleteFileFunction } from "./functions/files/deleteFileFunction.js";
+import { ListFilesFunction } from "./functions/files/listFilesFunction.js";
+import { CreateFilePresignedUrlFunction } from "./functions/files/createPresignedUrlFunction.js";
 
 const action = new Action(
     process.env.ACTION_ID ?? "s3-action",
     process.env.VERSION ?? "1.0.0",
     process.env.AQUILA_URL ?? "127.0.0.1:8081",
     "CodeZero",
-    "simple:amazons3",
-    "S3 / object storage integration: upload, download, list, and delete objects, and generate presigned URLs, against AWS S3 or any S3-compatible provider.",
+    "tabler:bucket",
+    "S3 / object storage integration against AWS S3 or any S3-compatible provider. Offers a parallel object set (raw data at an explicit key) and file set (hercules FILE values keyed by file name): upload, download, list, delete, and presigned URLs.",
     [{ code: "en-US", content: "S3" }],
     [
         {
@@ -92,15 +101,22 @@ const action = new Action(
 
 action.registerDataTypeClass(S3ObjectDataType);
 action.registerDataTypeClass(S3ObjectContentDataType);
+action.registerDataTypeClass(S3ObjectDataDataType);
 action.registerDataTypeClass(S3DeleteResultDataType);
 action.registerDataTypeClass(S3ObjectListDataType);
 action.registerDataTypeClass(S3PresignedUrlDataType);
 
-action.registerRuntimeFunction(PutObjectFunction);
-action.registerRuntimeFunction(GetObjectFunction);
+action.registerRuntimeFunction(UploadObjectFunction);
+action.registerRuntimeFunction(DownloadObjectFunction);
 action.registerRuntimeFunction(DeleteObjectFunction);
 action.registerRuntimeFunction(ListObjectsFunction);
-action.registerRuntimeFunction(CreatePresignedUrlFunction);
+action.registerRuntimeFunction(CreateObjectPresignedUrlFunction);
+
+action.registerRuntimeFunction(UploadFilesFunction);
+action.registerRuntimeFunction(DownloadFileFunction);
+action.registerRuntimeFunction(DeleteFileFunction);
+action.registerRuntimeFunction(ListFilesFunction);
+action.registerRuntimeFunction(CreateFilePresignedUrlFunction);
 
 action.on(CodeZeroEvent.connected, () => {
     console.log("Connected to aquila");

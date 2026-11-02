@@ -10,22 +10,22 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getS3Client, resolveBucket, toRuntimeError } from "../helpers.js";
-import { S3ObjectContent, S3ObjectContentSchema } from "../data_types/s3ObjectContent.js";
+import { getS3Client, resolveBucket, toRuntimeError } from "../../helpers.js";
+import { S3ObjectContent, S3ObjectContentSchema } from "../../data_types/s3ObjectContent.js";
 
-@Identifier("getObject")
-@DisplayIcon("simple:amazons3")
+@Identifier("downloadFile")
+@DisplayIcon("tabler:bucket")
 @Signature("(Key: string, Bucket?: string): S3_OBJECT_CONTENT")
-@Name({ code: "en-US", content: "Download object" })
-@DisplayMessage({ code: "en-US", content: "Download object ${Key}" })
+@Name({ code: "en-US", content: "Download file" })
+@DisplayMessage({ code: "en-US", content: "Download file ${Key}" })
 @Documentation({
     code: "en-US",
     content:
-        "Downloads an object from S3 and returns its content as a standard FILE value (base64-encoded content plus content type), so it can be passed directly to other functions/actions that accept a FILE.",
+        "Downloads an object from S3 and returns its content as a standard hercules FILE value (base64-encoded content plus content type), so it can be passed directly to other functions/actions that accept a FILE. To receive the body as raw text, use `Download object` instead.",
 })
 @Description({
     code: "en-US",
-    content: "Downloads an object from S3.",
+    content: "Downloads a file from S3.",
 })
 @Parameter({
     runtimeName: "Key",
@@ -40,7 +40,7 @@ import { S3ObjectContent, S3ObjectContentSchema } from "../data_types/s3ObjectCo
     ],
     optional: true,
 })
-export class GetObjectFunction {
+export class DownloadFileFunction {
     async run(context: FunctionContext, Key: string, Bucket?: string): Promise<S3ObjectContent> {
         const bucket = resolveBucket(context, Bucket);
         const client = getS3Client(context);
@@ -63,7 +63,7 @@ export class GetObjectFunction {
                 LastModified: result.LastModified?.toISOString(),
             });
         } catch (error) {
-            throw toRuntimeError("S3_GET_OBJECT_FAILED", error);
+            throw toRuntimeError("S3_DOWNLOAD_FILE_FAILED", error);
         }
     }
 }

@@ -10,27 +10,27 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getS3Client, resolveBucket, toRuntimeError } from "../helpers.js";
-import { S3ObjectList, S3ObjectListSchema } from "../data_types/s3ObjectList.js";
+import { getS3Client, resolveBucket, toRuntimeError } from "../../helpers.js";
+import { S3ObjectList, S3ObjectListSchema } from "../../data_types/s3ObjectList.js";
 
-@Identifier("listObjects")
-@DisplayIcon("simple:amazons3")
+@Identifier("listFiles")
+@DisplayIcon("tabler:bucket")
 @Signature("(Prefix?: string, Bucket?: string, MaxKeys?: number, ContinuationToken?: string): S3_OBJECT_LIST")
-@Name({ code: "en-US", content: "List objects" })
-@DisplayMessage({ code: "en-US", content: "List objects in ${Bucket}" })
+@Name({ code: "en-US", content: "List files" })
+@DisplayMessage({ code: "en-US", content: "List files in ${Bucket}" })
 @Documentation({
     code: "en-US",
     content:
-        "Lists objects in a bucket, optionally filtered by key prefix. Results are paginated; pass the returned NextContinuationToken back in as ContinuationToken to fetch the next page.",
+        "Lists files in a bucket, optionally filtered by key prefix. Results are paginated; pass the returned NextContinuationToken back in as ContinuationToken to fetch the next page.",
 })
 @Description({
     code: "en-US",
-    content: "Lists objects in a bucket.",
+    content: "Lists files in a bucket.",
 })
 @Parameter({
     runtimeName: "Prefix",
     name: [{ code: "en-US", content: "Prefix" }],
-    description: [{ code: "en-US", content: "Only return objects whose key starts with this prefix." }],
+    description: [{ code: "en-US", content: "Only return files whose key starts with this prefix." }],
     optional: true,
 })
 @Parameter({
@@ -53,7 +53,7 @@ import { S3ObjectList, S3ObjectListSchema } from "../data_types/s3ObjectList.js"
     description: [{ code: "en-US", content: "Token from a previous call's NextContinuationToken, to fetch the next page." }],
     optional: true,
 })
-export class ListObjectsFunction {
+export class ListFilesFunction {
     async run(
         context: FunctionContext,
         Prefix?: string,
@@ -88,7 +88,7 @@ export class ListObjectsFunction {
                 NextContinuationToken: result.NextContinuationToken,
             });
         } catch (error) {
-            throw toRuntimeError("S3_LIST_OBJECTS_FAILED", error);
+            throw toRuntimeError("S3_LIST_FILES_FAILED", error);
         }
     }
 }

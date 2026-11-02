@@ -7,18 +7,32 @@ DigitalOcean Spaces, ...) by pointing the `endpoint` config at that provider.
 
 ## Functions
 
+The action exposes two parallel function sets. The **object** set is the
+S3-native primitive: you give an explicit key and exchange the body as raw
+(UTF-8 text) data. The **file** set works with hercules' standard `FILE` value
+(base64 content plus a file name/content type), deriving object keys from the
+file name — so a file downloaded from S3 can be piped directly into, say, an
+HTTP upload, and vice versa. Pick the set that matches the data you have.
+
+### Object functions (raw data, explicit key)
+
 | Function | Description |
 |----------|-------------|
-| `putObject` | Upload one or more objects, creating or overwriting them. Each object's key is the file's own name, optionally under a `KeyPrefix`. |
-| `getObject` | Download an object's content and metadata. |
+| `uploadObject` | Upload raw text `Data` to an explicit `Key`, creating or overwriting the object. |
+| `downloadObject` | Download an object's body as raw UTF-8 text, plus metadata. |
 | `deleteObject` | Delete an object. |
 | `listObjects` | List objects in a bucket, optionally filtered by prefix. |
-| `createPresignedUrl` | Generate a temporary signed URL for direct GET or PUT access. |
+| `createObjectPresignedUrl` | Generate a temporary signed URL for direct GET or PUT access. |
 
-Object content is exchanged as hercules' standard `FILE` value (base64 content
-plus an optional file name/content type), the same type other actions/functions
-in a flow produce and consume — so a file downloaded from S3 can be piped
-directly into, say, an HTTP upload, and vice versa.
+### File functions (hercules `FILE` values)
+
+| Function | Description |
+|----------|-------------|
+| `uploadFiles` | Upload one or more `FILE` values, creating or overwriting them. Each file's key is its own name, optionally under a `KeyPrefix`. |
+| `downloadFile` | Download an object's content as a `FILE` value (base64), plus metadata. |
+| `deleteFile` | Delete a file. |
+| `listFiles` | List files in a bucket, optionally filtered by prefix. |
+| `createFilePresignedUrl` | Generate a temporary signed URL for direct GET or PUT access. |
 
 ## Configuration
 
