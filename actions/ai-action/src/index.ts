@@ -76,7 +76,7 @@ const RUNTIME_FUNCTIONS: RuntimeFunctionClass[] = [
 ];
 
 const action = new Action(
-    process.env.ACTION_ID ?? "ai-action",
+    process.env.ACTION_ID ?? "testing-action",
     process.env.VERSION ?? "1.0.0",
     process.env.AQUILA_URL ?? "127.0.0.1:8081",
     "code0-tech",

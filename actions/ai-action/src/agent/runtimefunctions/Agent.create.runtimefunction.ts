@@ -9,11 +9,9 @@ import {
     SubFlow,
     ThrowsError,
 } from "@code0-tech/hercules";
-import type { AiAgentRequest } from "../datatypes/Agent.request.datatype.js";
-import type { AiAgentResponse } from "../datatypes/Agent.response.datatype.js";
+import { AiAgentRequestSchema, type AiAgentRequest } from "../datatypes/Agent.request.datatype.js";
+import { AiAgentResponseSchema, type AiAgentResponse } from "../datatypes/Agent.response.datatype.js";
 import type { AiAgentTransform } from "../datatypes/Agent.transform.datatype.js";
-import type { AiMiddlewareTransform } from "../../middleware/datatypes/Middleware.transform.datatype.js";
-import type { AiModelTransform } from "../../model/datatypes/Model.transform.datatype.js";
 import { asList } from "../../shared/utils/Shared.asList.util.js";
 import { asSubFlow } from "../../shared/utils/Shared.asSubFlow.util.js";
 import { asText } from "../../shared/utils/Shared.asText.util.js";
@@ -59,9 +57,9 @@ export class CreateAgentFunction {
         _context: FunctionContext,
         name: string,
         system_prompt: string,
-        model: AiModelTransform,
+        model: unknown,
         tools?: ToolEntry[],
-        middleware?: (AiMiddlewareTransform)[],
+        middleware?: unknown[],
     ): AiAgentTransform {
         const definition: AgentDefinition = {
             name: requireText(name, "ERROR_INVALID_AI_AGENT", "An agent needs a name."),
@@ -74,6 +72,12 @@ export class CreateAgentFunction {
         };
         validateMcpServers(toolServers(definition.tools));
 
-        return (request: AiAgentRequest): Promise<AiAgentResponse> => runAgent(definition, request);
+        return {
+            name: `agent:${definition.name}`,
+            description: definition.systemPrompt || `The agent ${definition.name}`,
+            inputSchema: AiAgentRequestSchema,
+            outputSchema: AiAgentResponseSchema,
+            run: (request: AiAgentRequest): Promise<AiAgentResponse> => runAgent(definition, request),
+        };
     }
 }
