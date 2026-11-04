@@ -14,7 +14,7 @@ import { countTokensApproximately, trimMessages } from "langchain";
 import { toFlowMessage } from "../../message/utils/Message.toFlowMessage.util.js";
 import { toLangChainMessage } from "../../message/utils/Message.toLangChainMessage.util.js";
 import type { AiMiddlewareTransform } from "../datatypes/Middleware.transform.datatype.js";
-import type { AiStateUpdate } from "../datatypes/Middleware.stateUpdate.datatype.js";
+import { AiStateUpdateSchema, type AiStateUpdate } from "../datatypes/Middleware.stateUpdate.datatype.js";
 import { AiAgentStateSchema, type AiAgentState } from "../datatypes/Middleware.agentState.datatype.js";
 import { parseOrThrow } from "../../shared/utils/Shared.parseOrThrow.util.js";
 
@@ -63,26 +63,32 @@ export class TrimMessagesMiddlewareFunction {
         const trimStrategy: TrimStrategy = strategy === "first" ? "first" : "last";
         const includeSystem: boolean = keep_system ?? true;
 
-        return async (state: AiAgentState): Promise<AiStateUpdate> => {
-            const parsed: AiAgentState = parseOrThrow(
-                AiAgentStateSchema,
-                state,
-                "ERROR_INVALID_AI_AGENT_STATE",
-                "The agent state is not valid",
-            );
+        return {
+            name: `trim_messages:${trimStrategy}:${max_tokens}`,
+            description: `Trims the conversation to ${max_tokens} tokens`,
+            inputSchema: AiAgentStateSchema,
+            outputSchema: AiStateUpdateSchema,
+            run: async (state: AiAgentState): Promise<AiStateUpdate> => {
+                const parsed: AiAgentState = parseOrThrow(
+                    AiAgentStateSchema,
+                    state,
+                    "ERROR_INVALID_AI_AGENT_STATE",
+                    "The agent state is not valid",
+                );
 
-            const trimmed: BaseMessage[] = await trimMessages(parsed.messages.map(toLangChainMessage), {
-                maxTokens: max_tokens,
-                tokenCounter: countTokensApproximately,
-                strategy: trimStrategy,
-                includeSystem,
-                allowPartial: false,
-                startOn: "human",
-            });
+                const trimmed: BaseMessage[] = await trimMessages(parsed.messages.map(toLangChainMessage), {
+                    maxTokens: max_tokens,
+                    tokenCounter: countTokensApproximately,
+                    strategy: trimStrategy,
+                    includeSystem,
+                    allowPartial: false,
+                    startOn: "human",
+                });
 
-            if (trimmed.length === parsed.messages.length) return {};
+                if (trimmed.length === parsed.messages.length) return {};
 
-            return { messages: trimmed.map(toFlowMessage) };
+                return { messages: trimmed.map(toFlowMessage) };
+            },
         };
     }
 }

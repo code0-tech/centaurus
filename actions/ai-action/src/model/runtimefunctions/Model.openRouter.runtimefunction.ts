@@ -15,7 +15,7 @@ import type { Runnable } from "@langchain/core/runnables";
 import { ChatOpenAI, type ChatOpenAICallOptions } from "@langchain/openai";
 import { toFlowMessage } from "../../message/utils/Message.toFlowMessage.util.js";
 import { toLangChainMessage } from "../../message/utils/Message.toLangChainMessage.util.js";
-import type { AiModelResponse } from "../datatypes/Model.response.datatype.js";
+import { AiModelResponseSchema, type AiModelResponse } from "../datatypes/Model.response.datatype.js";
 import type { AiModelTransform } from "../datatypes/Model.transform.datatype.js";
 import { AiModelRequestSchema, type AiModelRequest } from "../datatypes/Model.request.datatype.js";
 import { describeError } from "../../shared/utils/Shared.describeError.util.js";
@@ -82,38 +82,44 @@ export class OpenRouterModelFunction {
             maxTokens: max_tokens,
         });
 
-        return async (request: AiModelRequest): Promise<AiModelResponse> => {
-            const parsed: AiModelRequest = parseOrThrow(
-                AiModelRequestSchema,
-                request,
-                "ERROR_INVALID_AI_MODEL_REQUEST",
-                "The model request is not valid",
-            );
+        return {
+            name: `openrouter:${identifier}`,
+            description: `OpenRouter model ${identifier}`,
+            inputSchema: AiModelRequestSchema,
+            outputSchema: AiModelResponseSchema,
+            run: async (request: AiModelRequest): Promise<AiModelResponse> => {
+                const parsed: AiModelRequest = parseOrThrow(
+                    AiModelRequestSchema,
+                    request,
+                    "ERROR_INVALID_AI_MODEL_REQUEST",
+                    "The model request is not valid",
+                );
 
-            const tools: ToolDefinition[] = parsed.tools.map((tool) => ({
-                type: "function",
-                function: {
-                    name: tool.name,
-                    description: tool.description,
-                    parameters: tool.input_schema,
-                },
-            }));
-            const bound: BoundModel = tools.length > 0 ? chat.bindTools(tools) : chat;
-            const messages: BaseMessage[] = parsed.messages.map(toLangChainMessage);
+                const tools: ToolDefinition[] = parsed.tools.map((tool) => ({
+                    type: "function",
+                    function: {
+                        name: tool.name,
+                        description: tool.description,
+                        parameters: tool.input_schema,
+                    },
+                }));
+                const bound: BoundModel = tools.length > 0 ? chat.bindTools(tools) : chat;
+                const messages: BaseMessage[] = parsed.messages.map(toLangChainMessage);
 
-            const answer: AIMessage = await bound
-                .invoke(messages, {
-                    ...(parsed.stop ? { stop: parsed.stop } : {}),
-                    ...(parsed.tool_choice ? { tool_choice: parsed.tool_choice } : {}),
-                })
-                .catch((error: unknown) => {
-                    throw new RuntimeError(
-                        "ERROR_AI_MODEL_CALL_FAILED",
-                        `The OpenRouter call to "${identifier}" failed: ${describeError(error)}`,
-                    );
-                });
+                const answer: AIMessage = await bound
+                    .invoke(messages, {
+                        ...(parsed.stop ? { stop: parsed.stop } : {}),
+                        ...(parsed.tool_choice ? { tool_choice: parsed.tool_choice } : {}),
+                    })
+                    .catch((error: unknown) => {
+                        throw new RuntimeError(
+                            "ERROR_AI_MODEL_CALL_FAILED",
+                            `The OpenRouter call to "${identifier}" failed: ${describeError(error)}`,
+                        );
+                    });
 
-            return { message: toFlowMessage(answer) };
+                return { message: toFlowMessage(answer) };
+            },
         };
     }
 }

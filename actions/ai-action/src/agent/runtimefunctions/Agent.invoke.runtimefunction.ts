@@ -9,7 +9,6 @@ import {
     Signature,
     ThrowsError,
 } from "@code0-tech/hercules";
-import type { AiAgentTransform } from "../datatypes/Agent.transform.datatype.js";
 import { AiAgentResponseSchema, type AiAgentResponse } from "../datatypes/Agent.response.datatype.js";
 import type { AiChatResponse } from "../../chat/datatypes/Chat.response.datatype.js";
 import { AiChatRequestSchema, type AiChatRequest } from "../../chat/datatypes/Chat.request.datatype.js";
@@ -44,7 +43,7 @@ import { toConversation } from "../../chat/utils/Chat.toConversation.util.js";
 export class InvokeAgentFunction {
     async run(
         _context: FunctionContext,
-        agent: AiAgentTransform,
+        agent: unknown,
         prompt: string,
         request?: AiChatRequest,
     ): Promise<AiChatResponse> {
