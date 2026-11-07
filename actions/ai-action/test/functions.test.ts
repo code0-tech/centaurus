@@ -1,23 +1,32 @@
 import "reflect-metadata";
 import { RuntimeError, type FunctionContext, type SubFlow } from "@code0-tech/hercules";
-import { describe, expect, it } from "vitest";
-import type { AiContentBlock } from "../src/message/datatypes/Message.contentBlock.datatype.js";
-import type { AiMessage } from "../src/message/datatypes/Message.datatype.js";
-import { AiChatResponseSchema } from "../src/chat/datatypes/Chat.response.datatype.js";
-import type { AiModelRequest } from "../src/model/datatypes/Model.request.datatype.js";
-import { AiModelResponseSchema, type AiModelResponse } from "../src/model/datatypes/Model.response.datatype.js";
-import { AiStateUpdateSchema } from "../src/middleware/datatypes/Middleware.stateUpdate.datatype.js";
-import { AiWebSearchResultSchema } from "../src/websearch/datatypes/WebSearch.result.datatype.js";
-import { TrimMessagesMiddlewareFunction } from "../src/middleware/runtimefunctions/Middleware.trimMessages.runtimefunction.js";
-import { OpenRouterModelFunction } from "../src/model/runtimefunctions/Model.openRouter.runtimefunction.js";
-import { WebSearchToolFunction } from "../src/websearch/runtimefunctions/WebSearch.search.runtimefunction.js";
-import { CreateAgentFunction } from "../src/agent/runtimefunctions/Agent.create.runtimefunction.js";
-import { InvokeAgentFunction } from "../src/agent/runtimefunctions/Agent.invoke.runtimefunction.js";
+import { describe, expect, it, vi } from "vitest";
+import { AIMessage } from "@langchain/core/messages";
+import { ChatOpenAI } from "@langchain/openai";
+import { toJsonSchema } from "@langchain/core/utils/json_schema";
+import type { AiContentBlock } from "../src/datatypes/message/Message.contentBlock.datatype.js";
+import type { AiMessage } from "../src/datatypes/message/Message.datatype.js";
+import { AiChatResponseSchema } from "../src/datatypes/chat/Chat.response.datatype.js";
+import type { AiModelRequest } from "../src/datatypes/model/Model.request.datatype.js";
+import { AiModelResponseSchema, type AiModelResponse } from "../src/datatypes/model/Model.response.datatype.js";
+import { AiStateUpdateSchema } from "../src/datatypes/middleware/Middleware.stateUpdate.datatype.js";
+import { TrimMessagesMiddlewareFunction } from "../src/runtimefunctions/middleware/Middleware.trimMessages.runtimefunction.js";
+import { OpenRouterModelFunction } from "../src/runtimefunctions/model/Model.openRouter.runtimefunction.js";
+import { CreateAgentFunction } from "../src/runtimefunctions/agent/Agent.create.runtimefunction.js";
 
 const model = new OpenRouterModelFunction();
 const middleware = new TrimMessagesMiddlewareFunction();
-const search = new WebSearchToolFunction();
 const create = new CreateAgentFunction();
+
+/**
+ * Mirrors how hercules hands a sub flow function from one node to the next: the
+ * producing node returns a sub flow function definition, the consuming node receives
+ * a callable sub flow.
+ */
+function asFlowValue<R>(definition: { run: (...args: never[]) => R | Promise<R> }): (...args: unknown[]) => Promise<R> {
+    const call = definition.run.bind(definition) as unknown as (...args: unknown[]) => R | Promise<R>;
+    return (...args: unknown[]) => Promise.resolve(call(...args));
+}
 
 function context(): FunctionContext {
     return {
@@ -39,9 +48,13 @@ function state(count: number, hook: "before_model" | "after_model" = "before_mod
 }
 
 describe("ai::model::openrouter", () => {
-    it("returns a callable, which is what TRANSFORM<_, _> is", () => {
+    it("returns a sub flow function definition, which is what hercules can serialize", () => {
         const transform = model.run(context(), "anthropic/claude-opus-5", "sk-or-test");
-        expect(typeof transform).toEqual("function");
+
+        expect(typeof transform.run).toEqual("function");
+        expect(transform.name).toEqual("openrouter:anthropic/claude-opus-5");
+        expect(transform.inputSchema).toBeDefined();
+        expect(transform.outputSchema).toBeDefined();
     });
 
     it("needs a model identifier and an API key", () => {
@@ -51,27 +64,121 @@ describe("ai::model::openrouter", () => {
 
     it("rejects a call whose argument is not a model request", async () => {
         const transform = model.run(context(), "anthropic/claude-opus-5", "sk-or-test");
-        await expect(transform({ messages: [] } as never)).rejects.toThrow(/model request is not valid/);
+        await expect(transform.run({ messages: [] } as never)).rejects.toThrow(/model request is not valid/);
     });
 
     it("reports a failed call as a runtime error rather than leaking the provider's", async () => {
         const transform = model.run(context(), "anthropic/claude-opus-5", "sk-or-invalid-key-for-test");
         await expect(
-            transform({ messages: [{ role: "human", content: [{ type: "text", text: "hi" }] }], tools: [] } as never),
+            transform.run({ messages: [{ role: "human", content: [{ type: "text", text: "hi" }] }], tools: [] } as never),
         ).rejects.toThrow(RuntimeError);
     }, 30_000);
 
-    it("is accepted by ai::agent::create as the agent's model", () => {
-        const transform = model.run(context(), "anthropic/claude-opus-5", "sk-or-test");
-        const agent = create.run(context(), "support", "You are helpful.", transform);
-        expect(typeof agent).toEqual("function");
+    it("hands the provider's own web search to the model only when it is switched on", async () => {
+        const answer = new AIMessage("ok");
+        const bindTools = vi
+            .spyOn(ChatOpenAI.prototype, "bindTools")
+            .mockReturnValue({ invoke: async () => answer } as never);
+        vi.spyOn(ChatOpenAI.prototype, "invoke").mockResolvedValue(answer as never);
+        const request = { messages: [{ role: "human", content: [{ type: "text", text: "hi" }] }], tools: [] };
+
+        await model.run(context(), "anthropic/claude-opus-5", "sk-or-test").run(request as never);
+        expect(bindTools).not.toHaveBeenCalled();
+
+        await model
+            .run(context(), "anthropic/claude-opus-5", "sk-or-test", undefined, undefined, true)
+            .run(request as never);
+        expect(bindTools).toHaveBeenCalledWith([{ type: "openrouter:web_search" }]);
+
+        vi.restoreAllMocks();
     });
+
+    it("stops declaring that it can constrain its own output once that is switched off", () => {
+        const off = model.run(context(), "openai/gpt-oss-120b", "sk-or-test", undefined, undefined, undefined, false);
+        const on = model.run(context(), "openai/gpt-oss-120b", "sk-or-test");
+
+        // The declared request schema is what the agent reads to choose between
+        // asking the provider for the type and binding it as a tool call.
+        const properties = (schema: unknown): string[] =>
+            Object.keys((toJsonSchema(schema as never) as { properties?: object }).properties ?? {});
+
+        expect(properties(off.inputSchema)).not.toContain("response_format");
+        expect(properties(on.inputSchema)).toContain("response_format");
+    });
+
+    it("ignores an output type once switched off, so a model that cannot do it is not asked to", async () => {
+        const answer = new AIMessage("ok");
+        const invoke = vi.spyOn(ChatOpenAI.prototype, "invoke").mockResolvedValue(answer as never);
+        const request = {
+            messages: [{ role: "human", content: [{ type: "text", text: "hi" }] }],
+            tools: [],
+            response_format: { name: "extract", schema: { type: "object", properties: {} } },
+        };
+
+        await model
+            .run(context(), "openai/gpt-oss-120b", "sk-or-test", undefined, undefined, undefined, false)
+            .run(request as never);
+        expect(invoke.mock.calls[0]?.[1]).not.toHaveProperty("response_format");
+
+        await model.run(context(), "openai/gpt-oss-120b", "sk-or-test").run(request as never);
+        expect(invoke.mock.calls[1]?.[1]).toMatchObject({ response_format: { type: "json_schema" } });
+
+        vi.restoreAllMocks();
+    });
+
+    it("fails a call the provider gave up on, rather than passing its half answer off as an answer", async () => {
+        const cutShort = new AIMessage({
+            content: "Here's a user object: { }",
+            response_metadata: { finish_reason: "error" },
+        });
+        vi.spyOn(ChatOpenAI.prototype, "invoke").mockResolvedValue(cutShort as never);
+
+        const transform = model.run(context(), "openai/gpt-oss-120b", "sk-or-test");
+        await expect(
+            transform.run({
+                messages: [{ role: "human", content: [{ type: "text", text: "hi" }] }],
+                tools: [],
+            } as never),
+        ).rejects.toThrow(/gave up mid-generation/);
+
+        vi.restoreAllMocks();
+    });
+
+    it("routes only to a provider that supports what the request carries", async () => {
+        const answer = new AIMessage("ok");
+        const invoke = vi.spyOn(ChatOpenAI.prototype, "invoke").mockResolvedValue(answer as never);
+
+        await model
+            .run(context(), "openai/gpt-oss-120b", "sk-or-test")
+            .run({ messages: [{ role: "human", content: [{ type: "text", text: "hi" }] }], tools: [] } as never);
+
+        // OpenRouter serves one model from many endpoints with different parameter
+        // support, so without this a tool call or an output type reaches one that
+        // cannot serve it.
+        const model_ = invoke.mock.instances[0] as ChatOpenAI;
+        expect(model_.modelKwargs).toMatchObject({ provider: { require_parameters: true } });
+
+        vi.restoreAllMocks();
+    });
+
+    it("is accepted by ai::agent::create as the agent's model", async () => {
+        const transform = model.run(context(), "anthropic/claude-opus-5", "sk-or-test");
+
+        // Reaches the model, which rejects the test key - proof the agent accepted it.
+        await expect(
+            create.run(context(), "support", "You are helpful.", asFlowValue(transform), "hi"),
+        ).rejects.toThrow(RuntimeError);
+    }, 30_000);
 });
 
 describe("ai::middleware::trim_messages", () => {
-    it("returns a callable, which is what TRANSFORM<_, _> is", () => {
+    it("returns a sub flow function definition, which is what hercules can serialize", () => {
         const transform = middleware.run(context(), 200);
-        expect(typeof transform).toEqual("function");
+
+        expect(typeof transform.run).toEqual("function");
+        expect(transform.name).toEqual("trim_messages:last:200");
+        expect(transform.inputSchema).toBeDefined();
+        expect(transform.outputSchema).toBeDefined();
     });
 
     it("rejects a budget that is not a positive number", () => {
@@ -84,13 +191,13 @@ describe("ai::middleware::trim_messages", () => {
     });
 
     it("returns no change when the conversation already fits", async () => {
-        const update = await middleware.run(context(), 100_000)(state(1));
+        const update = await middleware.run(context(), 100_000).run(state(1));
         expect(update).toEqual({});
     });
 
     it("drops whole messages until the conversation fits the budget", async () => {
         const before = state(12);
-        const update = await middleware.run(context(), 200)(before);
+        const update = await middleware.run(context(), 200).run(before);
 
         const parsed = AiStateUpdateSchema.parse(update);
         expect(parsed.messages).toBeDefined();
@@ -99,34 +206,20 @@ describe("ai::middleware::trim_messages", () => {
     });
 
     it("keeps the system prompt when it trims", async () => {
-        const update = await middleware.run(context(), 200, "last", true)(state(12));
+        const update = await middleware.run(context(), 200, "last", true).run(state(12));
         const parsed = AiStateUpdateSchema.parse(update);
         expect(parsed.messages![0].role).toEqual("system");
     });
 
     it("rejects a state that is not an agent state", async () => {
         const transform = middleware.run(context(), 500);
-        await expect(transform({ messages: [] } as never)).rejects.toThrow(/agent state is not valid/);
+        await expect(transform.run({ messages: [] } as never)).rejects.toThrow(/agent state is not valid/);
     });
 
     it("produces an update the agent will accept", async () => {
-        const update = await middleware.run(context(), 200)(state(12));
+        const update = await middleware.run(context(), 200).run(state(12));
         expect(() => AiStateUpdateSchema.parse(update)).not.toThrow();
     });
-});
-
-describe("ai::tool::web_search", () => {
-    it("needs a query and an API key", async () => {
-        await expect(search.run(context(), "", "key")).rejects.toThrow(RuntimeError);
-        await expect(search.run(context(), "   ", "key")).rejects.toThrow(RuntimeError);
-        await expect(search.run(context(), "what is langchain", "")).rejects.toThrow(RuntimeError);
-    });
-
-    it("reports a failed search as a runtime error", async () => {
-        await expect(search.run(context(), "what is langchain", "tvly-invalid-key-for-test")).rejects.toThrow(
-            RuntimeError,
-        );
-    }, 30_000);
 });
 
 describe("the contracts the functions implement", () => {
@@ -145,21 +238,9 @@ describe("the contracts the functions implement", () => {
             }),
         ).not.toThrow();
     });
-
-    it("the search function's output is a valid AI_WEB_SEARCH_RESULT", () => {
-        expect(() =>
-            AiWebSearchResultSchema.parse({
-                query: "what is langchain",
-                results: [{ title: "LangChain", url: "https://x", content: "a framework", score: 0.9 }],
-                answer: "A framework for LLM applications.",
-            }),
-        ).not.toThrow();
-    });
 });
 
-describe("ai::agent::invoke", () => {
-    const invoke = new InvokeAgentFunction();
-
+describe("the chat format of ai::agent::create", () => {
     function scriptedModel(responses: AiModelResponse[]) {
         const requests: AiModelRequest[] = [];
         let call = 0;
@@ -189,12 +270,16 @@ describe("ai::agent::invoke", () => {
                 total_tokens: 14,
             }),
         ]);
-        const agent = create.run(context(), "greeter", "You greet people.", run);
-
-        const response = await invoke.run(context(), agent, "hello", {
-            model: "my-agent",
-            messages: [{ role: "system", content: "Be brief." }],
-        });
+        const response = await create.run(
+            context(),
+            "greeter",
+            "You greet people.",
+            run,
+            "hello",
+            undefined,
+            undefined,
+            { model: "my-agent", messages: [{ role: "system", content: "Be brief." }] },
+        );
 
         const parsed = AiChatResponseSchema.parse(response);
         expect(parsed.object).toEqual("chat.completion");
@@ -202,6 +287,7 @@ describe("ai::agent::invoke", () => {
         expect(parsed.choices).toHaveLength(1);
         expect(parsed.choices[0].finish_reason).toEqual("stop");
         expect(parsed.choices[0].message).toEqual({ role: "assistant", content: "Hi there.", name: "greeter" });
+        expect(parsed.response).toEqual("Hi there.");
         expect(parsed.usage).toEqual({ prompt_tokens: 11, completion_tokens: 3, total_tokens: 14 });
 
         expect(requests[0].messages.map((message) => message.role)).toEqual(["system", "system", "human"]);
@@ -209,9 +295,7 @@ describe("ai::agent::invoke", () => {
 
     it("translates a multimodal prompt into content blocks", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "A cat." }])]);
-        const agent = create.run(context(), "describer", "", run);
-
-        await invoke.run(context(), agent, "", {
+        await create.run(context(), "describer", "", run, "", undefined, undefined, {
             messages: [
                 {
                     role: "user",
@@ -235,10 +319,16 @@ describe("ai::agent::invoke", () => {
             generation([{ type: "text", text: "Order A-1 has shipped." }]),
         ]);
         const lookup = (async () => ({ status: "shipped" })) as unknown as SubFlow;
-        const agent = create.run(context(), "support", "", run, [lookup]);
-
-        const response = await invoke.run(context(), agent, "and A-1?", {
-            messages: [
+        const response = await create.run(
+            context(),
+            "support",
+            "",
+            run,
+            "and A-1?",
+            [lookup],
+            undefined,
+            {
+                messages: [
                 { role: "user", content: "where is A-0?" },
                 {
                     role: "assistant",
@@ -247,9 +337,10 @@ describe("ai::agent::invoke", () => {
                         { id: "call-0", type: "function", function: { name: "tool_1", arguments: '{"order":"A-0"}' } },
                     ],
                 },
-                { role: "tool", tool_call_id: "call-0", content: '{"status":"delivered"}' },
-            ],
-        });
+                    { role: "tool", tool_call_id: "call-0", content: '{"status":"delivered"}' },
+                ],
+            },
+        );
 
         const asked = requests[0].messages.find((message) => message.role === "ai");
         expect(asked?.content).toEqual([{ type: "tool_call", id: "call-0", name: "tool_1", args: { order: "A-0" } }]);
@@ -263,9 +354,7 @@ describe("ai::agent::invoke", () => {
 
     it("keeps a malformed tool call instead of failing the request", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "ok" }])]);
-        const agent = create.run(context(), "support", "", run);
-
-        await invoke.run(context(), agent, "again?", {
+        await create.run(context(), "support", "", run, "again?", undefined, undefined, {
             messages: [
                 {
                     role: "assistant",
@@ -288,18 +377,14 @@ describe("ai::agent::invoke", () => {
                 { type: "text", text: "Hi." },
             ]),
         ]);
-        const agent = create.run(context(), "greeter", "", run);
-
-        const response = await invoke.run(context(), agent, "hello");
+        const response = await create.run(context(), "greeter", "", run, "hello");
 
         expect(response.choices[0].message.content).toEqual("Hi.");
     });
 
     it("takes just a prompt, with no request at all", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "Hi." }])]);
-        const agent = create.run(context(), "greeter", "", run);
-
-        const response = await invoke.run(context(), agent, "hello");
+        const response = await create.run(context(), "greeter", "", run, "hello");
 
         expect(requests[0].messages.at(-1)?.content).toEqual([{ type: "text", text: "hello" }]);
         expect(response.choices[0].message.content).toEqual("Hi.");
@@ -307,9 +392,7 @@ describe("ai::agent::invoke", () => {
 
     it("appends the prompt to the conversation the request carries", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "Still fine." }])]);
-        const agent = create.run(context(), "greeter", "", run);
-
-        await invoke.run(context(), agent, "and now?", {
+        await create.run(context(), "greeter", "", run, "and now?", undefined, undefined, {
             messages: [
                 { role: "user", content: "how are you?" },
                 { role: "assistant", content: "fine" },
@@ -320,16 +403,40 @@ describe("ai::agent::invoke", () => {
         expect(requests[0].messages.at(-1)?.content).toEqual([{ type: "text", text: "and now?" }]);
     });
 
-    it("rejects anything that is not an agent", async () => {
-        await expect(invoke.run(context(), { id: "agent-1" } as never, "hello")).rejects.toThrow(/has to be an agent/);
+    it("carries the answer as plain text next to the OpenAI shape", async () => {
+        const { run } = scriptedModel([generation([{ type: "text", text: "Two parts. " }, { type: "text", text: "One answer." }])]);
+
+        const response = await create.run(context(), "greeter", "", run, "hello");
+
+        expect(response.response).toEqual("Two parts. One answer.");
+        expect(response.object).toEqual("chat.completion");
+    });
+
+    it("leaves the plain text empty when the model only asked for a tool", async () => {
+        const { run } = scriptedModel([
+            generation([{ type: "tool_call", id: "call-1", name: "tool_1", args: {} }]),
+            generation([{ type: "text", text: "done" }]),
+        ]);
+        const lookup = (async () => ({ ok: true })) as unknown as SubFlow;
+
+        const response = await create.run(context(), "support", "", run, "hi", [lookup]);
+
+        // The run ends on a text answer, so this one is filled; the tool-call-only
+        // turn in between is what an empty `response` would come from.
+        expect(response.response).toEqual("done");
     });
 
     it("rejects having nothing to ask", async () => {
         const { run } = scriptedModel([generation([{ type: "text", text: "ok" }])]);
-        const agent = create.run(context(), "greeter", "", run);
 
-        await expect(invoke.run(context(), agent, "")).rejects.toThrow(/nothing to ask/);
-        await expect(invoke.run(context(), agent, "", { messages: [] })).rejects.toThrow(/nothing to ask/);
-        await expect(invoke.run(context(), agent, "hi", { messages: "nope" } as never)).rejects.toThrow(/not valid/);
+        await expect(create.run(context(), "greeter", "", run, "")).rejects.toThrow(/nothing to ask/);
+        await expect(
+            create.run(context(), "greeter", "", run, "", undefined, undefined, { messages: [] }),
+        ).rejects.toThrow(/nothing to ask/);
+        await expect(
+            create.run(context(), "greeter", "", run, "hi", undefined, undefined, {
+                messages: "nope",
+            } as never),
+        ).rejects.toThrow(/not valid/);
     });
 });

@@ -1,17 +1,17 @@
 import "reflect-metadata";
 import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from "@langchain/core/messages";
 import { describe, expect, it } from "vitest";
-import { fromChatMessage } from "../src/chat/utils/Chat.fromChatMessage.util.js";
-import { toChatMessage } from "../src/chat/utils/Chat.toChatMessage.util.js";
-import { toChatResponse } from "../src/chat/utils/Chat.toChatResponse.util.js";
-import { toFlowMessage } from "../src/message/utils/Message.toFlowMessage.util.js";
-import { toLangChainMessage } from "../src/message/utils/Message.toLangChainMessage.util.js";
-import type { AiChatMessage } from "../src/chat/datatypes/Chat.message.datatype.js";
-import { AiMcpServerSchema } from "../src/mcp/datatypes/Mcp.server.datatype.js";
-import { AiMessageSchema } from "../src/message/datatypes/Message.datatype.js";
-import { AiStateUpdateSchema } from "../src/middleware/datatypes/Middleware.stateUpdate.datatype.js";
-import { AiModelRequestSchema } from "../src/model/datatypes/Model.request.datatype.js";
-import { AiModelResponseSchema } from "../src/model/datatypes/Model.response.datatype.js";
+import { fromChatMessage } from "../src/utils/chat/Chat.fromChatMessage.util.js";
+import { toChatMessage } from "../src/utils/chat/Chat.toChatMessage.util.js";
+import { toChatResponse } from "../src/utils/chat/Chat.toChatResponse.util.js";
+import { toFlowMessage } from "../src/utils/message/Message.toFlowMessage.util.js";
+import { toLangChainMessage } from "../src/utils/message/Message.toLangChainMessage.util.js";
+import type { AiChatMessage } from "../src/datatypes/chat/Chat.message.datatype.js";
+import { AiMcpServerSchema } from "../src/datatypes/mcp/Mcp.server.datatype.js";
+import { AiMessageSchema } from "../src/datatypes/message/Message.datatype.js";
+import { AiStateUpdateSchema } from "../src/datatypes/middleware/Middleware.stateUpdate.datatype.js";
+import { AiModelRequestSchema } from "../src/datatypes/model/Model.request.datatype.js";
+import { AiModelResponseSchema } from "../src/datatypes/model/Model.response.datatype.js";
 
 describe("AiModelResponseSchema", () => {
     it("accepts a tool-only turn, which carries no text block at all", () => {
