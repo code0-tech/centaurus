@@ -5,7 +5,7 @@ import type { AiAgentState } from "../src/datatypes/middleware/Middleware.agentS
 import type { AiMessage } from "../src/datatypes/message/Message.datatype.js";
 import type { AiModelRequest } from "../src/datatypes/model/Model.request.datatype.js";
 import type { AiModelResponse } from "../src/datatypes/model/Model.response.datatype.js";
-import { CreateAgentFunction } from "../src/runtimefunctions/agent/Agent.create.runtimefunction.js";
+import { AskAgentFunction } from "../src/runtimefunctions/agent/Agent.ask.runtimefunction.js";
 import { TrimMessagesMiddlewareFunction } from "../src/runtimefunctions/middleware/Middleware.trimMessages.runtimefunction.js";
 
 function subFlow(implementation: (input: never) => unknown, inputSchema?: Record<string, unknown>): SubFlow {
@@ -72,7 +72,7 @@ const nativeModelSchema: Record<string, unknown> = {
     properties: { messages: {}, tools: {}, response_format: {} },
 };
 
-const create = new CreateAgentFunction();
+const ask = new AskAgentFunction();
 
 /** A data type's JSON schema, which is what a `TYPE` parameter carries. */
 const orderType: Record<string, unknown> = {
@@ -118,10 +118,10 @@ function asStruct(plain: Record<string, unknown>): unknown {
     return { fields: Object.fromEntries(Object.entries(plain).map(([key, value]) => [key, asValue(value)])) };
 }
 
-describe("ai::agent::create", () => {
+describe("ai::agent::ask", () => {
     it("answers with a chat response, because it runs the agent itself", async () => {
         const { run } = scriptedModel([answer("hello")]);
-        const response = await create.run(context(), "greeter", "You greet people.", run, "hi");
+        const response = await ask.run(context(), "greeter", "You greet people.", run, "hi");
 
         expect(response.object).toEqual("chat.completion");
         expect(replyOf(response)).toEqual("hello");
@@ -132,7 +132,7 @@ describe("ai::agent::create", () => {
             answer("", [{ id: "call-1", name: "Order", args: { order: "A-1", status: "shipped" } }]),
         ]);
 
-        const response = await create.run(context(), "support", "", run, "where is A-1?", undefined, orderType);
+        const response = await ask.run(context(), "support", "", run, "where is A-1?", undefined, orderType);
 
         // The type travels to the model as the tool it has to call to answer.
         expect(requests[0].tools.map((tool) => tool.name)).toEqual(["Order"]);
@@ -144,14 +144,14 @@ describe("ai::agent::create", () => {
             answer("", [{ id: "call-1", name: "Order", args: { order: "A-1", status: "shipped" } }]),
         ]);
 
-        await create.run(context(), "support", "", run, "where is A-1?", undefined, orderType);
+        await ask.run(context(), "support", "", run, "where is A-1?", undefined, orderType);
 
         expect(requests[0].tool_choice).toBe("any");
     });
 
     it("leaves the tool choice alone when no type was asked for", async () => {
         const { run, requests } = scriptedModel([answer("hello")]);
-        await create.run(context(), "greeter", "", run, "hi");
+        await ask.run(context(), "greeter", "", run, "hi");
 
         expect(requests[0].tool_choice).toBeUndefined();
     });
@@ -162,7 +162,7 @@ describe("ai::agent::create", () => {
             nativeModelSchema,
         );
 
-        const response = await create.run(context(), "support", "", run, "where is A-3?", undefined, orderType);
+        const response = await ask.run(context(), "support", "", run, "where is A-3?", undefined, orderType);
 
         // No tool to call and nothing to force: the type travels as the format the
         // answer has to be written in, and is read back off the message.
@@ -181,7 +181,7 @@ describe("ai::agent::create", () => {
         );
         const flowTool = subFlow(() => "ok");
 
-        const response = await create.run(context(), "support", "", run, "make one", [flowTool], orderType);
+        const response = await ask.run(context(), "support", "", run, "make one", [flowTool], orderType);
 
         // First the agent works, with its tools and no type in the request.
         expect(requests[0].tools.map((tool) => tool.name)).toEqual(["tool_1"]);
@@ -200,7 +200,7 @@ describe("ai::agent::create", () => {
             answer("", [{ id: "call-1", name: "Order", args: { order: "A-6", status: "open" } }]),
         ]);
 
-        const response = await create.run(context(), "support", "", run, "make one", [subFlow(() => "ok")], orderType);
+        const response = await ask.run(context(), "support", "", run, "make one", [subFlow(() => "ok")], orderType);
 
         // The flow tool is bound for the work, and the extract tool alone for the
         // type - never the two together, which is what a provider refuses.
@@ -215,14 +215,14 @@ describe("ai::agent::create", () => {
             nativeModelSchema,
         );
 
-        const response = await create.run(context(), "support", "", run, "make one", [subFlow(() => "ok")], orderType);
+        const response = await ask.run(context(), "support", "", run, "make one", [subFlow(() => "ok")], orderType);
 
         expect(replyOf(response)).toEqual("I made you a user object.");
     });
 
     it("asks for no format when a model that could constrain its output was given no type", async () => {
         const { run, requests } = scriptedModel([answer("hello")], nativeModelSchema);
-        await create.run(context(), "greeter", "", run, "hi");
+        await ask.run(context(), "greeter", "", run, "hi");
 
         expect(requests[0].response_format).toBeUndefined();
     });
@@ -232,7 +232,7 @@ describe("ai::agent::create", () => {
             answer("", [{ id: "call-1", name: "Order", args: { order: "A-2", status: "delivered" } }]),
         ]);
 
-        const response = await create.run(
+        const response = await ask.run(
             context(),
             "support",
             "",
@@ -248,7 +248,7 @@ describe("ai::agent::create", () => {
 
     it("leaves the structured answer out when no type was asked for", async () => {
         const { run } = scriptedModel([answer("hello")]);
-        const response = await create.run(context(), "greeter", "", run, "hi");
+        const response = await ask.run(context(), "greeter", "", run, "hi");
 
         expect(response.structured_response).toBeUndefined();
     });
@@ -256,44 +256,44 @@ describe("ai::agent::create", () => {
     it("rejects a type the agent cannot answer in", async () => {
         const { run } = scriptedModel([answer("hello")]);
         await expect(
-            create.run(context(), "support", "", run, "hi", undefined, { type: "string" }),
-        ).rejects.toThrow(/no properties/);
+            ask.run(context(), "support", "", run, "hi", undefined, { type: "string" }),
+        ).rejects.toThrow(/type with fields/);
     });
 
     it("fails when the agent ignores the type it was asked to answer in", async () => {
         const { run } = scriptedModel([answer("just text")]);
-        await expect(create.run(context(), "support", "", run, "hi", undefined, orderType)).rejects.toThrow(
+        await expect(ask.run(context(), "support", "", run, "hi", undefined, orderType)).rejects.toThrow(
             /did not answer in the type/,
         );
     });
 
     it("needs a name", async () => {
         const { run } = scriptedModel([answer("hello")]);
-        await expect(create.run(context(), "", "", run, "hi")).rejects.toThrow(RuntimeError);
+        await expect(ask.run(context(), "", "", run, "hi")).rejects.toThrow(RuntimeError);
     });
 
     it("needs something to ask", async () => {
         const { run } = scriptedModel([answer("hello")]);
-        await expect(create.run(context(), "greeter", "", run, "")).rejects.toThrow(/nothing to ask/);
+        await expect(ask.run(context(), "greeter", "", run, "")).rejects.toThrow(/nothing to ask/);
     });
 
     it("rejects a model that is not a sub flow", async () => {
         await expect(
-            create.run(context(), "greeter", "", { provider: "anthropic", model: "claude-opus-5" } as never, "hi"),
+            ask.run(context(), "greeter", "", { provider: "anthropic", model: "claude-opus-5" } as never, "hi"),
         ).rejects.toThrow(RuntimeError);
     });
 
     it("rejects an MCP server missing what its transport needs, before the agent runs", async () => {
         const { run } = scriptedModel([answer("hello")]);
         await expect(
-            create.run(context(), "greeter", "", run, "hi", [{ name: "docs", transport: "stdio" }] as never),
+            ask.run(context(), "greeter", "", run, "hi", [{ name: "docs", transport: "stdio" }] as never),
         ).rejects.toThrow(RuntimeError);
     });
 
     it("rejects two MCP servers with the same name", async () => {
         const { run } = scriptedModel([answer("hello")]);
         await expect(
-            create.run(context(), "greeter", "", run, "hi", [
+            ask.run(context(), "greeter", "", run, "hi", [
                 { name: "docs", url: "https://a/mcp" },
                 { name: "docs", url: "https://b/mcp" },
             ] as never),
@@ -304,7 +304,7 @@ describe("ai::agent::create", () => {
 describe("the agent loop", () => {
     it("runs the model sub flow and returns its answer", async () => {
         const { run, requests } = scriptedModel([answer("Hi there.")]);
-        const response = await create.run(context(), "greeter", "You greet people.", run, "hello");
+        const response = await ask.run(context(), "greeter", "You greet people.", run, "hello");
 
         expect(requests).toHaveLength(1);
         expect(requests[0].messages.map((m) => m.role)).toEqual(["system", "human"]);
@@ -326,7 +326,7 @@ describe("the agent loop", () => {
             { type: "object", description: "Looks an order up.", properties: { order: { type: "string" } } },
         );
 
-        const response = await create.run(context(), "support", "", run, "where is A-1?", [lookup]);
+        const response = await ask.run(context(), "support", "", run, "where is A-1?", [lookup]);
 
         expect(requests[0].tools).toEqual([
             {
@@ -341,6 +341,62 @@ describe("the agent loop", () => {
         expect(replyOf(response)).toEqual("Order A-1 has shipped.");
     });
 
+    it("advertises client tools and returns their call without executing them", async () => {
+        const { run, requests } = scriptedModel([
+            answer("", [{ id: "call-1", name: "view_knowledge_file", args: { path: "guide.md" } }]),
+        ]);
+
+        const response = await ask.run(
+            context(),
+            "support",
+            "",
+            run,
+            "read the guide",
+            undefined,
+            undefined,
+            {
+                messages: [{ role: "user", content: "read the guide" }],
+                tools: [
+                    {
+                        type: "function",
+                        function: {
+                            name: "view_knowledge_file",
+                            description: "Read a file from the knowledge base.",
+                            parameters: {
+                                type: "object",
+                                properties: { path: { type: "string" } },
+                                required: ["path"],
+                            },
+                        },
+                    },
+                ],
+            },
+        );
+
+        expect(requests).toHaveLength(1);
+        expect(requests[0].tools).toEqual([
+            {
+                name: "view_knowledge_file",
+                description: "Read a file from the knowledge base.",
+                input_schema: {
+                    type: "object",
+                    properties: { path: { type: "string" } },
+                    required: ["path"],
+                },
+            },
+        ]);
+        expect(response.choices[0].message).toMatchObject({
+            role: "assistant",
+            tool_calls: [
+                {
+                    id: "call-1",
+                    type: "function",
+                    function: { name: "view_knowledge_file", arguments: '{"path":"guide.md"}' },
+                },
+            ],
+        });
+    });
+
     it("reports a failing tool to the model instead of aborting the run", async () => {
         const { run, requests } = scriptedModel([
             answer("", [{ id: "call-1", name: "tool_1", args: {} }]),
@@ -350,7 +406,7 @@ describe("the agent loop", () => {
             throw new Error("the warehouse is offline");
         });
 
-        const response = await create.run(context(), "support", "", run, "status?", [broken]);
+        const response = await ask.run(context(), "support", "", run, "status?", [broken]);
 
         expect(JSON.stringify(requests[1].messages.at(-1)?.content)).toContain("the warehouse is offline");
         expect(replyOf(response)).toEqual("That did not work.");
@@ -374,7 +430,7 @@ describe("the agent loop", () => {
             };
         });
 
-        await create.run(
+        await ask.run(
             context(),
             "support",
             "",
@@ -393,7 +449,7 @@ describe("the agent loop", () => {
         const { run, requests } = scriptedModel([answer("should not be reached")]);
         const block = subFlow(() => ({ jump_to: "end" }));
 
-        const response = await create.run(
+        const response = await ask.run(
             context(),
             "support",
             "",
@@ -418,7 +474,7 @@ describe("the agent loop", () => {
             return null;
         });
 
-        const response = await create.run(
+        const response = await ask.run(
             context(),
             "support",
             "",
@@ -439,13 +495,13 @@ describe("the agent loop", () => {
         const lookup = subFlow(() => ({ status: "shipped" }), { type: "object", description: "Looks an order up." });
 
         await expect(
-            create.run(context(), "support", "", run, "hello", [
+            ask.run(context(), "support", "", run, "hello", [
                 lookup,
                 { name: "docs", transport: "stdio" },
             ] as never),
         ).rejects.toThrow(/needs a command/);
 
-        await create.run(context(), "support", "", run, "hello", [lookup]);
+        await ask.run(context(), "support", "", run, "hello", [lookup]);
         expect(requests[0].tools.map((t) => t.name)).toEqual(["tool_1"]);
     });
 
@@ -460,7 +516,7 @@ describe("the agent loop", () => {
         });
         const nameless = subFlow(() => "nothing");
 
-        await create.run(context(), "support", "", run, "hello", [now as never, nameless as never]);
+        await ask.run(context(), "support", "", run, "hello", [now as never, nameless as never]);
 
         expect(requests[0].tools).toEqual([
             {
@@ -486,7 +542,7 @@ describe("the agent loop", () => {
         );
         const sameName = subFlow(() => null, asStruct({ title: "Look up order" }) as never);
 
-        await create.run(context(), "support", "", run, "hello", [lookup as never, sameName as never]);
+        await ask.run(context(), "support", "", run, "hello", [lookup as never, sameName as never]);
 
         expect(requests[0].tools.map((tool) => tool.name)).toEqual(["Look_up_order", "Look_up_order_2"]);
         expect(requests[0].tools[0].description).toEqual("Looks an order up.");
@@ -500,13 +556,13 @@ describe("the agent loop", () => {
     it("rejects a tool entry that is neither a sub flow nor an MCP server", async () => {
         const { run } = scriptedModel([answer("ok")]);
         await expect(
-            create.run(context(), "support", "", run, "hello", [{ nonsense: true }] as never),
+            ask.run(context(), "support", "", run, "hello", [{ nonsense: true }] as never),
         ).rejects.toThrow(/Entry 1 of "tools"/);
     });
 
     it("fails with a clear error when the model sub flow answers with the wrong shape", async () => {
         const run = subFlow(() => ({ message: { role: "ai", content: "not a list" } }));
-        await expect(create.run(context(), "greeter", "", run, "hello")).rejects.toThrow(
+        await expect(ask.run(context(), "greeter", "", run, "hello")).rejects.toThrow(
             /did not return a valid model response/,
         );
     });
@@ -521,7 +577,7 @@ describe("what a middleware flow is handed", () => {
             return {};
         });
 
-        await create.run(context(), "support", "You are helpful.", run, "hello", [], undefined, undefined, [observe]);
+        await ask.run(context(), "support", "You are helpful.", run, "hello", [], undefined, undefined, [observe]);
 
         expect(seen[0].context).toBeUndefined();
         expect(Object.keys(seen[0])).toEqual(["messages", "agent_name", "hook"]);
@@ -540,7 +596,7 @@ describe("composing the shipped functions into an agent", () => {
                 : { role: "assistant" as const, content: `answer ${turn} ${"padding ".repeat(40)}` },
         );
 
-        const response = await create.run(
+        const response = await ask.run(
             context(),
             "support",
             "You are helpful.",

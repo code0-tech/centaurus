@@ -3,13 +3,13 @@ import type { FunctionContext, SubFlow } from "@code0-tech/hercules";
 import { describe, expect, it } from "vitest";
 import type { AiChatResponse } from "../src/datatypes/chat/Chat.response.datatype.js";
 import type { AiModelResponse } from "../src/datatypes/model/Model.response.datatype.js";
-import { CreateAgentFunction } from "../src/runtimefunctions/agent/Agent.create.runtimefunction.js";
+import { AskAgentFunction } from "../src/runtimefunctions/agent/Agent.ask.runtimefunction.js";
 import { HumanInTheLoopMiddlewareFunction } from "../src/runtimefunctions/middleware/Middleware.humanInTheLoop.runtimefunction.js";
 import { askFor } from "../src/utils/middleware/Approval.askFor.util.js";
 import { describeCall } from "../src/utils/middleware/Approval.describeCall.util.js";
 import { newCode } from "../src/utils/middleware/Approval.newCode.util.js";
 
-const create = new CreateAgentFunction();
+const ask = new AskAgentFunction();
 const humanInTheLoop = new HumanInTheLoopMiddlewareFunction();
 
 /**
@@ -74,7 +74,7 @@ function chat(
     conversation: Turn[],
     askBefore: string[] = ["refund"],
 ): Promise<AiChatResponse> {
-    return create.run(
+    return ask.run(
         context(),
         "support",
         "You help.",

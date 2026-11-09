@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { AiChatRequest } from "../src/datatypes/chat/Chat.request.datatype.js";
 import type { AiChatResponse } from "../src/datatypes/chat/Chat.response.datatype.js";
 import type { AiModelRequest } from "../src/datatypes/model/Model.request.datatype.js";
-import { CreateAgentFunction } from "../src/runtimefunctions/agent/Agent.create.runtimefunction.js";
+import { AskAgentFunction } from "../src/runtimefunctions/agent/Agent.ask.runtimefunction.js";
 import { AiOpenAiServerRuntimeEvent } from "../src/runtimeevents/openai/OpenAi.server.runtimeevent.js";
 import { OpenAiOpenWebUiFormattingFunction } from "../src/runtimefunctions/openai/OpenAi.openWebUiFormatting.runtimefunction.js";
 import { OpenAiRespondFunction } from "../src/runtimefunctions/openai/OpenAi.respond.runtimefunction.js";
@@ -181,7 +181,7 @@ describe("the OpenAI endpoint", () => {
 
         expect(response.status).toEqual(200);
         expect(calls.map((call) => call.flowId)).toEqual([2n]);
-        // The flow is handed the request itself, which is what ai::agent::create takes.
+        // The flow is handed the request itself, which is what ai::agent::ask takes.
         expect(calls[0].payload).toMatchObject({ messages: [{ role: "user", content: "hi" }] });
         expect(body.response).toEqual("triage here");
         // A client matches the answer against the model it asked for.
@@ -353,7 +353,7 @@ describe("the flow a client ends up talking to", () => {
         // which is exactly what the flow's return value could not express.
         const after: string[] = [];
         const { url } = await serve([flow({ id: 1, slug: "acme", model: "support" })], async ({ executionId, payload }) => {
-            const answer = await new CreateAgentFunction().run(
+            const answer = await new AskAgentFunction().run(
                 context(executionId) as never,
                 "support",
                 "You track orders.",
