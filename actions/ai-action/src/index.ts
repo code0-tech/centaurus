@@ -33,9 +33,17 @@ import { AiModelResponseDataType } from "./datatypes/model/Model.response.dataty
 import { AiResponseFormatDataType } from "./datatypes/model/Model.responseFormat.datatype.js";
 import { AiToolSpecDataType } from "./datatypes/model/Model.toolSpec.datatype.js";
 
-import { CreateAgentFunction } from "./runtimefunctions/agent/Agent.create.runtimefunction.js";
+import { AskAgentFunction } from "./runtimefunctions/agent/Agent.ask.runtimefunction.js";
+import { SkillsFunction } from "./runtimefunctions/agent/Agent.skills.runtimefunction.js";
+import { McpServerFunction } from "./runtimefunctions/mcp/Mcp.server.runtimefunction.js";
 import { HumanInTheLoopMiddlewareFunction } from "./runtimefunctions/middleware/Middleware.humanInTheLoop.runtimefunction.js";
 import { TrimMessagesMiddlewareFunction } from "./runtimefunctions/middleware/Middleware.trimMessages.runtimefunction.js";
+import { AnthropicModelFunction } from "./runtimefunctions/model/Model.anthropic.runtimefunction.js";
+import { GroqModelFunction } from "./runtimefunctions/model/Model.groq.runtimefunction.js";
+import { LiteLlmModelFunction } from "./runtimefunctions/model/Model.liteLlm.runtimefunction.js";
+import { MistralModelFunction } from "./runtimefunctions/model/Model.mistral.runtimefunction.js";
+import { OllamaModelFunction } from "./runtimefunctions/model/Model.ollama.runtimefunction.js";
+import { OpenAiModelFunction } from "./runtimefunctions/model/Model.openAi.runtimefunction.js";
 import { OpenRouterModelFunction } from "./runtimefunctions/model/Model.openRouter.runtimefunction.js";
 
 import { OpenAiOpenWebUiFormattingFunction } from "./runtimefunctions/openai/OpenAi.openWebUiFormatting.runtimefunction.js";
@@ -86,10 +94,18 @@ const DATA_TYPES: DataTypeClass[] = [
 ];
 
 const RUNTIME_FUNCTIONS: RuntimeFunctionClass[] = [
-    CreateAgentFunction,
+    AskAgentFunction,
+    SkillsFunction,
+    McpServerFunction,
     HumanInTheLoopMiddlewareFunction,
     OpenAiOpenWebUiFormattingFunction,
     OpenAiRespondFunction,
+    AnthropicModelFunction,
+    GroqModelFunction,
+    LiteLlmModelFunction,
+    MistralModelFunction,
+    OllamaModelFunction,
+    OpenAiModelFunction,
     OpenRouterModelFunction,
     TrimMessagesMiddlewareFunction,
 ];
@@ -103,7 +119,7 @@ const action = new Action(
     process.env.AQUILA_URL ?? "127.0.0.1:8081",
     "code0-tech",
     "tabler:robot",
-    "AI agent integration: build LangChain agents whose model, tools and middleware are flows of the project itself.",
+    "AI agents built from what the project already has: the model they think with, the flows and MCP servers they use as tools, and the rules they follow.",
     [{ code: "en-US", content: "AI" }],
 );
 
