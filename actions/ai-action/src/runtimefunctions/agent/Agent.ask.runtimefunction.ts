@@ -1,4 +1,6 @@
 import {
+    Alias,
+    Description,
     DisplayIcon,
     DisplayMessage,
     FunctionContext,
@@ -10,6 +12,7 @@ import {
     SubFlow,
     ThrowsError,
 } from "@code0-tech/hercules";
+import type { BaseMessage } from "@langchain/core/messages";
 import type { ClientTool } from "@langchain/core/tools";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import { createAgent, createMiddleware, tool, type AnyAgentMiddleware, type ReactAgent } from "langchain";
@@ -18,7 +21,11 @@ import { AiAgentRequestSchema, type AiAgentRequest } from "../../datatypes/agent
 import { AiAgentResponseSchema, type AiAgentResponse } from "../../datatypes/agent/Agent.response.datatype.js";
 import type { AiAgentStep } from "../../datatypes/agent/Agent.step.datatype.js";
 import type { AiChatResponse } from "../../datatypes/chat/Chat.response.datatype.js";
-import { AiChatRequestSchema, type AiChatRequest } from "../../datatypes/chat/Chat.request.datatype.js";
+import {
+    AiChatRequestSchema,
+    type AiChatRequest,
+    type AiChatTool,
+} from "../../datatypes/chat/Chat.request.datatype.js";
 import { AiMcpServerSchema, type AiMcpServer } from "../../datatypes/mcp/Mcp.server.datatype.js";
 import type { AiMessage } from "../../datatypes/message/Message.datatype.js";
 import type { AgentDefinition, ToolEntry } from "../../types/agent/Agent.types.js";
@@ -62,13 +69,19 @@ const JUMP_TARGETS = ["model", "tools", "end"] as const;
 const EXTRACTION_PROMPT =
     "The conversation above is finished. Answer with what it produced, in the type you were given, and add nothing that was not said in it.";
 
-@Identifier("ai::agent::create")
+@Identifier("ai::agent::ask")
 @DisplayIcon("tabler:ai")
 @Signature(
-    "<T extends TYPE>(name: TEXT, system_prompt: TEXT, model: TRANSFORM<AI_MODEL_REQUEST, AI_MODEL_RESPONSE>, prompt: TEXT, tools?: LIST<((...args: any[]) => any) | AI_MCP_SERVER>, output_schema?: T, request?: AI_CHAT_REQUEST, middleware?: LIST<TRANSFORM<AI_AGENT_STATE, AI_STATE_UPDATE>>): AI_CHAT_RESPONSE & { structured_response: T }",
+    "<T extends TYPE>(name: TEXT, instructions: TEXT, model: TRANSFORM<AI_MODEL_REQUEST, AI_MODEL_RESPONSE>, question: TEXT, tools?: LIST<((...args: any[]) => any) | AI_MCP_SERVER>, answer_type?: T, conversation?: AI_CHAT_REQUEST, rules?: LIST<TRANSFORM<AI_AGENT_STATE, AI_STATE_UPDATE>>): AI_CHAT_RESPONSE & { structured_response: T }",
 )
-@Name({ code: "en-US", content: "Create agent" })
-@DisplayMessage({ code: "en-US", content: "Ask the agent ${name} ${prompt}" })
+@Name({ code: "en-US", content: "Ask agent" })
+@Alias({ code: "en-US", content: "agent;ai;llm;chat;prompt;assistant;tools" })
+@Description({
+    code: "en-US",
+    content:
+        "Asks an AI agent a question and waits for its answer. Give it instructions, a model to think with and flows as tools - it decides on its own what to use until it can answer.",
+})
+@DisplayMessage({ code: "en-US", content: "Ask the agent ${name} ${question}" })
 @ThrowsError()
 @Parameter({
     runtimeName: "name",
@@ -82,13 +95,13 @@ const EXTRACTION_PROMPT =
     ],
 })
 @Parameter({
-    runtimeName: "system_prompt",
-    name: [{ code: "en-US", content: "System prompt" }],
+    runtimeName: "instructions",
+    name: [{ code: "en-US", content: "Instructions" }],
     description: [
         {
             code: "en-US",
             content:
-                "The standing instructions the agent works under - its role, what it may and may not do, how the answer should read. They are sent ahead of every turn, so they hold for the whole conversation rather than for this prompt alone.",
+                "What the agent is and how it should work: its role, what it may do, how the answer should read. The agent is told this before every turn.",
         },
     ],
 })
@@ -104,13 +117,13 @@ const EXTRACTION_PROMPT =
     ],
 })
 @Parameter({
-    runtimeName: "prompt",
-    name: [{ code: "en-US", content: "Prompt" }],
+    runtimeName: "question",
+    name: [{ code: "en-US", content: "Question" }],
     description: [
         {
             code: "en-US",
             content:
-                "The question put to the agent in this run. It is appended to the messages the request already carries, so it is the last thing the agent reads before answering. It may be left empty when the request already carries the question.",
+                "What the agent is asked this time. It comes after everything the conversation already holds. Leave it empty when the conversation already ends in a question.",
         },
     ],
 })
@@ -121,48 +134,48 @@ const EXTRACTION_PROMPT =
         {
             code: "en-US",
             content:
-                "What the agent may reach for while it works: flows of this project, each offered as a tool under its own name, and MCP servers, whose tools are discovered on connect. The agent decides on its own which of them to call, and how often.",
+                "What the agent may use while it works: flows of this project, each as its own tool, and whole sets of ready-made tools from an \"MCP server\" node. The agent picks what it needs.",
         },
     ],
     optional: true,
 })
 @Parameter({
-    runtimeName: "output_schema",
-    name: [{ code: "en-US", content: "Output type" }],
+    runtimeName: "answer_type",
+    name: [{ code: "en-US", content: "Answer type" }],
     description: [
         {
             code: "en-US",
             content:
-                "The data type the answer has to come back in, so the flow can read the fields instead of parsing prose. It has to be an object type; left empty, the agent answers in plain text.",
+                "The data type the answer has to come back in, so the flow can read its fields instead of searching a text. It needs fields; left empty the agent answers in plain text.",
         },
     ],
     optional: true,
 })
 @Parameter({
-    runtimeName: "request",
-    name: [{ code: "en-US", content: "Request" }],
+    runtimeName: "conversation",
+    name: [{ code: "en-US", content: "Conversation" }],
     description: [
         {
             code: "en-US",
             content:
-                "A conversation to continue, in the chat format an OpenAI-compatible client sends. Its messages go ahead of the prompt, which is how a chat endpoint hands the agent everything that was said before.",
+                "Everything that was said before, as a chat client sends it. Those messages go ahead of the question, which is how a chat endpoint hands the agent the conversation it is to carry on.",
         },
     ],
     optional: true,
 })
 @Parameter({
-    runtimeName: "middleware",
-    name: [{ code: "en-US", content: "Middleware" }],
+    runtimeName: "rules",
+    name: [{ code: "en-US", content: "Rules" }],
     description: [
         {
             code: "en-US",
             content:
-                "Steps that sit between the agent and its model and may change what happens on each turn - trimming the conversation, asking before a tool runs. They are applied in the order they are listed.",
+                "Rules the agent has to work by, checked on every turn: shortening a conversation that grew too long, asking a person before a tool runs. They apply in the order listed.",
         },
     ],
     optional: true,
 })
-export class CreateAgentFunction {
+export class AskAgentFunction {
     /**
      * Builds the agent and runs it in one node, rather than returning the agent for a
      * second node to invoke. A returned agent would be a sub flow function, and the
@@ -174,30 +187,30 @@ export class CreateAgentFunction {
      *
      * The parameters are ordered by how often a flow reaches for them: what every
      * agent needs first, then the tools and the answer's type, and the conversation
-     * and middleware knobs last.
+     * and the rules last.
      */
     async run(
         _context: FunctionContext,
         name: string,
-        system_prompt: string,
+        instructions: string,
         model: unknown,
-        prompt: string,
+        question: string,
         tools?: ToolEntry[],
-        output_schema?: unknown,
-        request?: AiChatRequest,
-        middleware?: unknown[],
+        answer_type?: unknown,
+        conversation?: AiChatRequest,
+        rules?: unknown[],
     ): Promise<AiChatResponse> {
         const log: Logger = logger("agent", _context.executionId);
         const toolLog: Logger = logger("tool", _context.executionId);
         log.info(`the node asks the agent "${name}"`, {
-            prompt,
+            question,
             tools: Array.isArray(tools) ? tools.length : 0,
-            middleware: Array.isArray(middleware) ? middleware.length : 0,
-            request,
-            output_schema,
+            rules: Array.isArray(rules) ? rules.length : 0,
+            conversation,
+            answer_type,
         });
 
-        // The "output_schema" parameter is a TYPE: the data type the flow wants the
+        // The "answer_type" parameter is a TYPE: the data type the flow wants the
         // agent to answer in. Its value reaches the action as that type's JSON schema
         // - as a protobuf Struct when aquila wrapped it, which `toPlainSchema`
         // unwraps either way. langchain only accepts a plain JSON schema as a
@@ -206,25 +219,25 @@ export class CreateAgentFunction {
         // type's value, so a schema for anything else is rejected here rather than
         // deep inside the agent.
         let outputSchema: Record<string, unknown> | undefined;
-        if (output_schema !== undefined && output_schema !== null) {
-            outputSchema = toPlainSchema(output_schema);
+        if (answer_type !== undefined && answer_type !== null) {
+            outputSchema = toPlainSchema(answer_type);
             if (!outputSchema || typeof outputSchema !== "object") {
                 throw new RuntimeError(
                     "ERROR_INVALID_AI_OUTPUT_SCHEMA",
-                    `The "output_schema" parameter has to be a type, but a ${typeof output_schema} was passed.`,
+                    `The "answer_type" parameter has to be a type, but a ${typeof answer_type} was passed.`,
                 );
             }
             if (!("properties" in outputSchema)) {
                 throw new RuntimeError(
                     "ERROR_INVALID_AI_OUTPUT_SCHEMA",
-                    'The agent can only answer in an object type: the type passed as "output_schema" has no properties.',
+                    'The agent can only answer in a type with fields: the type passed as "answer_type" has none.',
                 );
             }
         }
 
         const definition: AgentDefinition = {
             name: requireText(name, "ERROR_INVALID_AI_AGENT", "An agent needs a name."),
-            systemPrompt: asText(system_prompt ?? "", "system_prompt", "ERROR_INVALID_AI_AGENT"),
+            systemPrompt: asText(instructions ?? "", "instructions", "ERROR_INVALID_AI_AGENT"),
             model: asSubFlow(model, "model"),
             // A tool is either a flow of the project or an MCP server; which entry was
             // neither is part of the error, because that is what makes it fixable.
@@ -239,8 +252,8 @@ export class CreateAgentFunction {
                     `Entry ${index + 1} of "tools" is neither a sub flow nor a valid MCP server: ${formatIssues(server.error.issues)}`,
                 );
             }),
-            middleware: asList(middleware, "middleware").map((entry, index): SubFlow =>
-                asSubFlow(entry, `middleware[${index}]`),
+            middleware: asList(rules, "rules").map((entry, index): SubFlow =>
+                asSubFlow(entry, `rules[${index}]`),
             ),
             ...(outputSchema ? { outputSchema } : {}),
         };
@@ -264,36 +277,36 @@ export class CreateAgentFunction {
 
         const parsed: AiChatRequest = parseOrThrow(
             AiChatRequestSchema,
-            request ?? { messages: [] },
+            conversation ?? { messages: [] },
             "ERROR_INVALID_AI_CHAT_REQUEST",
             "The chat request is not valid",
         );
-        const question: string = asText(prompt, "prompt", "ERROR_INVALID_AI_CHAT_REQUEST");
-        const conversation: AiMessage[] = [
+        const asked: string = asText(question, "question", "ERROR_INVALID_AI_CHAT_REQUEST");
+        const history: AiMessage[] = [
             ...parsed.messages.map(fromChatMessage),
-            ...(question.length > 0
-                ? [{ role: "human", content: [{ type: "text", text: question }] } as AiMessage]
+            ...(asked.length > 0
+                ? [{ role: "human", content: [{ type: "text", text: asked }] } as AiMessage]
                 : []),
         ];
-        if (conversation.length === 0) {
+        if (history.length === 0) {
             throw new RuntimeError(
                 "ERROR_INVALID_AI_CHAT_REQUEST",
-                "There is nothing to ask: the prompt is empty and the request carries no messages.",
+                "There is nothing to ask: the question is empty and the conversation carries no messages.",
             );
         }
 
         const started: number = Date.now();
         log.info(`running the agent "${definition.name}"`, {
-            messages: conversation.length,
+            messages: history.length,
             tools: definition.tools.length,
-            middleware: definition.middleware.length,
-            output_schema: definition.outputSchema,
-            system_prompt: definition.systemPrompt,
+            rules: definition.middleware.length,
+            answer_type: definition.outputSchema,
+            instructions: definition.systemPrompt,
         });
 
         const agentRequest: AiAgentRequest = parseOrThrow(
             AiAgentRequestSchema,
-            { messages: conversation },
+            { messages: history },
             "ERROR_INVALID_AI_AGENT_REQUEST",
             "The agent request is not valid",
         );
@@ -325,19 +338,50 @@ export class CreateAgentFunction {
                 );
             }
 
-            const allowed = new Set(servers.flatMap((server) => server.allowed_tools ?? []));
+            // Each server's list of allowed tools is its own, and a tool arrives
+            // under the name of the server it came from with its own after it -
+            // "tickets_search". So a tool is held to the list of that server alone,
+            // found by that prefix, longest name first for a server whose name
+            // begins like another's: tool names are not unique across servers, and a
+            // server that lists nothing may use everything it offers.
+            const listed = new Map<string, Set<string>>(
+                servers
+                    .filter((server) => (server.allowed_tools ?? []).length > 0)
+                    .sort((one, other) => other.name.length - one.name.length)
+                    .map((server) => [server.name, new Set(server.allowed_tools)]),
+            );
             mcpTools =
-                allowed.size === 0
+                listed.size === 0
                     ? discovered
-                    : discovered.filter((entry) => allowed.has(entry.name.split("__").pop() ?? entry.name));
+                    : discovered.filter((entry) => {
+                          for (const [server, allowed] of listed) {
+                              if (entry.name.startsWith(`${server}_`)) {
+                                  return allowed.has(entry.name.slice(server.length + 1));
+                              }
+                          }
+                          return true;
+                      });
         }
 
         let agent: ReactAgent;
         try {
             // Two sub flows may share a title, and the model needs to tell the tools
             // they become apart.
-            const taken = new Set<string>();
+            const externalTools: ClientTool[] = (parsed.tools ?? []).map((entry: AiChatTool): ClientTool => {
+                const name = entry.function.name;
+                return tool(
+                    async () => `The external tool "${name}" must be run by the chat client.`,
+                    {
+                        name,
+                        description: entry.function.description ?? "",
+                        schema: (entry.function.parameters ?? emptyJsonSchema()) as never,
+                    },
+                ) as unknown as ClientTool;
+            });
+            const externalNames = new Set(externalTools.map((entry) => (entry as { name: string }).name));
+            const taken = new Set<string>(externalNames);
             const agentTools: ClientTool[] = [
+                ...externalTools,
                 ...flows.map((flow, index): ClientTool => {
                     const schema: Record<string, unknown> | undefined = toPlainSchema(flow.inputSchema);
 
@@ -414,20 +458,44 @@ export class CreateAgentFunction {
             agent = createAgent({
                 model: new FlowChatModel({ run: definition.model }),
                 tools: agentTools,
-                middleware: definition.middleware.map(
-                    (flow, index): AnyAgentMiddleware =>
-                        createMiddleware({
-                            name: `flow_middleware_${index + 1}`,
-                            beforeModel: {
-                                hook: createHookHandler(flow, definition.name, "before_model"),
-                                canJumpTo: [...JUMP_TARGETS],
-                            },
-                            afterModel: {
-                                hook: createHookHandler(flow, definition.name, "after_model"),
-                                canJumpTo: [...JUMP_TARGETS],
-                            },
-                        } as never) as AnyAgentMiddleware,
-                ),
+                middleware: [
+                    ...definition.middleware.map(
+                        (flow, index): AnyAgentMiddleware =>
+                            createMiddleware({
+                                name: `flow_middleware_${index + 1}`,
+                                beforeModel: {
+                                    hook: createHookHandler(flow, definition.name, "before_model"),
+                                    canJumpTo: [...JUMP_TARGETS],
+                                },
+                                afterModel: {
+                                    hook: createHookHandler(flow, definition.name, "after_model"),
+                                    canJumpTo: [...JUMP_TARGETS],
+                                },
+                            } as never) as AnyAgentMiddleware,
+                    ),
+                    ...(externalNames.size > 0
+                        ? [
+                              createMiddleware({
+                                  name: "return_external_tool_call",
+                                  afterModel: {
+                                      hook: async (state: { messages: BaseMessage[] }) => {
+                                          const last = state.messages.at(-1) as
+                                              | (BaseMessage & { tool_calls?: { name?: string }[] })
+                                              | undefined;
+                                          const calls = last?.tool_calls ?? [];
+                                          return calls.some(
+                                              (call) =>
+                                                  typeof call.name === "string" && externalNames.has(call.name),
+                                          )
+                                              ? { jumpTo: "end" }
+                                              : undefined;
+                                      },
+                                      canJumpTo: ["end"],
+                                  },
+                              } as never) as AnyAgentMiddleware,
+                          ]
+                        : []),
+                ],
                 name: definition.name,
                 ...(definition.systemPrompt ? { systemPrompt: definition.systemPrompt } : {}),
                 // An output type is only asked for here when the agent has no tools
@@ -597,7 +665,7 @@ export class CreateAgentFunction {
         if (outputSchema && !answer.structured_response) {
             throw new RuntimeError(
                 "ERROR_INVALID_AI_AGENT_RESPONSE",
-                `The agent "${definition.name}" did not answer in the type passed as "output_schema", not even when asked for it on its own.`,
+                `The agent "${definition.name}" did not answer in the type passed as "answer_type", not even when asked for it on its own.`,
             );
         }
 
