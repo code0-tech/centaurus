@@ -1,4 +1,6 @@
 import {
+    Alias,
+    Description,
     DisplayIcon,
     DisplayMessage,
     FunctionContext,
@@ -32,7 +34,13 @@ const log = logger("middleware");
 @Identifier("ai::middleware::human_in_the_loop")
 @DisplayIcon("tabler:message-ai")
 @Signature("(tools: LIST<TEXT>): TRANSFORM<AI_AGENT_STATE, AI_STATE_UPDATE>")
-@Name({ code: "en-US", content: "Human in the loop" })
+@Name({ code: "en-US", content: "Ask a person first" })
+@Alias({ code: "en-US", content: "human in the loop;approval;approve;confirm;permission;middleware" })
+@Description({
+    code: "en-US",
+    content:
+        "Makes the agent ask a person before it uses one of the tools you name. Give it to an agent as a rule: nothing happens until someone answers. Use it for tools that write, pay or delete.",
+})
 @DisplayMessage({ code: "en-US", content: "Ask before running ${tools}" })
 @ThrowsError()
 @Parameter({
@@ -42,7 +50,7 @@ const log = logger("middleware");
         {
             code: "en-US",
             content:
-                "The tools the agent has to ask about before running them. Instead of running one, it answers with what it wants to do and ends the turn; the reply to that question - the next message of the conversation - decides.",
+                "The tools the agent has to ask about, named as the agent sees them. It says what it wants to do and stops; the next message of the conversation is the answer.",
         },
     ],
 })
@@ -51,7 +59,7 @@ export class HumanInTheLoopMiddlewareFunction {
      * A middleware that makes an agent ask before it runs certain tools, and holds it
      * to the answer.
      *
-     * It is a middleware like any other, so an agent gets it the same way it gets a
+     * It is a rule like any other, so an agent gets it the same way it gets a
      * trimmer or a flow of the project - the agent node itself knows nothing about
      * approvals.
      *

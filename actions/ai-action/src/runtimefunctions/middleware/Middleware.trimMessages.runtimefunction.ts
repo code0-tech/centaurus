@@ -1,4 +1,6 @@
 import {
+    Alias,
+    Description,
     DisplayIcon,
     DisplayMessage,
     FunctionContext,
@@ -18,48 +20,56 @@ import { AiStateUpdateSchema, type AiStateUpdate } from "../../datatypes/middlew
 import { AiAgentStateSchema, type AiAgentState } from "../../datatypes/middleware/Middleware.agentState.datatype.js";
 import { parseOrThrow } from "../../utils/shared/Shared.parseOrThrow.util.js";
 
-type TrimStrategy = "first" | "last";
+type TrimEnd = "first" | "last";
 
 @Identifier("ai::middleware::trim_messages")
 @DisplayIcon("tabler:scissors")
-@Signature("(max_tokens: NUMBER, strategy?: TEXT, keep_system?: BOOLEAN): TRANSFORM<AI_AGENT_STATE, AI_STATE_UPDATE>")
-@Name({ code: "en-US", content: "Trim messages" })
+@Signature(
+    "(max_conversation_length: NUMBER, keep?: TEXT, keep_instructions?: BOOLEAN): TRANSFORM<AI_AGENT_STATE, AI_STATE_UPDATE>",
+)
+@Name({ code: "en-US", content: "Shorten long conversations" })
+@Alias({ code: "en-US", content: "trim;messages;history;context;window;tokens;middleware" })
+@Description({
+    code: "en-US",
+    content:
+        "Keeps a conversation short enough for the model by dropping whole messages before the agent is asked again. Give it to an agent as a rule. Nothing is summarized - dropped messages are gone.",
+})
 @DisplayMessage({
     code: "en-US",
-    content: "Trim the conversation to ${max_tokens} tokens",
+    content: "Shorten the conversation to ${max_conversation_length} tokens",
 })
 @ThrowsError()
 @Parameter({
-    runtimeName: "max_tokens",
-    name: [{ code: "en-US", content: "Maximum tokens" }],
+    runtimeName: "max_conversation_length",
+    name: [{ code: "en-US", content: "Maximum conversation length" }],
     description: [
         {
             code: "en-US",
             content:
-                "The size the conversation is cut down to before it is sent to the model, counted in tokens and approximated rather than counted by the model's own tokenizer. It has to be a positive number.",
+                "The length the conversation is cut down to, in tokens - one token is about three quarters of a word. The count is an estimate, so stay below what the model can really read.",
         },
     ],
 })
 @Parameter({
-    runtimeName: "strategy",
-    name: [{ code: "en-US", content: "Strategy" }],
+    runtimeName: "keep",
+    name: [{ code: "en-US", content: "Which messages to keep" }],
     description: [
         {
             code: "en-US",
             content:
-                "Which end of the conversation survives the cut: \"last\" keeps the most recent messages, \"first\" keeps the oldest ones. Defaults to \"last\", which is what keeps an ongoing conversation usable.",
+                "Which end of the conversation survives: \"newest\" keeps what was said last, \"oldest\" keeps how it began. Left empty, the newest are kept.",
         },
     ],
     optional: true,
 })
 @Parameter({
-    runtimeName: "keep_system",
-    name: [{ code: "en-US", content: "Keep system prompt" }],
+    runtimeName: "keep_instructions",
+    name: [{ code: "en-US", content: "Keep the instructions" }],
     description: [
         {
             code: "en-US",
             content:
-                "Whether the system prompt is kept even when the rest is cut away. On by default, because an agent that loses its instructions mid-conversation stops behaving as it was set up to.",
+                "Whether the agent's instructions are kept even when the rest is cut away. On unless switched off, because an agent that loses its instructions mid-conversation stops behaving as it was set up to.",
         },
     ],
     optional: true,
@@ -67,26 +77,36 @@ type TrimStrategy = "first" | "last";
 export class TrimMessagesMiddlewareFunction {
     run(
         _context: FunctionContext,
-        max_tokens: number,
-        strategy?: string,
-        keep_system?: boolean,
+        max_conversation_length: number,
+        keep?: string,
+        keep_instructions?: boolean,
     ): AiMiddlewareTransform {
-        if (typeof max_tokens !== "number" || !Number.isFinite(max_tokens) || max_tokens <= 0) {
-            throw new RuntimeError("ERROR_INVALID_AI_STATE_UPDATE", "Trimming needs a positive token budget.");
-        }
-        if (strategy !== undefined && strategy !== "first" && strategy !== "last") {
+        if (
+            typeof max_conversation_length !== "number" ||
+            !Number.isFinite(max_conversation_length) ||
+            max_conversation_length <= 0
+        ) {
             throw new RuntimeError(
                 "ERROR_INVALID_AI_STATE_UPDATE",
-                `"${strategy}" is not a trim strategy; use "first" or "last".`,
+                "Shortening a conversation needs a positive length to shorten it to.",
+            );
+        }
+        // "first" and "last" are what the trimmer itself calls the two ends; the node
+        // asks for them as the ends of a conversation, which is what a person reading
+        // it sees.
+        if (keep !== undefined && !["newest", "oldest", "first", "last"].includes(keep)) {
+            throw new RuntimeError(
+                "ERROR_INVALID_AI_STATE_UPDATE",
+                `"${keep}" is not an end of the conversation; keep either the "newest" or the "oldest" messages.`,
             );
         }
 
-        const trimStrategy: TrimStrategy = strategy === "first" ? "first" : "last";
-        const includeSystem: boolean = keep_system ?? true;
+        const keptEnd: TrimEnd = keep === "oldest" || keep === "first" ? "first" : "last";
+        const includeSystem: boolean = keep_instructions ?? true;
 
         return {
-            name: `trim_messages:${trimStrategy}:${max_tokens}`,
-            description: `Trims the conversation to ${max_tokens} tokens`,
+            name: `trim_messages:${keptEnd}:${max_conversation_length}`,
+            description: `Shortens the conversation to ${max_conversation_length} tokens`,
             inputSchema: AiAgentStateSchema,
             outputSchema: AiStateUpdateSchema,
             run: async (state: AiAgentState): Promise<AiStateUpdate> => {
@@ -98,9 +118,9 @@ export class TrimMessagesMiddlewareFunction {
                 );
 
                 const trimmed: BaseMessage[] = await trimMessages(parsed.messages.map(toLangChainMessage), {
-                    maxTokens: max_tokens,
+                    maxTokens: max_conversation_length,
                     tokenCounter: countTokensApproximately,
-                    strategy: trimStrategy,
+                    strategy: keptEnd,
                     includeSystem,
                     allowPartial: false,
                     startOn: "human",
