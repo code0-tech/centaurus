@@ -1,4 +1,5 @@
 import {
+    Description,
     DisplayIcon,
     DisplayMessage,
     FunctionContext,
@@ -15,8 +16,13 @@ import { pendingResponses } from "../../utils/openai/OpenAi.pending.util.js";
 
 @Identifier("ai::openai::respond")
 @DisplayIcon("tabler:ai")
-@Signature("(response: AI_CHAT_RESPONSE): void")
+@Signature("(response: AI_CHAT_RESPONSE): AI_CHAT_RESPONSE")
 @Name({ code: "en-US", content: "Respond to the OpenAI request" })
+@Description({
+    code: "en-US",
+    content:
+        "Answers the waiting OpenAI client with this response, from wherever in the flow it belongs, so the flow can go on afterwards without the client waiting. It is also this node's result.",
+})
 @DisplayMessage({ code: "en-US", content: "Answer the OpenAI request with ${response}" })
 @ThrowsError()
 @Parameter({
@@ -42,8 +48,14 @@ export class OpenAiRespondFunction {
      * of a flow nobody is waiting on - a manual execution from the editor, say - is
      * logged rather than failed: the flow did nothing wrong, there is simply no
      * connection to write to.
+     *
+     * The answer is returned rather than dropped, so it is the node's result and, for
+     * the last node of a flow, the flow's. That is what a manual execution has to go
+     * on: there is no connection to deliver to, and a void node would leave such a run
+     * ending in nothing. For an HTTP request it changes nothing - the server takes the
+     * answer from the wait this settles and ignores the flow's result.
      */
-    run(context: FunctionContext, response: unknown): null {
+    run(context: FunctionContext, response: unknown): AiChatResponse {
         const log = logger("openai", context.executionId);
         const answer: AiChatResponse = parseOrThrow(
             AiChatResponseSchema,
@@ -55,9 +67,11 @@ export class OpenAiRespondFunction {
         if (pendingResponses.settle(context.executionId, answer)) {
             log.info("answered the waiting OpenAI request", { model: answer.model });
         } else {
-            log.info("nothing is waiting for this execution's answer, so it goes nowhere", { model: answer.model });
+            log.info("nothing is waiting for this execution's answer, so it stays this node's result", {
+                model: answer.model,
+            });
         }
 
-        return null;
+        return answer;
     }
 }

@@ -1,4 +1,5 @@
 import {
+    Description,
     DisplayIcon,
     DisplayMessage,
     FunctionContext,
@@ -26,9 +27,14 @@ const asAttribute = (value: unknown): string => escaped(JSON.stringify(value ?? 
 const FORMATTED = /<details type="(reasoning|tool_calls)"/;
 
 @Identifier("ai::openai::openwebui_formatting")
-@DisplayIcon("tabler:file-text-ai")
+@DisplayIcon("thesvg:openwebui")
 @Signature("(response: AI_CHAT_RESPONSE): AI_CHAT_RESPONSE")
 @Name({ code: "en-US", content: "Format for Open WebUI" })
+@Description({
+    code: "en-US",
+    content:
+        "Rewrites an agent's answer so Open WebUI shows it the way it was meant: the steps on the way become collapsible blocks. Put it between the agent and \"Respond to the OpenAI request\".",
+})
 @DisplayMessage({ code: "en-US", content: "Format ${response} for Open WebUI" })
 @ThrowsError()
 @Parameter({
