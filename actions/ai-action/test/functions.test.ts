@@ -2,6 +2,9 @@ import "reflect-metadata";
 import { RuntimeError, type FunctionContext, type SubFlow } from "@code0-tech/hercules";
 import { describe, expect, it, vi } from "vitest";
 import { AIMessage } from "@langchain/core/messages";
+import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatGroq } from "@langchain/groq";
+import { ChatOllama } from "@langchain/ollama";
 import { ChatOpenAI } from "@langchain/openai";
 import { toJsonSchema } from "@langchain/core/utils/json_schema";
 import type { AiContentBlock } from "../src/datatypes/message/Message.contentBlock.datatype.js";
@@ -11,12 +14,20 @@ import type { AiModelRequest } from "../src/datatypes/model/Model.request.dataty
 import { AiModelResponseSchema, type AiModelResponse } from "../src/datatypes/model/Model.response.datatype.js";
 import { AiStateUpdateSchema } from "../src/datatypes/middleware/Middleware.stateUpdate.datatype.js";
 import { TrimMessagesMiddlewareFunction } from "../src/runtimefunctions/middleware/Middleware.trimMessages.runtimefunction.js";
+import { AnthropicModelFunction } from "../src/runtimefunctions/model/Model.anthropic.runtimefunction.js";
+import { GroqModelFunction } from "../src/runtimefunctions/model/Model.groq.runtimefunction.js";
+import { MistralModelFunction } from "../src/runtimefunctions/model/Model.mistral.runtimefunction.js";
+import { OllamaModelFunction } from "../src/runtimefunctions/model/Model.ollama.runtimefunction.js";
+import { OpenAiModelFunction } from "../src/runtimefunctions/model/Model.openAi.runtimefunction.js";
 import { OpenRouterModelFunction } from "../src/runtimefunctions/model/Model.openRouter.runtimefunction.js";
-import { CreateAgentFunction } from "../src/runtimefunctions/agent/Agent.create.runtimefunction.js";
+import { AskAgentFunction } from "../src/runtimefunctions/agent/Agent.ask.runtimefunction.js";
+import { McpServerFunction } from "../src/runtimefunctions/mcp/Mcp.server.runtimefunction.js";
+import { AiMcpServerSchema } from "../src/datatypes/mcp/Mcp.server.datatype.js";
 
 const model = new OpenRouterModelFunction();
 const middleware = new TrimMessagesMiddlewareFunction();
-const create = new CreateAgentFunction();
+const ask = new AskAgentFunction();
+const mcp = new McpServerFunction();
 
 /**
  * Mirrors how hercules hands a sub flow function from one node to the next: the
@@ -93,20 +104,18 @@ describe("ai::model::openrouter", () => {
         vi.restoreAllMocks();
     });
 
-    it("stops declaring that it can constrain its own output once that is switched off", () => {
-        const off = model.run(context(), "openai/gpt-oss-120b", "sk-or-test", undefined, undefined, undefined, false);
-        const on = model.run(context(), "openai/gpt-oss-120b", "sk-or-test");
-
+    it("declares that it can constrain its own output, which is how OpenRouter serves an output type", () => {
         // The declared request schema is what the agent reads to choose between
         // asking the provider for the type and binding it as a tool call.
         const properties = (schema: unknown): string[] =>
             Object.keys((toJsonSchema(schema as never) as { properties?: object }).properties ?? {});
 
-        expect(properties(off.inputSchema)).not.toContain("response_format");
-        expect(properties(on.inputSchema)).toContain("response_format");
+        expect(properties(model.run(context(), "openai/gpt-oss-120b", "sk-or-test").inputSchema)).toContain(
+            "response_format",
+        );
     });
 
-    it("ignores an output type once switched off, so a model that cannot do it is not asked to", async () => {
+    it("asks the provider for the output type the agent wants", async () => {
         const answer = new AIMessage("ok");
         const invoke = vi.spyOn(ChatOpenAI.prototype, "invoke").mockResolvedValue(answer as never);
         const request = {
@@ -115,13 +124,8 @@ describe("ai::model::openrouter", () => {
             response_format: { name: "extract", schema: { type: "object", properties: {} } },
         };
 
-        await model
-            .run(context(), "openai/gpt-oss-120b", "sk-or-test", undefined, undefined, undefined, false)
-            .run(request as never);
-        expect(invoke.mock.calls[0]?.[1]).not.toHaveProperty("response_format");
-
         await model.run(context(), "openai/gpt-oss-120b", "sk-or-test").run(request as never);
-        expect(invoke.mock.calls[1]?.[1]).toMatchObject({ response_format: { type: "json_schema" } });
+        expect(invoke.mock.calls[0]?.[1]).toMatchObject({ response_format: { type: "json_schema" } });
 
         vi.restoreAllMocks();
     });
@@ -161,12 +165,12 @@ describe("ai::model::openrouter", () => {
         vi.restoreAllMocks();
     });
 
-    it("is accepted by ai::agent::create as the agent's model", async () => {
+    it("is accepted by ai::agent::ask as the agent's model", async () => {
         const transform = model.run(context(), "anthropic/claude-opus-5", "sk-or-test");
 
         // Reaches the model, which rejects the test key - proof the agent accepted it.
         await expect(
-            create.run(context(), "support", "You are helpful.", asFlowValue(transform), "hi"),
+            ask.run(context(), "support", "You are helpful.", asFlowValue(transform), "hi"),
         ).rejects.toThrow(RuntimeError);
     }, 30_000);
 });
@@ -186,8 +190,13 @@ describe("ai::middleware::trim_messages", () => {
         expect(() => middleware.run(context(), Number.NaN)).toThrow(RuntimeError);
     });
 
-    it("rejects a strategy it has no meaning for", () => {
-        expect(() => middleware.run(context(), 500, "middle")).toThrow(/not a trim strategy/);
+    it("rejects an end of the conversation it has no meaning for", () => {
+        expect(() => middleware.run(context(), 500, "middle")).toThrow(/not an end of the conversation/);
+    });
+
+    it("keeps the oldest messages when asked to, under either name for that end", () => {
+        expect(middleware.run(context(), 500, "oldest").name).toEqual("trim_messages:first:500");
+        expect(middleware.run(context(), 500, "first").name).toEqual("trim_messages:first:500");
     });
 
     it("returns no change when the conversation already fits", async () => {
@@ -205,8 +214,8 @@ describe("ai::middleware::trim_messages", () => {
         expect(parsed.messages!.at(-1)?.content).toEqual(before.messages.at(-1)?.content);
     });
 
-    it("keeps the system prompt when it trims", async () => {
-        const update = await middleware.run(context(), 200, "last", true).run(state(12));
+    it("keeps the instructions when it trims", async () => {
+        const update = await middleware.run(context(), 200, "newest", true).run(state(12));
         const parsed = AiStateUpdateSchema.parse(update);
         expect(parsed.messages![0].role).toEqual("system");
     });
@@ -219,6 +228,54 @@ describe("ai::middleware::trim_messages", () => {
     it("produces an update the agent will accept", async () => {
         const update = await middleware.run(context(), 200).run(state(12));
         expect(() => AiStateUpdateSchema.parse(update)).not.toThrow();
+    });
+});
+
+describe("ai::mcp::server", () => {
+    it("describes a server the agent node can use as a tool", () => {
+        const server = mcp.run(context(), "tickets", "https://example.com/mcp", "token-1");
+
+        expect(() => AiMcpServerSchema.parse(server)).not.toThrow();
+        expect(server.transport).toEqual("http");
+        expect(server.url).toEqual("https://example.com/mcp");
+        expect(server.headers).toEqual({ Authorization: "Bearer token-1" });
+    });
+
+    it("reads the older protocol off the address, since nothing else announces it", () => {
+        expect(mcp.run(context(), "tickets", "https://example.com/sse").transport).toEqual("sse");
+        expect(mcp.run(context(), "tickets", "https://example.com/mcp").transport).toEqual("http");
+    });
+
+    it("sends what a server asked for on top of the access token", () => {
+        const server = mcp.run(context(), "tickets", "https://example.com/mcp", "token-1", {
+            "X-Api-Key": "key-1",
+        });
+
+        expect(server.headers).toEqual({ Authorization: "Bearer token-1", "X-Api-Key": "key-1" });
+    });
+
+    it("reads headers that arrive as a protobuf struct, which is how a flow may hand them over", () => {
+        const server = mcp.run(context(), "tickets", "https://example.com/mcp", undefined, {
+            fields: { "X-Api-Key": { kind: { oneofKind: "stringValue", stringValue: "key-1" } } },
+        });
+
+        expect(server.headers).toEqual({ "X-Api-Key": "key-1" });
+    });
+
+    it("limits the agent to the tools that were named, and leaves it everything otherwise", () => {
+        const limited = mcp.run(context(), "tickets", "https://example.com/mcp", undefined, undefined, ["search"]);
+
+        expect(limited.allowed_tools).toEqual(["search"]);
+        expect(mcp.run(context(), "tickets", "https://example.com/mcp").allowed_tools).toBeUndefined();
+    });
+
+    it("fails on the node rather than when the agent starts working", () => {
+        expect(() => mcp.run(context(), "", "https://example.com/mcp")).toThrow(/needs a name/);
+        expect(() => mcp.run(context(), "tickets", "example.com/mcp")).toThrow(/not a web address/);
+        expect(() => mcp.run(context(), "tickets", "ftp://example.com/mcp")).toThrow(/http:\/\/ or https:\/\//);
+        expect(() =>
+            mcp.run(context(), "tickets", "https://example.com/mcp", undefined, { "X-Api-Key": 1 }),
+        ).toThrow(/has to be a text/);
     });
 });
 
@@ -240,7 +297,7 @@ describe("the contracts the functions implement", () => {
     });
 });
 
-describe("the chat format of ai::agent::create", () => {
+describe("the chat format of ai::agent::ask", () => {
     function scriptedModel(responses: AiModelResponse[]) {
         const requests: AiModelRequest[] = [];
         let call = 0;
@@ -270,7 +327,7 @@ describe("the chat format of ai::agent::create", () => {
                 total_tokens: 14,
             }),
         ]);
-        const response = await create.run(
+        const response = await ask.run(
             context(),
             "greeter",
             "You greet people.",
@@ -295,7 +352,7 @@ describe("the chat format of ai::agent::create", () => {
 
     it("translates a multimodal prompt into content blocks", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "A cat." }])]);
-        await create.run(context(), "describer", "", run, "", undefined, undefined, {
+        await ask.run(context(), "describer", "", run, "", undefined, undefined, {
             messages: [
                 {
                     role: "user",
@@ -319,7 +376,7 @@ describe("the chat format of ai::agent::create", () => {
             generation([{ type: "text", text: "Order A-1 has shipped." }]),
         ]);
         const lookup = (async () => ({ status: "shipped" })) as unknown as SubFlow;
-        const response = await create.run(
+        const response = await ask.run(
             context(),
             "support",
             "",
@@ -354,7 +411,7 @@ describe("the chat format of ai::agent::create", () => {
 
     it("keeps a malformed tool call instead of failing the request", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "ok" }])]);
-        await create.run(context(), "support", "", run, "again?", undefined, undefined, {
+        await ask.run(context(), "support", "", run, "again?", undefined, undefined, {
             messages: [
                 {
                     role: "assistant",
@@ -377,14 +434,14 @@ describe("the chat format of ai::agent::create", () => {
                 { type: "text", text: "Hi." },
             ]),
         ]);
-        const response = await create.run(context(), "greeter", "", run, "hello");
+        const response = await ask.run(context(), "greeter", "", run, "hello");
 
         expect(response.choices[0].message.content).toEqual("Hi.");
     });
 
     it("takes just a prompt, with no request at all", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "Hi." }])]);
-        const response = await create.run(context(), "greeter", "", run, "hello");
+        const response = await ask.run(context(), "greeter", "", run, "hello");
 
         expect(requests[0].messages.at(-1)?.content).toEqual([{ type: "text", text: "hello" }]);
         expect(response.choices[0].message.content).toEqual("Hi.");
@@ -392,7 +449,7 @@ describe("the chat format of ai::agent::create", () => {
 
     it("appends the prompt to the conversation the request carries", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "Still fine." }])]);
-        await create.run(context(), "greeter", "", run, "and now?", undefined, undefined, {
+        await ask.run(context(), "greeter", "", run, "and now?", undefined, undefined, {
             messages: [
                 { role: "user", content: "how are you?" },
                 { role: "assistant", content: "fine" },
@@ -406,7 +463,7 @@ describe("the chat format of ai::agent::create", () => {
     it("carries the answer as plain text next to the OpenAI shape", async () => {
         const { run } = scriptedModel([generation([{ type: "text", text: "Two parts. " }, { type: "text", text: "One answer." }])]);
 
-        const response = await create.run(context(), "greeter", "", run, "hello");
+        const response = await ask.run(context(), "greeter", "", run, "hello");
 
         expect(response.response).toEqual("Two parts. One answer.");
         expect(response.object).toEqual("chat.completion");
@@ -419,7 +476,7 @@ describe("the chat format of ai::agent::create", () => {
         ]);
         const lookup = (async () => ({ ok: true })) as unknown as SubFlow;
 
-        const response = await create.run(context(), "support", "", run, "hi", [lookup]);
+        const response = await ask.run(context(), "support", "", run, "hi", [lookup]);
 
         // The run ends on a text answer, so this one is filled; the tool-call-only
         // turn in between is what an empty `response` would come from.
@@ -429,14 +486,141 @@ describe("the chat format of ai::agent::create", () => {
     it("rejects having nothing to ask", async () => {
         const { run } = scriptedModel([generation([{ type: "text", text: "ok" }])]);
 
-        await expect(create.run(context(), "greeter", "", run, "")).rejects.toThrow(/nothing to ask/);
+        await expect(ask.run(context(), "greeter", "", run, "")).rejects.toThrow(/nothing to ask/);
         await expect(
-            create.run(context(), "greeter", "", run, "", undefined, undefined, { messages: [] }),
+            ask.run(context(), "greeter", "", run, "", undefined, undefined, { messages: [] }),
         ).rejects.toThrow(/nothing to ask/);
         await expect(
-            create.run(context(), "greeter", "", run, "hi", undefined, undefined, {
+            ask.run(context(), "greeter", "", run, "hi", undefined, undefined, {
                 messages: "nope",
             } as never),
         ).rejects.toThrow(/not valid/);
+    });
+});
+
+/**
+ * What every model node has to get right, whichever provider it calls.
+ *
+ * The flow side of a model is the same everywhere - a request in, one message back -
+ * so what is worth testing per provider is the narrow part each one differs in: the
+ * dialect its output type is written in, and whether it claims to serve one at all.
+ */
+describe("the model nodes", () => {
+    const anthropic = new AnthropicModelFunction();
+    const groq = new GroqModelFunction();
+    const mistral = new MistralModelFunction();
+    const ollama = new OllamaModelFunction();
+    const openai = new OpenAiModelFunction();
+
+    const request = {
+        messages: [{ role: "human", content: [{ type: "text", text: "hi" }] }],
+        tools: [],
+        response_format: { name: "extract", schema: { type: "object", properties: {} } },
+    };
+
+    /** The names of the fields the node declares it takes a request with. */
+    const fields = (schema: unknown): string[] =>
+        Object.keys((toJsonSchema(schema as never) as { properties?: object }).properties ?? {});
+
+    it("names its sub flow after the provider and the model", () => {
+        expect(openai.run(context(), "gpt-5", "sk-test").name).toEqual("openai:gpt-5");
+        expect(anthropic.run(context(), "claude-opus-5", "sk-ant-test").name).toEqual("anthropic:claude-opus-5");
+        expect(groq.run(context(), "llama-3.3-70b-versatile", "gsk-test").name).toEqual(
+            "groq:llama-3.3-70b-versatile",
+        );
+        expect(mistral.run(context(), "mistral-large-latest", "test").name).toEqual("mistral:mistral-large-latest");
+        expect(ollama.run(context(), "qwen3:8b").name).toEqual("ollama:qwen3:8b");
+    });
+
+    it("needs a model identifier, and a key wherever the provider has one", () => {
+        expect(() => openai.run(context(), "", "sk-test")).toThrow(RuntimeError);
+        expect(() => openai.run(context(), "gpt-5", "")).toThrow(RuntimeError);
+        expect(() => anthropic.run(context(), "claude-opus-5", "")).toThrow(RuntimeError);
+        expect(() => groq.run(context(), "llama-3.3-70b-versatile", "")).toThrow(RuntimeError);
+        expect(() => mistral.run(context(), "mistral-large-latest", "")).toThrow(RuntimeError);
+        // Ollama is a server of your own, so there is no key to be missing.
+        expect(() => ollama.run(context(), "")).toThrow(RuntimeError);
+        expect(ollama.run(context(), "qwen3:8b").inputSchema).toBeDefined();
+    });
+
+    it("declares an output type only where the provider can constrain the answer", () => {
+        expect(fields(openai.run(context(), "gpt-5", "sk-test").inputSchema)).toContain("response_format");
+        expect(fields(anthropic.run(context(), "claude-opus-5", "sk-ant-test").inputSchema)).toContain(
+            "response_format",
+        );
+        expect(fields(ollama.run(context(), "qwen3:8b").inputSchema)).toContain("response_format");
+
+        // Mistral's client takes a JSON mode but no schema, so this node cannot
+        // promise a constrained answer - and the agent reads that off the schema and
+        // asks for the type as a forced tool call instead.
+        expect(fields(mistral.run(context(), "mistral-large-latest", "test").inputSchema)).not.toContain(
+            "response_format",
+        );
+        expect(fields(groq.run(context(), "openai/gpt-oss-120b", "gsk-test").inputSchema)).toContain(
+            "response_format",
+        );
+    });
+
+    it("writes the asked-for output type in the provider's own dialect", async () => {
+        const answer = new AIMessage("ok");
+        const openAiInvoke = vi.spyOn(ChatOpenAI.prototype, "invoke").mockResolvedValue(answer as never);
+        const anthropicInvoke = vi.spyOn(ChatAnthropic.prototype, "invoke").mockResolvedValue(answer as never);
+        const groqInvoke = vi.spyOn(ChatGroq.prototype, "invoke").mockResolvedValue(answer as never);
+        const ollamaInvoke = vi.spyOn(ChatOllama.prototype, "invoke").mockResolvedValue(answer as never);
+
+        await openai.run(context(), "gpt-5", "sk-test").run(request as never);
+        await anthropic.run(context(), "claude-opus-5", "sk-ant-test").run(request as never);
+        await groq.run(context(), "openai/gpt-oss-120b", "gsk-test").run(request as never);
+        await ollama.run(context(), "qwen3:8b").run(request as never);
+
+        expect(openAiInvoke.mock.calls[0]?.[1]).toMatchObject({ response_format: { type: "json_schema" } });
+        expect(groqInvoke.mock.calls[0]?.[1]).toMatchObject({ response_format: { type: "json_schema" } });
+        expect(anthropicInvoke.mock.calls[0]?.[1]).toMatchObject({
+            outputConfig: { format: { type: "json_schema", schema: request.response_format.schema } },
+        });
+        expect(ollamaInvoke.mock.calls[0]?.[1]).toMatchObject({ format: request.response_format.schema });
+
+        vi.restoreAllMocks();
+    });
+
+    it("hands the provider's own web search to the model only when it is switched on", async () => {
+        const answer = new AIMessage("ok");
+        const bindTools = vi
+            .spyOn(ChatAnthropic.prototype, "bindTools")
+            .mockReturnValue({ invoke: async () => answer } as never);
+        vi.spyOn(ChatAnthropic.prototype, "invoke").mockResolvedValue(answer as never);
+
+        await anthropic.run(context(), "claude-opus-5", "sk-ant-test").run(request as never);
+        expect(bindTools).not.toHaveBeenCalled();
+
+        await anthropic
+            .run(context(), "claude-opus-5", "sk-ant-test", undefined, undefined, true)
+            .run(request as never);
+        expect(bindTools).toHaveBeenCalledWith([{ type: "web_search_20250305", name: "web_search" }]);
+
+        vi.restoreAllMocks();
+    });
+
+    it("calls an OpenAI-compatible service where it was pointed instead of OpenAI", () => {
+        const transform = openai.run(context(), "qwen3-32b", "sk-test", "http://localhost:8000/v1");
+
+        expect(transform.name).toEqual("openai:qwen3-32b");
+        expect(fields(transform.inputSchema)).toContain("response_format");
+    });
+
+    it("is accepted by ai::agent::ask as the agent's model", async () => {
+        const answer = new AIMessage("ok");
+        vi.spyOn(ChatAnthropic.prototype, "invoke").mockResolvedValue(answer as never);
+
+        const response = await ask.run(
+            context(),
+            "support",
+            "You are helpful.",
+            asFlowValue(anthropic.run(context(), "claude-opus-5", "sk-ant-test")),
+            "hi",
+        );
+        expect(response.choices[0]?.message.content).toContain("ok");
+
+        vi.restoreAllMocks();
     });
 });
