@@ -30,7 +30,6 @@ export const AiChatResponseSchema = z.object({
      * was passed as `output_schema`. The signature carries that type as a generic, so
      * the flow reads this field as the very type it picked rather than as an object.
      */
-    structured_response: z.looseObject({}).optional(),
     /**
      * Every tool the agent used for this answer, with its arguments and what came
      * back. Not part of the OpenAI schema - a chat completion has no field for the
