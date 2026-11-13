@@ -63,7 +63,7 @@ describe("ai::model::openrouter", () => {
         const transform = model.run(context(), "anthropic/claude-opus-5", "sk-or-test");
 
         expect(typeof transform.run).toEqual("function");
-        expect(transform.name).toEqual("openrouter:anthropic/claude-opus-5");
+        expect(transform.name).toEqual("OpenRouter model anthropic/claude-opus-5");
         expect(transform.inputSchema).toBeDefined();
         expect(transform.outputSchema).toBeDefined();
     });
@@ -523,13 +523,17 @@ describe("the model nodes", () => {
         Object.keys((toJsonSchema(schema as never) as { properties?: object }).properties ?? {});
 
     it("names its sub flow after the provider and the model", () => {
-        expect(openai.run(context(), "gpt-5", "sk-test").name).toEqual("openai:gpt-5");
-        expect(anthropic.run(context(), "claude-opus-5", "sk-ant-test").name).toEqual("anthropic:claude-opus-5");
-        expect(groq.run(context(), "llama-3.3-70b-versatile", "gsk-test").name).toEqual(
-            "groq:llama-3.3-70b-versatile",
+        expect(openai.run(context(), "gpt-5", "sk-test").name).toEqual("OpenAI model gpt-5");
+        expect(anthropic.run(context(), "claude-opus-5", "sk-ant-test").name).toEqual(
+            "Anthropic model claude-opus-5",
         );
-        expect(mistral.run(context(), "mistral-large-latest", "test").name).toEqual("mistral:mistral-large-latest");
-        expect(ollama.run(context(), "qwen3:8b").name).toEqual("ollama:qwen3:8b");
+        expect(groq.run(context(), "llama-3.3-70b-versatile", "gsk-test").name).toEqual(
+            "Groq model llama-3.3-70b-versatile",
+        );
+        expect(mistral.run(context(), "mistral-large-latest", "test").name).toEqual(
+            "Mistral model mistral-large-latest",
+        );
+        expect(ollama.run(context(), "qwen3:8b").name).toEqual("Ollama model qwen3:8b");
     });
 
     it("needs a model identifier, and a key wherever the provider has one", () => {
@@ -604,7 +608,7 @@ describe("the model nodes", () => {
     it("calls an OpenAI-compatible service where it was pointed instead of OpenAI", () => {
         const transform = openai.run(context(), "qwen3-32b", "sk-test", "http://localhost:8000/v1");
 
-        expect(transform.name).toEqual("openai:qwen3-32b");
+        expect(transform.name).toEqual("OpenAI model qwen3-32b");
         expect(fields(transform.inputSchema)).toContain("response_format");
     });
 

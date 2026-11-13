@@ -41,7 +41,7 @@ type BoundModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModel
 export interface ModelTransformOptions {
     /** The provider as the flow reads it in a message, e.g. "OpenRouter". */
     provider: string;
-    /** What the sub flow's name is prefixed with, e.g. "openrouter". */
+    /** What this provider's log channel is named, e.g. "openrouter". */
     prefix: string;
     /** The model identifier the node was given. */
     identifier: string;
@@ -84,8 +84,12 @@ export function toModelTransform(options: ModelTransformOptions): AiModelTransfo
     const requestSchema = native ? AiModelRequestSchema : AiModelRequestSchema.omit({ response_format: true });
 
     return {
-        name: `${prefix}:${identifier}`,
-        description: `${provider} model ${identifier}`,
+        // A readable name, since this is what a flow and the agent's logs show the
+        // model call under; the identifier alone would not say whose model it is.
+        name: `${provider} model ${identifier}`,
+        description:
+            `Sends a conversation and the tools that may be called to the ${provider} model ` +
+            `"${identifier}" and returns the one message it answers with.`,
         inputSchema: requestSchema,
         outputSchema: AiModelResponseSchema,
         run: async (request: AiModelRequest): Promise<AiModelResponse> => {

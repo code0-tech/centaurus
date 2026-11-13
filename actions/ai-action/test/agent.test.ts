@@ -520,7 +520,7 @@ describe("the agent loop", () => {
 
         expect(requests[0].tools).toEqual([
             {
-                name: "Current_time",
+                name: "current_time",
                 description: "Answers with the current time in microseconds.",
                 input_schema: {
                     $schema: "https://json-schema.org/draft/2020-12/schema",
@@ -544,7 +544,7 @@ describe("the agent loop", () => {
 
         await ask.run(context(), "support", "", run, "hello", [lookup as never, sameName as never]);
 
-        expect(requests[0].tools.map((tool) => tool.name)).toEqual(["Look_up_order", "Look_up_order_2"]);
+        expect(requests[0].tools.map((tool) => tool.name)).toEqual(["look_up_order", "look_up_order_2"]);
         expect(requests[0].tools[0].description).toEqual("Looks an order up.");
         expect(requests[0].tools[0].input_schema).toEqual({
             title: "Look up order",
