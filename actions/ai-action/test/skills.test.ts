@@ -13,7 +13,7 @@ describe("ai::agent::skills", () => {
             "Customer Support\n================\n\nBe concise.",
         ]);
 
-        expect(tool.name).toEqual("use_skill");
+        expect(tool.name).toEqual("Use a skill");
         expect(tool.description).toContain("SQL Analysis");
         expect(tool.inputSchema).toMatchObject({
             properties: { title: { enum: ["SQL Analysis", "Customer Support"] } },
@@ -28,9 +28,49 @@ describe("ai::agent::skills", () => {
         await expect(tool.run({ title: "Actual title" } as never)).resolves.toContain("Body");
     });
 
-    it("rejects missing titles, duplicate titles, and unknown requests", async () => {
-        expect(() => skills.run(context, ["No heading here"])).toThrow(RuntimeError);
-        expect(() => skills.run(context, ["# Same\none", "## same\ntwo"])).toThrow(/titles must be unique/);
+    it("prefers a front matter title over the body", async () => {
+        const tool = skills.run(context, ["---\nname: Billing\ntitle: Refund policy\n---\n\n# Body heading\n\nText"]);
+
+        expect(tool.inputSchema).toMatchObject({ properties: { title: { enum: ["Refund policy"] } } });
+        await expect(tool.run({ title: "refund policy" } as never)).resolves.toContain("Text");
+    });
+
+    it("derives a title from plain text without any heading", async () => {
+        const tool = skills.run(context, [
+            "- **Escalation** rules for [support](https://example.com)\nmore",
+            "```\nonly fenced content\n```",
+            "***",
+        ]);
+
+        expect(tool.inputSchema).toMatchObject({
+            properties: {
+                title: { enum: ["Escalation rules for support", "only fenced content", "Skill 3"] },
+            },
+        });
+    });
+
+    it("shortens very long titles", () => {
+        const tool = skills.run(context, [`# ${"word ".repeat(40)}`]);
+        const [title] = (tool.inputSchema as { properties: { title: { enum: string[] } } }).properties
+            .title.enum;
+
+        expect(title.length).toBeLessThanOrEqual(81);
+        expect(title.endsWith("\u2026")).toBe(true);
+    });
+
+    it("numbers repeated titles instead of failing", async () => {
+        const tool = skills.run(context, ["# Same\none", "## same\ntwo", "Same\n---\nthree"]);
+
+        expect(tool.inputSchema).toMatchObject({
+            properties: { title: { enum: ["Same", "same (2)", "Same (3)"] } },
+        });
+        await expect(tool.run({ title: "Same" } as never)).resolves.toContain("one");
+        await expect(tool.run({ title: "same (2)" } as never)).resolves.toContain("two");
+        await expect(tool.run({ title: "same (3)" } as never)).resolves.toContain("three");
+    });
+
+    it("rejects empty entries and unknown requests", async () => {
+        expect(() => skills.run(context, ["   "])).toThrow(RuntimeError);
 
         const tool = skills.run(context, ["# Known\nbody"]);
         await expect(tool.run({ title: "Missing" } as never)).rejects.toThrow(/There is no skill titled/);

@@ -402,7 +402,12 @@ export class AskAgentFunction {
                         (named?.enumerable ? named.value : undefined) ?? schema?.title ?? schema?.name;
                     const cleaned: string =
                         typeof declared === "string"
-                            ? declared.trim().replace(TOOL_NAME_ALLOWED, "_").replace(/^_+|_+$/g, "").slice(0, 64)
+                            ? declared
+                                  .trim()
+                                  .toLowerCase()
+                                  .replace(TOOL_NAME_ALLOWED, "_")
+                                  .replace(/^_+|_+$/g, "")
+                                  .slice(0, 64)
                             : "";
                     let toolName: string = cleaned.length > 0 ? cleaned : `tool_${index + 1}`;
                     if (taken.has(toolName)) {
