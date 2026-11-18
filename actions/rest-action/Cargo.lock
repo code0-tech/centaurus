@@ -847,9 +847,9 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "hercules-macros"
-version = "1.7.2"
+version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88adddd448a23b08af8bf4875d626c3c3b078cdd0177d46657e58061154e8bf3"
+checksum = "2bc4f6cea6c239f6b9e34fd25b8c2fc0a3d2bfbf76f6bdb44b3fa55728ebdae3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -858,9 +858,9 @@ dependencies = [
 
 [[package]]
 name = "hercules-sdk"
-version = "1.7.2"
+version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6e9aa81e30b3c2daf33186185c31f518d8b9683bcb00f3b1392eb2a0fe807df"
+checksum = "c2bd9f274f26f2f58ba49161a6861bb97f03b0454658c1e6d22f47f35621952f"
 dependencies = [
  "async-trait",
  "hercules-macros",
@@ -874,7 +874,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tonic",
- "tucana 0.0.83",
+ "tucana 0.0.86",
  "uuid",
 ]
 
@@ -2056,7 +2056,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "tokio-stream",
- "tucana 0.0.83",
+ "tucana 0.0.86",
 ]
 
 [[package]]
@@ -2810,9 +2810,9 @@ dependencies = [
 
 [[package]]
 name = "tucana"
-version = "0.0.83"
+version = "0.0.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4810f214ea212f895371454f99eb87b1af072b3275f89fa6b4d3aba7780dbef"
+checksum = "de7bce38438ffc407e941f487572278dbd020febb53ed7b930520dc86c1a6c6a"
 dependencies = [
  "pbjson",
  "pbjson-build",
