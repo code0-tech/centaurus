@@ -1,0 +1,10 @@
+{
+  "name": "notion",
+  "identifier": "notion-action",
+  "description": "Notion integration: create, update, query, and archive pages, append blocks, and search workspaces via the Notion API.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/notion-action"
+    }
+  }
+}
