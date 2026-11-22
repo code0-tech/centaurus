@@ -19,6 +19,6 @@ export function page(id = "page-1", overrides: Partial<NotionPage> = {}): Notion
     };
 }
 
-export function list(results: unknown[], next_cursor: string | null = null, type = "page_or_database") {
+export function list(results: unknown[], next_cursor: string | null = null, type = "page_or_data_source") {
     return { object: "list", type, [type]: {}, results, has_more: next_cursor !== null, next_cursor };
 }

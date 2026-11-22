@@ -20,7 +20,7 @@ Create a Notion internal integration with read, insert and update content capabi
 | Project configuration | Type | Meaning |
 | --- | --- | --- |
 | `integration_token` | TEXT | Internal integration bearer token. If absent, uses `NOTION_INTEGRATION_TOKEN` from the process environment. An explicitly empty token is rejected. |
-| `notion_version` | TEXT, optional | Defaults to `2022-06-28`. This implementation supports this pinned version only. |
+| `notion_version` | TEXT, optional | Defaults to `2025-09-03`. This implementation supports this pinned version only. |
 
 Tokens are resolved per project, not cached globally, and are never put in exported module defaults. The environment fallback is shared by all projects that omit their own token.
 
@@ -40,9 +40,9 @@ Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (defa
 | `notionCreateRichText` | `content, url?, bold?, italic?` | `NOTION_RICH_TEXT` |
 | `notionCreatePropertyValue` | `type, value` | `NOTION_PROPERTY_VALUE` |
 
-`properties` maps the existing database's property names to writable Notion values. Update sends only supplied properties. Create does not create a database or change its schema. Get retrieves page metadata/properties, not block children. Archive returns the state confirmed by Notion.
+`properties` maps the existing database's property names to writable Notion values. Update sends only supplied properties. Create does not create a database or change its schema. Get retrieves page metadata/properties, not block children. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
 
-Query and search collect **all pages** of results into one response (`has_more: false`, `next_cursor: null`); large collections consume corresponding time and memory. Query filters accept the normal Notion property/timestamp filters and `and`/`or` groups. Sorts use either `property` or `timestamp` plus `direction`. Search matches titles, not full page text; its optional filter is `{ "property": "object", "value": "page" }` or `"database"`.
+Query and search collect **all pages** of results into one response (`has_more: false`, `next_cursor: null`); large collections consume corresponding time and memory. Query filters accept the normal Notion property/timestamp filters and `and`/`or` groups. Sorts use either `property` or `timestamp` plus `direction`. Search matches titles, not full page text; its optional filter is `{ "property": "object", "value": "page" }` or `"data_source"`.
 
 Append accepts a page or block ID. Create and append support at most 100 top-level child blocks per call. Notion validates block-specific shapes, nesting and request-size limits. API calls time out after 30 seconds. HTTP 429 is retried at most twice using `Retry-After` (up to 60 seconds); ambiguous network failures on writes are not automatically retried.
 
@@ -95,7 +95,7 @@ No inbound HTTP server, public webhook URL or cron-action dependency is required
 
 Each data type has its own file under `src/data_types/`: the nine requested response/value types plus `NotionProperties`, `NotionFilter`, `NotionSort` and `NotionSearchFilter` for function inputs. Zod schemas describe common fields and preserve additional Notion fields. They are deliberately extensible, not exhaustive validators for every Notion block or property subtype. No `z.custom()` schemas are used. Hercules `1.4.5` and Zod `4.4.3` are pinned together because newer Zod internals are incompatible with this Hercules release's embedded schema exporter.
 
-The API is pinned to the [legacy database API (`2022-06-28`)](https://developers.notion.com/reference/post-database-query). Starting with [`2025-09-03`, Notion separates databases and data sources](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03); multi-source databases and the newer endpoints are not supported here. Incompatible `notion_version` values fail locally with a clear runtime error.
+The API is pinned to [`2025-09-03`](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03), where a database is a container of one or more data sources and pages live in a data source. Functions and triggers keep taking a `databaseId`: the action resolves the database's data source (`GET /databases/{id}`) and then queries or creates pages in it. Databases with several data sources are ambiguous and fail with `NOTION_MULTIPLE_DATA_SOURCES`; the triggers resolve the data source once per watch. Incompatible `notion_version` values fail locally with a clear runtime error.
 
 Notion now also supports [native webhooks](https://developers.notion.com/reference/webhooks). This action intentionally implements the requested polling triggers.
 

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NotionClient } from "../client.js";
 import { config, list, page } from "./fixtures.js";
-import { mockNotionHttp } from "./httpMock.js";
+import { mockDataSources, mockNotionHttp } from "./httpMock.js";
 
 const http = vi.hoisted(() => ({ request: vi.fn() }));
 let fetchMock: ReturnType<typeof mockNotionHttp>;
@@ -16,7 +16,7 @@ describe("Notion API client", () => {
         const first = new Headers(fetchMock.mock.calls[0][1]?.headers);
         const second = new Headers(fetchMock.mock.calls[1][1]?.headers);
         expect(first.get("authorization")).toBe("Bearer test-token");
-        expect(first.get("notion-version")).toBe("2022-06-28");
+        expect(first.get("notion-version")).toBe("2025-09-03");
         expect(second.get("authorization")).toBe("Bearer other-token");
         expect(fetchMock.mock.calls[0][1]?.redirect).toBe("error");
     });
@@ -27,7 +27,7 @@ describe("Notion API client", () => {
         await new NotionClient(config({})).getPage("page");
         expect(new Headers(fetchMock.mock.calls[0][1]?.headers).get("authorization")).toBe("Bearer environment-token");
         expect(() => new NotionClient(config({ integration_token: "" }))).toThrow(/integration_token/);
-        expect(() => new NotionClient(config({ integration_token: "test", notion_version: "2025-09-03" }))).toThrow(/2022-06-28/);
+        expect(() => new NotionClient(config({ integration_token: "test", notion_version: "2022-06-28" }))).toThrow(/2025-09-03/);
     });
 
     it("collects database pages and preserves filters and sorts across cursors", async () => {
@@ -37,7 +37,8 @@ describe("Notion API client", () => {
         const result = await new NotionClient(config()).queryDatabase("db/1", filter, [...sorts]);
         expect(result.results).toHaveLength(2);
         expect(result).toMatchObject({ has_more: false, next_cursor: null });
-        expect(http.request).toHaveBeenNthCalledWith(2, { method: "POST", url: "/databases/db%2F1/query", data: { page_size: 100, filter, sorts, start_cursor: "cursor-2" } });
+        expect(http.request).toHaveBeenNthCalledWith(2, { method: "POST", url: "/data_sources/db%2F1-ds/query", data: { page_size: 100, filter, sorts, start_cursor: "cursor-2" } });
+        expect(fetchMock.databaseLookups).toHaveBeenCalledExactlyOnceWith("db/1");
     });
 
     it("paginates search even when an intermediate page has no results", async () => {
@@ -67,8 +68,19 @@ describe("Notion API client", () => {
         const client = new NotionClient(config());
         expect(() => client.appendBlocks("page", [])).toThrow();
         expect(() => client.appendBlocks("page", Array.from({ length: 101 }, () => ({ type: "paragraph" as const, paragraph: { rich_text: [] } })))).toThrow();
-        expect(() => client.createPage("db", {}, Array.from({ length: 101 }, () => ({ type: "paragraph" as const, paragraph: { rich_text: [] } })))).toThrow();
+        await expect(client.createPage("db", {}, Array.from({ length: 101 }, () => ({ type: "paragraph" as const, paragraph: { rich_text: [] } })))).rejects.toThrow();
         expect(() => client.getPage(" ")).toThrow();
+        expect(http.request).not.toHaveBeenCalled();
+        expect(fetchMock.databaseLookups).not.toHaveBeenCalled();
+    });
+
+    it("rejects databases without exactly one data source before querying or writing", async () => {
+        const client = new NotionClient(config());
+        mockDataSources.resolve = () => ["ds-1", "ds-2"];
+        await expect(client.queryDatabase("db")).rejects.toMatchObject({ code: "NOTION_MULTIPLE_DATA_SOURCES" });
+        await expect(client.createPage("db", {})).rejects.toMatchObject({ code: "NOTION_MULTIPLE_DATA_SOURCES" });
+        mockDataSources.resolve = () => [];
+        await expect(client.queryDatabase("db")).rejects.toMatchObject({ code: "NOTION_NO_DATA_SOURCE" });
         expect(http.request).not.toHaveBeenCalled();
     });
 

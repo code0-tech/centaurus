@@ -20,7 +20,7 @@ describe("Notion functions", () => {
     it("creates a page with its database parent, properties and initial blocks", async () => {
         http.request.mockResolvedValue({ data: page() });
         expect(await new NotionCreatePageFunction().run(context(), "database-1", properties, children)).toEqual(page());
-        expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/pages", data: { parent: { database_id: "database-1" }, properties, children } });
+        expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "database-1-ds" }, properties, children } });
         await new NotionCreatePageFunction().run(context(), "database-1", properties);
         expect(http.request.mock.lastCall?.[0].data).not.toHaveProperty("children");
     });
@@ -38,10 +38,10 @@ describe("Notion functions", () => {
     });
 
     it("returns the archive state confirmed by Notion", async () => {
-        http.request.mockResolvedValueOnce({ data: page("page-1", { archived: true }) }).mockResolvedValueOnce({ data: page() });
+        http.request.mockResolvedValueOnce({ data: page("page-1", { in_trash: true }) }).mockResolvedValueOnce({ data: page() });
         const fn = new NotionArchivePageFunction();
         expect(await fn.run(context(), "page-1")).toBe(true);
-        expect(http.request).toHaveBeenCalledWith({ method: "PATCH", url: "/pages/page-1", data: { archived: true } });
+        expect(http.request).toHaveBeenCalledWith({ method: "PATCH", url: "/pages/page-1", data: { in_trash: true } });
         expect(await fn.run(context(), "page-1")).toBe(false);
     });
 
@@ -50,7 +50,7 @@ describe("Notion functions", () => {
         const filter = { property: "Done", checkbox: { equals: false } };
         const sorts = [{ property: "Name", direction: "ascending" as const }];
         expect((await new NotionQueryDatabaseFunction().run(context(), "db", filter, sorts)).results).toHaveLength(1);
-        expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/databases/db/query", data: { filter, sorts, page_size: 100 } });
+        expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { filter, sorts, page_size: 100 } });
     });
 
     it("appends block input and preserves block-specific response fields", async () => {

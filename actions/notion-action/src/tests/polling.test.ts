@@ -29,7 +29,8 @@ function setup(type?: string) {
     return { action, fire, errors, poller, setTime: (time: string) => { now = new Date(time); } };
 }
 
-beforeEach(() => { vi.clearAllMocks(); http.request.mockReset(); mockNotionHttp(http.request); });
+let fetchMock: ReturnType<typeof mockNotionHttp>;
+beforeEach(() => { vi.clearAllMocks(); http.request.mockReset(); fetchMock = mockNotionHttp(http.request); });
 afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe("Notion polling", () => {
@@ -134,7 +135,19 @@ describe("Notion polling", () => {
         http.request.mockResolvedValueOnce({ data: list([edited]) }).mockResolvedValueOnce({ data: list([page()]) });
         await poller.tick();
         expect(fire).toHaveBeenCalledExactlyOnceWith(1n, edited);
-        expect(http.request.mock.calls.map((call) => call[0].url)).toEqual(["/databases/db-1/query", "/databases/db-2/query", "/databases/db-1/query", "/databases/db-2/query"]);
+        expect(http.request.mock.calls.map((call) => call[0].url)).toEqual(["/data_sources/db-1-ds/query", "/data_sources/db-2-ds/query", "/data_sources/db-1-ds/query", "/data_sources/db-2-ds/query"]);
+    });
+
+    it("resolves the database's data source once per watch", async () => {
+        const { action, poller } = setup("NotionDatabaseItemUpdated");
+        http.request.mockResolvedValue({ data: list([page()]) });
+        await poller.tick();
+        await poller.tick();
+        expect(fetchMock.databaseLookups).toHaveBeenCalledExactlyOnceWith("db-1");
+        action.flows.set(1n, flow("NotionDatabaseItemUpdated", 1n, 1n, "new-db"));
+        await poller.tick();
+        expect(fetchMock.databaseLookups).toHaveBeenLastCalledWith("new-db");
+        expect(fetchMock.databaseLookups).toHaveBeenCalledTimes(2);
     });
 
     it("waits for configuration and ignores unrelated events", async () => {
@@ -160,7 +173,7 @@ describe("Notion polling", () => {
         action.flows.set(1n, flow("NotionDatabaseItemUpdated", 1n, 1n, "new-db"));
         await poller.tick();
         expect(fire).not.toHaveBeenCalled();
-        expect(http.request.mock.lastCall?.[0].url).toBe("/databases/new-db/query");
+        expect(http.request.mock.lastCall?.[0].url).toBe("/data_sources/new-db-ds/query");
     });
 
     it("rejects overlapping polls and discards results for a deleted flow", async () => {
@@ -168,6 +181,8 @@ describe("Notion polling", () => {
         let resolve!: (value: unknown) => void;
         http.request.mockReturnValue(new Promise((done) => { resolve = done; }));
         const first = poller.tick();
+        // The data source lookup precedes the query; wait until it is in flight.
+        await vi.waitFor(() => expect(http.request).toHaveBeenCalledTimes(1));
         await poller.tick();
         expect(http.request).toHaveBeenCalledTimes(1);
         action.flows.delete(1n);

@@ -11,7 +11,10 @@ import type { NotionFilter } from "./data_types/notionFilter.js";
 import type { NotionSort } from "./data_types/notionSort.js";
 import type { NotionSearchFilter } from "./data_types/notionSearchFilter.js";
 
-export const NOTION_VERSION = "2022-06-28";
+// Only the data source references are needed to resolve a database.
+const DatabaseDataSourcesSchema = z.object({ data_sources: z.array(z.object({ id: z.string() }).passthrough()) }).passthrough();
+
+export const NOTION_VERSION = "2025-09-03";
 
 export function notionCredentials(config: Pick<ProjectConfiguration, "findConfig">) {
     const token = config.findConfig("integration_token") ?? process.env.NOTION_INTEGRATION_TOKEN;
@@ -19,8 +22,8 @@ export function notionCredentials(config: Pick<ProjectConfiguration, "findConfig
     if (typeof token !== "string" || !token.trim()) {
         throw new RuntimeError("NOTION_MISSING_TOKEN", "Configure integration_token or NOTION_INTEGRATION_TOKEN.");
     }
-    // Newer versions replace database queries with data-source queries. Do not
-    // silently send a legacy request with an incompatible version header.
+    // Request and response shapes differ between Notion versions (e.g. databases
+    // vs. data sources). Only send the version the bundled SDK types describe.
     if (version !== NOTION_VERSION) {
         throw new RuntimeError("NOTION_UNSUPPORTED_VERSION", `This action supports Notion-Version ${NOTION_VERSION}.`);
     }
@@ -29,7 +32,7 @@ export function notionCredentials(config: Pick<ProjectConfiguration, "findConfig
 
 function notionId(id: string): string {
     if (!id.trim()) throw new RuntimeError("NOTION_INVALID_ID", "A Notion page or database ID is required.");
-    // SDK v4 interpolates IDs into paths without encoding them itself.
+    // The SDK interpolates IDs into paths without encoding them itself.
     return encodeURIComponent(id.trim());
 }
 
@@ -42,6 +45,8 @@ export class NotionClient {
             auth: token,
             notionVersion: version,
             timeoutMs: 30_000,
+            // Rate limits are retried below with a bounded Retry-After.
+            retry: false,
             // Errors are sanitized below rather than logged with request details.
             logger: () => {},
             fetch: (url, init) => fetch(url, { ...init, redirect: "error" }),
@@ -73,11 +78,11 @@ export class NotionClient {
         }
     }
 
-    createPage(parentDatabaseId: string, properties: NotionProperties, children?: NotionBlock[]) {
+    async createPage(parentDatabaseId: string, properties: NotionProperties, children?: NotionBlock[]) {
         this.validateChildren(children);
-        const database_id = notionId(parentDatabaseId);
+        const data_source_id = await this.resolveDataSourceId(parentDatabaseId);
         return this.request(() => this.sdk.pages.create({
-            parent: { database_id }, properties, ...(children === undefined ? {} : { children }),
+            parent: { data_source_id }, properties, ...(children === undefined ? {} : { children }),
         }), NotionPageSchema);
     }
 
@@ -93,14 +98,36 @@ export class NotionClient {
 
     async archivePage(pageId: string): Promise<boolean> {
         const page_id = notionId(pageId);
-        const page = await this.request(() => this.sdk.pages.update({ page_id, archived: true }), NotionPageSchema);
-        return page.archived;
+        const page = await this.request(() => this.sdk.pages.update({ page_id, in_trash: true }), NotionPageSchema);
+        return page.in_trash;
+    }
+
+    /**
+     * Since Notion-Version 2025-09-03 a database is a container of data sources,
+     * and pages live in a data source. Flows keep addressing the database, so
+     * resolve its single data source; multi-source databases are ambiguous.
+     */
+    async resolveDataSourceId(databaseId: string): Promise<string> {
+        const database_id = notionId(databaseId);
+        const database = await this.request(() => this.sdk.databases.retrieve({ database_id }), DatabaseDataSourcesSchema);
+        if (database.data_sources.length !== 1) {
+            throw new RuntimeError(database.data_sources.length ? "NOTION_MULTIPLE_DATA_SOURCES" : "NOTION_NO_DATA_SOURCE",
+                database.data_sources.length
+                    ? "The Notion database has several data sources. Use a database with a single data source."
+                    : "The Notion database has no data source the integration can access.");
+        }
+        // Raw ID: callers encode it for paths, request bodies take it as is.
+        return database.data_sources[0].id;
     }
 
     async queryDatabase(databaseId: string, filter?: NotionFilter, sorts?: NotionSort[]) {
-        const database_id = notionId(databaseId);
-        return this.paginate((start_cursor) => this.request(() => this.sdk.databases.query({
-            database_id,
+        return this.queryDataSource(await this.resolveDataSourceId(databaseId), filter, sorts);
+    }
+
+    queryDataSource(dataSourceId: string, filter?: NotionFilter, sorts?: NotionSort[]) {
+        const data_source_id = notionId(dataSourceId);
+        return this.paginate((start_cursor) => this.request(() => this.sdk.dataSources.query({
+            data_source_id,
             page_size: 100, ...(filter === undefined ? {} : { filter }), ...(sorts === undefined ? {} : { sorts }),
             ...(start_cursor ? { start_cursor } : {}),
         }), NotionQueryResultSchema));

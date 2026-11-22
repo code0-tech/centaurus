@@ -25,6 +25,11 @@ const jsonSchema = generator.getSchemaForSymbols(roots);
 const definitions = jsonSchema.definitions ?? {};
 const names = new Map(Object.keys(definitions).sort().map((name) => [name, name.replace(/[^a-zA-Z0-9_]/g, "_")]));
 if (new Set(names.values()).size !== names.size) throw new Error("OpenAPI component name collision.");
+// The SDK types describe every Notion-Version at once: `archived` is only sent
+// before 2026-03-11, while `is_archived`, `is_locked` and the newer database
+// fields only appear in later versions. Keep them typed but optional, so a
+// response for the pinned version is not rejected for lacking them.
+const VERSION_DEPENDENT_FIELDS = new Set(["archived", "is_archived", "is_locked", "database_type", "show_data_source_title"]);
 function normalize(value) {
     if (Array.isArray(value)) return value.map(normalize);
     if (value && typeof value === "object") {
@@ -33,6 +38,9 @@ function normalize(value) {
                 const name = decodeURIComponent(entry.replace(/^#\/definitions\//, "")).replace(/~1/g, "/").replace(/~0/g, "~");
                 if (!names.has(name)) throw new Error(`Unresolved reference: ${entry}`);
                 return [key, `#/components/schemas/${names.get(name)}`];
+            }
+            if (key === "required" && Array.isArray(entry)) {
+                return [key, entry.filter((field) => !VERSION_DEPENDENT_FIELDS.has(field))];
             }
             return [key, normalize(entry)];
         }));
@@ -44,7 +52,7 @@ for (const name of roots) if (!schemas[name]) throw new Error(`Missing root sche
 const spec = {
     openapi: "3.1.0",
     info: {
-        title: "Notion action schemas", version: "2022-06-28",
+        title: "Notion action schemas", version: "2025-09-03",
         description: `Generated from @notionhq/client ${sdk.version}. The public Notion MCP OpenAPI spec lacks complete response schemas; these components are derived from the official SDK instead. Do not edit by hand.`,
         license: { name: "MIT", url: "https://github.com/makenotion/notion-sdk-js/blob/main/LICENSE" },
     },
