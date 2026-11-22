@@ -15,7 +15,7 @@ import { SlackBlock } from "../data_types/slackBlock.js";
 import { SlackMessage, SlackMessageSchema } from "../data_types/slackMessage.js";
 
 @Identifier("slackSendDirectMessage")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Signature("(userId: TEXT, text: TEXT, blocks?: LIST<SLACK_BLOCK>): SLACK_MESSAGE")
 @Name({ code: "en-US", content: "Send direct message" })
 @DisplayMessage({ code: "en-US", content: "Send Slack DM to ${userId}" })

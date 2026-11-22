@@ -11,7 +11,7 @@ import {
 import { SlackBlock } from "../../data_types/slackBlock.js";
 
 @Identifier("slackCreateTextSection")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Signature("(text: TEXT, markdown?: BOOLEAN, blockId?: TEXT): SLACK_BLOCK")
 @Name({ code: "en-US", content: "Create Slack text section" })
 @DisplayMessage({ code: "en-US", content: "Create Slack text section" })

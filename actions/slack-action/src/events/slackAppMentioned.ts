@@ -10,7 +10,7 @@ import {
 } from "@code0-tech/hercules";
 
 @Identifier("SlackAppMentioned")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Name({code: "en-US", content: "Slack app mentioned"})
 @Description({code: "en-US", content: "Triggered when the bot user is @-mentioned in a message (app_mention)."})
 @DisplayMessage({code: "en-US", content: "Slack app mentioned on ${http_url}"})

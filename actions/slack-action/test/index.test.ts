@@ -3,9 +3,11 @@ import { createHmac } from "node:crypto";
 import { FunctionContext } from "@code0-tech/hercules";
 import { describe, expect, it } from "vitest";
 import { SlackMessageSchema } from "../src/data_types/slackMessage.js";
+import { parseSlackChannel } from "../src/data_types/slackChannel.js";
+import { parseSlackFile } from "../src/data_types/slackFile.js";
 import { SlackSlashCommandPayloadSchema } from "../src/data_types/slackSlashCommandPayload.js";
 import { SlackReactionAddedEventPayloadSchema } from "../src/data_types/slackReactionAddedEventPayload.js";
-import { toBlockArgument, verifyRequestSignature } from "../src/helpers.js";
+import { fromUnixSeconds, getSlackClient, toBlockArgument, verifyRequestSignature } from "../src/helpers.js";
 import { CreateBlockFunction } from "../src/functions/utils/createBlockFunction.js";
 import { CreateTextSectionFunction } from "../src/functions/utils/createTextSectionFunction.js";
 
@@ -39,6 +41,47 @@ describe("SlackMessageSchema", () => {
 
         expect(parsed.channel).toEqual("C0EXAMPLE");
         expect(parsed.ts).toEqual("1503435956.000247");
+    });
+});
+
+describe("dates", () => {
+    it("converts Slack's Unix seconds into DATE microseconds", () => {
+        expect(fromUnixSeconds(1360782400)).toEqual(1360782400_000_000);
+        expect(fromUnixSeconds(1.5)).toEqual(1_500_000);
+        expect(fromUnixSeconds(undefined)).toBeUndefined();
+        expect(fromUnixSeconds(null)).toBeNull();
+    });
+
+    it("converts the timestamps of a channel", () => {
+        const channel = parseSlackChannel({
+            id: "C0EXAMPLE",
+            created: 1449252889,
+            topic: { value: "Deploys", last_set: 1449252900 },
+            purpose: null,
+        } as Parameters<typeof parseSlackChannel>[0]);
+
+        expect(channel.created).toEqual(1449252889_000_000);
+        expect(channel.topic?.last_set).toEqual(1449252900_000_000);
+        expect(channel.purpose).toBeNull();
+    });
+
+    it("converts the timestamps of a file", () => {
+        const file = parseSlackFile({ id: "F0EXAMPLE", created: 1531763342, timestamp: 1531763343 } as Parameters<
+            typeof parseSlackFile
+        >[0]);
+
+        expect(file.created).toEqual(1531763342_000_000);
+        expect(file.timestamp).toEqual(1531763343_000_000);
+    });
+});
+
+describe("getSlackClient", () => {
+    it("builds a client for each project's own bot token", () => {
+        const first = getSlackClient(contextWith({ bot_token: "xoxb-first" }));
+        const second = getSlackClient(contextWith({ bot_token: "xoxb-second" }));
+
+        expect(first.token).toEqual("xoxb-first");
+        expect(second.token).toEqual("xoxb-second");
     });
 });
 

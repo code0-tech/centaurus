@@ -10,7 +10,7 @@ import {
 } from "@code0-tech/hercules";
 
 @Identifier("SlackReactionAdded")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Name({code: "en-US", content: "Slack reaction added"})
 @Description({code: "en-US", content: "Triggered when a member adds an emoji reaction to a message or file (reaction_added). Use it to drive approval and reaction-role flows."})
 @DisplayMessage({code: "en-US", content: "Slack reaction added on ${http_url}"})

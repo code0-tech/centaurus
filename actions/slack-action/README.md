@@ -17,7 +17,7 @@ same pattern the `shopify-action` and `stripe-action` use.
 | `slackDeleteMessage` | `(channelId: TEXT, ts: TEXT): BOOLEAN` | Delete a message the app posted. |
 | `slackAddReaction` | `(channelId: TEXT, ts: TEXT, emoji: TEXT): BOOLEAN` | Add an emoji reaction to a message. |
 | `slackSendDirectMessage` | `(userId: TEXT, text: TEXT, blocks?: LIST<SLACK_BLOCK>): SLACK_MESSAGE` | Open (or reuse) an IM channel with a user, then post into it. |
-| `slackUploadFile` | `(channelId: TEXT, filename: TEXT, content: TEXT, title?: TEXT): SLACK_FILE` | Upload a text file and share it into a channel. |
+| `slackUploadFile` | `(channelId: TEXT, file: FILE<TEXT>, title?: TEXT): SLACK_FILE` | Upload a file and share it into a channel. |
 | `slackCreateChannel` | `(name: TEXT, isPrivate?: BOOLEAN): SLACK_CHANNEL` | Create a public or private channel. |
 | `slackInviteToChannel` | `(channelId: TEXT, userIds: LIST<TEXT>): SLACK_CHANNEL` | Invite up to 1000 users to a channel. |
 | `slackGetUserByEmail` | `(email: TEXT): SLACK_USER` | Look a workspace member up by email address. |
@@ -114,6 +114,13 @@ registered with `@Identifier` / `@Name` / `@Schema`:
 | `SLACK_FILE` | A file hosted by Slack. |
 | `SLACK_REACTION` | An emoji reaction and the item it points at. |
 | `SLACK_BLOCK` | A single Block Kit block. |
+
+Points in time on `SLACK_CHANNEL` and `SLACK_FILE` (`created`, `topic.last_set`,
+`purpose.last_set`, `timestamp`) are `DATE` values; Slack's Unix seconds are
+converted when the Web API responds. The event payloads keep Slack's raw Unix
+seconds (`event_time`, `channel.created`), because the REST adapter passes them
+through unchanged. Message timestamps (`ts`, `thread_ts`, `event_ts`) stay `TEXT`:
+Slack uses them as message identifiers.
 
 Slack's block and element catalogue keeps growing, so `SLACK_BLOCK` types the
 fields shared by the common blocks and leaves `accessory` and `elements` open for

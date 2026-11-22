@@ -11,10 +11,10 @@ import {
     Signature,
 } from "@code0-tech/hercules";
 import { getSlackClient, toRuntimeError } from "../helpers.js";
-import { SlackChannel, SlackChannelSchema } from "../data_types/slackChannel.js";
+import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
 
 @Identifier("slackSetChannelTopic")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Signature("(channelId: TEXT, topic: TEXT): SLACK_CHANNEL")
 @Name({ code: "en-US", content: "Set channel topic" })
 @DisplayMessage({ code: "en-US", content: "Set topic of Slack channel ${channelId}" })
@@ -45,7 +45,7 @@ export class SetChannelTopicFunction {
                     `Slack did not return a channel for ${channelId}.`
                 );
             }
-            return SlackChannelSchema.parse(result.channel);
+            return parseSlackChannel(result.channel);
         } catch (error) {
             throw toRuntimeError("SLACK_SET_CHANNEL_TOPIC_FAILED", error);
         }

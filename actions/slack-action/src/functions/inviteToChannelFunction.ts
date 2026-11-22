@@ -11,10 +11,10 @@ import {
     Signature,
 } from "@code0-tech/hercules";
 import { getSlackClient, toRuntimeError } from "../helpers.js";
-import { SlackChannel, SlackChannelSchema } from "../data_types/slackChannel.js";
+import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
 
 @Identifier("slackInviteToChannel")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Signature("(channelId: TEXT, userIds: LIST<TEXT>): SLACK_CHANNEL")
 @Name({ code: "en-US", content: "Invite to channel" })
 @DisplayMessage({ code: "en-US", content: "Invite users to Slack channel ${channelId}" })
@@ -50,7 +50,7 @@ export class InviteToChannelFunction {
                     `Slack did not return a channel for ${channelId}.`
                 );
             }
-            return SlackChannelSchema.parse(result.channel);
+            return parseSlackChannel(result.channel);
         } catch (error) {
             throw toRuntimeError("SLACK_INVITE_TO_CHANNEL_FAILED", error);
         }

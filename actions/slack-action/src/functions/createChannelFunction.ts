@@ -11,10 +11,10 @@ import {
     Signature,
 } from "@code0-tech/hercules";
 import { getSlackClient, toRuntimeError } from "../helpers.js";
-import { SlackChannel, SlackChannelSchema } from "../data_types/slackChannel.js";
+import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
 
 @Identifier("slackCreateChannel")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Signature("(name: TEXT, isPrivate?: BOOLEAN): SLACK_CHANNEL")
 @Name({ code: "en-US", content: "Create channel" })
 @DisplayMessage({ code: "en-US", content: "Create Slack channel #${name}" })
@@ -48,7 +48,7 @@ export class CreateChannelFunction {
             if (!result.channel) {
                 throw new RuntimeError("SLACK_CREATE_CHANNEL_FAILED", `Slack did not return a channel for ${name}.`);
             }
-            return SlackChannelSchema.parse(result.channel);
+            return parseSlackChannel(result.channel);
         } catch (error) {
             throw toRuntimeError("SLACK_CREATE_CHANNEL_FAILED", error);
         }

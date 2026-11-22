@@ -10,7 +10,7 @@ import {
 } from "@code0-tech/hercules";
 
 @Identifier("SlackSlashCommand")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Name({code: "en-US", content: "Slack slash command"})
 @Description({code: "en-US", content: "Triggered when a registered slash command is invoked. Compare event.command against the command you registered for this endpoint."})
 @DisplayMessage({code: "en-US", content: "Slack slash command on ${http_url}"})

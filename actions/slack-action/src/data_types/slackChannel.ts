@@ -1,5 +1,6 @@
-import { DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules";
+import { dateSchema, DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules";
 import { z } from "zod";
+import { fromUnixSeconds } from "../helpers.js";
 
 /**
  * A Slack conversation: a public or private channel, a DM (`is_im`) or a group
@@ -15,14 +16,14 @@ export const SlackChannelSchema = z.object({
     is_mpim: z.boolean().nullish().describe("Whether the conversation is a group direct message."),
     is_private: z.boolean().nullish().describe("Whether the channel is private."),
     is_archived: z.boolean().nullish().describe("Whether the channel has been archived."),
-    created: z.number().nullish().describe("The Unix timestamp at which the channel was created."),
+    created: dateSchema.nullish().describe("When the channel was created."),
     creator: z.string().nullish().describe("The ID of the user who created the channel."),
     num_members: z.number().nullish().describe("The number of members in the channel."),
     topic: z
         .object({
             value: z.string().nullish().describe("The channel topic."),
             creator: z.string().nullish().describe("The ID of the user who set the topic."),
-            last_set: z.number().nullish().describe("The Unix timestamp at which the topic was last set."),
+            last_set: dateSchema.nullish().describe("When the topic was last set."),
         })
         .nullish()
         .describe("The channel topic."),
@@ -30,12 +31,31 @@ export const SlackChannelSchema = z.object({
         .object({
             value: z.string().nullish().describe("The channel purpose."),
             creator: z.string().nullish().describe("The ID of the user who set the purpose."),
-            last_set: z.number().nullish().describe("The Unix timestamp at which the purpose was last set."),
+            last_set: dateSchema.nullish().describe("When the purpose was last set."),
         })
         .nullish()
         .describe("The channel purpose."),
 });
 export type SlackChannel = z.infer<typeof SlackChannelSchema>;
+
+type RawSlackChannel = {
+    created?: number | null;
+    topic?: { last_set?: number | null } | null;
+    purpose?: { last_set?: number | null } | null;
+};
+
+/**
+ * Parses a conversation object from the Slack Web API, converting its Unix
+ * second timestamps into `DATE` values.
+ */
+export function parseSlackChannel(raw: RawSlackChannel): SlackChannel {
+    return SlackChannelSchema.parse({
+        ...raw,
+        created: fromUnixSeconds(raw.created),
+        topic: raw.topic ? { ...raw.topic, last_set: fromUnixSeconds(raw.topic.last_set) } : raw.topic,
+        purpose: raw.purpose ? { ...raw.purpose, last_set: fromUnixSeconds(raw.purpose.last_set) } : raw.purpose,
+    });
+}
 
 @Identifier("SLACK_CHANNEL")
 @Name({ code: "en-US", content: "Slack channel" })

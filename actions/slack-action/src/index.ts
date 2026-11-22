@@ -40,7 +40,7 @@ const action = new Action(
     process.env.VERSION ?? "1.0.0",
     process.env.AQUILA_URL ?? "127.0.0.1:8081",
     "code0-tech",
-    "simple:slack",
+    "tabler:brand-slack",
     "Slack integration: post and update messages, react to Slack events, and drive channel, user and file operations via the Slack Web API.",
     [{ code: "en-US", content: "Slack" }],
     [

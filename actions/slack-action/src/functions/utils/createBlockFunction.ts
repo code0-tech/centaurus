@@ -11,7 +11,7 @@ import {
 import { SlackBlock, SlackTextObject } from "../../data_types/slackBlock.js";
 
 @Identifier("slackCreateBlock")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Signature("(type: TEXT, text?: TEXT, fields?: LIST<TEXT>, imageUrl?: TEXT, altText?: TEXT, blockId?: TEXT): SLACK_BLOCK")
 @Name({ code: "en-US", content: "Create Slack block" })
 @DisplayMessage({ code: "en-US", content: "Create Slack ${type} block" })

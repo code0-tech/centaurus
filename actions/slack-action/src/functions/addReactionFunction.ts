@@ -12,7 +12,7 @@ import {
 import { getSlackClient, toRuntimeError } from "../helpers.js";
 
 @Identifier("slackAddReaction")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Signature("(channelId: TEXT, ts: TEXT, emoji: TEXT): BOOLEAN")
 @Name({ code: "en-US", content: "Add reaction" })
 @DisplayMessage({ code: "en-US", content: "Add :${emoji}: to Slack message ${ts}" })

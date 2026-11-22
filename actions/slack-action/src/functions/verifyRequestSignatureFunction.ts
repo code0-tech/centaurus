@@ -12,7 +12,7 @@ import {
 import { toRuntimeError, verifyRequestSignature } from "../helpers.js";
 
 @Identifier("slackVerifyRequestSignature")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Signature("(signature: TEXT, timestamp: TEXT, rawBody: TEXT): BOOLEAN")
 @Name({ code: "en-US", content: "Verify request signature" })
 @DisplayMessage({ code: "en-US", content: "Verify Slack request signature" })

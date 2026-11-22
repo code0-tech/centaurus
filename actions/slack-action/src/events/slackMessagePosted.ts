@@ -10,7 +10,7 @@ import {
 } from "@code0-tech/hercules";
 
 @Identifier("SlackMessagePosted")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Name({code: "en-US", content: "Slack message posted"})
 @Description({code: "en-US", content: "Triggered when a message is posted in a public channel the Slack app is a member of (message.channels). Compare event.channel against the channel you want to watch."})
 @DisplayMessage({code: "en-US", content: "Slack message posted on ${http_url}"})

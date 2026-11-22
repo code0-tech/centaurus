@@ -4,14 +4,12 @@ import { ErrorCode, WebClient, type CodedError } from "@slack/web-api";
 import { SlackBlock } from "./data_types/slackBlock.js";
 
 /**
- * Builds (and caches) a Slack Web API client from the action configuration.
+ * Builds a Slack Web API client from the action configuration.
  *
- * The client is cached per bot token so repeated function invocations reuse the
- * same instance. The official `@slack/web-api` SDK handles authentication,
- * retries and rate limit backoff for us.
+ * Every project brings its own bot token, so a client is created per call
+ * instead of being cached. The official `@slack/web-api` SDK handles
+ * authentication, retries and rate limit backoff for us.
  */
-let cached: { token: string; client: WebClient } | null = null;
-
 export function getSlackClient(context: FunctionContext): WebClient {
     const botToken = context.matchedConfig.findConfig("bot_token") as string;
     if (!botToken) {
@@ -21,13 +19,18 @@ export function getSlackClient(context: FunctionContext): WebClient {
         );
     }
 
-    if (cached && cached.token === botToken) {
-        return cached.client;
-    }
+    return new WebClient(botToken);
+}
 
-    const client = new WebClient(botToken);
-    cached = { token: botToken, client };
-    return client;
+/**
+ * Slack reports points in time as Unix seconds, while a `DATE` holds Unix
+ * microseconds (UTC). Missing values stay missing.
+ */
+export function fromUnixSeconds(seconds: number | null | undefined): number | null | undefined {
+    if (seconds === null || seconds === undefined) {
+        return seconds;
+    }
+    return Math.round(seconds * 1_000_000);
 }
 
 /**

@@ -14,7 +14,7 @@ import { SlackBlock } from "../data_types/slackBlock.js";
 import { SlackMessage, SlackMessageSchema } from "../data_types/slackMessage.js";
 
 @Identifier("slackPostMessage")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Signature("(channelId: TEXT, text: TEXT, blocks?: LIST<SLACK_BLOCK>): SLACK_MESSAGE")
 @Name({ code: "en-US", content: "Post message" })
 @DisplayMessage({ code: "en-US", content: "Post Slack message to ${channelId}" })

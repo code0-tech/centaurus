@@ -14,7 +14,7 @@ import { getSlackClient, toRuntimeError } from "../helpers.js";
 import { SlackUser, SlackUserSchema } from "../data_types/slackUser.js";
 
 @Identifier("slackGetUserByEmail")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Signature("(email: TEXT): SLACK_USER")
 @Name({ code: "en-US", content: "Get user by email" })
 @DisplayMessage({ code: "en-US", content: "Look up Slack user ${email}" })

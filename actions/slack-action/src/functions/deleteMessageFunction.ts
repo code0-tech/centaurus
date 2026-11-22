@@ -12,7 +12,7 @@ import {
 import { getSlackClient, toRuntimeError } from "../helpers.js";
 
 @Identifier("slackDeleteMessage")
-@DisplayIcon("simple:slack")
+@DisplayIcon("tabler:brand-slack")
 @Signature("(channelId: TEXT, ts: TEXT): BOOLEAN")
 @Name({ code: "en-US", content: "Delete message" })
 @DisplayMessage({ code: "en-US", content: "Delete Slack message ${ts}" })

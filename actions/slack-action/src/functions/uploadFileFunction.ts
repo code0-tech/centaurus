@@ -1,5 +1,6 @@
 import {
     Description,
+    type File,
     DisplayIcon,
     DisplayMessage,
     Documentation,
@@ -11,17 +12,17 @@ import {
     Signature,
 } from "@code0-tech/hercules";
 import { getSlackClient, toRuntimeError } from "../helpers.js";
-import { SlackFile, SlackFileSchema } from "../data_types/slackFile.js";
+import { parseSlackFile, SlackFile } from "../data_types/slackFile.js";
 
 @Identifier("slackUploadFile")
-@DisplayIcon("simple:slack")
-@Signature("(channelId: TEXT, filename: TEXT, content: TEXT, title?: TEXT): SLACK_FILE")
+@DisplayIcon("tabler:brand-slack")
+@Signature("(channelId: TEXT, file: FILE<TEXT>, title?: TEXT): SLACK_FILE")
 @Name({ code: "en-US", content: "Upload file" })
-@DisplayMessage({ code: "en-US", content: "Upload ${filename} to Slack channel ${channelId}" })
+@DisplayMessage({ code: "en-US", content: "Upload file to Slack channel ${channelId}" })
 @Documentation({
     code: "en-US",
     content:
-        "Uploads a text file and shares it into a channel, using Slack's external upload flow (`files.getUploadURLExternal` + `files.completeUploadExternal`).\nThe file extension in `filename` determines how Slack renders the content, e.g. `report.csv` or `trace.log`.",
+        "Uploads a file and shares it into a channel, using Slack's external upload flow (`files.getUploadURLExternal` + `files.completeUploadExternal`).\nThe file's name, including its extension, is used as the file name in Slack and determines how Slack renders the content, e.g. `report.csv` or `screenshot.png`.",
 })
 @Description({ code: "en-US", content: "Uploads a file and shares it into a Slack channel." })
 @Parameter({
@@ -30,14 +31,9 @@ import { SlackFile, SlackFileSchema } from "../data_types/slackFile.js";
     description: [{ code: "en-US", content: "The ID of the channel to share the file into." }],
 })
 @Parameter({
-    runtimeName: "filename",
-    name: [{ code: "en-US", content: "File name" }],
-    description: [{ code: "en-US", content: "The file name including its extension, e.g. report.csv." }],
-})
-@Parameter({
-    runtimeName: "content",
-    name: [{ code: "en-US", content: "Content" }],
-    description: [{ code: "en-US", content: "The file content as text." }],
+    runtimeName: "file",
+    name: [{ code: "en-US", content: "File" }],
+    description: [{ code: "en-US", content: "The file to upload. Its file name, including the extension, is used in Slack." }],
 })
 @Parameter({
     runtimeName: "title",
@@ -46,28 +42,22 @@ import { SlackFile, SlackFileSchema } from "../data_types/slackFile.js";
     optional: true,
 })
 export class UploadFileFunction {
-    async run(
-        context: FunctionContext,
-        channelId: string,
-        filename: string,
-        content: string,
-        title?: string
-    ): Promise<SlackFile> {
+    async run(context: FunctionContext, channelId: string, file: File<string>, title?: string): Promise<SlackFile> {
         const client = getSlackClient(context);
         try {
             const result = await client.filesUploadV2({
                 channel_id: channelId,
-                filename,
-                content,
-                title: title ?? filename,
+                filename: file.fileName,
+                file: Buffer.from(file.value, "base64"),
+                title: title ?? file.fileName,
             });
             // filesUploadV2 batches uploads, so a single file arrives as the first
             // file of the first completion response.
-            const file = result.files?.[0]?.files?.[0];
-            if (!file) {
-                throw new RuntimeError("SLACK_UPLOAD_FILE_FAILED", `Slack did not return a file for ${filename}.`);
+            const uploaded = result.files?.[0]?.files?.[0];
+            if (!uploaded) {
+                throw new RuntimeError("SLACK_UPLOAD_FILE_FAILED", `Slack did not return a file for ${file.fileName}.`);
             }
-            return SlackFileSchema.parse(file);
+            return parseSlackFile(uploaded);
         } catch (error) {
             throw toRuntimeError("SLACK_UPLOAD_FILE_FAILED", error);
         }
