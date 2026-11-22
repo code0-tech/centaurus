@@ -1,12 +1,32 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { NotionClient } from "../client.js";
-import { config, list, page } from "./fixtures.js";
+import { NotionClient, withNotionDates } from "../client.js";
+import { config, list, page, parsed } from "./fixtures.js";
 import { mockDataSources, mockNotionHttp } from "./httpMock.js";
 
 const http = vi.hoisted(() => ({ request: vi.fn() }));
 let fetchMock: ReturnType<typeof mockNotionHttp>;
 beforeEach(() => { vi.clearAllMocks(); http.request.mockReset(); fetchMock = mockNotionHttp(http.request); });
 afterEach(() => { vi.useRealTimers(); vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
+
+describe("Notion timestamps", () => {
+    it("converts ISO timestamps of known fields into DATE microseconds", () => {
+        expect(withNotionDates({
+            created_time: "2026-09-01T10:00:00.000Z",
+            nested: [{ last_edited_time: "2026-09-01T10:00:00.500Z", file: { expiry_time: "2026-09-01T11:00:00.000Z" } }],
+            date: { start: "2026-09-01", end: null },
+            title: "2026-09-01T10:00:00.000Z",
+        })).toEqual({
+            created_time: 1788256800000000,
+            nested: [{ last_edited_time: 1788256800500000, file: { expiry_time: 1788260400000000 } }],
+            date: { start: "2026-09-01", end: null },
+            title: "2026-09-01T10:00:00.000Z",
+        });
+    });
+
+    it("leaves unparseable timestamps for response validation to reject", () => {
+        expect(withNotionDates({ created_time: "yesterday" })).toEqual({ created_time: "yesterday" });
+    });
+});
 
 describe("Notion API client", () => {
     it("uses isolated project credentials and the pinned header", async () => {
@@ -60,7 +80,7 @@ describe("Notion API client", () => {
         const original = page("page-1", { icon: { type: "emoji", emoji: "🚀" }, properties: { Count: { id: "count", type: "formula", formula: { type: "number", number: 7 } } } });
         http.request.mockResolvedValueOnce({ data: original }).mockResolvedValueOnce({ data: { object: "page" } });
         const client = new NotionClient(config());
-        expect(await client.getPage("page-1")).toEqual(original);
+        expect(await client.getPage("page-1")).toEqual(parsed(original));
         await expect(client.getPage("page-2")).rejects.toMatchObject({ code: "NOTION_INVALID_RESPONSE" });
     });
 

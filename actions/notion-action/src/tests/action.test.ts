@@ -23,4 +23,11 @@ describe("Hercules registration", () => {
         expect(propertyEvent?.settings?.map((setting) => setting.identifier).sort()).toEqual(["databaseId", "propertyName"]);
         expect(() => action.buildModule()).not.toThrow();
     });
+
+    it("types response timestamps as DATE but keeps request timestamps as text", () => {
+        const page = action.dataTypes.get("NOTION_PAGE")!.type;
+        expect(page).toContain("created_time: DATE");
+        expect(page).toContain("last_edited_time: DATE");
+        expect(action.dataTypes.get("NOTION_PROPERTY_VALUE")!.type).toMatch(/expiry_time\??: string/);
+    });
 });

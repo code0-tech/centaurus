@@ -74,6 +74,12 @@ const IGNORED_KEYWORDS = new Set([
     "dependentRequired", "dependentSchemas", "unevaluatedProperties",
 ]);
 
+// `x-hercules-schema: "<export>"` replaces a node with a schema exported by
+// @code0-tech/hercules (e.g. "dateSchema"), so the hercules type export
+// references that data type (e.g. DATE) by identifier. Sibling `type` keywords
+// are ignored; nullability still applies.
+const herculesImports = new Set();
+
 // Component names may contain characters invalid in JS identifiers
 // (e.g. "billing.credit_grant", "test_helpers.test_clock").
 const ident = (name) => name.replace(/[^a-zA-Z0-9_$]/g, "_");
@@ -264,7 +270,12 @@ function toZod(node) {
         return "z.any()";
     }
     assertKnown(node);
-    let expr = coreExpr(node);
+    const hercules = node["x-hercules-schema"];
+    if (hercules !== undefined && !/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(hercules)) {
+        throw new Error(`Invalid x-hercules-schema export name: ${JSON.stringify(hercules)}`);
+    }
+    if (hercules) herculesImports.add(hercules);
+    let expr = hercules ?? coreExpr(node);
     if (isNullable(node) && expr !== "z.null()") {
         expr = `${expr}.nullable()`;
     }
@@ -380,6 +391,10 @@ const recursive = findRecursiveSchemas(schemas);
 for (const name of names) {
     const annotation = recursive.has(name) ? ": z.ZodTypeAny" : "";
     lines.push(`const ${ident(name)}${annotation} = z.lazy(() => ${toZod(schemas[name])});`);
+}
+
+if (herculesImports.size > 0) {
+    lines.splice(3, 0, `import {${[...herculesImports].sort().join(", ")}} from "@code0-tech/hercules";`);
 }
 
 lines.push("");

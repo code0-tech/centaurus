@@ -8,13 +8,15 @@ import { NotionPageSchema, type NotionPage } from "./data_types/notionPage.js"
 
 export const NOTION_EVENT_TYPES = ["NotionDatabaseItemCreated", "NotionDatabaseItemUpdated", "NotionPagePropertyChanged"] as const
 type EventType = (typeof NOTION_EVENT_TYPES)[number]
+// Page timestamps are DATE values (Unix microseconds); the cursor stays an
+// ISO 8601 string because it is sent back to Notion as a filter value.
 interface Snapshot {
-    edited: string
+    edited: number
     property: unknown
 }
 interface WatchState {
     fingerprint: string
-    activatedAt: string
+    activatedAt: number
     cursor?: string
     dataSourceId?: string
     pages: Map<string, Snapshot>
@@ -125,10 +127,11 @@ export class NotionPoller {
     private async poll(flow: ActionFlow) {
         const watch = this.watch(flow)
         if (!watch) return
-        const startedAt = this.now().toISOString()
+        const now = this.now()
+        const startedAt = now.toISOString()
         let state = this.states.get(flow.flowId)
         if (!state || state.fingerprint !== watch.fingerprint) {
-            state = { fingerprint: watch.fingerprint, activatedAt: startedAt, pages: new Map() }
+            state = { fingerprint: watch.fingerprint, activatedAt: now.getTime() * 1000, pages: new Map() }
             this.states.set(flow.flowId, state)
         }
         const baseline = state.cursor === undefined
@@ -158,7 +161,7 @@ export class NotionPoller {
                 if (flow.type === "NotionDatabaseItemUpdated")
                     changed = previous
                         ? page.last_edited_time > previous.edited
-                        : page.last_edited_time >= state.cursor! && page.last_edited_time > page.created_time
+                        : page.last_edited_time >= Date.parse(state.cursor!) * 1000 && page.last_edited_time > page.created_time
                 if (flow.type === "NotionPagePropertyChanged") changed = !!previous && !isDeepStrictEqual(previous.property, snapshot.property)
             }
             if (changed) {

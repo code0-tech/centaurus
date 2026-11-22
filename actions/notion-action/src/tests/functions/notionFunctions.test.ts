@@ -6,7 +6,7 @@ import { NotionArchivePageFunction } from "../../functions/notionArchivePageFunc
 import { NotionQueryDatabaseFunction } from "../../functions/notionQueryDatabaseFunction.js";
 import { NotionAppendBlocksFunction } from "../../functions/notionAppendBlocksFunction.js";
 import { NotionSearchFunction } from "../../functions/notionSearchFunction.js";
-import { context, list, page } from "../fixtures.js";
+import { context, list, page, parsed } from "../fixtures.js";
 import { mockNotionHttp } from "../httpMock.js";
 
 const http = vi.hoisted(() => ({ request: vi.fn() }));
@@ -19,7 +19,7 @@ describe("Notion functions", () => {
 
     it("creates a page with its database parent, properties and initial blocks", async () => {
         http.request.mockResolvedValue({ data: page() });
-        expect(await new NotionCreatePageFunction().run(context(), "database-1", properties, children)).toEqual(page());
+        expect(await new NotionCreatePageFunction().run(context(), "database-1", properties, children)).toEqual(parsed(page()));
         expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "database-1-ds" }, properties, children } });
         await new NotionCreatePageFunction().run(context(), "database-1", properties);
         expect(http.request.mock.lastCall?.[0].data).not.toHaveProperty("children");
@@ -33,7 +33,7 @@ describe("Notion functions", () => {
 
     it("retrieves the requested page", async () => {
         http.request.mockResolvedValue({ data: page() });
-        expect(await new NotionGetPageFunction().run(context(), "page-1")).toEqual(page());
+        expect(await new NotionGetPageFunction().run(context(), "page-1")).toEqual(parsed(page()));
         expect(http.request).toHaveBeenCalledWith({ method: "GET", url: "/pages/page-1", data: undefined });
     });
 

@@ -41,3 +41,4 @@ export const supportingSchemaNames = [
   "ViewSortRequest",
   "UserObjectResponse"
 ] as const;
+export const notionDateFields = ["created_time","last_edited_time","expiry_time","start_time","end_time"] as const;

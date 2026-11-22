@@ -10,6 +10,30 @@ import type { NotionBlock } from "./data_types/notionBlock.js";
 import type { NotionFilter } from "./data_types/notionFilter.js";
 import type { NotionSort } from "./data_types/notionSort.js";
 import type { NotionSearchFilter } from "./data_types/notionSearchFilter.js";
+import { notionDateFields } from "./generated/notion-schema-order.js";
+
+const DATE_FIELDS = new Set<string>(notionDateFields);
+
+/** An ISO 8601 timestamp as a hercules DATE: Unix microseconds (UTC). */
+export function toNotionDate(iso: string): number | string {
+    const milliseconds = Date.parse(iso);
+    // Unparseable values stay as they are and fail response validation.
+    return Number.isNaN(milliseconds) ? iso : milliseconds * 1000;
+}
+
+/**
+ * Notion sends points in time as ISO 8601 strings, while the response data
+ * types declare them as DATE. Converts every known timestamp field in a
+ * response before it is validated.
+ */
+export function withNotionDates(value: unknown): unknown {
+    if (Array.isArray(value)) return value.map(withNotionDates);
+    if (!value || typeof value !== "object") return value;
+    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [
+        key,
+        DATE_FIELDS.has(key) && typeof entry === "string" ? toNotionDate(entry) : withNotionDates(entry),
+    ]));
+}
 
 // Only the data source references are needed to resolve a database.
 const DatabaseDataSourcesSchema = z.object({ data_sources: z.array(z.object({ id: z.string() }).passthrough()) }).passthrough();
@@ -56,7 +80,7 @@ export class NotionClient {
     private async request<T>(call: () => Promise<unknown>, schema: z.ZodType<T>): Promise<T> {
         for (let attempt = 0; ; attempt++) {
             try {
-                return schema.parse(await call());
+                return schema.parse(withNotionDates(await call()));
             } catch (error) {
                 if (isNotionClientError(error)) {
                     const response = APIResponseError.isAPIResponseError(error) || UnknownHTTPResponseError.isUnknownHTTPResponseError(error) ? error : undefined;

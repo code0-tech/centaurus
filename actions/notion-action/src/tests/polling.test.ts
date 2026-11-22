@@ -3,7 +3,7 @@ import { Action, CodeZeroEvent } from "@code0-tech/hercules";
 import { ActionFlow } from "@code0-tech/tucana/aquila";
 import { constructValue } from "@code0-tech/tucana/helpers";
 import { NotionPoller } from "../polling.js";
-import { config, list, page } from "./fixtures.js";
+import { config, list, page, parsed } from "./fixtures.js";
 import { mockNotionHttp } from "./httpMock.js";
 
 const http = vi.hoisted(() => ({ request: vi.fn() }));
@@ -45,7 +45,7 @@ describe("Notion polling", () => {
         http.request.mockResolvedValue({ data: list([page(), added]) });
         await poller.tick();
         await poller.tick();
-        expect(fire).toHaveBeenCalledExactlyOnceWith(1n, added);
+        expect(fire).toHaveBeenCalledExactlyOnceWith(1n, parsed(added));
         expect(http.request.mock.calls[2][0].data.filter).toEqual({ timestamp: "last_edited_time", last_edited_time: { on_or_after: "2026-09-14T09:59:00.000Z" } });
     });
 
@@ -57,7 +57,7 @@ describe("Notion polling", () => {
         http.request.mockResolvedValue({ data: list([edited]) });
         await poller.tick();
         await poller.tick();
-        expect(fire).toHaveBeenCalledExactlyOnceWith(1n, edited);
+        expect(fire).toHaveBeenCalledExactlyOnceWith(1n, parsed(edited));
     });
 
     it("detects property changes including clearing but ignores other edits and object key order", async () => {
@@ -72,7 +72,7 @@ describe("Notion polling", () => {
         http.request.mockResolvedValue({ data: list([edited]) });
         await poller.tick();
         await poller.tick();
-        expect(fire).toHaveBeenCalledExactlyOnceWith(1n, edited);
+        expect(fire).toHaveBeenCalledExactlyOnceWith(1n, parsed(edited));
         const cleared = page("page-1", { properties: {} });
         http.request.mockResolvedValueOnce({ data: list([cleared]) });
         await poller.tick();
@@ -122,7 +122,7 @@ describe("Notion polling", () => {
         expect(errors).toHaveBeenCalledTimes(1);
         http.request.mockResolvedValueOnce({ data: list([edited]) });
         await poller.tick();
-        expect(fire).toHaveBeenCalledExactlyOnceWith(1n, edited);
+        expect(fire).toHaveBeenCalledExactlyOnceWith(1n, parsed(edited));
     });
 
     it("isolates flows and projects with the same page IDs", async () => {
@@ -134,7 +134,7 @@ describe("Notion polling", () => {
         const edited = page("page-1", { last_edited_time: "2026-09-14T10:00:30.000Z" });
         http.request.mockResolvedValueOnce({ data: list([edited]) }).mockResolvedValueOnce({ data: list([page()]) });
         await poller.tick();
-        expect(fire).toHaveBeenCalledExactlyOnceWith(1n, edited);
+        expect(fire).toHaveBeenCalledExactlyOnceWith(1n, parsed(edited));
         expect(http.request.mock.calls.map((call) => call[0].url)).toEqual(["/data_sources/db-1-ds/query", "/data_sources/db-2-ds/query", "/data_sources/db-1-ds/query", "/data_sources/db-2-ds/query"]);
     });
 
