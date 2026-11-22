@@ -86,13 +86,20 @@ Slack signs each request with an `X-Slack-Signature` header: an HMAC-SHA256 over
 `slackVerifyRequestSignature` recomputes it and additionally rejects timestamps
 older than five minutes as replays.
 
-> **Known limitation:** Slack signs the exact bytes it sent, and the `Rest` flow
-> type hands the flow an already parsed `payload` — re-serializing it does not
-> reproduce those bytes. Until the REST adapter exposes the raw body, the function
-> can only be used where the flow has the unparsed body available. Slack does not
-> send a Bearer token either, so the event's `http_auth` setting cannot stand in
-> for it. Treat these endpoints as publicly reachable and keep that in mind for
-> what a flow does with an unverified payload.
+Slack signs the exact bytes it sent, so the check needs the unparsed body, not the
+parsed `payload`. The REST adapter passes it alongside as `raw_body`, and header
+names arrive lowercased. Verify first and stop the flow if it returns `false`:
+
+```
+slackVerifyRequestSignature(
+  input.headers["x-slack-signature"],
+  input.headers["x-slack-request-timestamp"],
+  input.raw_body
+)
+```
+
+Slack does not send a Bearer token, so the event's `http_auth` setting cannot
+stand in for this check.
 
 ## Data types
 
