@@ -122,6 +122,12 @@ seconds (`event_time`, `channel.created`), because the REST adapter passes them
 through unchanged. Message timestamps (`ts`, `thread_ts`, `event_ts`) stay `TEXT`:
 Slack uses them as message identifiers.
 
+A message timestamp is Unix seconds with a dot before the last six digits, e.g.
+`1712345678.123456`. Usually you take it from a previous step (the `ts` of a
+`SLACK_MESSAGE` or of an event payload). To use an existing message, copy its link
+in Slack (`…/archives/C0123ABC/p1712345678123456`) and insert the dot before the
+last six digits of the `p…` part; without the dot Slack answers `message_not_found`.
+
 Slack's block and element catalogue keeps growing, so `SLACK_BLOCK` types the
 fields shared by the common blocks and leaves `accessory` and `elements` open for
 raw Block Kit objects.

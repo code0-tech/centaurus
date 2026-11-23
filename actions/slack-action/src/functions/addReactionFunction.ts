@@ -39,7 +39,7 @@ export function normalizeEmojiName(emoji: string): string {
 @Parameter({
     runtimeName: "ts",
     name: [{ code: "en-US", content: "Message timestamp" }],
-    description: [{ code: "en-US", content: "The `ts` of the message to react to." }],
+    description: [{ code: "en-US", content: "The `ts` of the message to react to. Format: Unix seconds with a dot before the last six digits, e.g. 1712345678.123456. From a message link (…/p1712345678123456) insert the dot before the last six digits." }],
 })
 @Parameter({
     runtimeName: "emoji",

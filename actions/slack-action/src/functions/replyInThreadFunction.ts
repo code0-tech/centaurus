@@ -32,7 +32,7 @@ import { SlackMessage, SlackMessageSchema } from "../data_types/slackMessage.js"
 @Parameter({
     runtimeName: "threadTs",
     name: [{ code: "en-US", content: "Thread timestamp" }],
-    description: [{ code: "en-US", content: "The `ts` of the parent message to reply to." }],
+    description: [{ code: "en-US", content: "The `ts` of the parent message to reply to. Format: Unix seconds with a dot before the last six digits, e.g. 1712345678.123456. From a message link (…/p1712345678123456) insert the dot before the last six digits." }],
 })
 @Parameter({
     runtimeName: "text",

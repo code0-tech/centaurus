@@ -30,7 +30,7 @@ import { getSlackClient, toRuntimeError } from "../helpers.js";
 @Parameter({
     runtimeName: "ts",
     name: [{ code: "en-US", content: "Message timestamp" }],
-    description: [{ code: "en-US", content: "The `ts` of the message to delete." }],
+    description: [{ code: "en-US", content: "The `ts` of the message to delete. Format: Unix seconds with a dot before the last six digits, e.g. 1712345678.123456. From a message link (…/p1712345678123456) insert the dot before the last six digits." }],
 })
 export class DeleteMessageFunction {
     async run(context: FunctionContext, channelId: string, ts: string): Promise<boolean> {

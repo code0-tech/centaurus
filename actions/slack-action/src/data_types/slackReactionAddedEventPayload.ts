@@ -18,7 +18,7 @@ export const SlackReactionAddedEventPayloadSchema = slackEventEnvelope(
             .object({
                 type: z.string().describe("The type of the item reacted to, e.g. `message` or `file`."),
                 channel: z.string().nullish().describe("The ID of the channel holding the item."),
-                ts: z.string().nullish().describe("The timestamp of the message reacted to."),
+                ts: z.string().nullish().describe("The timestamp of the message reacted to. Format: e.g. 1712345678.123456."),
                 file: z.string().nullish().describe("The ID of the file reacted to."),
             })
             .describe("The item the reaction was added to."),

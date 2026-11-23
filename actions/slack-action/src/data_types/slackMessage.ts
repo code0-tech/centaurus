@@ -11,8 +11,8 @@ import { SlackBlockSchema } from "./slackBlock.js";
 export const SlackMessageSchema = z.object({
     ok: z.boolean().nullish().describe("Whether the Slack API call succeeded."),
     channel: z.string().nullish().describe("The ID of the channel the message was posted to."),
-    ts: z.string().nullish().describe("The message timestamp. Identifies the message within its channel."),
-    thread_ts: z.string().nullish().describe("The timestamp of the parent message when this message is a threaded reply."),
+    ts: z.string().nullish().describe("The message timestamp. Identifies the message within its channel. Format: e.g. 1712345678.123456."),
+    thread_ts: z.string().nullish().describe("The timestamp of the parent message when this message is a threaded reply. Format: e.g. 1712345678.123456."),
     text: z.string().nullish().describe("The fallback text of the message."),
     user: z.string().nullish().describe("The ID of the user the message was posted as."),
     bot_id: z.string().nullish().describe("The ID of the bot the message was posted as."),
