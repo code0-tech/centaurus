@@ -1,6 +1,6 @@
 import { dateSchema, DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules";
 import { z } from "zod";
-import { fromUnixSeconds } from "../helpers.js";
+import { fromUnixSeconds, withoutUndefined } from "../helpers.js";
 
 /**
  * A Slack conversation: a public or private channel, a DM (`is_im`) or a group
@@ -49,12 +49,14 @@ type RawSlackChannel = {
  * second timestamps into `DATE` values.
  */
 export function parseSlackChannel(raw: RawSlackChannel): SlackChannel {
-    return SlackChannelSchema.parse({
-        ...raw,
-        created: fromUnixSeconds(raw.created),
-        topic: raw.topic ? { ...raw.topic, last_set: fromUnixSeconds(raw.topic.last_set) } : raw.topic,
-        purpose: raw.purpose ? { ...raw.purpose, last_set: fromUnixSeconds(raw.purpose.last_set) } : raw.purpose,
-    });
+    return withoutUndefined(
+        SlackChannelSchema.parse({
+            ...raw,
+            created: fromUnixSeconds(raw.created),
+            topic: raw.topic ? { ...raw.topic, last_set: fromUnixSeconds(raw.topic.last_set) } : raw.topic,
+            purpose: raw.purpose ? { ...raw.purpose, last_set: fromUnixSeconds(raw.purpose.last_set) } : raw.purpose,
+        })
+    );
 }
 
 @Identifier("SLACK_CHANNEL")

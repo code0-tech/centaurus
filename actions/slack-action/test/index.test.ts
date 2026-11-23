@@ -185,6 +185,19 @@ describe("block builders", () => {
             { type: "mrkdwn", text: "*By*\n<@U0E>" },
         ]);
     });
+
+    it("puts context texts into elements, because context blocks have no text field", () => {
+        const block = new CreateBlockFunction().run(undefined, "context", "Deployed by <@U0E>", ["2 min ago"]);
+
+        expect(block).toEqual({
+            type: "context",
+            block_id: undefined,
+            elements: [
+                { type: "mrkdwn", text: "Deployed by <@U0E>" },
+                { type: "mrkdwn", text: "2 min ago" },
+            ],
+        });
+    });
 });
 
 describe("toBlockArgument", () => {
@@ -288,5 +301,60 @@ describe("normalizeEmojiName", () => {
 
     it("keeps inner colons such as skin tone modifiers", () => {
         expect(normalizeEmojiName(":thumbsup::skin-tone-2:")).toBe("thumbsup::skin-tone-2");
+    });
+});
+
+describe("function results", () => {
+    // Hercules rejects undefined values when serializing a result ("Unsupported value type: undefined").
+    const hasUndefined = (value: unknown): boolean =>
+        value === undefined ||
+        (value !== null && typeof value === "object" && Object.values(value).some(hasUndefined));
+
+    it("contain no undefined values", () => {
+        expect(hasUndefined(new CreateBlockFunction().run(undefined, "divider"))).toBe(false);
+        expect(hasUndefined(new CreateBlockFunction().run(undefined, "context", "hi"))).toBe(false);
+        expect(hasUndefined(new CreateTextSectionFunction().run(undefined, "hi"))).toBe(false);
+        expect(hasUndefined(parseSlackChannel({ id: "C1", topic: {} } as never))).toBe(false);
+        expect(hasUndefined(parseSlackFile({ id: "F1" } as never))).toBe(false);
+    });
+});
+
+describe("toBlockArgument null handling", () => {
+    it("drops null fields that unset optional block fields come back as", () => {
+        expect(
+            toBlockArgument([
+                { type: "divider", block_id: null, text: null, fields: null },
+                { type: "context", elements: [{ type: "mrkdwn", text: "hi", verbatim: null }] },
+            ])
+        ).toEqual({
+            blocks: [{ type: "divider" }, { type: "context", elements: [{ type: "mrkdwn", text: "hi" }] }],
+        });
+    });
+});
+
+describe("CreateBlockFunction per block type", () => {
+    const builder = new CreateBlockFunction();
+
+    it("only keeps the properties Slack allows for a type", () => {
+        expect(builder.run(undefined, "divider", "ignored", ["ignored"], "https://x", "alt", "")).toStrictEqual({
+            type: "divider",
+        });
+        expect(builder.run(undefined, "image", "ignored", undefined, "https://x/a.png", "A chart")).toStrictEqual({
+            type: "image",
+            image_url: "https://x/a.png",
+            alt_text: "A chart",
+        });
+        expect(builder.run(undefined, "header", "Release", ["ignored"])).toStrictEqual({
+            type: "header",
+            text: { type: "plain_text", text: "Release" },
+        });
+    });
+
+    it("treats empty strings as unset", () => {
+        expect(builder.run(undefined, "section", "Body", ["", "*Env*"], "", "", "")).toStrictEqual({
+            type: "section",
+            text: { type: "mrkdwn", text: "Body" },
+            fields: [{ type: "mrkdwn", text: "*Env*" }],
+        });
     });
 });

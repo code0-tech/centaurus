@@ -23,6 +23,25 @@ export function getSlackClient(context: FunctionContext): WebClient {
 }
 
 /**
+ * Removes `undefined` values (recursively) from a function result. Hercules
+ * serializes results into protobuf values and rejects `undefined`, while
+ * optional fields of our objects and zod's output keep such keys around.
+ */
+export function withoutUndefined<T>(value: T): T {
+    if (Array.isArray(value)) {
+        return value.map((entry) => withoutUndefined(entry)) as T;
+    }
+    if (value !== null && typeof value === "object") {
+        return Object.fromEntries(
+            Object.entries(value)
+                .filter(([, entry]) => entry !== undefined)
+                .map(([key, entry]) => [key, withoutUndefined(entry)])
+        ) as T;
+    }
+    return value;
+}
+
+/**
  * Slack reports points in time as Unix seconds, while a `DATE` holds Unix
  * microseconds (UTC). Missing values stay missing.
  */
@@ -44,9 +63,15 @@ export function toRuntimeError(code: string, error: unknown): RuntimeError {
         return error;
     }
 
-    const coded = error as Partial<CodedError> & { data?: { error?: string }; retryAfter?: number };
+    const coded = error as Partial<CodedError> & {
+        data?: { error?: string; response_metadata?: { messages?: string[] } };
+        retryAfter?: number;
+    };
     if (coded?.code === ErrorCode.PlatformError && coded.data?.error) {
-        return new RuntimeError(code, `Slack API error: ${coded.data.error}`);
+        // Errors such as invalid_blocks explain the actual problem in response_metadata.
+        const details = coded.data.response_metadata?.messages ?? [];
+        const suffix = details.length > 0 ? ` (${details.join("; ")})` : "";
+        return new RuntimeError(code, `Slack API error: ${coded.data.error}${suffix}`);
     }
     if (coded?.code === ErrorCode.RateLimitedError) {
         return new RuntimeError(code, `Slack rate limited the request. Retry after ${coded.retryAfter ?? "?"}s.`);
@@ -60,9 +85,26 @@ export function toRuntimeError(code: string, error: unknown): RuntimeError {
 /**
  * Block Kit blocks travel through flows as SLACK_BLOCK values. Slack rejects an
  * empty `blocks` array, so an omitted or empty list is sent as no blocks at all.
+ * Unset optional fields can come back from the flow as `null`, which Slack also
+ * rejects (`invalid_blocks`), so they are dropped before sending.
  */
 export function toBlockArgument(blocks?: SlackBlock[] | null): { blocks?: SlackBlock[] } {
-    return blocks && blocks.length > 0 ? { blocks } : {};
+    return blocks && blocks.length > 0 ? { blocks: blocks.map((block) => withoutNullish(block)) } : {};
+}
+
+/** Recursively removes `null` and `undefined` values. */
+function withoutNullish<T>(value: T): T {
+    if (Array.isArray(value)) {
+        return value.map((entry) => withoutNullish(entry)) as T;
+    }
+    if (value !== null && typeof value === "object") {
+        return Object.fromEntries(
+            Object.entries(value)
+                .filter(([, entry]) => entry !== null && entry !== undefined)
+                .map(([key, entry]) => [key, withoutNullish(entry)])
+        ) as T;
+    }
+    return value;
 }
 
 /** Requests older than this are rejected by {@link verifyRequestSignature} as replays. */

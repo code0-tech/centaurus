@@ -9,7 +9,7 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getSlackClient, toBlockArgument, toRuntimeError } from "../helpers.js";
+import { getSlackClient, toBlockArgument, toRuntimeError, withoutUndefined } from "../helpers.js";
 import { SlackBlock } from "../data_types/slackBlock.js";
 import { SlackMessage, SlackMessageSchema } from "../data_types/slackMessage.js";
 
@@ -61,7 +61,9 @@ export class UpdateMessageFunction {
                 text,
                 ...toBlockArgument(blocks),
             });
-            return SlackMessageSchema.parse({ ...result.message, ok: result.ok, channel: result.channel, ts: result.ts });
+            return withoutUndefined(
+                SlackMessageSchema.parse({ ...result.message, ok: result.ok, channel: result.channel, ts: result.ts })
+            );
         } catch (error) {
             throw toRuntimeError("SLACK_UPDATE_MESSAGE_FAILED", error);
         }

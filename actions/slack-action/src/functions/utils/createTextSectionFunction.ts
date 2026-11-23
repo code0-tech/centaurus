@@ -9,6 +9,7 @@ import {
     Signature,
 } from "@code0-tech/hercules";
 import { SlackBlock } from "../../data_types/slackBlock.js";
+import { withoutUndefined } from "../../helpers.js";
 
 @Identifier("slackCreateTextSection")
 @DisplayIcon("tabler:brand-slack")
@@ -45,13 +46,13 @@ import { SlackBlock } from "../../data_types/slackBlock.js";
 })
 export class CreateTextSectionFunction {
     run(_context: unknown, text: string, markdown?: boolean, blockId?: string): SlackBlock {
-        return {
+        return withoutUndefined({
             type: "section",
             block_id: blockId,
             text: {
                 type: markdown === false ? "plain_text" : "mrkdwn",
                 text,
             },
-        };
+        });
     }
 }

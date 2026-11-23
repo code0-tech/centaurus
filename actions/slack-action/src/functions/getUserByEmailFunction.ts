@@ -10,7 +10,7 @@ import {
     RuntimeError,
     Signature,
 } from "@code0-tech/hercules";
-import { getSlackClient, toRuntimeError } from "../helpers.js";
+import { getSlackClient, toRuntimeError, withoutUndefined } from "../helpers.js";
 import { SlackUser, SlackUserSchema } from "../data_types/slackUser.js";
 
 @Identifier("slackGetUserByEmail")
@@ -37,7 +37,7 @@ export class GetUserByEmailFunction {
             if (!result.user) {
                 throw new RuntimeError("SLACK_GET_USER_BY_EMAIL_FAILED", `Slack did not return a user for ${email}.`);
             }
-            return SlackUserSchema.parse(result.user);
+            return withoutUndefined(SlackUserSchema.parse(result.user));
         } catch (error) {
             throw toRuntimeError("SLACK_GET_USER_BY_EMAIL_FAILED", error);
         }

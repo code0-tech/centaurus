@@ -1,6 +1,6 @@
 import { dateSchema, DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules";
 import { z } from "zod";
-import { fromUnixSeconds } from "../helpers.js";
+import { fromUnixSeconds, withoutUndefined } from "../helpers.js";
 
 /**
  * A file hosted by Slack, as returned by the external upload flow behind
@@ -33,11 +33,13 @@ export type SlackFile = z.infer<typeof SlackFileSchema>;
  * timestamps into `DATE` values.
  */
 export function parseSlackFile(raw: { created?: number | null; timestamp?: number | null }): SlackFile {
-    return SlackFileSchema.parse({
-        ...raw,
-        created: fromUnixSeconds(raw.created),
-        timestamp: fromUnixSeconds(raw.timestamp),
-    });
+    return withoutUndefined(
+        SlackFileSchema.parse({
+            ...raw,
+            created: fromUnixSeconds(raw.created),
+            timestamp: fromUnixSeconds(raw.timestamp),
+        })
+    );
 }
 
 @Identifier("SLACK_FILE")
