@@ -10,6 +10,7 @@ import { SlackReactionAddedEventPayloadSchema } from "../src/data_types/slackRea
 import { fromUnixSeconds, getSlackClient, toBlockArgument, verifyRequestSignature } from "../src/helpers.js";
 import { CreateBlockFunction } from "../src/functions/utils/createBlockFunction.js";
 import { CreateTextSectionFunction } from "../src/functions/utils/createTextSectionFunction.js";
+import { normalizeEmojiName } from "../src/functions/addReactionFunction.js";
 
 const SIGNING_SECRET = "example-signing-secret";
 
@@ -276,5 +277,16 @@ describe("verifyRequestSignature", () => {
                 body,
             ),
         ).toThrow(/signing secret/i);
+    });
+});
+
+describe("normalizeEmojiName", () => {
+    it("strips the surrounding colons and whitespace Slack users type", () => {
+        expect(normalizeEmojiName(":thumbsup:")).toBe("thumbsup");
+        expect(normalizeEmojiName("  white_check_mark ")).toBe("white_check_mark");
+    });
+
+    it("keeps inner colons such as skin tone modifiers", () => {
+        expect(normalizeEmojiName(":thumbsup::skin-tone-2:")).toBe("thumbsup::skin-tone-2");
     });
 });
