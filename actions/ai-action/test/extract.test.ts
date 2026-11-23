@@ -147,6 +147,31 @@ describe("ai::extract::information", () => {
         expect(requests[0].tools.map((tool) => tool.name)).toEqual(["Invoice"]);
     });
 
+    it("puts what was said before ahead of the prompt", async () => {
+        const { run, requests } = scriptedModel([
+            answer("", [{ id: "call-1", name: "Invoice", args: { number: "R-77" } }]),
+        ]);
+
+        await extract.run(context(), "what is the number?", invoiceType, run, undefined, {
+            messages: [{ role: "user", content: text }],
+        });
+
+        // The system prompt, then the conversation, then what this call asks for.
+        expect(requests[0].messages.map((message) => message.role)).toEqual(["system", "human", "human"]);
+        expect(requests[0].messages[1].content).toEqual([{ type: "text", text }]);
+    });
+
+    it("reads a conversation without a prompt of its own", async () => {
+        const { run, requests } = scriptedModel([
+            answer("", [{ id: "call-1", name: "Invoice", args: { number: "R-77" } }]),
+        ]);
+
+        await expect(
+            extract.run(context(), "", invoiceType, run, undefined, { messages: [{ role: "user", content: text }] }),
+        ).resolves.toEqual({ number: "R-77" });
+        expect(requests[0].messages.map((message) => message.role)).toEqual(["system", "human"]);
+    });
+
     it("needs a text to read", async () => {
         const { run } = scriptedModel([answer("")]);
 

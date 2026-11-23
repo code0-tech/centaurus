@@ -181,8 +181,9 @@ describe("the OpenAI endpoint", () => {
 
         expect(response.status).toEqual(200);
         expect(calls.map((call) => call.flowId)).toEqual([2n]);
-        // The flow is handed the request itself, which is what ai::agent::create takes.
-        expect(calls[0].payload).toMatchObject({ messages: [{ role: "user", content: "hi" }] });
+        // The flow is handed the request itself, which is what ai::agent::create takes,
+        // with what the user last said next to it as plain text.
+        expect(calls[0].payload).toMatchObject({ messages: [{ role: "user", content: "hi" }], prompt: "hi" });
         expect(body.response).toEqual("triage here");
         // A client matches the answer against the model it asked for.
         expect(body.model).toEqual("triage");
@@ -356,9 +357,9 @@ describe("the flow a client ends up talking to", () => {
             const answer = await new CreateAgentFunction().run(
                 context(executionId) as never,
                 "support",
-                "You track orders.",
                 model,
                 "",
+                "You track orders.",
                 undefined,
                 undefined,
                 payload as unknown as AiChatRequest,
@@ -455,7 +456,7 @@ describe("what the event offers a flow", () => {
 
     it("hands the flow the client's request as a chat request", () => {
         expect(Reflect.getMetadata("hercules:signature", AiOpenAiServerRuntimeEvent)).toEqual(
-            "(route: TEXT, model: TEXT, api_key?: TEXT): AI_CHAT_REQUEST",
+            "(route: TEXT, model: TEXT, api_key?: TEXT): AI_CHAT_REQUEST & { prompt: TEXT }",
         );
     });
 });

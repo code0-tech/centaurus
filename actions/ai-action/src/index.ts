@@ -125,8 +125,19 @@ DATA_TYPES.forEach((dataType) => action.registerDataTypeClass(dataType));
 RUNTIME_FUNCTIONS.forEach((runtimeFunction) => action.registerRuntimeFunction(runtimeFunction));
 RUNTIME_EVENTS.forEach((event) => action.registerRuntimeEventClass(event));
 
-action.on(CodeZeroEvent.error, () => {
+action.on(CodeZeroEvent.connected, () => {
+    console.log("Connected to aquila");
+});
+
+action.on(CodeZeroEvent.error, (error: Error) => {
+    console.error("Stream error:", error.message);
+    console.log(`Attempting to reconnect in ${RECONNECT_DELAY_MS / 1000}s...`);
     setTimeout(() => connectToAquila(action), RECONNECT_DELAY_MS);
+});
+
+action.on(CodeZeroEvent.moduleUpdated, (message: unknown) => {
+    console.dir(message, { depth: null });
+    console.dir(action.configs.values(), { depth: null });
 });
 
 connectToAquila(action);

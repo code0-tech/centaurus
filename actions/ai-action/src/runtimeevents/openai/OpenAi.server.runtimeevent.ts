@@ -18,10 +18,12 @@ import {
  * matching flow for `POST /chat/completions`.
  *
  * The flow is handed the client's request as an `AI_CHAT_REQUEST` - the type
- * `ai::agent::create` takes - and answers it with `ai::openai::respond`, from wherever
- * in the flow that belongs, so a flow that logs or stores something after the agent
- * still answers with the agent's reply. A flow that never responds falls back to its
- * own return value.
+ * `ai::agent::create` takes - with `prompt` added to it: what the user last said, as
+ * text, so a flow that only wants that one message reads a field instead of walking
+ * the messages itself. It answers with `ai::openai::respond`, from wherever in the
+ * flow that belongs, so a flow that logs or stores something after the agent still
+ * answers with the agent's reply. A flow that never responds falls back to its own
+ * return value.
  *
  * `route` is the path the endpoint lives under, with the project's slug in front of
  * it, and unique per project. `model` is the name a client sees and picks, which every
@@ -32,7 +34,7 @@ import {
 @Identifier("ai::openai::server")
 @DisplayIcon("tabler:ai")
 @Editable()
-@Signature("(route: TEXT, model: TEXT, api_key?: TEXT): AI_CHAT_REQUEST")
+@Signature("(route: TEXT, model: TEXT, api_key?: TEXT): AI_CHAT_REQUEST & { prompt: TEXT }")
 @Name({ code: "en-US", content: "OpenAI endpoint" })
 @Description({
     code: "en-US",
@@ -51,12 +53,10 @@ import {
             content:
                 "The path this endpoint is reached under, \"/v1\" by default. A chat client is given the project's own address followed by this path as its server address, and finds the rest on its own.",
         },
-    ],
-    defaultValue: "/v1",
+    ]
 })
 @EventSetting({
     identifier: "model",
-    unique: "PROJECT",
     name: [{ code: "en-US", content: "Model" }],
     description: [
         {

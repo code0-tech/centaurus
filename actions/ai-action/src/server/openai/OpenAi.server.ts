@@ -1,6 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { PlainValue } from "@code0-tech/hercules";
 import type { ActionFlow } from "@code0-tech/tucana/aquila";
+import type { AiChatMessage } from "../../datatypes/chat/Chat.message.datatype.js";
 import { AiChatRequestSchema, type AiChatRequest } from "../../datatypes/chat/Chat.request.datatype.js";
 import { AiChatResponseSchema, type AiChatResponse } from "../../datatypes/chat/Chat.response.datatype.js";
 import type { OpenAiEndpoint, OpenAiRequestPath } from "../../types/openai/OpenAi.types.js";
@@ -222,11 +223,26 @@ export class OpenAiServer {
         // its respond node runs - which can be before executeFlow even resolves.
         const executionId: string = this.action.reserveExecutionId();
 
+        // What the user last said, flattened to text and handed over next to the
+        // request itself: a flow that only wants that one message then reads a field
+        // instead of walking the messages. Empty when the last turn was not the
+        // user's, which the flow can treat the way the agent treats an empty prompt.
+        const last: AiChatMessage | undefined = [...request.messages]
+            .reverse()
+            .find((message) => message.role === "user");
+        const prompt: string =
+            typeof last?.content === "string"
+                ? last.content
+                : (Array.isArray(last?.content) ? last.content : [])
+                      .filter((part) => part.type === "text")
+                      .map((part) => String((part as { text?: unknown }).text ?? ""))
+                      .join("");
+
         const responded: Promise<{ answer: AiChatResponse }> = pendingResponses
             .open(executionId, endpoint.model)
             .then((answer) => ({ answer }));
         const finished: Promise<{ result: PlainValue }> = this.action
-            .executeFlowWithId(executionId, endpoint.flow.flowId, request as unknown as PlainValue)
+            .executeFlowWithId(executionId, endpoint.flow.flowId, { ...request, prompt } as unknown as PlainValue)
             .then((result) => ({ result }));
 
         try {

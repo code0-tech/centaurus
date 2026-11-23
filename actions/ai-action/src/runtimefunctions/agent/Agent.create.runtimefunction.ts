@@ -70,7 +70,7 @@ const EXTRACTION_PROMPT =
 @Identifier("ai::agent::create")
 @DisplayIcon("tabler:ai")
 @Signature(
-    "<T extends TYPE>(name: TEXT, instructions: TEXT, model: TRANSFORM<AI_MODEL_REQUEST, AI_MODEL_RESPONSE>, question: TEXT, tools?: LIST<((...args: any[]) => any) | AI_MCP_SERVER>, answer_type?: T, conversation?: AI_CHAT_REQUEST, rules?: LIST<TRANSFORM<AI_AGENT_STATE, AI_STATE_UPDATE>>): AI_CHAT_RESPONSE & { structured_response: T }",
+    "<T extends TYPE>(name: TEXT, model: TRANSFORM<AI_MODEL_REQUEST, AI_MODEL_RESPONSE>, prompt: TEXT, instructions?: TEXT, tools?: LIST<((...args: any[]) => any) | AI_MCP_SERVER>, answer_type?: T, conversation?: AI_CHAT_REQUEST, rules?: LIST<TRANSFORM<AI_AGENT_STATE, AI_STATE_UPDATE>>): AI_CHAT_RESPONSE & { structured_response: T }",
 )
 @Name({ code: "en-US", content: "Create agent" })
 @Alias({ code: "en-US", content: "agent;ai;llm;chat;prompt;assistant;tools" })
@@ -79,7 +79,7 @@ const EXTRACTION_PROMPT =
     content:
         "Asks an AI agent a question and waits for its answer. Give it instructions, a model to think with and flows as tools - it decides on its own what to use until it can answer.",
 })
-@DisplayMessage({ code: "en-US", content: "Ask the agent ${name} ${question}" })
+@DisplayMessage({ code: "en-US", content: "Ask the agent ${name} ${prompt}" })
 @ThrowsError()
 @Parameter({
     runtimeName: "name",
@@ -89,17 +89,6 @@ const EXTRACTION_PROMPT =
             code: "en-US",
             content:
                 "The agent's own name. It identifies the agent in the node's message, and is what an error names when the agent fails.",
-        },
-    ],
-})
-@Parameter({
-    runtimeName: "instructions",
-    name: [{ code: "en-US", content: "Instructions" }],
-    description: [
-        {
-            code: "en-US",
-            content:
-                "What the agent is and how it should work: its role, what it may do, how the answer should read. The agent is told this before every turn.",
         },
     ],
 })
@@ -115,8 +104,8 @@ const EXTRACTION_PROMPT =
     ],
 })
 @Parameter({
-    runtimeName: "question",
-    name: [{ code: "en-US", content: "Question" }],
+    runtimeName: "prompt",
+    name: [{ code: "en-US", content: "Prompt" }],
     description: [
         {
             code: "en-US",
@@ -124,6 +113,18 @@ const EXTRACTION_PROMPT =
                 "What the agent is asked this time. It comes after everything the conversation already holds. Leave it empty when the conversation already ends in a question.",
         },
     ],
+})
+@Parameter({
+    runtimeName: "instructions",
+    name: [{ code: "en-US", content: "Instructions" }],
+    description: [
+        {
+            code: "en-US",
+            content:
+                "What the agent is and how it should work: its role, what it may do, how the answer should read. The agent is told this before every turn.",
+        },
+    ],
+    optional: true,
 })
 @Parameter({
     runtimeName: "tools",
@@ -156,7 +157,7 @@ const EXTRACTION_PROMPT =
         {
             code: "en-US",
             content:
-                "Everything that was said before, as a chat client sends it. Those messages go ahead of the question, which is how a chat endpoint hands the agent the conversation it is to carry on.",
+                "Everything that was said before, as a chat client sends it. Those messages go ahead of the prompt, which is how a chat endpoint hands the agent the conversation it is to carry on.",
         },
     ],
     optional: true,
@@ -184,15 +185,15 @@ export class CreateAgentFunction {
      * references are scoped to.
      *
      * The parameters are ordered by how often a flow reaches for them: what every
-     * agent needs first, then the tools and the answer's type, and the conversation
-     * and the rules last.
+     * agent needs first - a name, a model, a prompt - then the instructions, the
+     * tools and the answer's type, and the conversation and the rules last.
      */
     async run(
         _context: FunctionContext,
         name: string,
-        instructions: string,
         model: unknown,
-        question: string,
+        prompt: string,
+        instructions?: string,
         tools?: ToolEntry[],
         answer_type?: unknown,
         conversation?: AiChatRequest,
@@ -269,7 +270,7 @@ export class CreateAgentFunction {
             "ERROR_INVALID_AI_CHAT_REQUEST",
             "The chat request is not valid",
         );
-        const asked: string = asText(question, "question", "ERROR_INVALID_AI_CHAT_REQUEST");
+        const asked: string = asText(prompt, "prompt", "ERROR_INVALID_AI_CHAT_REQUEST");
         const history: AiMessage[] = [
             ...parsed.messages.map(fromChatMessage),
             ...(asked.length > 0
@@ -279,7 +280,7 @@ export class CreateAgentFunction {
         if (history.length === 0) {
             throw new RuntimeError(
                 "ERROR_INVALID_AI_CHAT_REQUEST",
-                "There is nothing to ask: the question is empty and the conversation carries no messages.",
+                "There is nothing to ask: the prompt is empty and the conversation carries no messages.",
             );
         }
 

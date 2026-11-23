@@ -170,7 +170,7 @@ describe("ai::model::openrouter", () => {
 
         // Reaches the model, which rejects the test key - proof the agent accepted it.
         await expect(
-            ask.run(context(), "support", "You are helpful.", asFlowValue(transform), "hi"),
+            ask.run(context(), "support", asFlowValue(transform), "hi", "You are helpful."),
         ).rejects.toThrow(RuntimeError);
     }, 30_000);
 });
@@ -330,9 +330,9 @@ describe("the chat format of ai::agent::create", () => {
         const response = await ask.run(
             context(),
             "greeter",
-            "You greet people.",
             run,
             "hello",
+            "You greet people.",
             undefined,
             undefined,
             { model: "my-agent", messages: [{ role: "system", content: "Be brief." }] },
@@ -352,7 +352,7 @@ describe("the chat format of ai::agent::create", () => {
 
     it("translates a multimodal prompt into content blocks", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "A cat." }])]);
-        await ask.run(context(), "describer", "", run, "", undefined, undefined, {
+        await ask.run(context(), "describer", run, "", "", undefined, undefined, {
             messages: [
                 {
                     role: "user",
@@ -379,9 +379,9 @@ describe("the chat format of ai::agent::create", () => {
         const response = await ask.run(
             context(),
             "support",
-            "",
             run,
             "and A-1?",
+            "",
             [lookup],
             undefined,
             {
@@ -411,7 +411,7 @@ describe("the chat format of ai::agent::create", () => {
 
     it("keeps a malformed tool call instead of failing the request", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "ok" }])]);
-        await ask.run(context(), "support", "", run, "again?", undefined, undefined, {
+        await ask.run(context(), "support", run, "again?", "", undefined, undefined, {
             messages: [
                 {
                     role: "assistant",
@@ -434,14 +434,14 @@ describe("the chat format of ai::agent::create", () => {
                 { type: "text", text: "Hi." },
             ]),
         ]);
-        const response = await ask.run(context(), "greeter", "", run, "hello");
+        const response = await ask.run(context(), "greeter", run, "hello", "");
 
         expect(response.choices[0].message.content).toEqual("Hi.");
     });
 
     it("takes just a prompt, with no request at all", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "Hi." }])]);
-        const response = await ask.run(context(), "greeter", "", run, "hello");
+        const response = await ask.run(context(), "greeter", run, "hello", "");
 
         expect(requests[0].messages.at(-1)?.content).toEqual([{ type: "text", text: "hello" }]);
         expect(response.choices[0].message.content).toEqual("Hi.");
@@ -449,7 +449,7 @@ describe("the chat format of ai::agent::create", () => {
 
     it("appends the prompt to the conversation the request carries", async () => {
         const { run, requests } = scriptedModel([generation([{ type: "text", text: "Still fine." }])]);
-        await ask.run(context(), "greeter", "", run, "and now?", undefined, undefined, {
+        await ask.run(context(), "greeter", run, "and now?", "", undefined, undefined, {
             messages: [
                 { role: "user", content: "how are you?" },
                 { role: "assistant", content: "fine" },
@@ -463,7 +463,7 @@ describe("the chat format of ai::agent::create", () => {
     it("carries the answer as plain text next to the OpenAI shape", async () => {
         const { run } = scriptedModel([generation([{ type: "text", text: "Two parts. " }, { type: "text", text: "One answer." }])]);
 
-        const response = await ask.run(context(), "greeter", "", run, "hello");
+        const response = await ask.run(context(), "greeter", run, "hello", "");
 
         expect(response.response).toEqual("Two parts. One answer.");
         expect(response.object).toEqual("chat.completion");
@@ -476,7 +476,7 @@ describe("the chat format of ai::agent::create", () => {
         ]);
         const lookup = (async () => ({ ok: true })) as unknown as SubFlow;
 
-        const response = await ask.run(context(), "support", "", run, "hi", [lookup]);
+        const response = await ask.run(context(), "support", run, "hi", "", [lookup]);
 
         // The run ends on a text answer, so this one is filled; the tool-call-only
         // turn in between is what an empty `response` would come from.
@@ -486,12 +486,12 @@ describe("the chat format of ai::agent::create", () => {
     it("rejects having nothing to ask", async () => {
         const { run } = scriptedModel([generation([{ type: "text", text: "ok" }])]);
 
-        await expect(ask.run(context(), "greeter", "", run, "")).rejects.toThrow(/nothing to ask/);
+        await expect(ask.run(context(), "greeter", run, "", "")).rejects.toThrow(/nothing to ask/);
         await expect(
-            ask.run(context(), "greeter", "", run, "", undefined, undefined, { messages: [] }),
+            ask.run(context(), "greeter", run, "", "", undefined, undefined, { messages: [] }),
         ).rejects.toThrow(/nothing to ask/);
         await expect(
-            ask.run(context(), "greeter", "", run, "hi", undefined, undefined, {
+            ask.run(context(), "greeter", run, "hi", "", undefined, undefined, {
                 messages: "nope",
             } as never),
         ).rejects.toThrow(/not valid/);
@@ -619,9 +619,9 @@ describe("the model nodes", () => {
         const response = await ask.run(
             context(),
             "support",
-            "You are helpful.",
             asFlowValue(anthropic.run(context(), "claude-opus-5", "sk-ant-test")),
             "hi",
+            "You are helpful.",
         );
         expect(response.choices[0]?.message.content).toContain("ok");
 

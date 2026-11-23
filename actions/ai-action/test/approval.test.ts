@@ -77,9 +77,9 @@ function chat(
     return ask.run(
         context(),
         "support",
-        "You help.",
         model,
         "",
+        "You help.",
         tools,
         undefined,
         { messages: conversation } as never,
