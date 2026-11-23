@@ -38,14 +38,12 @@ pub struct RestAuthValue(pub serde_json::Value);
     display_message(en_US = "Rest Adapter Input"),
     alias(en_US = "http;rest;adapter;input"),
     generic_keys("T"),
-    type_override = "{ payload: T, raw_body: TEXT, headers: OBJECT<{}>, query_params: OBJECT<{}>, path_params: OBJECT<{}> }",
+    type_override = "{ payload: T, headers: OBJECT<{}>, query_params: OBJECT<{}>, path_params: OBJECT<{}> }",
     linked_data_type_identifiers("OBJECT")
 )]
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct RestAdapterInput {
     pub payload: serde_json::Value,
-    /// The unparsed request body, for verifying webhook signatures.
-    pub raw_body: String,
     pub headers: std::collections::HashMap<String, String>,
     pub query_params: std::collections::HashMap<String, String>,
     pub path_params: std::collections::HashMap<String, String>,

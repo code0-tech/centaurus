@@ -1,6 +1,5 @@
-//! Builds the flow input value (`payload`/`raw_body`/`headers`/
-//! `query_params`/`path_params`, matching `REST_ADAPTER_INPUT`) from an
-//! incoming request.
+//! Builds the flow input value (`payload`/`headers`/`query_params`/
+//! `path_params`, matching `REST_ADAPTER_INPUT`) from an incoming request.
 //! Ported from draco's REST adapter, adjusted to take `path_params` as
 //! already-extracted by `registry.rs::CompiledRoute::path_params` (from the
 //! single regex match that also confirmed the route), rather than
@@ -15,21 +14,12 @@ pub fn build_flow_input(
     query: Option<&str>,
     headers: &HeaderMap<HeaderValue>,
     payload: Option<Value>,
-    raw_body: &[u8],
 ) -> Value {
-    let mut fields = HashMap::with_capacity(5);
+    let mut fields = HashMap::with_capacity(4);
 
     if let Some(payload) = payload {
         fields.insert(String::from("payload"), payload);
     }
-
-    // The unparsed body, exactly as received. Webhook providers such as Slack,
-    // GitHub or Stripe sign these bytes, and `payload` can't reproduce them
-    // once parsed (key order, whitespace, escaping, form re-encoding).
-    fields.insert(
-        String::from("raw_body"),
-        String::from_utf8_lossy(raw_body).into_owned().to_value(),
-    );
 
     fields.insert(
         String::from("headers"),
@@ -88,7 +78,6 @@ fn string_map_to_value(map: HashMap<String, String>) -> Value {
 mod tests {
     use super::{build_flow_input, query_params, string_map_to_value};
     use hyper::HeaderMap;
-    use std::collections::HashMap;
     use tucana::shared::{Struct, Value, value::Kind};
 
     #[test]
@@ -129,7 +118,6 @@ mod tests {
             Some("search=hello+world"),
             &HeaderMap::new(),
             None,
-            b"",
         );
 
         assert_eq!(
@@ -139,20 +127,6 @@ mod tests {
         assert_eq!(
             nested_string_field(&input, "path_params", "user_id"),
             Some("42")
-        );
-    }
-
-    #[test]
-    fn flow_input_contains_the_unparsed_raw_body() {
-        let raw = br#"{"text":"a\/b",  "n":1}"#;
-        let input = build_flow_input(HashMap::new(), None, &HeaderMap::new(), None, raw);
-
-        let Some(Kind::StructValue(Struct { fields })) = input.kind.as_ref() else {
-            panic!("expected struct value");
-        };
-        assert_eq!(
-            fields.get("raw_body").and_then(|value| value.kind.as_ref()),
-            Some(&Kind::StringValue(String::from_utf8(raw.to_vec()).unwrap()))
         );
     }
 

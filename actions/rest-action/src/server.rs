@@ -235,13 +235,8 @@ async fn handle(
         }
     }
 
-    let flow_input = input::build_flow_input(
-        path_params,
-        query.as_deref(),
-        &headers,
-        request_body_value,
-        &body_bytes,
-    );
+    let flow_input =
+        input::build_flow_input(path_params, query.as_deref(), &headers, request_body_value);
     let payload = tucana::shared::helper::value::to_json_value(flow_input);
 
     Ok(execute_and_await_response(ExecutionRequest {
