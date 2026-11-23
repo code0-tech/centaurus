@@ -75,7 +75,11 @@ slow work:
 
 - **URL verification** — when you first save the Request URL, Slack posts
   `{ "type": "url_verification", "challenge": "…" }` and expects the `challenge`
-  echoed back.
+  echoed back. Branch on `payload.type == "url_verification"` and call the REST
+  `Respond` function with status `200`, content type `text/plain` and
+  `payload.challenge` as body. Without a `Respond` the REST adapter answers `204`
+  and Slack rejects the URL. Such requests carry no `event`, so `payload.event` is
+  optional on every Events API payload.
 - **Slash commands** — respond with a body to reply immediately, or respond empty
   and post to the payload's `response_url` for up to 30 minutes afterwards.
 

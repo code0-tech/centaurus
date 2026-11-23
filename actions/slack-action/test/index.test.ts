@@ -106,16 +106,19 @@ describe("SlackReactionAddedEventPayloadSchema", () => {
             },
         });
 
-        expect(parsed.event.reaction).toEqual("white_check_mark");
-        expect(parsed.event.item.ts).toEqual("1360782400.498405");
+        expect(parsed.event?.reaction).toEqual("white_check_mark");
+        expect(parsed.event?.item.ts).toEqual("1360782400.498405");
     });
 
-    it("rejects a delivery without the inner event", () => {
-        expect(() =>
-            SlackReactionAddedEventPayloadSchema.parse({
-                type: "event_callback",
-            }),
-        ).toThrow();
+    it("accepts Slack's url_verification request, which carries a challenge instead of an event", () => {
+        const parsed = SlackReactionAddedEventPayloadSchema.parse({
+            token: "legacy",
+            challenge: "3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P",
+            type: "url_verification",
+        });
+
+        expect(parsed.challenge).toEqual("3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P");
+        expect(parsed.event).toBeUndefined();
     });
 });
 
