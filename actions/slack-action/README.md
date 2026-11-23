@@ -135,7 +135,6 @@ the envelope built by `src/data_types/slackEventEnvelope.ts`.
 |--------|----------|-------------|-------------|
 | `bot_token` | yes | `SLACK_BOT_TOKEN` | Bot user OAuth token (`xoxb-…`), the Bearer credential for the Web API. Found under *OAuth & Permissions*. |
 | `signing_secret` | yes | `SLACK_SIGNING_SECRET` | Signing secret used by `slackVerifyRequestSignature`. Found under *Basic Information*. |
-| `app_token` | no | `SLACK_APP_TOKEN` | App-level token (`xapp-…`), only needed when running the Slack app in Socket Mode instead of exposing public HTTP endpoints. |
 
 Beyond these the action uses the shared Hercules variables (`HERCULES_AUTH_TOKEN`,
 `HERCULES_AQUILA_URL`, `HERCULES_ACTION_ID`, `HERCULES_SDK_VERSION`) documented in

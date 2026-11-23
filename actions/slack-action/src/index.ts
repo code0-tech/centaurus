@@ -72,21 +72,6 @@ const action = new Action(
             ],
             linkedDataTypes: ["TEXT"],
         },
-        {
-            identifier: "app_token",
-            type: "TEXT",
-            defaultValue: process.env.SLACK_APP_TOKEN ?? "",
-            optional: true,
-            name: [{ code: "en-US", content: "App token" }],
-            description: [
-                {
-                    code: "en-US",
-                    content:
-                        "An optional app-level token (xapp-...), only needed if you run the Slack app in Socket Mode instead of exposing the webhook events as public HTTP endpoints.",
-                },
-            ],
-            linkedDataTypes: ["TEXT"],
-        },
     ]
 );
 
