@@ -19,13 +19,10 @@ import { parseOrThrow } from "../utils/shared/Shared.parseOrThrow.util.js";
 import { stripUndefined } from "../utils/shared/Shared.stripUndefined.util.js";
 import { toFlowMessage } from "../utils/message/Message.toFlowMessage.util.js";
 import { toLangChainMessage } from "../utils/message/Message.toLangChainMessage.util.js";
-import { logger } from "../utils/shared/Log.logger.util.js";
 import { emptyJsonSchema } from "../utils/shared/Shared.emptyJsonSchema.util.js";
 import { toPlainSchema } from "../utils/shared/Shared.toPlainSchema.util.js";
 
 type BoundFlowChatModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModelCallOptions>;
-
-const log = logger("model");
 
 interface FlowChatModelFields {
     run: SubFlow;
@@ -144,10 +141,6 @@ export class FlowChatModel extends BaseChatModel<BaseChatModelCallOptions> {
                 input_schema: inputSchema,
             });
         });
-        log.debug(
-            `${specs.length} tools are bound to the model`,
-            specs.map((spec) => spec.name),
-        );
         return new FlowChatModel({
             run: this.run,
             toolSpecs: specs,
@@ -169,16 +162,7 @@ export class FlowChatModel extends BaseChatModel<BaseChatModelCallOptions> {
             ...(responseFormat ? { response_format: responseFormat } : {}),
         };
 
-        log.debug(`calling the model sub flow with ${request.messages.length} messages`, request);
-
-        const started: number = Date.now();
-        const raw: unknown = await this.run(request as never).catch((error: unknown) => {
-            log.error(`the model sub flow failed after ${Date.now() - started}ms`, {
-                error: error instanceof Error ? error.message : String(error),
-            });
-            throw error;
-        });
-        log.debug(`the model sub flow answered after ${Date.now() - started}ms with`, raw);
+        const raw: unknown = await this.run(request as never);
 
         const answer = parseOrThrow(
             AiModelResponseSchema,

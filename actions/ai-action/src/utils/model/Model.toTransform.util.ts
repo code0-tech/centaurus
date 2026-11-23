@@ -10,7 +10,6 @@ import type { AiModelTransform } from "../../datatypes/model/Model.transform.dat
 import { toFlowMessage } from "../message/Message.toFlowMessage.util.js";
 import { toLangChainMessage } from "../message/Message.toLangChainMessage.util.js";
 import { describeError } from "../shared/Shared.describeError.util.js";
-import { logger } from "../shared/Log.logger.util.js";
 import { parseOrThrow } from "../shared/Shared.parseOrThrow.util.js";
 
 /** A tool as every OpenAI-dialect provider wants to be handed it. */
@@ -41,8 +40,6 @@ type BoundModel = Runnable<BaseLanguageModelInput, AIMessageChunk, BaseChatModel
 export interface ModelTransformOptions {
     /** The provider as the flow reads it in a message, e.g. "OpenRouter". */
     provider: string;
-    /** What this provider's log channel is named, e.g. "openrouter". */
-    prefix: string;
     /** The model identifier the node was given. */
     identifier: string;
     /** The provider client, already configured by the node. */
@@ -73,8 +70,7 @@ export interface ModelTransformOptions {
  * closure.
  */
 export function toModelTransform(options: ModelTransformOptions): AiModelTransform {
-    const { provider, prefix, identifier, model } = options;
-    const log = logger(`model:${prefix}`);
+    const { provider, identifier, model } = options;
     const native: boolean = options.responseFormat !== undefined;
 
     // What the agent reads to decide how to get a structured answer: carrying
@@ -84,8 +80,8 @@ export function toModelTransform(options: ModelTransformOptions): AiModelTransfo
     const requestSchema = native ? AiModelRequestSchema : AiModelRequestSchema.omit({ response_format: true });
 
     return {
-        // A readable name, since this is what a flow and the agent's logs show the
-        // model call under; the identifier alone would not say whose model it is.
+        // A readable name, since this is what a flow shows the model call under; the
+        // identifier alone would not say whose model it is.
         name: `${provider} model ${identifier}`,
         description:
             `Sends a conversation and the tools that may be called to the ${provider} model ` +
@@ -121,16 +117,6 @@ export function toModelTransform(options: ModelTransformOptions): AiModelTransfo
             const formatOptions: Record<string, unknown> =
                 format && options.responseFormat ? options.responseFormat(format) : {};
 
-            // What a model answered is only half of a failed run: whether it was asked
-            // to call a tool at all, and whether it then did, is the other half, and
-            // only this node sees both.
-            log.debug(`calling "${identifier}" with`, {
-                messages: parsed.messages.length,
-                tools: bindable.length,
-                tool_choice: parsed.tool_choice,
-                response_format: format?.name,
-            });
-
             const answer: AIMessage = await bound
                 .invoke(messages, {
                     ...(parsed.stop ? { stop: parsed.stop } : {}),
@@ -138,14 +124,6 @@ export function toModelTransform(options: ModelTransformOptions): AiModelTransfo
                     ...formatOptions,
                 } as never)
                 .catch((error: unknown) => {
-                    // Which parameter a provider refused is only answerable against
-                    // what was actually sent, and a rejected call is exactly when
-                    // nobody can reconstruct that from the flow.
-                    log.error(`the call to "${identifier}" was rejected, having sent`, {
-                        tools: bindable,
-                        tool_choice: parsed.tool_choice,
-                        response_format: format,
-                    });
                     throw new RuntimeError(
                         "ERROR_AI_MODEL_CALL_FAILED",
                         `The ${provider} call to "${identifier}" failed: ${(options.describeFailure ?? describeError)(error)}`,
@@ -154,13 +132,6 @@ export function toModelTransform(options: ModelTransformOptions): AiModelTransfo
 
             const reply = toFlowMessage(answer);
             const metadata = answer.response_metadata as { finish_reason?: unknown } | undefined;
-            log.debug(`"${identifier}" answered with`, {
-                blocks: (reply.content ?? []).map((block) => block.type),
-                tool_calls: (reply.content ?? [])
-                    .filter((block) => block.type === "tool_call")
-                    .map((block) => block.name),
-                finish_reason: metadata?.finish_reason,
-            });
 
             // A provider that gave up mid-generation can still answer 200, with
             // whatever text it had produced and "error" as the finish reason. Taken at

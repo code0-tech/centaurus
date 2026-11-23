@@ -11,7 +11,6 @@ import {
 } from "@code0-tech/hercules";
 import type { AiAgentStep } from "../../datatypes/agent/Agent.step.datatype.js";
 import { AiChatResponseSchema, type AiChatResponse } from "../../datatypes/chat/Chat.response.datatype.js";
-import { logger } from "../../utils/shared/Log.logger.util.js";
 import { parseOrThrow } from "../../utils/shared/Shared.parseOrThrow.util.js";
 
 /** Open WebUI reads these blocks out of the answer's text, so they have to survive as markup. */
@@ -64,8 +63,7 @@ export class OpenAiOpenWebUiFormattingFunction {
      * still gets the data rather than the markup. An answer with nothing to show, and
      * one that came through here already, are returned untouched.
      */
-    run(context: FunctionContext, response: unknown): AiChatResponse {
-        const log = logger("openai", context.executionId);
+    run(_context: FunctionContext, response: unknown): AiChatResponse {
         const answer: AiChatResponse = parseOrThrow(
             AiChatResponseSchema,
             response,
@@ -77,10 +75,7 @@ export class OpenAiOpenWebUiFormattingFunction {
         const thought: string = answer.reasoning?.trim() ?? "";
         if (thought.length === 0 && steps.length === 0) return answer;
 
-        if (FORMATTED.test(answer.response)) {
-            log.debug("this answer was already formatted for Open WebUI, so it is left as it is");
-            return answer;
-        }
+        if (FORMATTED.test(answer.response)) return answer;
 
         const blocks: string[] = [];
 
@@ -109,7 +104,6 @@ export class OpenAiOpenWebUiFormattingFunction {
         });
 
         const content: string = [...blocks, answer.response].filter((part) => part.length > 0).join("\n");
-        log.info("formatted the answer for Open WebUI", { reasoning: thought.length > 0, steps: steps.length });
 
         return {
             ...answer,

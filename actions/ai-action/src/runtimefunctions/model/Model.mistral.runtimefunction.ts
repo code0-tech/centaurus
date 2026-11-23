@@ -102,7 +102,6 @@ export class MistralModelFunction {
 
         return toModelTransform({
             provider: "Mistral",
-            prefix: "mistral",
             identifier,
             model: chat as never,
         });

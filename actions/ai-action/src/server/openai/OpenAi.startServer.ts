@@ -1,8 +1,5 @@
 import type { OpenAiServerHost, OpenAiServerOptions } from "../../types/openai/OpenAiServer.types.js";
-import { logger } from "../../utils/shared/Log.logger.util.js";
 import { OpenAiServer } from "./OpenAi.server.js";
-
-const log = logger("openai");
 
 /**
  * Starts the OpenAI endpoint of every project this action serves. It is the action's
@@ -14,7 +11,6 @@ export async function startOpenAiServer(
     options: OpenAiServerOptions = {},
 ): Promise<OpenAiServer> {
     const server = new OpenAiServer(action, options);
-    const { host, port } = await server.listen();
-    log.info(`OpenAI endpoint listening on http://${host}:${port}/<project>/<route>`);
+    await server.listen();
     return server;
 }

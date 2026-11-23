@@ -10,7 +10,6 @@ import {
     ThrowsError,
 } from "@code0-tech/hercules";
 import { AiChatResponseSchema, type AiChatResponse } from "../../datatypes/chat/Chat.response.datatype.js";
-import { logger } from "../../utils/shared/Log.logger.util.js";
 import { parseOrThrow } from "../../utils/shared/Shared.parseOrThrow.util.js";
 import { pendingResponses } from "../../utils/openai/OpenAi.pending.util.js";
 
@@ -46,7 +45,7 @@ export class OpenAiRespondFunction {
      * The request is answered the moment this runs; the flow carries on, and anything
      * after this node no longer changes what the client got. A second call, or a run
      * of a flow nobody is waiting on - a manual execution from the editor, say - is
-     * logged rather than failed: the flow did nothing wrong, there is simply no
+     * passed over rather than failed: the flow did nothing wrong, there is simply no
      * connection to write to.
      *
      * The answer is returned rather than dropped, so it is the node's result and, for
@@ -56,7 +55,6 @@ export class OpenAiRespondFunction {
      * answer from the wait this settles and ignores the flow's result.
      */
     run(context: FunctionContext, response: unknown): AiChatResponse {
-        const log = logger("openai", context.executionId);
         const answer: AiChatResponse = parseOrThrow(
             AiChatResponseSchema,
             response,
@@ -64,13 +62,7 @@ export class OpenAiRespondFunction {
             "The answer for an OpenAI client has to be a chat response",
         );
 
-        if (pendingResponses.settle(context.executionId, answer)) {
-            log.info("answered the waiting OpenAI request", { model: answer.model });
-        } else {
-            log.info("nothing is waiting for this execution's answer, so it stays this node's result", {
-                model: answer.model,
-            });
-        }
+        pendingResponses.settle(context.executionId, answer);
 
         return answer;
     }

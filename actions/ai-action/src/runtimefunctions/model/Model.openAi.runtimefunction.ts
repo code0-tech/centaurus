@@ -111,7 +111,6 @@ export class OpenAiModelFunction {
 
         return toModelTransform({
             provider: "OpenAI",
-            prefix: "openai",
             identifier,
             model: chat as never,
             responseFormat: (format: AiResponseFormat) => ({ response_format: toJsonSchemaFormat(format) }),

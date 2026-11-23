@@ -18,7 +18,7 @@ import {
  * matching flow for `POST /chat/completions`.
  *
  * The flow is handed the client's request as an `AI_CHAT_REQUEST` - the type
- * `ai::agent::ask` takes - and answers it with `ai::openai::respond`, from wherever
+ * `ai::agent::create` takes - and answers it with `ai::openai::respond`, from wherever
  * in the flow that belongs, so a flow that logs or stores something after the agent
  * still answers with the agent's reply. A flow that never responds falls back to its
  * own return value.

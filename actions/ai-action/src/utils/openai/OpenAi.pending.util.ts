@@ -1,8 +1,4 @@
 import type { AiChatResponse } from "../../datatypes/chat/Chat.response.datatype.js";
-import { logger } from "../shared/Log.logger.util.js";
-
-const log = logger("openai");
-
 interface Waiting {
     resolve: (response: AiChatResponse) => void;
     model: string;
@@ -26,7 +22,6 @@ class PendingResponses {
     open(executionId: string, model: string): Promise<AiChatResponse> {
         return new Promise<AiChatResponse>((resolve) => {
             this.waiting.set(executionId, { resolve, model });
-            log.debug(`waiting for execution ${executionId} to answer`, { model, waiting: this.waiting.size });
         });
     }
 
@@ -37,7 +32,6 @@ class PendingResponses {
 
         this.waiting.delete(executionId);
         waiting.resolve(response);
-        log.debug(`execution ${executionId} answered its request`, { waiting: this.waiting.size });
         return true;
     }
 

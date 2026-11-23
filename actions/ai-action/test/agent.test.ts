@@ -5,7 +5,7 @@ import type { AiAgentState } from "../src/datatypes/middleware/Middleware.agentS
 import type { AiMessage } from "../src/datatypes/message/Message.datatype.js";
 import type { AiModelRequest } from "../src/datatypes/model/Model.request.datatype.js";
 import type { AiModelResponse } from "../src/datatypes/model/Model.response.datatype.js";
-import { AskAgentFunction } from "../src/runtimefunctions/agent/Agent.ask.runtimefunction.js";
+import { CreateAgentFunction } from "../src/runtimefunctions/agent/Agent.create.runtimefunction.js";
 import { TrimMessagesMiddlewareFunction } from "../src/runtimefunctions/middleware/Middleware.trimMessages.runtimefunction.js";
 
 function subFlow(implementation: (input: never) => unknown, inputSchema?: Record<string, unknown>): SubFlow {
@@ -72,7 +72,7 @@ const nativeModelSchema: Record<string, unknown> = {
     properties: { messages: {}, tools: {}, response_format: {} },
 };
 
-const ask = new AskAgentFunction();
+const ask = new CreateAgentFunction();
 
 /** A data type's JSON schema, which is what a `TYPE` parameter carries. */
 const orderType: Record<string, unknown> = {
@@ -118,7 +118,7 @@ function asStruct(plain: Record<string, unknown>): unknown {
     return { fields: Object.fromEntries(Object.entries(plain).map(([key, value]) => [key, asValue(value)])) };
 }
 
-describe("ai::agent::ask", () => {
+describe("ai::agent::create", () => {
     it("answers with a chat response, because it runs the agent itself", async () => {
         const { run } = scriptedModel([answer("hello")]);
         const response = await ask.run(context(), "greeter", "You greet people.", run, "hi");

@@ -97,7 +97,6 @@ export class GroqModelFunction {
 
         return toModelTransform({
             provider: "Groq",
-            prefix: "groq",
             identifier,
             model: chat as never,
             responseFormat: (format: AiResponseFormat) => ({ response_format: toJsonSchemaFormat(format) }),

@@ -20,13 +20,13 @@ import { MistralModelFunction } from "../src/runtimefunctions/model/Model.mistra
 import { OllamaModelFunction } from "../src/runtimefunctions/model/Model.ollama.runtimefunction.js";
 import { OpenAiModelFunction } from "../src/runtimefunctions/model/Model.openAi.runtimefunction.js";
 import { OpenRouterModelFunction } from "../src/runtimefunctions/model/Model.openRouter.runtimefunction.js";
-import { AskAgentFunction } from "../src/runtimefunctions/agent/Agent.ask.runtimefunction.js";
+import { CreateAgentFunction } from "../src/runtimefunctions/agent/Agent.create.runtimefunction.js";
 import { McpServerFunction } from "../src/runtimefunctions/mcp/Mcp.server.runtimefunction.js";
 import { AiMcpServerSchema } from "../src/datatypes/mcp/Mcp.server.datatype.js";
 
 const model = new OpenRouterModelFunction();
 const middleware = new TrimMessagesMiddlewareFunction();
-const ask = new AskAgentFunction();
+const ask = new CreateAgentFunction();
 const mcp = new McpServerFunction();
 
 /**
@@ -165,7 +165,7 @@ describe("ai::model::openrouter", () => {
         vi.restoreAllMocks();
     });
 
-    it("is accepted by ai::agent::ask as the agent's model", async () => {
+    it("is accepted by ai::agent::create as the agent's model", async () => {
         const transform = model.run(context(), "anthropic/claude-opus-5", "sk-or-test");
 
         // Reaches the model, which rejects the test key - proof the agent accepted it.
@@ -297,7 +297,7 @@ describe("the contracts the functions implement", () => {
     });
 });
 
-describe("the chat format of ai::agent::ask", () => {
+describe("the chat format of ai::agent::create", () => {
     function scriptedModel(responses: AiModelResponse[]) {
         const requests: AiModelRequest[] = [];
         let call = 0;
@@ -612,7 +612,7 @@ describe("the model nodes", () => {
         expect(fields(transform.inputSchema)).toContain("response_format");
     });
 
-    it("is accepted by ai::agent::ask as the agent's model", async () => {
+    it("is accepted by ai::agent::create as the agent's model", async () => {
         const answer = new AIMessage("ok");
         vi.spyOn(ChatAnthropic.prototype, "invoke").mockResolvedValue(answer as never);
 

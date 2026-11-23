@@ -33,8 +33,9 @@ import { AiModelResponseDataType } from "./datatypes/model/Model.response.dataty
 import { AiResponseFormatDataType } from "./datatypes/model/Model.responseFormat.datatype.js";
 import { AiToolSpecDataType } from "./datatypes/model/Model.toolSpec.datatype.js";
 
-import { AskAgentFunction } from "./runtimefunctions/agent/Agent.ask.runtimefunction.js";
-import { SkillsFunction } from "./runtimefunctions/agent/Agent.skills.runtimefunction.js";
+import { CreateAgentFunction } from "./runtimefunctions/agent/Agent.create.runtimefunction.js";
+import { SkillsFunction } from "./runtimefunctions/tool/Tool.skills.runtimefunction.js";
+import { ExtractInformationFunction } from "./runtimefunctions/extract/Extract.information.runtimefunction.js";
 import { McpServerFunction } from "./runtimefunctions/mcp/Mcp.server.runtimefunction.js";
 import { HumanInTheLoopMiddlewareFunction } from "./runtimefunctions/middleware/Middleware.humanInTheLoop.runtimefunction.js";
 import { TrimMessagesMiddlewareFunction } from "./runtimefunctions/middleware/Middleware.trimMessages.runtimefunction.js";
@@ -52,13 +53,9 @@ import { OpenAiRespondFunction } from "./runtimefunctions/openai/OpenAi.respond.
 import { AiOpenAiServerRuntimeEvent } from "./runtimeevents/openai/OpenAi.server.runtimeevent.js";
 import { startOpenAiServer } from "./server/openai/OpenAi.startServer.js";
 
-import type { ActionExecutionRequest, ActionFlow } from "@code0-tech/tucana/aquila";
-
 import { connectToAquila } from "./utils/shared/Shared.connectToAquila.util.js";
-import { logger } from "./utils/shared/Log.logger.util.js";
 
 const RECONNECT_DELAY_MS = 5000;
-const log = logger("action");
 
 const DATA_TYPES: DataTypeClass[] = [
     AiMessageRoleDataType,
@@ -94,8 +91,9 @@ const DATA_TYPES: DataTypeClass[] = [
 ];
 
 const RUNTIME_FUNCTIONS: RuntimeFunctionClass[] = [
-    AskAgentFunction,
+    CreateAgentFunction,
     SkillsFunction,
+    ExtractInformationFunction,
     McpServerFunction,
     HumanInTheLoopMiddlewareFunction,
     OpenAiOpenWebUiFormattingFunction,
@@ -114,7 +112,7 @@ const RUNTIME_FUNCTIONS: RuntimeFunctionClass[] = [
 const RUNTIME_EVENTS: RuntimeEventClass[] = [AiOpenAiServerRuntimeEvent];
 
 const action = new Action(
-    process.env.ACTION_ID ?? "testing-action",
+    process.env.ACTION_ID ?? "ai-action",
     process.env.VERSION ?? "1.0.0",
     process.env.AQUILA_URL ?? "127.0.0.1:8081",
     "code0-tech",
@@ -127,42 +125,8 @@ DATA_TYPES.forEach((dataType) => action.registerDataTypeClass(dataType));
 RUNTIME_FUNCTIONS.forEach((runtimeFunction) => action.registerRuntimeFunction(runtimeFunction));
 RUNTIME_EVENTS.forEach((event) => action.registerRuntimeEventClass(event));
 
-action.on(CodeZeroEvent.connected, () => {
-    log.info("connected to aquila", {
-        data_types: DATA_TYPES.length,
-        runtime_functions: RUNTIME_FUNCTIONS.length,
-        runtime_events: RUNTIME_EVENTS.length,
-        flows: action.flows.size,
-    });
-});
-
-action.on(CodeZeroEvent.error, (error: Error) => {
-    log.error(`stream error, reconnecting in ${RECONNECT_DELAY_MS / 1000}s`, { error: error.message });
+action.on(CodeZeroEvent.error, () => {
     setTimeout(() => connectToAquila(action), RECONNECT_DELAY_MS);
-});
-
-// Which flows the action knows decides what the OpenAI endpoint serves, so every
-// change to the registry is logged: a client finding no model is answered here.
-action.on(CodeZeroEvent.flowUpdated, (flow: ActionFlow) => {
-    log.info(`flow ${flow.flowId} of project ${flow.projectSlug} is bound to ${flow.type}`, {
-        name: flow.name,
-        settings: flow.settings.map((setting: { flowSettingId: string }) => setting.flowSettingId),
-    });
-});
-
-action.on(CodeZeroEvent.flowDeleted, (flowId: bigint) => {
-    log.info(`flow ${flowId} is gone`, { flows: action.flows.size });
-});
-
-action.on(CodeZeroEvent.executionRequestReceived, (request: ActionExecutionRequest) => {
-    log.debug("aquila asks for an execution", {
-        execution_id: request.executionIdentifier,
-        function: request.functionIdentifier,
-    });
-});
-
-action.on(CodeZeroEvent.moduleUpdated, () => {
-    log.debug("the module configuration was updated");
 });
 
 connectToAquila(action);
@@ -175,8 +139,6 @@ startOpenAiServer({
     reserveExecutionId: () => action.reserveExecutionId(),
     executeFlowWithId: (executionId: string, flowId: bigint, payload: PlainValue) =>
         action.executeFlowWithId(executionId, flowId, payload),
-}).catch((error: unknown) => {
-    console.error("Could not start the OpenAI endpoint:", error instanceof Error ? error.message : error);
 });
 
 export { action };

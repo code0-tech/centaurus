@@ -22,14 +22,11 @@ import { asList } from "../../utils/shared/Shared.asList.util.js";
 import { askFor } from "../../utils/middleware/Approval.askFor.util.js";
 import { codeOf } from "../../utils/middleware/Approval.codeOf.util.js";
 import { describeCall } from "../../utils/middleware/Approval.describeCall.util.js";
-import { logger } from "../../utils/shared/Log.logger.util.js";
 import { newCode } from "../../utils/middleware/Approval.newCode.util.js";
 import { parseOrThrow } from "../../utils/shared/Shared.parseOrThrow.util.js";
 import { requireText } from "../../utils/shared/Shared.requireText.util.js";
 import { settle } from "../../utils/middleware/Approval.settle.util.js";
 import { textOf } from "../../utils/message/Message.textOf.util.js";
-
-const log = logger("middleware");
 
 @Identifier("ai::middleware::human_in_the_loop")
 @DisplayIcon("tabler:message-ai")
@@ -114,7 +111,6 @@ export class HumanInTheLoopMiddlewareFunction {
                 // chose, narrowed to the ones this middleware guards.
                 const held: ToolCall[] = [];
                 const declined: ToolCall[] = [];
-                const approved: ToolCall[] = [];
                 const calls: ToolCall[] = (last.content ?? [])
                     .filter(
                         (block): block is AiContentBlock & { name: string } =>
@@ -186,7 +182,6 @@ export class HumanInTheLoopMiddlewareFunction {
                     switch (question.decision) {
                         case "approved":
                             settled.set(question.at, settle(earlier[question.at], question.code));
-                            approved.push(call);
                             break;
                         case "declined":
                             settled.set(question.at, settle(earlier[question.at], question.code));
@@ -200,10 +195,6 @@ export class HumanInTheLoopMiddlewareFunction {
                             open ??= question.code;
                             break;
                         case "spent":
-                            log.debug("an earlier approval was already spent, so this call is asked about again", {
-                                call: describeCall(call),
-                                code: question.code,
-                            });
                             held.push(call);
                             break;
                     }
@@ -217,7 +208,6 @@ export class HumanInTheLoopMiddlewareFunction {
                 // decision nobody made.
                 if (held.length > 0) {
                     const code: string = open ?? newCode();
-                    log.info(`the agent asks before it runs (${code})`, held.map(describeCall));
                     return {
                         messages: [
                             ...history,
@@ -232,7 +222,6 @@ export class HumanInTheLoopMiddlewareFunction {
                 }
 
                 if (declined.length > 0) {
-                    log.info("the agent does not run what was declined", declined.map(describeCall));
                     return {
                         messages: [
                             ...history,
@@ -256,7 +245,6 @@ export class HumanInTheLoopMiddlewareFunction {
 
                 // Everything was approved: the calls stay as the model made them, and
                 // only the questions behind them are marked as spent.
-                log.info("the agent runs what was approved", approved.map(describeCall));
                 return { messages: [...history, last] };
             },
         };

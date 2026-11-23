@@ -138,7 +138,6 @@ export class LiteLlmModelFunction {
 
         return toModelTransform({
             provider: "LiteLLM",
-            prefix: "litellm",
             identifier,
             model: chat as never,
             // Left out unless the node says the server can do it: a server that

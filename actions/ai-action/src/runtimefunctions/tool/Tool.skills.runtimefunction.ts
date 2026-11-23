@@ -170,7 +170,7 @@ function skillInput(input: unknown): string {
     return requireText(title, "ERROR_INVALID_AI_SKILL", 'The "title" argument of "Use a skill" is required.');
 }
 
-@Identifier("ai::agent::skills")
+@Identifier("ai::tool::skills")
 @DisplayIcon("tabler:books")
 @Signature("(skills: LIST<TEXT>): ((title: TEXT) => TEXT)")
 @Name({ code: "en-US", content: "Skills" })

@@ -29,7 +29,6 @@ import {
 import { AiMcpServerSchema, type AiMcpServer } from "../../datatypes/mcp/Mcp.server.datatype.js";
 import type { AiMessage } from "../../datatypes/message/Message.datatype.js";
 import type { AgentDefinition, ToolEntry } from "../../types/agent/Agent.types.js";
-import type { Logger } from "../../types/shared/Log.types.js";
 import { asList } from "../../utils/shared/Shared.asList.util.js";
 import { asSubFlow } from "../../utils/shared/Shared.asSubFlow.util.js";
 import { asText } from "../../utils/shared/Shared.asText.util.js";
@@ -42,7 +41,6 @@ import { FlowChatModel } from "../../model/Model.flowChatModel.js";
 import { formatIssues } from "../../utils/shared/Shared.formatIssues.util.js";
 import { fromChatMessage } from "../../utils/chat/Chat.fromChatMessage.util.js";
 import { isSubFlow } from "../../utils/shared/Shared.isSubFlow.util.js";
-import { logger } from "../../utils/shared/Log.logger.util.js";
 import { parseOrThrow } from "../../utils/shared/Shared.parseOrThrow.util.js";
 import { requireText } from "../../utils/shared/Shared.requireText.util.js";
 import { textOf } from "../../utils/message/Message.textOf.util.js";
@@ -69,12 +67,12 @@ const JUMP_TARGETS = ["model", "tools", "end"] as const;
 const EXTRACTION_PROMPT =
     "The conversation above is finished. Answer with what it produced, in the type you were given, and add nothing that was not said in it.";
 
-@Identifier("ai::agent::ask")
+@Identifier("ai::agent::create")
 @DisplayIcon("tabler:ai")
 @Signature(
     "<T extends TYPE>(name: TEXT, instructions: TEXT, model: TRANSFORM<AI_MODEL_REQUEST, AI_MODEL_RESPONSE>, question: TEXT, tools?: LIST<((...args: any[]) => any) | AI_MCP_SERVER>, answer_type?: T, conversation?: AI_CHAT_REQUEST, rules?: LIST<TRANSFORM<AI_AGENT_STATE, AI_STATE_UPDATE>>): AI_CHAT_RESPONSE & { structured_response: T }",
 )
-@Name({ code: "en-US", content: "Ask agent" })
+@Name({ code: "en-US", content: "Create agent" })
 @Alias({ code: "en-US", content: "agent;ai;llm;chat;prompt;assistant;tools" })
 @Description({
     code: "en-US",
@@ -90,7 +88,7 @@ const EXTRACTION_PROMPT =
         {
             code: "en-US",
             content:
-                "The agent's own name. It identifies the agent in the node's message and in the logs, and is what an error names when the agent fails.",
+                "The agent's own name. It identifies the agent in the node's message, and is what an error names when the agent fails.",
         },
     ],
 })
@@ -175,7 +173,7 @@ const EXTRACTION_PROMPT =
     ],
     optional: true,
 })
-export class AskAgentFunction {
+export class CreateAgentFunction {
     /**
      * Builds the agent and runs it in one node, rather than returning the agent for a
      * second node to invoke. A returned agent would be a sub flow function, and the
@@ -200,16 +198,6 @@ export class AskAgentFunction {
         conversation?: AiChatRequest,
         rules?: unknown[],
     ): Promise<AiChatResponse> {
-        const log: Logger = logger("agent", _context.executionId);
-        const toolLog: Logger = logger("tool", _context.executionId);
-        log.info(`the node asks the agent "${name}"`, {
-            question,
-            tools: Array.isArray(tools) ? tools.length : 0,
-            rules: Array.isArray(rules) ? rules.length : 0,
-            conversation,
-            answer_type,
-        });
-
         // The "answer_type" parameter is a TYPE: the data type the flow wants the
         // agent to answer in. Its value reaches the action as that type's JSON schema
         // - as a protobuf Struct when aquila wrapped it, which `toPlainSchema`
@@ -295,15 +283,6 @@ export class AskAgentFunction {
             );
         }
 
-        const started: number = Date.now();
-        log.info(`running the agent "${definition.name}"`, {
-            messages: history.length,
-            tools: definition.tools.length,
-            rules: definition.middleware.length,
-            answer_type: definition.outputSchema,
-            instructions: definition.systemPrompt,
-        });
-
         const agentRequest: AiAgentRequest = parseOrThrow(
             AiAgentRequestSchema,
             { messages: history },
@@ -312,10 +291,6 @@ export class AskAgentFunction {
         );
 
         const flows: SubFlow[] = definition.tools.filter(isSubFlow);
-        log.debug(`building the agent "${definition.name}"`, {
-            mcp_servers: servers.map((server) => server.name),
-            flow_tools: flows.length,
-        });
 
         // The MCP connections stay open for as long as the agent may call a tool, so
         // closing them is the one thing that has to happen on every way out below.
@@ -419,33 +394,13 @@ export class AskAgentFunction {
 
                     const described: unknown = flow.description ?? schema?.description;
                     const description: string = typeof described === "string" ? described : "";
-                    toolLog.debug(`the tool "${toolName}" is built from a flow`, {
-                        declared,
-                        description,
-                        schema,
-                    });
-
                     return tool(
-                        (args: unknown) => {
-                            const calledAt: number = Date.now();
-                            toolLog.info(`the agent calls the tool "${toolName}" with`, args);
-
-                            return Promise.resolve(flow(args as never)).then(
-                                (result) => {
-                                    toolLog.info(
-                                        `the tool "${toolName}" answered after ${Date.now() - calledAt}ms with`,
-                                        result,
-                                    );
-                                    return typeof result === "string" ? result : JSON.stringify(result ?? null);
-                                },
-                                (error: unknown) => {
-                                    toolLog.error(`the tool "${toolName}" failed after ${Date.now() - calledAt}ms`, {
-                                        error: describeError(error),
-                                    });
-                                    return `The tool failed: ${describeError(error)}`;
-                                },
-                            );
-                        },
+                        (args: unknown) =>
+                            Promise.resolve(flow(args as never)).then(
+                                (result) =>
+                                    typeof result === "string" ? result : JSON.stringify(result ?? null),
+                                (error: unknown) => `The tool failed: ${describeError(error)}`,
+                            ),
                         {
                             name: toolName,
                             description,
@@ -455,11 +410,6 @@ export class AskAgentFunction {
                 }),
                 ...mcpTools,
             ];
-            log.debug(
-                `the agent "${definition.name}" has ${agentTools.length} tools`,
-                agentTools.map((entry) => (entry as { name?: string }).name),
-            );
-
             agent = createAgent({
                 model: new FlowChatModel({ run: definition.model }),
                 tools: agentTools,
@@ -514,7 +464,6 @@ export class AskAgentFunction {
                     : {}),
             } as never) as unknown as ReactAgent;
         } catch (error: unknown) {
-            log.error(`the agent "${definition.name}" could not be built`, { error: describeError(error) });
             await close().catch(() => undefined);
             if (error instanceof RuntimeError) throw error;
             throw new RuntimeError(
@@ -525,7 +474,6 @@ export class AskAgentFunction {
 
         let answer: AiAgentResponse;
         try {
-            log.debug("the conversation the agent starts from", agentRequest.messages);
             const result = await agent.invoke({ messages: agentRequest.messages.map(toLangChainMessage) });
 
             // The run only ever produced what is in the conversation, so both what it
@@ -587,10 +535,6 @@ export class AskAgentFunction {
                 }
             }
 
-            if (pending.length > 0) {
-                log.info(`the agent "${definition.name}" is waiting for approval`, pending);
-            }
-
             answer = parseOrThrow(
                 AiAgentResponseSchema,
                 {
@@ -602,11 +546,6 @@ export class AskAgentFunction {
                 "ERROR_INVALID_AI_AGENT_RESPONSE",
                 "The agent did not answer with a valid agent response",
             );
-            log.info(
-                `the agent "${definition.name}" finished after ${Date.now() - started}ms with ${answer.messages.length} messages`,
-                { structured_response: answer.structured_response },
-            );
-            log.debug("the conversation the agent ends with", answer.messages);
 
             // The second phase: the agent has finished working, so the type can now
             // be asked for on its own, with no tools in the request to collide with
@@ -621,10 +560,6 @@ export class AskAgentFunction {
                     })
                     .filter((line) => line.length > 0)
                     .join("\n\n");
-
-                log.debug(`asking the agent "${definition.name}" for the type on its own`, {
-                    transcript: transcript.length,
-                });
 
                 const extractor = createAgent({
                     model: new FlowChatModel({ run: definition.model }),
@@ -643,17 +578,8 @@ export class AskAgentFunction {
 
                 if (extracted.structuredResponse) {
                     answer = { ...answer, structured_response: extracted.structuredResponse };
-                    log.info(`the agent "${definition.name}" answered the type on the second turn`, {
-                        structured_response: answer.structured_response,
-                    });
                 }
             }
-        } catch (error: unknown) {
-            log.error(`the agent "${definition.name}" failed after ${Date.now() - started}ms`, {
-                error: error instanceof Error ? error.message : String(error),
-                stack: error instanceof Error ? error.stack : undefined,
-            });
-            throw error;
         } finally {
             await close().catch(() => undefined);
         }
@@ -678,7 +604,6 @@ export class AskAgentFunction {
             ...(answer.steps ? { steps: answer.steps } : {}),
             ...(answer.awaiting_approval ? { awaitingApproval: answer.awaiting_approval } : {}),
         });
-        log.info(`the agent "${definition.name}" answers the node with`, response);
         return response;
     }
 }

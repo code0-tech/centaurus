@@ -170,7 +170,6 @@ export class OpenRouterModelFunction {
 
         return toModelTransform({
             provider: "OpenRouter",
-            prefix: "openrouter",
             identifier,
             model: chat as never,
             // "strict" is forwarded as asked for, which means OpenAI requires every

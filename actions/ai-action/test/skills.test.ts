@@ -1,12 +1,12 @@
 import "reflect-metadata";
 import { RuntimeError } from "@code0-tech/hercules";
 import { describe, expect, it } from "vitest";
-import { SkillsFunction } from "../src/runtimefunctions/agent/Agent.skills.runtimefunction.js";
+import { SkillsFunction } from "../src/runtimefunctions/tool/Tool.skills.runtimefunction.js";
 
 const skills = new SkillsFunction();
 const context = {} as never;
 
-describe("ai::agent::skills", () => {
+describe("ai::tool::skills", () => {
     it("creates a named tool that returns the complete Markdown skill", async () => {
         const tool = skills.run(context, [
             "Intro text\n\n## SQL Analysis ##\n\nUse the query plan.",

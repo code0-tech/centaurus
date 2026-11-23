@@ -116,7 +116,6 @@ export class AnthropicModelFunction {
 
         return toModelTransform({
             provider: "Anthropic",
-            prefix: "anthropic",
             identifier,
             model: chat as never,
             // Anthropic's own dialect for the same thing OpenAI calls

@@ -99,7 +99,6 @@ export class OllamaModelFunction {
 
         return toModelTransform({
             provider: "Ollama",
-            prefix: "ollama",
             identifier,
             model: chat as never,
             // Ollama's dialect for the same thing: the bare JSON schema under
