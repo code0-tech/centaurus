@@ -1,33 +1,24 @@
-import {
-    Description,
-    DisplayIcon,
-    DisplayMessage,
-    EventSetting,
-    Identifier,
-    Name,
-    Rest,
-    Signature,
-} from "@code0-tech/hercules";
+import { Description, DisplayIcon, DisplayMessage, EventSetting, Identifier, Name, Signature } from "@code0-tech/hercules";
 
+/**
+ * Delivered over Slack Socket Mode by {@link SlackSocketManager}, not over HTTP.
+ */
 @Identifier("SlackSlashCommand")
 @DisplayIcon("tabler:brand-slack")
-@Name({code: "en-US", content: "Slack slash command"})
-@Description({code: "en-US", content: "Triggered when a registered slash command is invoked. Compare event.command against the command you registered for this endpoint."})
-@DisplayMessage({code: "en-US", content: "Slack slash command on ${http_url}"})
-@Signature("<A extends REST_AUTH_TYPE>(http_schema: HTTP_SCHEMA, http_url: HTTP_URL, http_method: HTTP_METHOD, http_auth: A, http_auth_value: REST_AUTH_VALUE<A>, input_schema?: SlackSlashCommandPayload): REST_ADAPTER_INPUT<SlackSlashCommandPayload>")
+@Name({ code: "en-US", content: "Slack slash command" })
+@Description({ code: "en-US", content: "Triggered when one of the app's slash commands is invoked. Reply by posting to the payload's response_url or with slackPostMessage." })
+@DisplayMessage({ code: "en-US", content: "Slack slash command" })
+@Signature("(channelId?: TEXT): SlackSlashCommandPayload")
 @EventSetting({
-    identifier: "input_schema",
-    hidden: true
+    identifier: "channelId",
+    name: [{ code: "en-US", content: "Channel ID" }],
+    description: [
+        {
+            code: "en-US",
+            content: "Only trigger for the channel the command was invoked in, e.g. C0123456789. Leave empty to trigger for every channel.",
+        },
+    ],
+    linkedDataTypeIdentifiers: ["TEXT"],
+    optional: true,
 })
-@EventSetting({
-    identifier: "http_method",
-    hidden: true,
-    defaultValue: "POST"
-})
-@EventSetting({
-    identifier: "http_schema",
-    hidden: true,
-    defaultValue: "application/x-www-form-urlencoded"
-})
-export class SlackSlashCommand extends Rest {
-}
+export class SlackSlashCommand {}

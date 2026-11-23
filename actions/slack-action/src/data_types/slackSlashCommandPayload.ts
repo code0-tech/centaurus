@@ -3,12 +3,11 @@ import { z } from "zod";
 
 /**
  * Payload of a slash command invocation. Unlike Events API deliveries this is
- * not wrapped in an `event_callback` envelope: Slack posts the fields below as
- * `application/x-www-form-urlencoded`.
+ * not wrapped in an `event_callback` envelope.
  * See https://docs.slack.dev/interactivity/implementing-slash-commands
  */
 export const SlackSlashCommandPayloadSchema = z.object({
-    token: z.string().nullish().describe("The deprecated verification token. Validate the request signature instead."),
+    token: z.string().nullish().describe("The deprecated verification token. Not needed: Socket Mode deliveries are authenticated by the app token."),
     command: z.string().describe("The invoked command including its leading slash, e.g. /deploy."),
     text: z.string().nullish().describe("Everything the user typed after the command name."),
     team_id: z.string().nullish().describe("The ID of the workspace the command was invoked in."),

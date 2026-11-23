@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import { createHmac } from "node:crypto";
 import { FunctionContext } from "@code0-tech/hercules";
 import { describe, expect, it } from "vitest";
 import { SlackMessageSchema } from "../src/data_types/slackMessage.js";
@@ -7,12 +6,10 @@ import { parseSlackChannel } from "../src/data_types/slackChannel.js";
 import { parseSlackFile } from "../src/data_types/slackFile.js";
 import { SlackSlashCommandPayloadSchema } from "../src/data_types/slackSlashCommandPayload.js";
 import { SlackReactionAddedEventPayloadSchema } from "../src/data_types/slackReactionAddedEventPayload.js";
-import { fromUnixSeconds, getSlackClient, toBlockArgument, verifyRequestSignature } from "../src/helpers.js";
+import { fromUnixSeconds, getSlackClient, toBlockArgument } from "../src/helpers.js";
 import { CreateBlockFunction } from "../src/functions/utils/createBlockFunction.js";
 import { CreateTextSectionFunction } from "../src/functions/utils/createTextSectionFunction.js";
 import { normalizeEmojiName } from "../src/functions/addReactionFunction.js";
-
-const SIGNING_SECRET = "example-signing-secret";
 
 /** A FunctionContext exposing just the configs the helpers read. */
 const contextWith = (configs: Record<string, string>): FunctionContext =>
@@ -106,19 +103,16 @@ describe("SlackReactionAddedEventPayloadSchema", () => {
             },
         });
 
-        expect(parsed.event?.reaction).toEqual("white_check_mark");
-        expect(parsed.event?.item.ts).toEqual("1360782400.498405");
+        expect(parsed.event.reaction).toEqual("white_check_mark");
+        expect(parsed.event.item.ts).toEqual("1360782400.498405");
     });
 
-    it("accepts Slack's url_verification request, which carries a challenge instead of an event", () => {
-        const parsed = SlackReactionAddedEventPayloadSchema.parse({
-            token: "legacy",
-            challenge: "3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P",
-            type: "url_verification",
-        });
-
-        expect(parsed.challenge).toEqual("3eZbrw1aBm2rZgRNFdxV2595E9CY3gmdALWMmHkvFXO7tYXAYM8P");
-        expect(parsed.event).toBeUndefined();
+    it("rejects a delivery without the inner event", () => {
+        expect(() =>
+            SlackReactionAddedEventPayloadSchema.parse({
+                type: "event_callback",
+            }),
+        ).toThrow();
     });
 });
 
@@ -210,89 +204,6 @@ describe("toBlockArgument", () => {
         expect(toBlockArgument([{ type: "divider" }])).toEqual({
             blocks: [{ type: "divider" }],
         });
-    });
-});
-
-describe("verifyRequestSignature", () => {
-    const sign = (timestamp: string, body: string, secret = SIGNING_SECRET) =>
-        `v0=${createHmac("sha256", secret).update(`v0:${timestamp}:${body}`).digest("hex")}`;
-
-    const context = contextWith({
-        bot_token: "xoxb-example",
-        signing_secret: SIGNING_SECRET,
-    });
-    const body = "token=example&command=%2Fdeploy&text=staging";
-
-    it("accepts a signature Slack would have produced", () => {
-        const timestamp = String(Math.floor(Date.now() / 1000));
-        expect(
-            verifyRequestSignature(
-                context,
-                sign(timestamp, body),
-                timestamp,
-                body,
-            ),
-        ).toBe(true);
-    });
-
-    it("rejects a signature made with a different secret", () => {
-        const timestamp = String(Math.floor(Date.now() / 1000));
-        expect(
-            verifyRequestSignature(
-                context,
-                sign(timestamp, body, "other-secret"),
-                timestamp,
-                body,
-            ),
-        ).toBe(false);
-    });
-
-    it("rejects a tampered body", () => {
-        const timestamp = String(Math.floor(Date.now() / 1000));
-        const signature = sign(timestamp, body);
-        expect(
-            verifyRequestSignature(
-                context,
-                signature,
-                timestamp,
-                `${body}&extra=1`,
-            ),
-        ).toBe(false);
-    });
-
-    it("rejects a replayed request older than five minutes", () => {
-        const timestamp = String(Math.floor(Date.now() / 1000) - 60 * 6);
-        expect(
-            verifyRequestSignature(
-                context,
-                sign(timestamp, body),
-                timestamp,
-                body,
-            ),
-        ).toBe(false);
-    });
-
-    it("rejects a non numeric timestamp", () => {
-        expect(
-            verifyRequestSignature(
-                context,
-                sign("not-a-time", body),
-                "not-a-time",
-                body,
-            ),
-        ).toBe(false);
-    });
-
-    it("fails loudly when no signing secret is configured", () => {
-        const timestamp = String(Math.floor(Date.now() / 1000));
-        expect(() =>
-            verifyRequestSignature(
-                contextWith({ bot_token: "xoxb-example" }),
-                sign(timestamp, body),
-                timestamp,
-                body,
-            ),
-        ).toThrow(/signing secret/i);
     });
 });
 

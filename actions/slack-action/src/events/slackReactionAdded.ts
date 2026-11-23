@@ -1,33 +1,37 @@
-import {
-    Description,
-    DisplayIcon,
-    DisplayMessage,
-    EventSetting,
-    Identifier,
-    Name,
-    Rest,
-    Signature,
-} from "@code0-tech/hercules";
+import { Description, DisplayIcon, DisplayMessage, EventSetting, Identifier, Name, Signature } from "@code0-tech/hercules";
 
+/**
+ * Delivered over Slack Socket Mode by {@link SlackSocketManager}, not over HTTP.
+ */
 @Identifier("SlackReactionAdded")
 @DisplayIcon("tabler:brand-slack")
-@Name({code: "en-US", content: "Slack reaction added"})
-@Description({code: "en-US", content: "Triggered when a member adds an emoji reaction to a message or file (reaction_added). Use it to drive approval and reaction-role flows."})
-@DisplayMessage({code: "en-US", content: "Slack reaction added on ${http_url}"})
-@Signature("<A extends REST_AUTH_TYPE>(http_schema: HTTP_SCHEMA, http_url: HTTP_URL, http_method: HTTP_METHOD, http_auth: A, http_auth_value: REST_AUTH_VALUE<A>, input_schema?: SlackReactionAddedEventPayload): REST_ADAPTER_INPUT<SlackReactionAddedEventPayload>")
+@Name({ code: "en-US", content: "Slack reaction added" })
+@Description({ code: "en-US", content: "Triggered when a member adds an emoji reaction to a message or file (reaction_added). Use it to drive approval and reaction-role flows." })
+@DisplayMessage({ code: "en-US", content: "Slack reaction added" })
+@Signature("(channelId?: TEXT, messageTs?: TEXT): SlackReactionAddedEventPayload")
 @EventSetting({
-    identifier: "input_schema",
-    hidden: true
+    identifier: "channelId",
+    name: [{ code: "en-US", content: "Channel ID" }],
+    description: [
+        {
+            code: "en-US",
+            content: "Only trigger for the channel of the message reacted to, e.g. C0123456789. Leave empty to trigger for every channel.",
+        },
+    ],
+    linkedDataTypeIdentifiers: ["TEXT"],
+    optional: true,
 })
 @EventSetting({
-    identifier: "http_method",
-    hidden: true,
-    defaultValue: "POST"
+    identifier: "messageTs",
+    name: [{ code: "en-US", content: "Message" }],
+    description: [
+        {
+            code: "en-US",
+            content:
+                "Only trigger for reactions to this message. Enter its timestamp (e.g. 1712345678.123456) or paste its link from Slack (Copy link). Leave empty to trigger for every message.",
+        },
+    ],
+    linkedDataTypeIdentifiers: ["TEXT"],
+    optional: true,
 })
-@EventSetting({
-    identifier: "http_schema",
-    hidden: true,
-    defaultValue: "application/json"
-})
-export class SlackReactionAdded extends Rest {
-}
+export class SlackReactionAdded {}

@@ -1,33 +1,24 @@
-import {
-    Description,
-    DisplayIcon,
-    DisplayMessage,
-    EventSetting,
-    Identifier,
-    Name,
-    Rest,
-    Signature,
-} from "@code0-tech/hercules";
+import { Description, DisplayIcon, DisplayMessage, EventSetting, Identifier, Name, Signature } from "@code0-tech/hercules";
 
+/**
+ * Delivered over Slack Socket Mode by {@link SlackSocketManager}, not over HTTP.
+ */
 @Identifier("SlackAppMentioned")
 @DisplayIcon("tabler:brand-slack")
-@Name({code: "en-US", content: "Slack app mentioned"})
-@Description({code: "en-US", content: "Triggered when the bot user is @-mentioned in a message (app_mention)."})
-@DisplayMessage({code: "en-US", content: "Slack app mentioned on ${http_url}"})
-@Signature("<A extends REST_AUTH_TYPE>(http_schema: HTTP_SCHEMA, http_url: HTTP_URL, http_method: HTTP_METHOD, http_auth: A, http_auth_value: REST_AUTH_VALUE<A>, input_schema?: SlackAppMentionEventPayload): REST_ADAPTER_INPUT<SlackAppMentionEventPayload>")
+@Name({ code: "en-US", content: "Slack app mentioned" })
+@Description({ code: "en-US", content: "Triggered when the bot user is @-mentioned in a message (app_mention)." })
+@DisplayMessage({ code: "en-US", content: "Slack app mentioned" })
+@Signature("(channelId?: TEXT): SlackAppMentionEventPayload")
 @EventSetting({
-    identifier: "input_schema",
-    hidden: true
+    identifier: "channelId",
+    name: [{ code: "en-US", content: "Channel ID" }],
+    description: [
+        {
+            code: "en-US",
+            content: "Only trigger for the channel the mention was posted in, e.g. C0123456789. Leave empty to trigger for every channel.",
+        },
+    ],
+    linkedDataTypeIdentifiers: ["TEXT"],
+    optional: true,
 })
-@EventSetting({
-    identifier: "http_method",
-    hidden: true,
-    defaultValue: "POST"
-})
-@EventSetting({
-    identifier: "http_schema",
-    hidden: true,
-    defaultValue: "application/json"
-})
-export class SlackAppMentioned extends Rest {
-}
+export class SlackAppMentioned {}

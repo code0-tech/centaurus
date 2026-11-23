@@ -1,4 +1,3 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
 import { FunctionContext, RuntimeError } from "@code0-tech/hercules";
 import { ErrorCode, WebClient, type CodedError } from "@slack/web-api";
 import { SlackBlock } from "./data_types/slackBlock.js";
@@ -105,47 +104,4 @@ function withoutNullish<T>(value: T): T {
         ) as T;
     }
     return value;
-}
-
-/** Requests older than this are rejected by {@link verifyRequestSignature} as replays. */
-const SIGNATURE_MAX_AGE_SECONDS = 60 * 5;
-
-/**
- * Verifies the `X-Slack-Signature` / `X-Slack-Request-Timestamp` header pair of
- * an inbound Slack request against the configured signing secret.
- *
- * Slack signs the exact bytes it sent, so `rawBody` must be the unparsed request
- * body — re-serializing a parsed payload will not reproduce the same signature.
- * See https://docs.slack.dev/authentication/verifying-requests-from-slack
- */
-export function verifyRequestSignature(
-    context: FunctionContext,
-    signature: string,
-    timestamp: string,
-    rawBody: string
-): boolean {
-    const signingSecret = context.matchedConfig.findConfig("signing_secret") as string;
-    if (!signingSecret) {
-        throw new RuntimeError(
-            "SLACK_MISSING_SIGNING_SECRET",
-            "No Slack signing secret configured. Set the 'signing_secret' config to verify inbound requests."
-        );
-    }
-
-    const requestTime = Number(timestamp);
-    if (!Number.isFinite(requestTime)) {
-        return false;
-    }
-    // Reject stale timestamps so a captured request cannot be replayed later.
-    if (Math.abs(Math.floor(Date.now() / 1000) - requestTime) > SIGNATURE_MAX_AGE_SECONDS) {
-        return false;
-    }
-
-    const expected = `v0=${createHmac("sha256", signingSecret).update(`v0:${timestamp}:${rawBody}`).digest("hex")}`;
-    const expectedBuffer = Buffer.from(expected, "utf8");
-    const actualBuffer = Buffer.from(signature, "utf8");
-    if (expectedBuffer.length !== actualBuffer.length) {
-        return false;
-    }
-    return timingSafeEqual(expectedBuffer, actualBuffer);
 }

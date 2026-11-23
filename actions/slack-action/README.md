@@ -4,8 +4,9 @@ Slack integration for the **Hercules** automation platform — the canonical
 "notify a human / capture a human decision" step in a flow.
 
 Messages, threads, reactions, files and channel/user operations go out through
-the Slack Web API; inbound Slack events arrive as `Rest` webhook flow types, the
-same pattern the `shopify-action` and `stripe-action` use.
+the Slack Web API; inbound Slack events arrive over
+[Socket Mode](https://docs.slack.dev/apis/events-api/using-socket-mode), so the
+action needs no public URL.
 
 ## Functions
 
@@ -22,7 +23,6 @@ same pattern the `shopify-action` and `stripe-action` use.
 | `slackInviteToChannel` | `(channelId: TEXT, userIds: LIST<TEXT>): SLACK_CHANNEL` | Invite up to 1000 users to a channel. |
 | `slackGetUserByEmail` | `(email: TEXT): SLACK_USER` | Look a workspace member up by email address. |
 | `slackSetChannelTopic` | `(channelId: TEXT, topic: TEXT): SLACK_CHANNEL` | Set a channel's topic. |
-| `slackVerifyRequestSignature` | `(signature: TEXT, timestamp: TEXT, rawBody: TEXT): BOOLEAN` | Verify that an inbound request really came from Slack. See [Verifying inbound requests](#verifying-inbound-requests). |
 
 ### Block Kit utils
 
@@ -41,69 +41,58 @@ rejects a `mrkdwn` text object there.
 
 ## Events
 
-Slack pushes events over HTTP via its [Events API](https://docs.slack.dev/apis/events-api).
-Each event below is a `Rest` flow type: it exposes an HTTP endpoint, so paste its
-URL into **Event Subscriptions → Request URL** in your Slack app and subscribe to
-the matching bot event.
+The action receives Slack events over
+[Socket Mode](https://docs.slack.dev/apis/events-api/using-socket-mode): it opens
+a WebSocket connection to Slack with the project's `app_token` and fires the
+matching flows itself. There is no Request URL to expose, no URL verification
+challenge to answer and no request signature to check, because the connection is
+authenticated by the app token. Every delivery is acknowledged right away, so
+long running flows do not cause Slack to redeliver it.
 
-| Event | Slack event | Payload |
-|-------|-------------|---------|
-| `SlackMessagePosted` | `message.channels` | `SlackMessagePostedEventPayload` |
+| Trigger | Slack event | Payload |
+|---------|-------------|---------|
+| `SlackMessagePosted` | `message.channels` (also `message.groups`, `message.im`, `message.mpim` if subscribed) | `SlackMessagePostedEventPayload` |
 | `SlackAppMentioned` | `app_mention` | `SlackAppMentionEventPayload` |
 | `SlackReactionAdded` | `reaction_added` | `SlackReactionAddedEventPayload` |
 | `SlackChannelCreated` | `channel_created` | `SlackChannelCreatedEventPayload` |
 | `SlackSlashCommand` | slash command invocation | `SlackSlashCommandPayload` |
 
-The four Events API events arrive as `application/json`, wrapped in the shared
-`event_callback` envelope (`{ team_id, event_id, event: { … } }`); a slash command
-arrives as `application/x-www-form-urlencoded` with flat fields and no envelope.
-Both defaults are pre-set on the events, together with `POST`.
+The four Events API triggers receive Slack's `event_callback` envelope
+(`{ team_id, event_id, event: { … } }`); a slash command receives its flat fields
+without an envelope.
 
-### Filtering by channel or command
+`SlackMessagePosted` skips edits, deletions and join notices (messages with a
+`subtype`) and messages sent by bots, including this app. Otherwise a flow that
+posts into the channel it listens to would trigger itself again.
 
-Slack delivers one subscription to one Request URL, so an endpoint receives every
-message of every channel the app is in — the event itself cannot narrow that
-down. Filter inside the flow instead: compare `event.channel`
-(`SlackMessagePosted`), `event.item.channel` (`SlackReactionAdded`) or `command`
-(`SlackSlashCommand`) against the value you care about and stop early otherwise.
+### Filtering by channel
 
-### Responding to Slack
+Every trigger except `SlackChannelCreated` has an optional **Channel ID** setting.
+Leave it empty to trigger for every channel the app is in, or set it to a channel
+ID (e.g. `C0123456789`) to trigger only for that channel.
 
-Slack expects a `2xx` within three seconds and retries otherwise, so respond with
-the `Respond` function of the `rest-action` (`rest::control::respond`) before doing
-slow work:
+`SlackReactionAdded` also has an optional **Message** setting to trigger only for
+reactions to one message, e.g. an approval request. Paste the message link from
+Slack (*Copy link*) or enter its timestamp (`1712345678.123456`); the link is
+converted to the timestamp.
 
-- **URL verification** — when you first save the Request URL, Slack posts
-  `{ "type": "url_verification", "challenge": "…" }` and expects the `challenge`
-  echoed back. Branch on `payload.type == "url_verification"` and call the REST
-  `Respond` function with status `200`, content type `text/plain` and
-  `payload.challenge` as body. Without a `Respond` the REST adapter answers `204`
-  and Slack rejects the URL. Such requests carry no `event`, so `payload.event` is
-  optional on every Events API payload.
-- **Slash commands** — respond with a body to reply immediately, or respond empty
-  and post to the payload's `response_url` for up to 30 minutes afterwards.
+### Replying to slash commands
 
-### Verifying inbound requests
+The command is acknowledged immediately without a visible reply. Reply from the
+flow with `slackPostMessage` into `channel_id`, or post to the payload's
+`response_url` for up to 30 minutes afterwards.
 
-Slack signs each request with an `X-Slack-Signature` header: an HMAC-SHA256 over
-`v0:<X-Slack-Request-Timestamp>:<raw body>` keyed with the signing secret.
-`slackVerifyRequestSignature` recomputes it and additionally rejects timestamps
-older than five minutes as replays.
+### Setting up the Slack app
 
-Slack signs the exact bytes it sent, so the check needs the unparsed body, not the
-parsed `payload`. The REST adapter passes it alongside as `raw_body`, and header
-names arrive lowercased. Verify first and stop the flow if it returns `false`:
-
-```
-slackVerifyRequestSignature(
-  input.headers["x-slack-signature"],
-  input.headers["x-slack-request-timestamp"],
-  input.raw_body
-)
-```
-
-Slack does not send a Bearer token, so the event's `http_auth` setting cannot
-stand in for this check.
+1. **Socket Mode**: enable it under *Settings → Socket Mode*.
+2. **App token**: create one under *Basic Information → App-Level Tokens* with the
+   `connections:write` scope and store it as the `app_token` config.
+3. **Events**: under *Event Subscriptions*, enable events and subscribe to the bot
+   events you use (`message.channels`, `app_mention`, `reaction_added`,
+   `channel_created`). With Socket Mode enabled no Request URL is asked for.
+4. **Slash commands**: create them under *Slash Commands*; no Request URL is
+   needed either.
+5. Reinstall the app to the workspace after changing scopes or events.
 
 ## Data types
 
@@ -122,8 +111,8 @@ registered with `@Identifier` / `@Name` / `@Schema`:
 Points in time on `SLACK_CHANNEL` and `SLACK_FILE` (`created`, `topic.last_set`,
 `purpose.last_set`, `timestamp`) are `DATE` values; Slack's Unix seconds are
 converted when the Web API responds. The event payloads keep Slack's raw Unix
-seconds (`event_time`, `channel.created`), because the REST adapter passes them
-through unchanged. Message timestamps (`ts`, `thread_ts`, `event_ts`) stay `TEXT`:
+seconds (`event_time`, `channel.created`): they reach the flow exactly as Slack
+sends them. Message timestamps (`ts`, `thread_ts`, `event_ts`) stay `TEXT`:
 Slack uses them as message identifiers.
 
 A message timestamp is Unix seconds with a dot before the last six digits, e.g.
@@ -144,7 +133,7 @@ the envelope built by `src/data_types/slackEventEnvelope.ts`.
 | Config | Required | Env default | Description |
 |--------|----------|-------------|-------------|
 | `bot_token` | yes | `SLACK_BOT_TOKEN` | Bot user OAuth token (`xoxb-…`), the Bearer credential for the Web API. Found under *OAuth & Permissions*. |
-| `signing_secret` | yes | `SLACK_SIGNING_SECRET` | Signing secret used by `slackVerifyRequestSignature`. Found under *Basic Information*. |
+| `app_token` | for triggers | `SLACK_APP_TOKEN` | App-level token (`xapp-…`) with the `connections:write` scope. Needed only for the Slack triggers, which arrive over Socket Mode. Found under *Basic Information → App-Level Tokens*. |
 
 Beyond these the action uses the shared Hercules variables (`HERCULES_AUTH_TOKEN`,
 `HERCULES_AQUILA_URL`, `HERCULES_ACTION_ID`, `HERCULES_SDK_VERSION`) documented in

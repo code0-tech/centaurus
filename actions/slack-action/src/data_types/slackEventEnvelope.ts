@@ -9,23 +9,12 @@ import { z } from "zod";
  */
 export const slackEventEnvelope = <T extends z.ZodType>(event: T) =>
     z.object({
-        token: z.string().nullish().describe("The deprecated verification token. Validate the request signature instead."),
+        token: z.string().nullish().describe("The deprecated verification token. Not needed: Socket Mode deliveries are authenticated by the app token."),
         team_id: z.string().nullish().describe("The ID of the workspace the event happened in."),
         api_app_id: z.string().nullish().describe("The ID of the Slack app the event was delivered to."),
-        type: z
-            .string()
-            .describe(
-                "The envelope type: `event_callback` for events, `url_verification` when Slack checks the Request URL."
-            ),
-        challenge: z
-            .string()
-            .nullish()
-            .describe(
-                "Only set when `type` is `url_verification`: respond with this value (status 200, text/plain) to verify the Request URL."
-            ),
+        type: z.string().describe("The envelope type. Always `event_callback` for Events API deliveries."),
         event_id: z.string().nullish().describe("A unique identifier for this delivery, usable for deduplication."),
         event_time: z.number().nullish().describe("The Unix timestamp at which the event happened."),
         event_context: z.string().nullish().describe("An opaque string identifying the event's subscription context."),
-        // url_verification requests carry no event.
-        event: event.nullish().describe("The event itself. Missing on url_verification requests."),
+        event,
     });
