@@ -1,39 +1,39 @@
-import "reflect-metadata";
-import { Action, CodeZeroEvent } from "@code0-tech/hercules";
+import "reflect-metadata"
+import { Action, CodeZeroEvent, isExportMode } from "@code0-tech/hercules"
 
-import { SlackBlockDataType } from "./data_types/slackBlock.js";
-import { SlackChannelDataType } from "./data_types/slackChannel.js";
-import { SlackFileDataType } from "./data_types/slackFile.js";
-import { SlackMessageDataType } from "./data_types/slackMessage.js";
-import { SlackReactionDataType } from "./data_types/slackReaction.js";
-import { SlackUserDataType } from "./data_types/slackUser.js";
-import { SlackAppMentionEventPayload } from "./data_types/slackAppMentionEventPayload.js";
-import { SlackChannelCreatedEventPayload } from "./data_types/slackChannelCreatedEventPayload.js";
-import { SlackMessagePostedEventPayload } from "./data_types/slackMessagePostedEventPayload.js";
-import { SlackReactionAddedEventPayload } from "./data_types/slackReactionAddedEventPayload.js";
-import { SlackSlashCommandPayload } from "./data_types/slackSlashCommandPayload.js";
+import { SlackBlockDataType } from "./data_types/slackBlock.js"
+import { SlackChannelDataType } from "./data_types/slackChannel.js"
+import { SlackFileDataType } from "./data_types/slackFile.js"
+import { SlackMessageDataType } from "./data_types/slackMessage.js"
+import { SlackReactionDataType } from "./data_types/slackReaction.js"
+import { SlackUserDataType } from "./data_types/slackUser.js"
+import { SlackAppMentionEventPayload } from "./data_types/slackAppMentionEventPayload.js"
+import { SlackChannelCreatedEventPayload } from "./data_types/slackChannelCreatedEventPayload.js"
+import { SlackMessagePostedEventPayload } from "./data_types/slackMessagePostedEventPayload.js"
+import { SlackReactionAddedEventPayload } from "./data_types/slackReactionAddedEventPayload.js"
+import { SlackSlashCommandPayload } from "./data_types/slackSlashCommandPayload.js"
 
-import { AddReactionFunction } from "./functions/addReactionFunction.js";
-import { CreateChannelFunction } from "./functions/createChannelFunction.js";
-import { DeleteMessageFunction } from "./functions/deleteMessageFunction.js";
-import { GetUserByEmailFunction } from "./functions/getUserByEmailFunction.js";
-import { InviteToChannelFunction } from "./functions/inviteToChannelFunction.js";
-import { PostMessageFunction } from "./functions/postMessageFunction.js";
-import { ReplyInThreadFunction } from "./functions/replyInThreadFunction.js";
-import { SendDirectMessageFunction } from "./functions/sendDirectMessageFunction.js";
-import { SetChannelTopicFunction } from "./functions/setChannelTopicFunction.js";
-import { UpdateMessageFunction } from "./functions/updateMessageFunction.js";
-import { UploadFileFunction } from "./functions/uploadFileFunction.js";
-import { VerifyRequestSignatureFunction } from "./functions/verifyRequestSignatureFunction.js";
+import { AddReactionFunction } from "./functions/addReactionFunction.js"
+import { CreateChannelFunction } from "./functions/createChannelFunction.js"
+import { DeleteMessageFunction } from "./functions/deleteMessageFunction.js"
+import { GetUserByEmailFunction } from "./functions/getUserByEmailFunction.js"
+import { InviteToChannelFunction } from "./functions/inviteToChannelFunction.js"
+import { PostMessageFunction } from "./functions/postMessageFunction.js"
+import { ReplyInThreadFunction } from "./functions/replyInThreadFunction.js"
+import { SendDirectMessageFunction } from "./functions/sendDirectMessageFunction.js"
+import { SetChannelTopicFunction } from "./functions/setChannelTopicFunction.js"
+import { UpdateMessageFunction } from "./functions/updateMessageFunction.js"
+import { UploadFileFunction } from "./functions/uploadFileFunction.js"
 
-import { CreateBlockFunction } from "./functions/utils/createBlockFunction.js";
-import { CreateTextSectionFunction } from "./functions/utils/createTextSectionFunction.js";
+import { CreateBlockFunction } from "./functions/utils/createBlockFunction.js"
+import { CreateTextSectionFunction } from "./functions/utils/createTextSectionFunction.js"
 
-import { SlackAppMentioned } from "./events/slackAppMentioned.js";
-import { SlackChannelCreated } from "./events/slackChannelCreated.js";
-import { SlackMessagePosted } from "./events/slackMessagePosted.js";
-import { SlackReactionAdded } from "./events/slackReactionAdded.js";
-import { SlackSlashCommand } from "./events/slackSlashCommand.js";
+import { SlackAppMentioned } from "./events/slackAppMentioned.js"
+import { SlackChannelCreated } from "./events/slackChannelCreated.js"
+import { SlackMessagePosted } from "./events/slackMessagePosted.js"
+import { SlackReactionAdded } from "./events/slackReactionAdded.js"
+import { SlackSlashCommand } from "./events/slackSlashCommand.js"
+import { SlackSocketManager } from "./socketMode.js"
 
 const action = new Action(
     process.env.ACTION_ID ?? "slack-action",
@@ -59,77 +59,90 @@ const action = new Action(
             linkedDataTypes: ["TEXT"],
         },
         {
-            identifier: "signing_secret",
+            identifier: "app_token",
             type: "TEXT",
-            defaultValue: process.env.SLACK_SIGNING_SECRET ?? "",
-            name: [{ code: "en-US", content: "Signing secret" }],
+            defaultValue: process.env.SLACK_APP_TOKEN ?? "",
+            optional: true,
+            name: [{ code: "en-US", content: "App token" }],
             description: [
                 {
                     code: "en-US",
                     content:
-                        "The Slack signing secret used by slackVerifyRequestSignature to validate the X-Slack-Signature and X-Slack-Request-Timestamp headers of inbound requests. Find it under Basic Information in your Slack app.",
+                        "The app-level token (xapp-...) with the connections:write scope. Required for the Slack triggers: the action receives events over Socket Mode with it, so no public URL is needed. Create it under Basic Information > App-Level Tokens and enable Socket Mode in your Slack app.",
                 },
             ],
             linkedDataTypes: ["TEXT"],
         },
     ]
-);
+)
 
-action.registerDataTypeClass(SlackBlockDataType);
-action.registerDataTypeClass(SlackChannelDataType);
-action.registerDataTypeClass(SlackFileDataType);
-action.registerDataTypeClass(SlackMessageDataType);
-action.registerDataTypeClass(SlackReactionDataType);
-action.registerDataTypeClass(SlackUserDataType);
-action.registerDataTypeClass(SlackAppMentionEventPayload);
-action.registerDataTypeClass(SlackChannelCreatedEventPayload);
-action.registerDataTypeClass(SlackMessagePostedEventPayload);
-action.registerDataTypeClass(SlackReactionAddedEventPayload);
-action.registerDataTypeClass(SlackSlashCommandPayload);
+action.registerDataTypeClass(SlackBlockDataType)
+action.registerDataTypeClass(SlackChannelDataType)
+action.registerDataTypeClass(SlackFileDataType)
+action.registerDataTypeClass(SlackMessageDataType)
+action.registerDataTypeClass(SlackReactionDataType)
+action.registerDataTypeClass(SlackUserDataType)
+action.registerDataTypeClass(SlackAppMentionEventPayload)
+action.registerDataTypeClass(SlackChannelCreatedEventPayload)
+action.registerDataTypeClass(SlackMessagePostedEventPayload)
+action.registerDataTypeClass(SlackReactionAddedEventPayload)
+action.registerDataTypeClass(SlackSlashCommandPayload)
 
-action.registerRuntimeFunction(PostMessageFunction);
-action.registerRuntimeFunction(ReplyInThreadFunction);
-action.registerRuntimeFunction(UpdateMessageFunction);
-action.registerRuntimeFunction(DeleteMessageFunction);
-action.registerRuntimeFunction(AddReactionFunction);
-action.registerRuntimeFunction(SendDirectMessageFunction);
-action.registerRuntimeFunction(UploadFileFunction);
-action.registerRuntimeFunction(CreateChannelFunction);
-action.registerRuntimeFunction(InviteToChannelFunction);
-action.registerRuntimeFunction(GetUserByEmailFunction);
-action.registerRuntimeFunction(SetChannelTopicFunction);
-action.registerRuntimeFunction(VerifyRequestSignatureFunction);
+action.registerRuntimeFunction(PostMessageFunction)
+action.registerRuntimeFunction(ReplyInThreadFunction)
+action.registerRuntimeFunction(UpdateMessageFunction)
+action.registerRuntimeFunction(DeleteMessageFunction)
+action.registerRuntimeFunction(AddReactionFunction)
+action.registerRuntimeFunction(SendDirectMessageFunction)
+action.registerRuntimeFunction(UploadFileFunction)
+action.registerRuntimeFunction(CreateChannelFunction)
+action.registerRuntimeFunction(InviteToChannelFunction)
+action.registerRuntimeFunction(GetUserByEmailFunction)
+action.registerRuntimeFunction(SetChannelTopicFunction)
 
-action.registerRuntimeFunction(CreateBlockFunction);
-action.registerRuntimeFunction(CreateTextSectionFunction);
+action.registerRuntimeFunction(CreateBlockFunction)
+action.registerRuntimeFunction(CreateTextSectionFunction)
 
-action.registerEventClass(SlackMessagePosted);
-action.registerEventClass(SlackAppMentioned);
-action.registerEventClass(SlackReactionAdded);
-action.registerEventClass(SlackChannelCreated);
-action.registerEventClass(SlackSlashCommand);
+action.registerRuntimeEventClass(SlackMessagePosted)
+action.registerRuntimeEventClass(SlackAppMentioned)
+action.registerRuntimeEventClass(SlackReactionAdded)
+action.registerRuntimeEventClass(SlackChannelCreated)
+action.registerRuntimeEventClass(SlackSlashCommand)
+
+// Slack events arrive over Socket Mode, one connection per project with an
+// app_token; the manager follows the project configuration Aquila sends.
+const socketManager = new SlackSocketManager(action)
+if (!isExportMode()) {
+    socketManager.start()
+}
+
+// Close the Socket Mode connections on shutdown, so Slack stops routing
+// deliveries to this instance right away instead of waiting for a timeout.
+for (const signal of ["SIGTERM", "SIGINT"] as const) {
+    process.once(signal, () => {
+        socketManager
+            .stop()
+            .catch((error: Error) => console.error("Could not close the Slack connections:", error.message))
+            .finally(() => process.exit(0))
+    })
+}
 
 action.on(CodeZeroEvent.connected, () => {
-    console.log("Connected to aquila");
-});
+    console.log("Connected to aquila")
+})
 
 action.on(CodeZeroEvent.error, (error: Error) => {
-    console.error("Stream error:", error.message);
-    console.log("Attempting to reconnect in 5s...");
+    console.error("Stream error:", error.message)
+    console.log("Attempting to reconnect in 5s...")
     setTimeout(() => {
         action.connect(process.env.AUTH_TOKEN ?? "your_auth_token_here").catch((err: Error) => {
-            action.emit(CodeZeroEvent.error, err);
-        });
-    }, 5000);
-});
+            action.emit(CodeZeroEvent.error, err)
+        })
+    }, 5000)
+})
 
 action.connect(process.env.AUTH_TOKEN ?? "your_auth_token_here").catch((err: Error) => {
-    action.emit(CodeZeroEvent.error, err);
-});
+    action.emit(CodeZeroEvent.error, err)
+})
 
-action.on(CodeZeroEvent.moduleUpdated, (message: any) => {
-    console.dir(message, { depth: null });
-    console.dir(action.configs.values(), { depth: null });
-});
-
-export { action };
+export { action }
