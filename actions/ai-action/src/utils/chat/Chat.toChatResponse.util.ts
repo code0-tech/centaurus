@@ -3,7 +3,7 @@ import type { AiAgentApproval } from "../../datatypes/agent/Agent.approval.datat
 import type { AiAgentStep } from "../../datatypes/agent/Agent.step.datatype.js";
 import type { AiMessage } from "../../datatypes/message/Message.datatype.js";
 import type { AiChatMessage } from "../../datatypes/chat/Chat.message.datatype.js";
-import type { AiChatResponse } from "../../datatypes/chat/Chat.response.datatype.js";
+import type { AiStructuredChatResponse } from "../../datatypes/chat/Chat.response.datatype.js";
 import type { AiChatUsage } from "../../datatypes/chat/Chat.usage.datatype.js";
 import { toChatContent } from "./Chat.toChatContent.util.js";
 import { toChatMessage } from "./Chat.toChatMessage.util.js";
@@ -13,7 +13,7 @@ export function toChatResponse(
     fallbackModel: string,
     structuredResponse?: Record<string, unknown>,
     extras: { steps?: AiAgentStep[]; awaitingApproval?: AiAgentApproval[] } = {},
-): AiChatResponse {
+): AiStructuredChatResponse {
     const message: AiChatMessage = toChatMessage(answer);
 
     // What the provider counted, if it counted anything: a total it did not report is

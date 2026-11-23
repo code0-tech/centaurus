@@ -131,7 +131,7 @@ describe("what the action registers", () => {
             // Every translated text of a node is written as `content: "..."`, which is
             // the node's own description as much as a parameter's.
             for (const match of file.content.matchAll(/content:\s*"((?:[^"\\]|\\.)*)"/gs)) {
-                const text: string = match[1].replaceAll('\\"', '"');
+                const text: string = match[1].replace(/\\"/g, '"');
                 const label = `${file.name}: "${text.slice(0, 40)}..."`;
 
                 expect(text.length, `${label} is ${text.length} characters`).toBeLessThanOrEqual(200);

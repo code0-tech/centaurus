@@ -20,7 +20,7 @@ import type { AiAgentApproval } from "../../datatypes/agent/Agent.approval.datat
 import { AiAgentRequestSchema, type AiAgentRequest } from "../../datatypes/agent/Agent.request.datatype.js";
 import { AiAgentResponseSchema, type AiAgentResponse } from "../../datatypes/agent/Agent.response.datatype.js";
 import type { AiAgentStep } from "../../datatypes/agent/Agent.step.datatype.js";
-import type { AiChatResponse } from "../../datatypes/chat/Chat.response.datatype.js";
+import type { AiStructuredChatResponse } from "../../datatypes/chat/Chat.response.datatype.js";
 import {
     AiChatRequestSchema,
     type AiChatRequest,
@@ -197,7 +197,7 @@ export class CreateAgentFunction {
         answer_type?: unknown,
         conversation?: AiChatRequest,
         rules?: unknown[],
-    ): Promise<AiChatResponse> {
+    ): Promise<AiStructuredChatResponse> {
         // The "answer_type" parameter is a TYPE: the data type the flow wants the
         // agent to answer in. Its value reaches the action as that type's JSON schema
         // - as a protobuf Struct when aquila wrapped it, which `toPlainSchema`
@@ -600,10 +600,15 @@ export class CreateAgentFunction {
             );
         }
 
-        const response: AiChatResponse = toChatResponse(last, parsed.model ?? "", answer.structured_response, {
-            ...(answer.steps ? { steps: answer.steps } : {}),
-            ...(answer.awaiting_approval ? { awaitingApproval: answer.awaiting_approval } : {}),
-        });
+        const response: AiStructuredChatResponse = toChatResponse(
+            last,
+            parsed.model ?? "",
+            answer.structured_response,
+            {
+                ...(answer.steps ? { steps: answer.steps } : {}),
+                ...(answer.awaiting_approval ? { awaitingApproval: answer.awaiting_approval } : {}),
+            },
+        );
         return response;
     }
 }

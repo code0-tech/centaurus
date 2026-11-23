@@ -26,11 +26,6 @@ export const AiChatResponseSchema = z.object({
     choices: z.array(AiChatChoiceSchema),
     usage: AiChatUsageSchema.optional(),
     /**
-     * The answer in the type the node was asked to produce, present only when a type
-     * was passed as `output_schema`. The signature carries that type as a generic, so
-     * the flow reads this field as the very type it picked rather than as an object.
-     */
-    /**
      * Every tool the agent used for this answer, with its arguments and what came
      * back. Not part of the OpenAI schema - a chat completion has no field for the
      * middle of a run - but without it everything the agent did is lost on the way to
@@ -45,6 +40,14 @@ export const AiChatResponseSchema = z.object({
     awaiting_approval: z.array(AiAgentApprovalSchema).optional(),
 });
 export type AiChatResponse = z.infer<typeof AiChatResponseSchema>;
+
+/**
+ * A chat response that also carries the answer in the type the node was asked to
+ * produce, present only when a type was passed as `answer_type`. The field is not
+ * part of the registered data type: the node's signature adds it as a generic, so
+ * the flow reads it as the very type it picked rather than as an object.
+ */
+export type AiStructuredChatResponse = AiChatResponse & { structured_response?: Record<string, unknown> };
 
 @Identifier("AI_CHAT_RESPONSE")
 @Name({ code: "en-US", content: "Chat response" })
