@@ -1,6 +1,6 @@
-import {createHash} from "node:crypto";
+import { createHash } from "node:crypto";
 import mailchimp from "@mailchimp/mailchimp_marketing";
-import {FunctionContext, RuntimeError} from "@code0-tech/hercules";
+import { FunctionContext, RuntimeError } from "@code0-tech/hercules";
 
 /**
  * Configures (and caches) the official Mailchimp Marketing SDK client from the
@@ -13,7 +13,7 @@ import {FunctionContext, RuntimeError} from "@code0-tech/hercules";
  * `server_prefix` config, falling back to the suffix of the API key itself
  * (every Mailchimp key ends in `-usX`).
  */
-let cached: {apiKey: string; server: string} | null = null;
+let cached: { apiKey: string; server: string } | null = null;
 
 export function getMailchimpClient(context: FunctionContext): typeof mailchimp {
     const apiKey = context.matchedConfig.findConfig("api_key") as string;
@@ -34,8 +34,8 @@ export function getMailchimpClient(context: FunctionContext): typeof mailchimp {
     }
 
     if (!cached || cached.apiKey !== apiKey || cached.server !== server) {
-        mailchimp.setConfig({apiKey, server});
-        cached = {apiKey, server};
+        mailchimp.setConfig({ apiKey, server });
+        cached = { apiKey, server };
     }
 
     return mailchimp;
@@ -56,15 +56,39 @@ export function subscriberHash(email: string): string {
  */
 export function toRuntimeError(code: string, error: unknown): RuntimeError {
     if (error && typeof error === "object" && "response" in error) {
-        const response = (error as {response?: {body?: unknown; text?: unknown}}).response;
-        const body = response?.body ?? response?.text;
-        const detail =
-            typeof body === "string"
-                ? body
-                : ((body as {detail?: string; title?: string} | undefined)?.detail ??
-                  (body as {detail?: string; title?: string} | undefined)?.title);
-        if (detail) {
-            return new RuntimeError(code, String(detail));
+        const response = (error as { response?: { body?: unknown; text?: unknown } }).response;
+        let body: unknown = response?.body ?? response?.text;
+
+        // response.text ist meist rohes JSON -> parsen
+        if (typeof body === "string") {
+            let raw = body;
+            try {
+                body = JSON.parse(raw);
+            } catch {
+                if (raw) {
+                    return new RuntimeError(code, raw);
+                }
+            }
+        }
+
+        if (body && typeof body === "object") {
+            const { title, detail, errors } = body as {
+                title?: string;
+                detail?: string;
+                errors?: Array<{ field?: string; message?: string }>;
+            };
+
+            const fieldErrors = Array.isArray(errors)
+                ? errors
+                    .filter((e) => e?.message)
+                    .map((e) => (e.field ? `${e.field}: ${e.message}` : String(e.message)))
+                : [];
+
+            const message = fieldErrors.length > 0 ? fieldErrors.join("; ") : (detail ?? title);
+
+            if (message) {
+                return new RuntimeError(code, String(message));
+            }
         }
     }
     if (error instanceof Error) {
