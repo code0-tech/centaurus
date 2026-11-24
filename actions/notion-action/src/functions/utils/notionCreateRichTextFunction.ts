@@ -7,10 +7,10 @@ import type { NotionRichText } from "../../data_types/notionRichText.js";
 @DisplayIcon("simple:notion")
 @DisplayMessage({ code: "en-US", content: "Create Notion rich text" })
 @Signature("(content: string, url?: string, bold?: boolean, italic?: boolean): NOTION_RICH_TEXT")
-@Parameter({ runtimeName: "content", name: [{ code: "en-US", content: "Text content" }] })
-@Parameter({ runtimeName: "url", name: [{ code: "en-US", content: "Optional link URL" }] })
-@Parameter({ runtimeName: "bold", name: [{ code: "en-US", content: "Bold" }] })
-@Parameter({ runtimeName: "italic", name: [{ code: "en-US", content: "Italic" }] })
+@Parameter({ runtimeName: "content", name: [{ code: "en-US", content: "Text content" }], description: [{ code: "en-US", content: "The text, at most 2000 characters" }] })
+@Parameter({ runtimeName: "url", name: [{ code: "en-US", content: "Link URL" }], description: [{ code: "en-US", content: "Turns the text into a link to this URL" }], optional: true })
+@Parameter({ runtimeName: "bold", name: [{ code: "en-US", content: "Bold" }], description: [{ code: "en-US", content: "Render the text bold (default false)" }], optional: true })
+@Parameter({ runtimeName: "italic", name: [{ code: "en-US", content: "Italic" }], description: [{ code: "en-US", content: "Render the text italic (default false)" }], optional: true })
 export class NotionCreateRichTextFunction {
     run(_context: unknown, content: string, url?: string | null, bold?: boolean | null, italic?: boolean | null): NotionRichText {
         if (content.length > 2000) throw new RuntimeError("NOTION_TEXT_TOO_LONG", "One rich-text item supports at most 2000 characters.");

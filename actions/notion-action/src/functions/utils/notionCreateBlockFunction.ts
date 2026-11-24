@@ -17,11 +17,11 @@ const TextInputSchema = z.union([z.string().max(2000), z.array(NotionRichTextSch
 @Description({ code: "en-US", content: "Build a block for create page or append blocks. Types: paragraph, heading_1, heading_2, heading_3, bulleted_list_item, numbered_list_item, to_do, quote, callout, code, toggle, divider. Text is plain text or rich-text items; divider takes none. checked applies to to_do, language to code (defaults to plain text)." })
 @DisplayIcon("simple:notion")
 @DisplayMessage({ code: "en-US", content: "Create Notion ${type} block" })
-@Signature("(type: string, text?: string | NOTION_RICH_TEXT[], checked?: boolean, language?: string): NOTION_BLOCK")
-@Parameter({ runtimeName: "type", name: [{ code: "en-US", content: "Block type" }], description: [{ code: "en-US", content: "e.g. paragraph, heading_2, bulleted_list_item, to_do, code or divider" }] })
-@Parameter({ runtimeName: "text", name: [{ code: "en-US", content: "Text" }], description: [{ code: "en-US", content: "Plain text or rich-text items. Not used by divider." }] })
-@Parameter({ runtimeName: "checked", name: [{ code: "en-US", content: "Checked" }], description: [{ code: "en-US", content: "Whether a to_do block is checked" }] })
-@Parameter({ runtimeName: "language", name: [{ code: "en-US", content: "Code language" }], description: [{ code: "en-US", content: "Language of a code block, e.g. typescript or json" }] })
+@Signature(`(type: ${BLOCK_TYPES.map((type) => `"${type}"`).join(" | ")}, text?: string | NOTION_RICH_TEXT[], checked?: boolean, language?: string): NOTION_BLOCK`)
+@Parameter({ runtimeName: "type", name: [{ code: "en-US", content: "Block type" }], description: [{ code: "en-US", content: "The kind of block, e.g. paragraph, heading_2, to_do, code or divider" }] })
+@Parameter({ runtimeName: "text", name: [{ code: "en-US", content: "Text" }], description: [{ code: "en-US", content: "Plain text or rich-text items. Not used by divider." }], optional: true })
+@Parameter({ runtimeName: "checked", name: [{ code: "en-US", content: "Checked" }], description: [{ code: "en-US", content: "Whether a to_do block is checked" }], optional: true })
+@Parameter({ runtimeName: "language", name: [{ code: "en-US", content: "Code language" }], description: [{ code: "en-US", content: "Language of a code block, e.g. typescript or json" }], optional: true })
 export class NotionCreateBlockFunction {
     run(_context: unknown, type: string, text?: string | NotionRichText[] | null, checked?: boolean | null, language?: string | null): NotionBlock {
         if (!(BLOCK_TYPES as readonly string[]).includes(type)) {

@@ -1,13 +1,30 @@
 import { describe, expect, it } from "vitest";
 import { NotionCreateRichTextFunction } from "../../../functions/utils/notionCreateRichTextFunction.js";
-import { NotionCreatePropertyValueFunction } from "../../../functions/utils/notionCreatePropertyValueFunction.js";
+import { buildPropertyValue } from "../../../functions/utils/propertyValue.js";
 import { NotionPropertyValueSchema } from "../../../data_types/notionPropertyValue.js";
 import { NotionCreateBlockFunction } from "../../../functions/utils/notionCreateBlockFunction.js";
+import { NotionSetPropertyFunction } from "../../../functions/utils/notionSetPropertyFunction.js";
 
 describe("Notion builders", () => {
-    const property = new NotionCreatePropertyValueFunction();
     const richText = new NotionCreateRichTextFunction();
     const block = new NotionCreateBlockFunction();
+    const setProperty = new NotionSetPropertyFunction();
+
+    it("chains column values into one properties object", () => {
+        const first = setProperty.run(null, "Name", "title", "Task", null);
+        expect(first).toEqual({ Name: { title: [{ type: "text", text: { content: "Task" } }] } });
+        const second = setProperty.run(null, "Priority", "select", "High", first);
+        expect(second).toEqual({ ...first, Priority: { select: { name: "High" } } });
+        // The previous node's properties stay unchanged.
+        expect(first).not.toHaveProperty("Priority");
+        expect(setProperty.run(null, "Priority", "select", "Low", second).Priority).toEqual({ select: { name: "Low" } });
+    });
+
+    it("rejects missing column names and invalid values", () => {
+        expect(() => setProperty.run(null, " ", "title", "Task")).toThrow(expect.objectContaining({ code: "NOTION_INVALID_PROPERTY_NAME" }));
+        expect(() => setProperty.run(null, "Done", "checkbox", "yes")).toThrow(expect.objectContaining({ code: "NOTION_INVALID_PROPERTY_VALUE" }));
+        expect(() => setProperty.run(null, "Formula", "formula", 1)).toThrow(expect.objectContaining({ code: "NOTION_INVALID_PROPERTY_TYPE" }));
+    });
 
     it("builds text blocks from plain text or rich-text items", () => {
         expect(block.run(null, "paragraph", "Hello")).toEqual({ type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: "Hello" } }] } });
@@ -33,7 +50,7 @@ describe("Notion builders", () => {
     it("builds linked and formatted text usable as a title", () => {
         const text = richText.run(null, "Task", "https://example.com", true, true);
         expect(text).toEqual({ type: "text", text: { content: "Task", link: { url: "https://example.com" } }, annotations: { bold: true, italic: true } });
-        expect(property.run(null, "title", [text])).toEqual({ title: [text] });
+        expect(buildPropertyValue("title", [text])).toEqual({ title: [text] });
         expect(richText.run(null, "Plain").text).not.toHaveProperty("link");
     });
 
@@ -60,17 +77,17 @@ describe("Notion builders", () => {
         ["number", null, { number: null }],
         ["date", null, { date: null }],
     ])("builds %s values", (type, input, expected) => {
-        const value = property.run(null, type as string, input);
+        const value = buildPropertyValue(type as string, input);
         expect(value).toEqual(expected);
         expect(NotionPropertyValueSchema.parse(value)).toEqual(expected);
     });
 
     it.each([["checkbox", "false"], ["number", "123"], ["multi_select", "one"], ["relation", [1]], ["formula", 5], ["__proto__", {}]])("rejects invalid %s values", (type, value) => {
-        expect(() => property.run(null, type as string, value)).toThrow();
+        expect(() => buildPropertyValue(type as string, value)).toThrow();
     });
 
     it("enforces the rich-text item length limit", () => {
         expect(() => richText.run(null, "x".repeat(2001))).toThrow();
-        expect(() => property.run(null, "title", "x".repeat(2001))).toThrow();
+        expect(() => buildPropertyValue("title", "x".repeat(2001))).toThrow();
     });
 });

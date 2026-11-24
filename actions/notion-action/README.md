@@ -37,8 +37,8 @@ Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (defa
 | `notionAppendBlocks` | `pageId, children` (block or list) | `NOTION_BLOCK_LIST` |
 | `notionSearch` | `query, filter?` | `NOTION_SEARCH_RESULT` |
 | `notionCreateRichText` | `content, url?, bold?, italic?` | `NOTION_RICH_TEXT` |
-| `notionCreatePropertyValue` | `type, value` | `NOTION_PROPERTY_VALUE` |
 | `notionCreateBlock` | `type, text?, checked?, language?` | `NOTION_BLOCK` |
+| `notionSetProperty` | `name, type, value, properties?` | `NOTION_PROPERTIES` |
 
 `properties` maps the existing database's property names to writable Notion values. Update sends only supplied properties. Create does not create a database or change its schema. Get retrieves page metadata/properties, not block children. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
 
@@ -58,9 +58,10 @@ const title = {
   annotations: { bold: true, italic: false },
 };
 
-// notionCreatePropertyValue("title", [title])
-// notionCreatePropertyValue("checkbox", false)
-// notionCreatePropertyValue("select", "High")
+// Chain notionSetProperty nodes, each extending the previous properties:
+// notionSetProperty("Name", "title", [title])
+// notionSetProperty("Done", "checkbox", false, <previous properties>)
+// notionSetProperty("Priority", "select", "High", <previous properties>)
 const properties = {
   Name: { title: [title] },
   Done: { checkbox: false },
@@ -79,7 +80,7 @@ const children = [
 ];
 ```
 
-Supported property builder types: `title`, `rich_text`, `number`, `checkbox`, `select`, `status`, `multi_select`, `date`, `url`, `email`, `phone_number`, `people`, `relation`. Text properties accept text or rich-text arrays; select/status accept a name; multi-select accepts name arrays; people/relation accept ID arrays. Date accepts ISO date text or `{ start, end?, time_zone? }`. Nullable properties accept `null` to clear. Empty arrays clear title/rich-text/multi-select/people/relation. Read-only properties such as formula and rollup cannot be built as write values.
+Supported `notionSetProperty` types: `title`, `rich_text`, `number`, `checkbox`, `select`, `status`, `multi_select`, `date`, `url`, `email`, `phone_number`, `people`, `relation`. Text properties accept text or rich-text arrays; select/status accept a name; multi-select accepts name arrays; people/relation accept ID arrays. Date accepts ISO date text or `{ start, end?, time_zone? }`. Nullable properties accept `null` to clear. Empty arrays clear title/rich-text/multi-select/people/relation. Read-only properties such as formula and rollup cannot be built as write values.
 
 Supported block builder types: `paragraph`, `heading_1`, `heading_2`, `heading_3`, `bulleted_list_item`, `numbered_list_item`, `to_do`, `quote`, `callout`, `code`, `toggle`, `divider`. `text` is plain text (max 2000 characters) or a list of `NOTION_RICH_TEXT` items and is ignored for `divider`. `checked` applies to `to_do` (default `false`), `language` to `code` (default `plain text`, must be a language Notion supports). Pass the resulting blocks as `children` to `notionAppendBlocks` or `notionCreatePage`.
 
