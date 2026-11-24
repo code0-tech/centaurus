@@ -22,6 +22,27 @@ interface WatchState {
     pages: Map<string, Snapshot>
 }
 
+export const DEFAULT_POLL_INTERVAL_MS = 60_000
+export const MIN_POLL_INTERVAL_MS = 10_000
+// After a new baseline, poll again soon so a first test change shows up quickly.
+const FOLLOW_UP_DELAY_MS = 10_000
+const MINUTE_MS = 60_000
+
+/** Reads NOTION_POLL_INTERVAL_MS; invalid or too small values fall back to a safe interval. */
+export function pollIntervalFromEnv(value = process.env.NOTION_POLL_INTERVAL_MS, warn: (message: string) => void = console.warn): number {
+    if (value === undefined || value.trim() === "") return DEFAULT_POLL_INTERVAL_MS
+    const interval = Number(value)
+    if (!Number.isInteger(interval) || interval <= 0) {
+        warn(`Notion polling: ignoring invalid NOTION_POLL_INTERVAL_MS "${value}"; using ${DEFAULT_POLL_INTERVAL_MS}ms.`)
+        return DEFAULT_POLL_INTERVAL_MS
+    }
+    if (interval < MIN_POLL_INTERVAL_MS) {
+        warn(`Notion polling: NOTION_POLL_INTERVAL_MS ${interval}ms is below the minimum; using ${MIN_POLL_INTERVAL_MS}ms.`)
+        return MIN_POLL_INTERVAL_MS
+    }
+    return interval
+}
+
 function setting(flow: ActionFlow, name: string): string {
     const encoded = flow.settings.find((entry) => entry.flowSettingId === name)?.value
     const value = encoded ? toAllowedValue(encoded) : undefined
@@ -35,15 +56,20 @@ function setting(flow: ActionFlow, name: string): string {
 export class NotionPoller {
     private readonly states = new Map<bigint, WatchState>()
     private timer?: ReturnType<typeof setInterval>
+    private followUp?: ReturnType<typeof setTimeout>
+    private baselined = false
     private running = false
     private stopped = false
+    // Status messages already logged, so each one appears once per flow and state.
+    private readonly announced = new Set<string>()
 
     constructor(
         private readonly action: Action,
-        private readonly intervalMs = 60_000,
+        private readonly intervalMs = DEFAULT_POLL_INTERVAL_MS,
         private readonly reportError: (error: unknown) => void = (error) =>
             console.error("Notion polling:", error instanceof Error ? error.message : "Poll failed"),
-        private readonly now: () => Date = () => new Date()
+        private readonly now: () => Date = () => new Date(),
+        private readonly log: (message: string) => void = (message) => console.log("Notion polling:", message)
     ) {
         if (!Number.isFinite(intervalMs) || intervalMs < 1000) throw new Error("Notion polling interval must be at least 1000ms.")
     }
@@ -63,11 +89,20 @@ export class NotionPoller {
     stop() {
         this.stopped = true
         if (this.timer) clearInterval(this.timer)
+        if (this.followUp) clearTimeout(this.followUp)
         this.timer = undefined
+        this.followUp = undefined
         this.action.off(CodeZeroEvent.flowDeleted, this.forget)
         this.action.off(CodeZeroEvent.flowUpdated, this.flowUpdated)
         this.action.off(CodeZeroEvent.moduleUpdated, this.configUpdated)
         this.states.clear()
+        this.announced.clear()
+    }
+
+    private info(key: string, message: string) {
+        if (this.announced.has(key)) return
+        this.announced.add(key)
+        this.log(message)
     }
 
     private readonly forget = (flowId: bigint) => {
@@ -90,7 +125,10 @@ export class NotionPoller {
             for (const id of this.states.keys()) if (!this.action.flows.has(id)) this.states.delete(id)
             for (const flow of this.action.flows.values()) {
                 if (this.stopped) break
-                if (!NOTION_EVENT_TYPES.includes(flow.type as EventType)) continue
+                if (!NOTION_EVENT_TYPES.includes(flow.type as EventType)) {
+                    this.info(`ignored:${flow.flowId}:${flow.type}`, `Ignoring flow ${flow.flowId} of type ${flow.type}; expected one of ${NOTION_EVENT_TYPES.join(", ")}.`)
+                    continue
+                }
                 try {
                     await this.poll(flow)
                 } catch (error) {
@@ -100,11 +138,22 @@ export class NotionPoller {
         } finally {
             this.running = false
         }
+        if (this.baselined && !this.stopped && this.timer && !this.followUp && FOLLOW_UP_DELAY_MS < this.intervalMs) {
+            this.followUp = setTimeout(() => {
+                this.followUp = undefined
+                void this.tick()
+            }, FOLLOW_UP_DELAY_MS)
+        }
+        this.baselined = false
     }
 
     private watch(flow: ActionFlow) {
         const config = this.action.configs.get(flow.projectId)
-        if (!config) return undefined // Aquila may deliver flows before project configuration.
+        if (!config) {
+            // Aquila may deliver flows before project configuration.
+            this.info(`config:${flow.flowId}:${flow.projectId}`, `Flow ${flow.flowId} waits for the configuration of project ${flow.projectId}.`)
+            return undefined
+        }
         const databaseId = setting(flow, "databaseId")
         const propertyName = flow.type === "NotionPagePropertyChanged" ? setting(flow, "propertyName") : undefined
         const credentials = notionCredentials(config)
@@ -131,7 +180,10 @@ export class NotionPoller {
         const startedAt = now.toISOString()
         let state = this.states.get(flow.flowId)
         if (!state || state.fingerprint !== watch.fingerprint) {
-            state = { fingerprint: watch.fingerprint, activatedAt: now.getTime() * 1000, pages: new Map() }
+            // Notion rounds created_time down to the minute, so a page created in the
+            // activation minute would otherwise look older than the watch.
+            const activatedAt = Math.floor(now.getTime() / MINUTE_MS) * MINUTE_MS * 1000
+            state = { fingerprint: watch.fingerprint, activatedAt, pages: new Map() }
             this.states.set(flow.flowId, state)
         }
         const baseline = state.cursor === undefined
@@ -147,12 +199,14 @@ export class NotionPoller {
             [{ timestamp: "last_edited_time", direction: "ascending" }]
         )
         if (!this.isCurrent(flow.flowId, state)) return
+        const columns = new Set<string>()
         for (const item of result.results) {
             if (item.object !== "page") continue // Wiki data sources may also return data sources.
             // SDK responses can include partial objects without accessible properties.
             const parsed = NotionPageSchema.safeParse(item)
             if (!parsed.success) continue
             const page = parsed.data
+            for (const name of Object.keys(page.properties)) columns.add(name)
             const previous = state.pages.get(page.id)
             const snapshot = { edited: page.last_edited_time, property: watch.propertyName ? (page.properties[watch.propertyName] ?? null) : null }
             let changed = false
@@ -168,6 +222,7 @@ export class NotionPoller {
                 if (!this.isCurrent(flow.flowId, state)) return
                 // A class-wide fire would incorrectly dispatch to other databases/projects.
                 await this.fire(flow.flowId, page)
+                this.log(`Triggered flow ${flow.flowId} (${flow.type}) for page ${page.id}.`)
                 if (!this.isCurrent(flow.flowId, state)) return
             }
             // Advance only after successful delivery. Already acknowledged pages are
@@ -175,6 +230,17 @@ export class NotionPoller {
             state.pages.set(page.id, snapshot)
         }
         state.cursor = startedAt
+        if (baseline) this.baselined = true
+        if (baseline && watch.propertyName && columns.size > 0 && !columns.has(watch.propertyName)) {
+            // Property names are case-sensitive; a typo would otherwise never fire.
+            this.info(`missing:${flow.flowId}:${watch.fingerprint}`,
+                `Flow ${flow.flowId}: database ${watch.databaseId} has no property "${watch.propertyName}". Available: ${[...columns].join(", ")}.`)
+        }
+        if (baseline) {
+            const property = watch.propertyName ? `, property "${watch.propertyName}"` : ""
+            this.info(`baseline:${flow.flowId}:${watch.fingerprint}`,
+                `Flow ${flow.flowId} (${flow.type}) watches database ${watch.databaseId}${property}; baseline of ${state.pages.size} page(s), changes from now on trigger it.`)
+        }
     }
 
     private async fire(flowId: bigint, page: NotionPage): Promise<void> {

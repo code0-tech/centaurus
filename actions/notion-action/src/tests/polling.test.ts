@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Action, CodeZeroEvent } from "@code0-tech/hercules";
 import { ActionFlow } from "@code0-tech/tucana/aquila";
 import { constructValue } from "@code0-tech/tucana/helpers";
-import { NotionPoller } from "../polling.js";
+import { NotionPoller, pollIntervalFromEnv } from "../polling.js";
 import { config, list, page, parsed } from "./fixtures.js";
 import { mockNotionHttp } from "./httpMock.js";
 
@@ -24,9 +24,10 @@ function setup(type?: string) {
     action.flows.set(1n, flow(type));
     const fire = vi.spyOn(action, "fire").mockResolvedValue(null);
     const errors = vi.fn();
+    const log = vi.fn();
     let now = new Date("2026-09-14T10:00:00.000Z");
-    const poller = new NotionPoller(action, 60_000, errors, () => now);
-    return { action, fire, errors, poller, setTime: (time: string) => { now = new Date(time); } };
+    const poller = new NotionPoller(action, 60_000, errors, () => now, log);
+    return { action, fire, errors, log, poller, setTime: (time: string) => { now = new Date(time); } };
 }
 
 let fetchMock: ReturnType<typeof mockNotionHttp>;
@@ -150,6 +151,27 @@ describe("Notion polling", () => {
         expect(fetchMock.databaseLookups).toHaveBeenCalledTimes(2);
     });
 
+    it("logs the watch state once per flow instead of skipping silently", async () => {
+        const { action, poller, log } = setup("NotionPagePropertyChanged");
+        action.flows.set(2n, flow("SomethingElse", 2n));
+        action.flows.set(3n, flow("NotionDatabaseItemCreated", 3n, 9n));
+        http.request.mockResolvedValue({ data: list([page()]) });
+        await poller.tick();
+        await poller.tick();
+        const messages = log.mock.calls.map(([message]) => message);
+        expect(messages.filter((message) => message.includes("Ignoring flow 2 of type SomethingElse"))).toHaveLength(1);
+        expect(messages.filter((message) => message.includes("Flow 3 waits for the configuration of project 9"))).toHaveLength(1);
+        expect(messages.filter((message) => message.includes("Flow 1 (NotionPagePropertyChanged) watches database db-1, property \"Done\"; baseline of 1 page(s)"))).toHaveLength(1);
+    });
+
+    it("reports a watched property the database does not have", async () => {
+        const { action, poller, log } = setup("NotionPagePropertyChanged");
+        action.flows.set(1n, flow("NotionPagePropertyChanged", 1n, 1n, "db-1", "done"));
+        http.request.mockResolvedValue({ data: list([page()]) });
+        await poller.tick();
+        expect(log.mock.calls.map(([message]) => message)).toContainEqual(expect.stringMatching(/has no property "done"\. Available: .*Done/));
+    });
+
     it("waits for configuration and ignores unrelated events", async () => {
         const { action, poller } = setup();
         action.configs.clear();
@@ -212,13 +234,56 @@ describe("Notion polling", () => {
         http.request.mockResolvedValue({ data: list([]) });
         poller.start();
         poller.start();
+        // Baseline, the follow-up after 10s, then the regular 60s interval.
         await vi.advanceTimersByTimeAsync(60_000);
-        expect(http.request).toHaveBeenCalledTimes(2);
+        expect(http.request).toHaveBeenCalledTimes(3);
         expect(action.listenerCount(CodeZeroEvent.flowDeleted)).toBe(1);
         poller.stop();
         await vi.advanceTimersByTimeAsync(120_000);
         await poller.tick();
-        expect(http.request).toHaveBeenCalledTimes(2);
+        expect(http.request).toHaveBeenCalledTimes(3);
         expect(action.listenerCount(CodeZeroEvent.flowDeleted)).toBe(0);
+    });
+
+    it("polls again 10 seconds after a new baseline, then only on the interval", async () => {
+        vi.useFakeTimers();
+        const { poller } = setup();
+        http.request.mockResolvedValue({ data: list([]) });
+        poller.start();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(http.request).toHaveBeenCalledTimes(1);
+        await vi.advanceTimersByTimeAsync(10_000);
+        expect(http.request).toHaveBeenCalledTimes(2);
+        // No further follow-up once the baseline exists.
+        await vi.advanceTimersByTimeAsync(40_000);
+        expect(http.request).toHaveBeenCalledTimes(2);
+        await vi.advanceTimersByTimeAsync(10_000);
+        expect(http.request).toHaveBeenCalledTimes(3);
+        poller.stop();
+    });
+
+    it("fires for a page created in the activation minute despite Notion's minute rounding", async () => {
+        const { poller, fire, setTime } = setup();
+        setTime("2026-09-14T10:00:20.000Z");
+        http.request.mockResolvedValueOnce({ data: list([]) });
+        await poller.tick();
+        // Created at 10:00:40, which Notion reports as 10:00:00.
+        const added = page("new", { created_time: "2026-09-14T10:00:00.000Z", last_edited_time: "2026-09-14T10:00:00.000Z" });
+        setTime("2026-09-14T10:01:00.000Z");
+        http.request.mockResolvedValue({ data: list([added]) });
+        await poller.tick();
+        expect(fire).toHaveBeenCalledExactlyOnceWith(1n, parsed(added));
+    });
+
+    it("reads the poll interval from the environment with a 10 second minimum", () => {
+        const warn = vi.fn();
+        expect(pollIntervalFromEnv(undefined, warn)).toBe(60_000);
+        expect(pollIntervalFromEnv("", warn)).toBe(60_000);
+        expect(pollIntervalFromEnv("15000", warn)).toBe(15_000);
+        expect(warn).not.toHaveBeenCalled();
+        expect(pollIntervalFromEnv("2000", warn)).toBe(10_000);
+        expect(pollIntervalFromEnv("soon", warn)).toBe(60_000);
+        expect(pollIntervalFromEnv("-5", warn)).toBe(60_000);
+        expect(warn).toHaveBeenCalledTimes(3);
     });
 });

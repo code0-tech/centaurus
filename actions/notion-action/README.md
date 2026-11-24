@@ -88,7 +88,8 @@ Supported block builder types: `paragraph`, `heading_1`, `heading_2`, `heading_3
 
 Hercules registers each class as a RuntimeEvent **and** its matching Event definition. The poller reads Aquila's flow settings and each flow's project configuration. It calls `action.fire(flowId, page)` only for the matching flow; it does not broadcast to every flow of that event type.
 
-- Polling runs immediately after connection and every 60 seconds, without overlapping poll cycles. API calls and flow acknowledgements can make a cycle take longer.
+- Polling runs immediately after connection and then every `NOTION_POLL_INTERVAL_MS` (default 60 seconds, minimum 10 seconds), without overlapping poll cycles. After a flow establishes its baseline, one extra poll follows after 10 seconds so a first change shows up quickly. Each poll is one Notion API request per watched flow, so keep the interval and the number of flows within Notion's rate limit (about three requests per second per integration). API calls and flow acknowledgements can make a cycle take longer.
+- Notion rounds `created_time` down to the minute; item-created watches therefore count pages from the start of the activation minute.
 - The first successful, fully paginated query establishes a baseline and emits no historical pages. Created detects newly observed pages whose creation time is at or after watch activation; moving an old page into a database is not a creation event.
 - Updated detects increasing `last_edited_time`. A newly observed page that has already been edited can also trigger it. A new, unedited page is handled by Created.
 - PropertyChanged compares the exact, case-sensitive property's API value against the previous snapshot. Other property edits do not trigger it. The first observation of a page establishes its property baseline. Removing/clearing a previously present value also triggers it. The payload is the current page, not a before/after diff.

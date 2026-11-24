@@ -26,7 +26,7 @@ import { NotionSetPropertyFunction } from "./functions/utils/notionSetPropertyFu
 import { NotionDatabaseItemCreated } from "./events/notionDatabaseItemCreated.js"
 import { NotionDatabaseItemUpdated } from "./events/notionDatabaseItemUpdated.js"
 import { NotionPagePropertyChanged } from "./events/notionPagePropertyChanged.js"
-import { NotionPoller } from "./polling.js"
+import { NotionPoller, pollIntervalFromEnv } from "./polling.js"
 
 export const action = new Action(
     process.env.HERCULES_ACTION_ID ?? "notion-action",
@@ -76,7 +76,7 @@ action.registerRuntimeEventClass(NotionDatabaseItemUpdated)
 action.registerRuntimeEventClass(NotionPagePropertyChanged)
 
 if (!isExportMode()) {
-    const poller = new NotionPoller(action)
+    const poller = new NotionPoller(action, pollIntervalFromEnv())
     let retry: ReturnType<typeof setTimeout> | undefined
     let stopping = false
 
