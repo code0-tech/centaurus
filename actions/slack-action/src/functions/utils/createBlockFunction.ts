@@ -2,21 +2,25 @@ import { Description, DisplayIcon, DisplayMessage, Documentation, Identifier, Na
 import { SlackBlock, SlackTextObject } from "../../data_types/slackBlock.js"
 import { withoutUndefined } from "../../helpers.js"
 
+// Offered as a select in the flow editor.
+export const BLOCK_TYPES = ["section", "header", "divider", "image", "context"] as const
+export type BlockType = (typeof BLOCK_TYPES)[number]
+
 @Identifier("slackCreateBlock")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(type: TEXT, text?: TEXT, fields?: LIST<TEXT>, imageUrl?: TEXT, altText?: TEXT, blockId?: TEXT): SLACK_BLOCK")
+@Signature(`(type: ${BLOCK_TYPES.map((type) => `"${type}"`).join(" | ")}, text?: TEXT, fields?: LIST<TEXT>, imageUrl?: TEXT, altText?: TEXT, blockId?: TEXT): SLACK_BLOCK`)
 @Name({ code: "en-US", content: "Create Slack block" })
 @DisplayMessage({ code: "en-US", content: "Create Slack ${type} block" })
 @Documentation({
     code: "en-US",
     content:
-        "Creates a Block Kit block (`SLACK_BLOCK`) of any type, for the blocks `slackCreateTextSection` does not cover.\nOnly the arguments a block type actually uses are included, the rest is ignored: `divider` needs none, `header` and `section` take `text`, `section` can take up to 10 `fields` rendered as a two column layout, `context` renders `text` and `fields` as small grey text elements, and `image` takes `imageUrl` plus `altText`. All text is rendered as Slack markdown, except in `header` blocks, which Slack renders literally.",
+        "Creates a `section`, `header`, `divider`, `image` or `context` Block Kit block (`SLACK_BLOCK`), for the blocks `slackCreateTextSection` does not cover.\nOnly the arguments a block type actually uses are included, the rest is ignored: `divider` needs none, `header` and `section` take `text`, `section` can take up to 10 `fields` rendered as a two column layout, `context` renders `text` and `fields` as small grey text elements, and `image` takes `imageUrl` plus `altText`. All text is rendered as Slack markdown, except in `header` blocks, which Slack renders literally.",
 })
 @Description({ code: "en-US", content: "Creates a Slack Block Kit block of a given type." })
 @Parameter({
     runtimeName: "type",
     name: [{ code: "en-US", content: "Type" }],
-    description: [{ code: "en-US", content: "The block type, e.g. section, divider, header, image or context." }],
+    description: [{ code: "en-US", content: "The block type: section, header, divider, image or context." }],
 })
 @Parameter({
     runtimeName: "text",

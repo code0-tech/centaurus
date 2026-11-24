@@ -33,7 +33,7 @@ the `gls-action`:
 | Function | Signature | Description |
 |----------|-----------|-------------|
 | `slackCreateTextSection` | `(text: TEXT, markdown?: BOOLEAN, blockId?: TEXT): SLACK_BLOCK` | A `section` block holding one text object. Slack markdown by default. |
-| `slackCreateBlock` | `(type: TEXT, text?: TEXT, fields?: LIST<TEXT>, imageUrl?: TEXT, altText?: TEXT, blockId?: TEXT): SLACK_BLOCK` | Any other block type — `divider`, `header`, `image`, `context`, or a `section` with fields. |
+| `slackCreateBlock` | `(type: "section" \| "header" \| "divider" \| "image" \| "context", text?: TEXT, fields?: LIST<TEXT>, imageUrl?: TEXT, altText?: TEXT, blockId?: TEXT): SLACK_BLOCK` | Any other block type — `divider`, `header`, `image`, `context`, or a `section` with fields. |
 
 Only the arguments a block type actually uses are sent, so `slackCreateBlock("divider")`
 produces a bare divider. `header` text is rendered literally, because Slack
