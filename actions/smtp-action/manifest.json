@@ -1,0 +1,10 @@
+{
+  "name": "smtp",
+  "identifier": "smtp-action",
+  "description": "Send emails through any SMTP server from a flow, built on nodemailer.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/smtp-action"
+    }
+  }
+}
