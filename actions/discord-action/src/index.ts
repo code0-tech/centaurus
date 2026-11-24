@@ -23,6 +23,16 @@ import { DiscordReplyToMessageFunction } from "./functions/messaging/discordRepl
 import { DiscordEditMessageFunction } from "./functions/messaging/discordEditMessage.js";
 import { DiscordDeleteMessageFunction } from "./functions/messaging/discordDeleteMessage.js";
 import { DiscordAddReactionFunction } from "./functions/messaging/discordAddReaction.js";
+import { DiscordAnswerSlashCommandFunction } from "./functions/messaging/discordAnswerSlashCommand.js";
+import { DiscordGetMessageFunction } from "./functions/messaging/discordGetMessage.js";
+import { DiscordGetMessagesFunction } from "./functions/messaging/discordGetMessages.js";
+import { DiscordGetChannelFunction } from "./functions/channels/discordGetChannel.js";
+import { DiscordGetChannelsFunction } from "./functions/channels/discordGetChannels.js";
+import { DiscordGetGuildFunction } from "./functions/guilds/discordGetGuild.js";
+import { DiscordGetRolesFunction } from "./functions/guilds/discordGetRoles.js";
+import { DiscordGetGuildMemberFunction } from "./functions/members/discordGetGuildMember.js";
+import { DiscordGetGuildMembersFunction } from "./functions/members/discordGetGuildMembers.js";
+import { DiscordGetUserFunction } from "./functions/users/discordGetUser.js";
 import { DiscordAddRoleToMemberFunction } from "./functions/members/discordAddRoleToMember.js";
 import { DiscordRemoveRoleFromMemberFunction } from "./functions/members/discordRemoveRoleFromMember.js";
 
@@ -67,6 +77,16 @@ action.registerRuntimeFunction(DiscordReplyToMessageFunction);
 action.registerRuntimeFunction(DiscordEditMessageFunction);
 action.registerRuntimeFunction(DiscordDeleteMessageFunction);
 action.registerRuntimeFunction(DiscordAddReactionFunction);
+action.registerRuntimeFunction(DiscordAnswerSlashCommandFunction);
+action.registerRuntimeFunction(DiscordGetMessageFunction);
+action.registerRuntimeFunction(DiscordGetMessagesFunction);
+action.registerRuntimeFunction(DiscordGetChannelFunction);
+action.registerRuntimeFunction(DiscordGetChannelsFunction);
+action.registerRuntimeFunction(DiscordGetGuildFunction);
+action.registerRuntimeFunction(DiscordGetRolesFunction);
+action.registerRuntimeFunction(DiscordGetGuildMemberFunction);
+action.registerRuntimeFunction(DiscordGetGuildMembersFunction);
+action.registerRuntimeFunction(DiscordGetUserFunction);
 action.registerRuntimeFunction(DiscordAddRoleToMemberFunction);
 action.registerRuntimeFunction(DiscordRemoveRoleFromMemberFunction);
 
