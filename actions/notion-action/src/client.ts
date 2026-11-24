@@ -36,7 +36,7 @@ export function withNotionDates(value: unknown): unknown {
 }
 
 // Only the data source references are needed to resolve a database.
-const DatabaseDataSourcesSchema = z.object({ data_sources: z.array(z.object({ id: z.string() }).passthrough()) }).passthrough();
+const DatabaseDataSourcesSchema = z.looseObject({ data_sources: z.array(z.looseObject({ id: z.string() })) });
 
 // Request and response shapes differ between Notion versions (e.g. databases
 // vs. data sources), so the version is pinned to the one the bundled SDK
@@ -49,6 +49,20 @@ export function notionCredentials(config: Pick<ProjectConfiguration, "findConfig
         throw new RuntimeError("NOTION_MISSING_TOKEN", "Configure integration_token or NOTION_INTEGRATION_TOKEN.");
     }
     return { token: token.trim(), version: NOTION_VERSION };
+}
+
+/**
+ * Flows can pass a single block (e.g. straight from notionCreateBlock) where a
+ * list of blocks is expected; both are sent as a list. Unset stays unset.
+ */
+// NOTION_BLOCK is a compact data type (see notionBlock.ts); Notion validates
+// the block-specific shape, so blocks are handed to the SDK as its request type.
+type SdkBlocks = Parameters<Client["blocks"]["children"]["append"]>[0]["children"];
+type SdkFilter = Parameters<Client["dataSources"]["query"]>[0]["filter"];
+
+export function toBlockList(children?: NotionBlock | NotionBlock[] | null): NotionBlock[] | undefined {
+    if (children == null) return undefined;
+    return Array.isArray(children) ? children : [children];
 }
 
 function notionId(id: string): string {
@@ -99,11 +113,12 @@ export class NotionClient {
         }
     }
 
-    async createPage(parentDatabaseId: string, properties: NotionProperties, children?: NotionBlock[] | null) {
+    async createPage(parentDatabaseId: string, properties: NotionProperties, blocks?: NotionBlock | NotionBlock[] | null) {
+        const children = toBlockList(blocks);
         this.validateChildren(children);
         const data_source_id = await this.resolveDataSourceId(parentDatabaseId);
         return this.request(() => this.sdk.pages.create({
-            parent: { data_source_id }, properties, ...(children == null ? {} : { children }),
+            parent: { data_source_id }, properties, ...(children === undefined ? {} : { children: children as SdkBlocks }),
         }), NotionPageSchema);
     }
 
@@ -149,16 +164,17 @@ export class NotionClient {
         const data_source_id = notionId(dataSourceId);
         return this.paginate((start_cursor) => this.request(() => this.sdk.dataSources.query({
             data_source_id,
-            page_size: 100, ...(filter == null ? {} : { filter }), ...(sorts == null ? {} : { sorts }),
+            page_size: 100, ...(filter == null ? {} : { filter: filter as SdkFilter }), ...(sorts == null ? {} : { sorts }),
             ...(start_cursor ? { start_cursor } : {}),
         }), NotionQueryResultSchema));
     }
 
-    appendBlocks(pageId: string, children: NotionBlock[]) {
+    appendBlocks(pageId: string, blocks: NotionBlock | NotionBlock[]) {
+        const children = toBlockList(blocks) ?? [];
         this.validateChildren(children);
         if (!children.length) throw new RuntimeError("NOTION_INVALID_CHILDREN", "Provide at least one block.");
         const block_id = notionId(pageId);
-        return this.request(() => this.sdk.blocks.children.append({ block_id, children }), NotionBlockListSchema);
+        return this.request(() => this.sdk.blocks.children.append({ block_id, children: children as SdkBlocks }), NotionBlockListSchema);
     }
 
     search(query: string, filter?: NotionSearchFilter | null) {
@@ -167,7 +183,7 @@ export class NotionClient {
         }), NotionSearchResultSchema));
     }
 
-    private validateChildren(children?: NotionBlock[] | null) {
+    private validateChildren(children?: NotionBlock[]) {
         if (children && children.length > 100) {
             throw new RuntimeError("NOTION_INVALID_CHILDREN", "A single request supports at most 100 top-level blocks.");
         }

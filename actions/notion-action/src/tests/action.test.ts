@@ -9,7 +9,7 @@ vi.mock("@code0-tech/hercules", async (importOriginal) => {
 
 describe("Hercules registration", () => {
     it("builds a module with all functions, data types and matching runtime events", () => {
-        expect(action.runtimeFunctions.size).toBe(9);
+        expect(action.runtimeFunctions.size).toBe(10);
         expect(action.dataTypes.size).toBe(13 + supportingSchemaNames.length);
         expect(action.events.size).toBe(3);
         expect(action.runtimeEvents.size).toBe(3);

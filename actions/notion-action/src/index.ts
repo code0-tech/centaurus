@@ -23,6 +23,7 @@ import { NotionAppendBlocksFunction } from "./functions/notionAppendBlocksFuncti
 import { NotionSearchFunction } from "./functions/notionSearchFunction.js"
 import { NotionCreateRichTextFunction } from "./functions/utils/notionCreateRichTextFunction.js"
 import { NotionCreatePropertyValueFunction } from "./functions/utils/notionCreatePropertyValueFunction.js"
+import { NotionCreateBlockFunction } from "./functions/utils/notionCreateBlockFunction.js"
 import { NotionDatabaseItemCreated } from "./events/notionDatabaseItemCreated.js"
 import { NotionDatabaseItemUpdated } from "./events/notionDatabaseItemUpdated.js"
 import { NotionPagePropertyChanged } from "./events/notionPagePropertyChanged.js"
@@ -70,6 +71,7 @@ action.registerRuntimeFunction(NotionAppendBlocksFunction)
 action.registerRuntimeFunction(NotionSearchFunction)
 action.registerRuntimeFunction(NotionCreateRichTextFunction)
 action.registerRuntimeFunction(NotionCreatePropertyValueFunction)
+action.registerRuntimeFunction(NotionCreateBlockFunction)
 // Hercules registers both the runtime event and its public event definition.
 action.registerRuntimeEventClass(NotionDatabaseItemCreated)
 action.registerRuntimeEventClass(NotionDatabaseItemUpdated)
@@ -93,8 +95,8 @@ if (!isExportMode()) {
         console.log("Notion action connected to Aquila")
         poller.start()
     })
-    action.on(CodeZeroEvent.error, () => {
-        console.error("Aquila connection failed; reconnecting in 5 seconds.")
+    action.on(CodeZeroEvent.error, (error: Error) => {
+        console.error("Aquila connection failed; reconnecting in 5 seconds.", error?.message ?? error)
         poller.stop()
         if (!stopping && !retry)
             retry = setTimeout(() => {

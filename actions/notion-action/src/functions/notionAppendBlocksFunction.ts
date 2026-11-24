@@ -7,11 +7,11 @@ import type { NotionBlock } from "../data_types/notionBlock.js";
 @Description({ code: "en-US", content: "Append up to 100 blocks to a page or block." })
 @DisplayIcon("simple:notion")
 @DisplayMessage({ code: "en-US", content: "Append Notion blocks" })
-@Signature("(pageId: string, children: NOTION_BLOCK[]): NOTION_BLOCK_LIST")
+@Signature("(pageId: string, children: NOTION_BLOCK | NOTION_BLOCK[]): NOTION_BLOCK_LIST")
 @Parameter({ runtimeName: "pageId", name: [{ code: "en-US", content: "pageId" }], description: [{ code: "en-US", content: "Page or block ID" }] })
-@Parameter({ runtimeName: "children", name: [{ code: "en-US", content: "children" }], description: [{ code: "en-US", content: "Blocks to append" }] })
+@Parameter({ runtimeName: "children", name: [{ code: "en-US", content: "children" }], description: [{ code: "en-US", content: "A block or a list of blocks to append (maximum 100)" }] })
 export class NotionAppendBlocksFunction {
-    run(context: FunctionContext, pageId: string, children: NotionBlock[]) {
+    run(context: FunctionContext, pageId: string, children: NotionBlock | NotionBlock[]) {
         return new NotionClient(context.matchedConfig).appendBlocks(pageId, children);
     }
 }

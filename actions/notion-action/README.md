@@ -34,16 +34,17 @@ Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (defa
 | `notionGetPage` | `pageId` | `NOTION_PAGE` |
 | `notionArchivePage` | `pageId` | `boolean` (Hercules BOOLEAN) |
 | `notionQueryDatabase` | `databaseId, filter?, sorts?` | `NOTION_QUERY_RESULT` |
-| `notionAppendBlocks` | `pageId, children` | `NOTION_BLOCK_LIST` |
+| `notionAppendBlocks` | `pageId, children` (block or list) | `NOTION_BLOCK_LIST` |
 | `notionSearch` | `query, filter?` | `NOTION_SEARCH_RESULT` |
 | `notionCreateRichText` | `content, url?, bold?, italic?` | `NOTION_RICH_TEXT` |
 | `notionCreatePropertyValue` | `type, value` | `NOTION_PROPERTY_VALUE` |
+| `notionCreateBlock` | `type, text?, checked?, language?` | `NOTION_BLOCK` |
 
 `properties` maps the existing database's property names to writable Notion values. Update sends only supplied properties. Create does not create a database or change its schema. Get retrieves page metadata/properties, not block children. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
 
 Query and search collect **all pages** of results into one response (`has_more: false`, `next_cursor: null`); large collections consume corresponding time and memory. Query filters accept the normal Notion property/timestamp filters and `and`/`or` groups. Sorts use either `property` or `timestamp` plus `direction`. Search matches titles, not full page text; its optional filter is `{ "property": "object", "value": "page" }` or `"data_source"`.
 
-Append accepts a page or block ID. Create and append support at most 100 top-level child blocks per call. Notion validates block-specific shapes, nesting and request-size limits. API calls time out after 30 seconds. HTTP 429 is retried at most twice using `Retry-After` (up to 60 seconds); ambiguous network failures on writes are not automatically retried.
+Append accepts a page or block ID. Create and append take a single block or a list of blocks (e.g. from `notionCreateBlock`) and support at most 100 top-level child blocks per call. Notion validates block-specific shapes, nesting and request-size limits. API calls time out after 30 seconds. HTTP 429 is retried at most twice using `Retry-After` (up to 60 seconds); ambiguous network failures on writes are not automatically retried.
 
 ### Builder examples
 
@@ -65,9 +66,22 @@ const properties = {
   Done: { checkbox: false },
   Priority: { select: { name: "High" } },
 };
+
+// notionCreateBlock("heading_2", "Summary")
+// notionCreateBlock("to_do", "Ship the release", true)
+// notionCreateBlock("code", "{ \"ok\": true }", undefined, "json")
+// notionCreateBlock("divider")
+const children = [
+  { type: "heading_2", heading_2: { rich_text: [{ type: "text", text: { content: "Summary" } }] } },
+  { type: "to_do", to_do: { rich_text: [{ type: "text", text: { content: "Ship the release" } }], checked: true } },
+  { type: "code", code: { rich_text: [{ type: "text", text: { content: "{ \"ok\": true }" } }], language: "json" } },
+  { type: "divider", divider: {} },
+];
 ```
 
 Supported property builder types: `title`, `rich_text`, `number`, `checkbox`, `select`, `status`, `multi_select`, `date`, `url`, `email`, `phone_number`, `people`, `relation`. Text properties accept text or rich-text arrays; select/status accept a name; multi-select accepts name arrays; people/relation accept ID arrays. Date accepts ISO date text or `{ start, end?, time_zone? }`. Nullable properties accept `null` to clear. Empty arrays clear title/rich-text/multi-select/people/relation. Read-only properties such as formula and rollup cannot be built as write values.
+
+Supported block builder types: `paragraph`, `heading_1`, `heading_2`, `heading_3`, `bulleted_list_item`, `numbered_list_item`, `to_do`, `quote`, `callout`, `code`, `toggle`, `divider`. `text` is plain text (max 2000 characters) or a list of `NOTION_RICH_TEXT` items and is ignored for `divider`. `checked` applies to `to_do` (default `false`), `language` to `code` (default `plain text`, must be a language Notion supports). Pass the resulting blocks as `children` to `notionAppendBlocks` or `notionCreatePage`.
 
 ## Polling events
 

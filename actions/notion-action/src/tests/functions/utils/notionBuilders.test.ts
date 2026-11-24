@@ -2,10 +2,33 @@ import { describe, expect, it } from "vitest";
 import { NotionCreateRichTextFunction } from "../../../functions/utils/notionCreateRichTextFunction.js";
 import { NotionCreatePropertyValueFunction } from "../../../functions/utils/notionCreatePropertyValueFunction.js";
 import { NotionPropertyValueSchema } from "../../../data_types/notionPropertyValue.js";
+import { NotionCreateBlockFunction } from "../../../functions/utils/notionCreateBlockFunction.js";
 
 describe("Notion builders", () => {
     const property = new NotionCreatePropertyValueFunction();
     const richText = new NotionCreateRichTextFunction();
+    const block = new NotionCreateBlockFunction();
+
+    it("builds text blocks from plain text or rich-text items", () => {
+        expect(block.run(null, "paragraph", "Hello")).toEqual({ type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: "Hello" } }] } });
+        const text = richText.run(null, "Bold", null, true);
+        expect(block.run(null, "heading_2", [text])).toEqual({ type: "heading_2", heading_2: { rich_text: [text] } });
+        expect(block.run(null, "bulleted_list_item", null)).toEqual({ type: "bulleted_list_item", bulleted_list_item: { rich_text: [] } });
+    });
+
+    it("builds to_do, code and divider blocks", () => {
+        expect(block.run(null, "to_do", "Ship", true)).toEqual({ type: "to_do", to_do: { rich_text: [{ type: "text", text: { content: "Ship" } }], checked: true } });
+        expect(block.run(null, "to_do", "Ship", null)).toMatchObject({ to_do: { checked: false } });
+        expect(block.run(null, "code", "{}", null, "json")).toMatchObject({ code: { language: "json" } });
+        expect(block.run(null, "code", "x", null, null)).toMatchObject({ code: { language: "plain text" } });
+        expect(block.run(null, "divider", "ignored")).toEqual({ type: "divider", divider: {} });
+    });
+
+    it("rejects unsupported block types, languages and text", () => {
+        expect(() => block.run(null, "image", "x")).toThrow(expect.objectContaining({ code: "NOTION_INVALID_BLOCK_TYPE" }));
+        expect(() => block.run(null, "code", "x", null, "klingon")).toThrow(expect.objectContaining({ code: "NOTION_INVALID_BLOCK" }));
+        expect(() => block.run(null, "paragraph", "x".repeat(2001))).toThrow(expect.objectContaining({ code: "NOTION_INVALID_BLOCK_TEXT" }));
+    });
 
     it("builds linked and formatted text usable as a title", () => {
         const text = richText.run(null, "Task", "https://example.com", true, true);

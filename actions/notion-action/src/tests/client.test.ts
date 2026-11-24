@@ -88,6 +88,17 @@ describe("Notion API client", () => {
         expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "db-ds" }, properties: {} } });
     });
 
+    it("accepts a single block where a list of blocks is expected", async () => {
+        const client = new NotionClient(config());
+        const block = { type: "paragraph" as const, paragraph: { rich_text: [] } };
+        http.request.mockResolvedValueOnce({ data: page() });
+        await client.createPage("db", {}, block);
+        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "db-ds" }, properties: {}, children: [block] } });
+        http.request.mockResolvedValueOnce({ data: { object: "list", type: "block", block: {}, results: [], has_more: false, next_cursor: null } });
+        await client.appendBlocks("page", block);
+        expect(http.request).toHaveBeenLastCalledWith(expect.objectContaining({ method: "PATCH", url: "/blocks/page/children", data: { children: [block] } }));
+    });
+
     it("validates responses without dropping nested Notion fields", async () => {
         const original = page("page-1", { icon: { type: "emoji", emoji: "🚀" }, properties: { Count: { id: "count", type: "formula", formula: { type: "number", number: 7 } } } });
         http.request.mockResolvedValueOnce({ data: original }).mockResolvedValueOnce({ data: { object: "page" } });
