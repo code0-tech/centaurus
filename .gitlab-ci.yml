@@ -46,6 +46,7 @@ test-node:
       - C0_ACTION: !reference [.node-actions]
   script:
     - cd actions/$C0_ACTION
+    - corepack enable npm
     - npm ci
     - npm run typecheck
     - npm run test

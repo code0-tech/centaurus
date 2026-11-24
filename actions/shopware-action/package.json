@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "packageManager": "npm@11.21.3",
+  "engines": {
+    "npm": ">=11.21.3"
+  },
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
