@@ -30,6 +30,7 @@ include:
   - smtp-action
   - github-action
   - ai-action
+  - discord-action
 
 .rust-actions:
   - cron-action

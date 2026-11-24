@@ -1,0 +1,10 @@
+{
+  "name": "discord",
+  "identifier": "discord-action",
+  "description": "Discord bot integration: send and manage messages, reactions, and roles, and react to Discord events.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/discord-action"
+    }
+  }
+}
