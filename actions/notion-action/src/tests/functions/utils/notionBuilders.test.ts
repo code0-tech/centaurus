@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { NotionCreateRichTextFunction } from "../../../functions/utils/notionCreateRichTextFunction.js";
 import { buildPropertyValue } from "../../../functions/utils/propertyValue.js";
 import { NotionPropertyValueSchema } from "../../../data_types/notionPropertyValue.js";
 import { NotionCreateBlockFunction } from "../../../functions/utils/notionCreateBlockFunction.js";
 import { NotionSetPropertyFunction } from "../../../functions/utils/notionSetPropertyFunction.js";
 
 describe("Notion builders", () => {
-    const richText = new NotionCreateRichTextFunction();
     const block = new NotionCreateBlockFunction();
     const setProperty = new NotionSetPropertyFunction();
 
@@ -28,7 +26,7 @@ describe("Notion builders", () => {
 
     it("builds text blocks from plain text or rich-text items", () => {
         expect(block.run(null, "paragraph", "Hello")).toEqual({ type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: "Hello" } }] } });
-        const text = richText.run(null, "Bold", null, true);
+        const text = { type: "text" as const, text: { content: "Bold" }, annotations: { bold: true } };
         expect(block.run(null, "heading_2", [text])).toEqual({ type: "heading_2", heading_2: { rich_text: [text] } });
         expect(block.run(null, "bulleted_list_item", null)).toEqual({ type: "bulleted_list_item", bulleted_list_item: { rich_text: [] } });
     });
@@ -47,15 +45,29 @@ describe("Notion builders", () => {
         expect(() => block.run(null, "paragraph", "x".repeat(2001))).toThrow(expect.objectContaining({ code: "NOTION_INVALID_BLOCK_TEXT" }));
     });
 
-    it("builds linked and formatted text usable as a title", () => {
-        const text = richText.run(null, "Task", "https://example.com", true, true);
-        expect(text).toEqual({ type: "text", text: { content: "Task", link: { url: "https://example.com" } }, annotations: { bold: true, italic: true } });
-        expect(buildPropertyValue("title", [text])).toEqual({ title: [text] });
-        expect(richText.run(null, "Plain").text).not.toHaveProperty("link");
+    it("links and formats the whole plain text of a block", () => {
+        expect(block.run(null, "paragraph", "Docs", null, null, "https://example.com", true, true)).toEqual({
+            type: "paragraph",
+            paragraph: { rich_text: [{ type: "text", text: { content: "Docs", link: { url: "https://example.com" } }, annotations: { bold: true, italic: true } }] },
+        });
+        expect(block.run(null, "quote", "Note", null, null, null, null, true)).toEqual({
+            type: "quote", quote: { rich_text: [{ type: "text", text: { content: "Note" }, annotations: { bold: false, italic: true } }] },
+        });
+        // Code blocks ignore formatting; rich-text items keep their own.
+        expect(block.run(null, "code", "x", null, "json", "https://example.com", true)).toEqual({
+            type: "code", code: { rich_text: [{ type: "text", text: { content: "x" } }], language: "json" },
+        });
+        const item = { type: "text" as const, text: { content: "Own" } };
+        expect(block.run(null, "paragraph", [item], null, null, "https://example.com", true)).toEqual({ type: "paragraph", paragraph: { rich_text: [item] } });
     });
 
     it("treats null optional arguments from a flow as unset", () => {
-        expect(richText.run(null, "Plain", null, null, null)).toEqual({ type: "text", text: { content: "Plain" }, annotations: { bold: false, italic: false } });
+        expect(block.run(null, "paragraph", "Plain", null, null, null, null, null)).toEqual({ type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: "Plain" } }] } });
+    });
+
+    it("accepts formatted rich-text items as a title", () => {
+        const text = { type: "text" as const, text: { content: "Task", link: { url: "https://example.com" } }, annotations: { bold: true } };
+        expect(buildPropertyValue("title", [text])).toEqual({ title: [text] });
     });
 
     it.each([
@@ -87,7 +99,7 @@ describe("Notion builders", () => {
     });
 
     it("enforces the rich-text item length limit", () => {
-        expect(() => richText.run(null, "x".repeat(2001))).toThrow();
+        expect(() => block.run(null, "paragraph", "x".repeat(2001))).toThrow();
         expect(() => buildPropertyValue("title", "x".repeat(2001))).toThrow();
     });
 });

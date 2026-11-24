@@ -36,8 +36,7 @@ Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (defa
 | `notionQueryDatabase` | `databaseId, filter?, sorts?` | `NOTION_QUERY_RESULT` |
 | `notionAppendBlocks` | `pageId, children` (block or list) | `NOTION_BLOCK_LIST` |
 | `notionSearch` | `query, filter?` | `NOTION_SEARCH_RESULT` |
-| `notionCreateRichText` | `content, url?, bold?, italic?` | `NOTION_RICH_TEXT` |
-| `notionCreateBlock` | `type, text?, checked?, language?` | `NOTION_BLOCK` |
+| `notionCreateBlock` | `type, text?, checked?, language?, url?, bold?, italic?` | `NOTION_BLOCK` |
 | `notionSetProperty` | `name, type, value, properties?` | `NOTION_PROPERTIES` |
 
 `properties` maps the existing database's property names to writable Notion values. Update sends only supplied properties. Create does not create a database or change its schema. Get retrieves page metadata/properties, not block children. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
@@ -51,29 +50,24 @@ Append accepts a page or block ID. Create and append take a single block or a li
 The following illustrates values produced by the builders and passed to create/update functions:
 
 ```ts
-// notionCreateRichText("Ship the release", undefined, true)
-const title = {
-  type: "text",
-  text: { content: "Ship the release" },
-  annotations: { bold: true, italic: false },
-};
-
 // Chain notionSetProperty nodes, each extending the previous properties:
-// notionSetProperty("Name", "title", [title])
+// notionSetProperty("Name", "title", "Ship the release")
 // notionSetProperty("Done", "checkbox", false, <previous properties>)
 // notionSetProperty("Priority", "select", "High", <previous properties>)
 const properties = {
-  Name: { title: [title] },
+  Name: { title: [{ type: "text", text: { content: "Ship the release" } }] },
   Done: { checkbox: false },
   Priority: { select: { name: "High" } },
 };
 
 // notionCreateBlock("heading_2", "Summary")
+// notionCreateBlock("paragraph", "Release notes", undefined, undefined, "https://example.com", true)
 // notionCreateBlock("to_do", "Ship the release", true)
 // notionCreateBlock("code", "{ \"ok\": true }", undefined, "json")
 // notionCreateBlock("divider")
 const children = [
   { type: "heading_2", heading_2: { rich_text: [{ type: "text", text: { content: "Summary" } }] } },
+  { type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: "Release notes", link: { url: "https://example.com" } }, annotations: { bold: true, italic: false } }] } },
   { type: "to_do", to_do: { rich_text: [{ type: "text", text: { content: "Ship the release" } }], checked: true } },
   { type: "code", code: { rich_text: [{ type: "text", text: { content: "{ \"ok\": true }" } }], language: "json" } },
   { type: "divider", divider: {} },
@@ -82,7 +76,7 @@ const children = [
 
 Supported `notionSetProperty` types: `title`, `rich_text`, `number`, `checkbox`, `select`, `status`, `multi_select`, `date`, `url`, `email`, `phone_number`, `people`, `relation`. Text properties accept text or rich-text arrays; select/status accept a name; multi-select accepts name arrays; people/relation accept ID arrays. Date accepts ISO date text or `{ start, end?, time_zone? }`. Nullable properties accept `null` to clear. Empty arrays clear title/rich-text/multi-select/people/relation. Read-only properties such as formula and rollup cannot be built as write values.
 
-Supported block builder types: `paragraph`, `heading_1`, `heading_2`, `heading_3`, `bulleted_list_item`, `numbered_list_item`, `to_do`, `quote`, `callout`, `code`, `toggle`, `divider`. `text` is plain text (max 2000 characters) or a list of `NOTION_RICH_TEXT` items and is ignored for `divider`. `checked` applies to `to_do` (default `false`), `language` to `code` (default `plain text`, must be a language Notion supports). Pass the resulting blocks as `children` to `notionAppendBlocks` or `notionCreatePage`.
+Supported block builder types: `paragraph`, `heading_1`, `heading_2`, `heading_3`, `bulleted_list_item`, `numbered_list_item`, `to_do`, `quote`, `callout`, `code`, `toggle`, `divider`. `text` is plain text (max 2000 characters) or a list of `NOTION_RICH_TEXT` items and is ignored for `divider`. `url`, `bold` and `italic` link or format the whole plain text (ignored for `code` and for rich-text items, which carry their own formatting; mixed formatting within one block needs rich-text items). `checked` applies to `to_do` (default `false`), `language` to `code` (default `plain text`, must be a language Notion supports). Pass the resulting blocks as `children` to `notionAppendBlocks` or `notionCreatePage`.
 
 ## Polling events
 

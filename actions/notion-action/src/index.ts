@@ -21,7 +21,6 @@ import { NotionArchivePageFunction } from "./functions/notionArchivePageFunction
 import { NotionQueryDatabaseFunction } from "./functions/notionQueryDatabaseFunction.js"
 import { NotionAppendBlocksFunction } from "./functions/notionAppendBlocksFunction.js"
 import { NotionSearchFunction } from "./functions/notionSearchFunction.js"
-import { NotionCreateRichTextFunction } from "./functions/utils/notionCreateRichTextFunction.js"
 import { NotionCreateBlockFunction } from "./functions/utils/notionCreateBlockFunction.js"
 import { NotionSetPropertyFunction } from "./functions/utils/notionSetPropertyFunction.js"
 import { NotionDatabaseItemCreated } from "./events/notionDatabaseItemCreated.js"
@@ -69,7 +68,6 @@ action.registerRuntimeFunction(NotionArchivePageFunction)
 action.registerRuntimeFunction(NotionQueryDatabaseFunction)
 action.registerRuntimeFunction(NotionAppendBlocksFunction)
 action.registerRuntimeFunction(NotionSearchFunction)
-action.registerRuntimeFunction(NotionCreateRichTextFunction)
 action.registerRuntimeFunction(NotionCreateBlockFunction)
 action.registerRuntimeFunction(NotionSetPropertyFunction)
 // Hercules registers both the runtime event and its public event definition.
