@@ -448,8 +448,8 @@ describe("what the event offers a flow", () => {
         const byIdentifier = Object.fromEntries(settings.map((setting) => [setting.identifier, setting]));
 
         expect(settings.map((setting) => setting.identifier)).toEqual(["route", "model", "api_key"]);
-        expect(byIdentifier.route).toMatchObject({ unique: "PROJECT", defaultValue: "/v1" });
-        expect(byIdentifier.model).toMatchObject({ unique: "PROJECT" });
+        expect(byIdentifier.route).toMatchObject({ unique: "PROJECT" });
+        expect(byIdentifier.route.defaultValue).toBeUndefined();
         expect(byIdentifier.model.optional).toBeUndefined();
         expect(byIdentifier.api_key.optional).toEqual(true);
     });
