@@ -17,6 +17,16 @@ function subFlow(implementation: (input: never) => unknown, inputSchema?: Record
     return flow as unknown as SubFlow;
 }
 
+/** A sub flow of several parameters, which is handed them positionally. */
+function multiSubFlow(
+    implementation: (...args: unknown[]) => unknown,
+    inputSchema: Record<string, unknown>,
+): SubFlow {
+    const flow = (async (...args: unknown[]) => implementation(...args)) as unknown as { inputSchema?: unknown };
+    flow.inputSchema = inputSchema;
+    return flow as unknown as SubFlow;
+}
+
 /**
  * Mirrors how hercules hands a sub flow function to a consuming node: the producing
  * node returns a definition, the node that receives it gets a callable sub flow.
@@ -335,10 +345,73 @@ describe("the agent loop", () => {
                 input_schema: expect.objectContaining({ type: "object" }),
             },
         ]);
-        expect(calls).toEqual([{ order: "A-1" }]);
+        expect(calls).toEqual(["A-1"]);
         expect(requests[1].messages.map((m) => m.role)).toEqual(["human", "ai", "tool"]);
         expect(requests[1].messages.at(-1)?.content).toEqual([{ type: "text", text: '{"status":"shipped"}' }]);
         expect(replyOf(response)).toEqual("Order A-1 has shipped.");
+    });
+
+    it("hands a tool sub flow its parameters in the order its schema declares them", async () => {
+        const { run } = scriptedModel([
+            answer("", [
+                {
+                    id: "call-1",
+                    name: "get_message",
+                    // A model answers a tool call by name, in whatever order it likes.
+                    args: { message_id: "157478", bot_token: "token", channel_id: "channel" },
+                },
+            ]),
+            answer("It says hello."),
+        ]);
+        const calls: unknown[][] = [];
+        const getMessage = multiSubFlow(
+            (...args: unknown[]) => {
+                calls.push(args);
+                return { content: "hello" };
+            },
+            {
+                type: "object",
+                title: "Get message",
+                properties: {
+                    bot_token: { type: "string" },
+                    channel_id: { type: "string" },
+                    message_id: { type: "string" },
+                },
+                required: ["bot_token", "channel_id", "message_id"],
+            },
+        );
+
+        await ask.run(context(), "support", run, "read 157478", "", [getMessage]);
+
+        expect(calls).toEqual([["token", "channel", "157478"]]);
+    });
+
+    it("holds the position of a parameter the model left out", async () => {
+        const { run } = scriptedModel([
+            answer("", [{ id: "call-1", name: "send_message", args: { channel_id: "channel", text: "hi" } }]),
+            answer("Sent."),
+        ]);
+        const calls: unknown[][] = [];
+        const send = multiSubFlow(
+            (...args: unknown[]) => {
+                calls.push(args);
+                return null;
+            },
+            {
+                type: "object",
+                title: "Send message",
+                properties: {
+                    channel_id: { type: "string" },
+                    thread_id: { type: "string" },
+                    text: { type: "string" },
+                },
+                required: ["channel_id", "text"],
+            },
+        );
+
+        await ask.run(context(), "support", run, "say hi", "", [send]);
+
+        expect(calls).toEqual([["channel", null, "hi"]]);
     });
 
     it("advertises client tools and returns their call without executing them", async () => {

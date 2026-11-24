@@ -57,11 +57,16 @@ function scriptedModel(responses: AiModelResponse[]) {
 }
 
 function tool(name: string, calls: unknown[], answers: unknown = { ok: true }): SubFlow {
-    const run = (async (args: unknown) => {
-        calls.push({ [name]: args });
+    const run = (async (order: unknown) => {
+        calls.push({ [name]: order });
         return answers;
     }) as unknown as { inputSchema?: unknown };
-    run.inputSchema = { type: "object", title: name, description: `Runs ${name}.`, properties: {} };
+    run.inputSchema = {
+        type: "object",
+        title: name,
+        description: `Runs ${name}.`,
+        properties: { order: { type: "string" } },
+    };
     return run as unknown as SubFlow;
 }
 
@@ -185,7 +190,7 @@ describe("a tool the agent has to ask about", () => {
             { role: "user", content: `APPROVE ${code}` },
         ]);
 
-        expect(calls).toEqual([{ refund: { order: "A-1" } }]);
+        expect(calls).toEqual([{ refund: "A-1" }]);
         expect(done.awaiting_approval).toBeUndefined();
         expect(done.choices[0].message.content).toEqual("Refunded A-1.");
         expect(done.steps).toEqual([{ name: "refund", args: { order: "A-1" }, result: '{"refunded":true}' }]);
@@ -289,7 +294,7 @@ describe("a tool the agent has to ask about", () => {
 
         const response = await chat(run, [tool("lookup", calls)], [{ role: "user", content: "where is A-1?" }]);
 
-        expect(calls).toEqual([{ lookup: { order: "A-1" } }]);
+        expect(calls).toEqual([{ lookup: "A-1" }]);
         expect(response.awaiting_approval).toBeUndefined();
     });
 

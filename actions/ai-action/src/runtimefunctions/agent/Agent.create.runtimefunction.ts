@@ -49,6 +49,7 @@ import { toConnection } from "../../utils/mcp/Mcp.toConnection.util.js";
 import { toFlowMessage } from "../../utils/message/Message.toFlowMessage.util.js";
 import { toLangChainMessage } from "../../utils/message/Message.toLangChainMessage.util.js";
 import { toPlainSchema } from "../../utils/shared/Shared.toPlainSchema.util.js";
+import { toSubFlowArguments } from "../../utils/shared/Shared.toSubFlowArguments.util.js";
 
 /** What the model APIs accept as a tool name: letters, digits, underscore, dash. */
 const TOOL_NAME_ALLOWED = /[^a-zA-Z0-9_-]+/g;
@@ -396,8 +397,11 @@ export class CreateAgentFunction {
                     const described: unknown = flow.description ?? schema?.description;
                     const description: string = typeof described === "string" ? described : "";
                     return tool(
+                        // A sub flow takes its parameters positionally, so what the
+                        // model answered by name is turned back into positions by the
+                        // schema the sub flow declared them in.
                         (args: unknown) =>
-                            Promise.resolve(flow(args as never)).then(
+                            Promise.resolve(flow(...(toSubFlowArguments(args, schema) as never[]))).then(
                                 (result) =>
                                     typeof result === "string" ? result : JSON.stringify(result ?? null),
                                 (error: unknown) => `The tool failed: ${describeError(error)}`,
