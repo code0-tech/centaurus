@@ -5,7 +5,7 @@
     "type": "module",
     "main": "dist/index.js",
     "scripts": {
-        "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
+        "dev": "tsx watch src/index.ts",
         "typecheck": "tsc --noEmit",
         "generate:notion-schemas": "node scripts/generate-openapi.mjs && node ../../scripts/openapi-to-zod.mjs schemas/notion-openapi.json src/generated/notion-schemas.ts",
         "build": "vite build",

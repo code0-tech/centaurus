@@ -38,20 +38,17 @@ export function withNotionDates(value: unknown): unknown {
 // Only the data source references are needed to resolve a database.
 const DatabaseDataSourcesSchema = z.object({ data_sources: z.array(z.object({ id: z.string() }).passthrough()) }).passthrough();
 
+// Request and response shapes differ between Notion versions (e.g. databases
+// vs. data sources), so the version is pinned to the one the bundled SDK
+// types and our schemas describe rather than being configurable.
 export const NOTION_VERSION = "2025-09-03";
 
 export function notionCredentials(config: Pick<ProjectConfiguration, "findConfig">) {
     const token = config.findConfig("integration_token") ?? process.env.NOTION_INTEGRATION_TOKEN;
-    const version = config.findConfig("notion_version") || NOTION_VERSION;
     if (typeof token !== "string" || !token.trim()) {
         throw new RuntimeError("NOTION_MISSING_TOKEN", "Configure integration_token or NOTION_INTEGRATION_TOKEN.");
     }
-    // Request and response shapes differ between Notion versions (e.g. databases
-    // vs. data sources). Only send the version the bundled SDK types describe.
-    if (version !== NOTION_VERSION) {
-        throw new RuntimeError("NOTION_UNSUPPORTED_VERSION", `This action supports Notion-Version ${NOTION_VERSION}.`);
-    }
-    return { token: token.trim(), version };
+    return { token: token.trim(), version: NOTION_VERSION };
 }
 
 function notionId(id: string): string {

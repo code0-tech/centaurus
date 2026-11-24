@@ -20,7 +20,6 @@ Create a Notion internal integration with read, insert and update content capabi
 | Project configuration | Type | Meaning |
 | --- | --- | --- |
 | `integration_token` | TEXT | Internal integration bearer token. If absent, uses `NOTION_INTEGRATION_TOKEN` from the process environment. An explicitly empty token is rejected. |
-| `notion_version` | TEXT, optional | Defaults to `2025-09-03`. This implementation supports this pinned version only. |
 
 Tokens are resolved per project, not cached globally, and are never put in exported module defaults. The environment fallback is shared by all projects that omit their own token.
 
@@ -97,7 +96,7 @@ Each data type has its own file under `src/data_types/`: the nine requested resp
 
 Points in time in responses (`created_time`, `last_edited_time`, file `expiry_time`, calendar `start_time`/`end_time`) are `DATE` values, i.e. Unix microseconds (UTC); the client converts Notion's ISO 8601 strings before validating a response. Values flows send to Notion keep Notion's formats: filter timestamps and date property values (`{ start, end, time_zone }`) stay ISO 8601 text, because Notion distinguishes date-only values and time zones that a `DATE` cannot express.
 
-The API is pinned to [`2025-09-03`](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03), where a database is a container of one or more data sources and pages live in a data source. Functions and triggers keep taking a `databaseId`: the action resolves the database's data source (`GET /databases/{id}`) and then queries or creates pages in it. Databases with several data sources are ambiguous and fail with `NOTION_MULTIPLE_DATA_SOURCES`; the triggers resolve the data source once per watch. Incompatible `notion_version` values fail locally with a clear runtime error.
+The API is pinned to [`2025-09-03`](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03), where a database is a container of one or more data sources and pages live in a data source. Functions and triggers keep taking a `databaseId`: the action resolves the database's data source (`GET /databases/{id}`) and then queries or creates pages in it. Databases with several data sources are ambiguous and fail with `NOTION_MULTIPLE_DATA_SOURCES`; the triggers resolve the data source once per watch.
 
 Notion now also supports [native webhooks](https://developers.notion.com/reference/webhooks). This action intentionally implements the requested polling triggers.
 

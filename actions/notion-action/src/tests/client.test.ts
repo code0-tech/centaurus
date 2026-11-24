@@ -41,13 +41,12 @@ describe("Notion API client", () => {
         expect(fetchMock.mock.calls[0][1]?.redirect).toBe("error");
     });
 
-    it("uses the environment fallback but rejects missing tokens and incompatible versions", async () => {
+    it("uses the environment fallback but rejects missing tokens", async () => {
         vi.stubEnv("NOTION_INTEGRATION_TOKEN", "environment-token");
         http.request.mockResolvedValue({ data: page() });
         await new NotionClient(config({})).getPage("page");
         expect(new Headers(fetchMock.mock.calls[0][1]?.headers).get("authorization")).toBe("Bearer environment-token");
         expect(() => new NotionClient(config({ integration_token: "" }))).toThrow(/integration_token/);
-        expect(() => new NotionClient(config({ integration_token: "test", notion_version: "2022-06-28" }))).toThrow(/2025-09-03/);
     });
 
     it("collects database pages and preserves filters and sorts across cursors", async () => {
