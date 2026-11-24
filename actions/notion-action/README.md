@@ -20,6 +20,7 @@ Create a Notion internal integration with read, insert and update content capabi
 | Project configuration | Type | Meaning |
 | --- | --- | --- |
 | `integration_token` | TEXT | Internal integration bearer token. If absent, uses `NOTION_INTEGRATION_TOKEN` from the process environment. An explicitly empty token is rejected. |
+| `poll_interval_seconds` | NUMBER, optional | How often the triggers of this project check Notion. Minimum 10 seconds; defaults to `NOTION_POLL_INTERVAL_MS` of the action process (60 seconds). |
 
 Tokens are resolved per project, not cached globally, and are never put in exported module defaults. The environment fallback is shared by all projects that omit their own token.
 
@@ -88,7 +89,7 @@ Supported block builder types: `paragraph`, `heading_1`, `heading_2`, `heading_3
 
 Hercules registers each class as a RuntimeEvent **and** its matching Event definition. The poller reads Aquila's flow settings and each flow's project configuration. It calls `action.fire(flowId, page)` only for the matching flow; it does not broadcast to every flow of that event type.
 
-- Polling runs immediately after connection and then every `NOTION_POLL_INTERVAL_MS` (default 60 seconds, minimum 10 seconds), without overlapping poll cycles. After a flow establishes its baseline, one extra poll follows after 10 seconds so a first change shows up quickly. Each poll is one Notion API request per watched flow, so keep the interval and the number of flows within Notion's rate limit (about three requests per second per integration). API calls and flow acknowledgements can make a cycle take longer.
+- Polling runs immediately after connection. Each flow is then polled every `poll_interval_seconds` of its project (minimum 10 seconds), falling back to `NOTION_POLL_INTERVAL_MS` of the action process (default 60 seconds); a base timer checks every 10 seconds which flows are due. Poll cycles do not overlap. After a flow establishes its baseline, one extra poll follows after 10 seconds so a first change shows up quickly. Changing the interval keeps the baseline. Each poll is one Notion API request per watched flow, so keep intervals and the number of flows per integration within Notion's rate limit (about three requests per second). API calls and flow acknowledgements can make a cycle take longer.
 - Notion rounds `created_time` down to the minute; item-created watches therefore count pages from the start of the activation minute.
 - The first successful, fully paginated query establishes a baseline and emits no historical pages. Created detects newly observed pages whose creation time is at or after watch activation; moving an old page into a database is not a creation event.
 - Updated detects increasing `last_edited_time`. A newly observed page that has already been edited can also trigger it. A new, unedited page is handled by Created.

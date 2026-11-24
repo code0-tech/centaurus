@@ -26,7 +26,7 @@ import { NotionSetPropertyFunction } from "./functions/utils/notionSetPropertyFu
 import { NotionDatabaseItemCreated } from "./events/notionDatabaseItemCreated.js"
 import { NotionDatabaseItemUpdated } from "./events/notionDatabaseItemUpdated.js"
 import { NotionPagePropertyChanged } from "./events/notionPagePropertyChanged.js"
-import { NotionPoller, pollIntervalFromEnv } from "./polling.js"
+import { NotionPoller, POLL_INTERVAL_CONFIG, pollIntervalFromEnv } from "./polling.js"
 
 export const action = new Action(
     process.env.HERCULES_ACTION_ID ?? "notion-action",
@@ -43,6 +43,20 @@ export const action = new Action(
             name: [{ code: "en-US", content: "Integration token" }],
             description: [{ code: "en-US", content: "Internal integration bearer token. Falls back to NOTION_INTEGRATION_TOKEN in the action process." }],
             linkedDataTypes: ["TEXT"],
+        },
+        {
+            identifier: POLL_INTERVAL_CONFIG,
+            type: "NUMBER",
+            optional: true,
+            name: [{ code: "en-US", content: "Poll interval (seconds)" }],
+            description: [
+                {
+                    code: "en-US",
+                    content:
+                        "How often the triggers check Notion for changes. Minimum 10 seconds; defaults to 60 seconds (or NOTION_POLL_INTERVAL_MS in the action process). Each check is one Notion API request per trigger, and Notion allows about three requests per second per integration.",
+                },
+            ],
+            linkedDataTypes: ["NUMBER"],
         },
     ]
 )

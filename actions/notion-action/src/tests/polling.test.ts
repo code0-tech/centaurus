@@ -18,15 +18,16 @@ function flow(type = "NotionDatabaseItemCreated", flowId = 1n, projectId = 1n, d
     });
 }
 
-function setup(type?: string) {
+function setup(type?: string, options: { realClock?: boolean; values?: Record<string, string | number> } = {}) {
     const action = new Action("notion-test", "1.0.0", "localhost:50051", "code0-tech", "simple:notion", "", []);
-    action.configs.set(1n, config());
+    action.configs.set(1n, config(options.values));
     action.flows.set(1n, flow(type));
     const fire = vi.spyOn(action, "fire").mockResolvedValue(null);
     const errors = vi.fn();
     const log = vi.fn();
     let now = new Date("2026-09-14T10:00:00.000Z");
-    const poller = new NotionPoller(action, 60_000, errors, () => now, log);
+    // Timer tests need a running clock (faked by vi.useFakeTimers) for the per-flow schedule.
+    const poller = new NotionPoller(action, 60_000, errors, options.realClock ? () => new Date() : () => now, log);
     return { action, fire, errors, log, poller, setTime: (time: string) => { now = new Date(time); } };
 }
 
@@ -230,35 +231,70 @@ describe("Notion polling", () => {
 
     it("starts one timer and removes listeners and stops requests on shutdown", async () => {
         vi.useFakeTimers();
-        const { action, poller } = setup();
+        const { action, poller } = setup(undefined, { realClock: true });
         http.request.mockResolvedValue({ data: list([]) });
         poller.start();
         poller.start();
-        // Baseline, the follow-up after 10s, then the regular 60s interval.
+        // Baseline, then the follow-up after 10s; the regular 60s interval is not due yet.
         await vi.advanceTimersByTimeAsync(60_000);
-        expect(http.request).toHaveBeenCalledTimes(3);
+        expect(http.request).toHaveBeenCalledTimes(2);
         expect(action.listenerCount(CodeZeroEvent.flowDeleted)).toBe(1);
         poller.stop();
         await vi.advanceTimersByTimeAsync(120_000);
         await poller.tick();
-        expect(http.request).toHaveBeenCalledTimes(3);
+        expect(http.request).toHaveBeenCalledTimes(2);
         expect(action.listenerCount(CodeZeroEvent.flowDeleted)).toBe(0);
     });
 
     it("polls again 10 seconds after a new baseline, then only on the interval", async () => {
         vi.useFakeTimers();
-        const { poller } = setup();
+        const { poller } = setup(undefined, { realClock: true });
         http.request.mockResolvedValue({ data: list([]) });
         poller.start();
         await vi.advanceTimersByTimeAsync(0);
         expect(http.request).toHaveBeenCalledTimes(1);
         await vi.advanceTimersByTimeAsync(10_000);
         expect(http.request).toHaveBeenCalledTimes(2);
-        // No further follow-up once the baseline exists.
-        await vi.advanceTimersByTimeAsync(40_000);
+        // No further follow-up once the baseline exists; the next poll is 60s after the follow-up.
+        await vi.advanceTimersByTimeAsync(50_000);
         expect(http.request).toHaveBeenCalledTimes(2);
         await vi.advanceTimersByTimeAsync(10_000);
         expect(http.request).toHaveBeenCalledTimes(3);
+        poller.stop();
+    });
+
+    it("uses the project's poll_interval_seconds per flow", async () => {
+        vi.useFakeTimers();
+        const { action, poller } = setup(undefined, { realClock: true, values: { integration_token: "test-token", poll_interval_seconds: 20 } });
+        action.configs.set(2n, config({ integration_token: "other-token" }, 2n));
+        action.flows.set(2n, flow("NotionDatabaseItemCreated", 2n, 2n));
+        http.request.mockResolvedValue({ data: list([]) });
+        poller.start();
+        await vi.advanceTimersByTimeAsync(10_000); // baselines and follow-ups of both flows
+        const afterFollowUps = http.request.mock.calls.length;
+        expect(afterFollowUps).toBe(4);
+        await vi.advanceTimersByTimeAsync(20_000); // project 1 is due every 20s, project 2 every 60s
+        expect(http.request.mock.calls.length - afterFollowUps).toBe(1);
+        await vi.advanceTimersByTimeAsync(40_000);
+        // 70s: project 1 polled at 30s, 50s and 70s; project 2 once at 70s.
+        expect(http.request.mock.calls.length - afterFollowUps).toBe(4);
+        poller.stop();
+    });
+
+    it("falls back for invalid or too small project intervals and keeps the baseline on changes", async () => {
+        vi.useFakeTimers();
+        const { action, poller, log } = setup(undefined, { realClock: true, values: { integration_token: "test-token", poll_interval_seconds: 3 } });
+        http.request.mockResolvedValue({ data: list([]) });
+        poller.start();
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(log.mock.calls.map(([message]) => message)).toContainEqual(expect.stringContaining("poll_interval_seconds 3s is below the minimum; using 10s"));
+        // Changing only the interval must not start a new baseline.
+        action.configs.set(1n, config({ integration_token: "test-token", poll_interval_seconds: "soon" }));
+        action.emit(CodeZeroEvent.moduleUpdated, {} as never);
+        await vi.advanceTimersByTimeAsync(60_000);
+        const messages = log.mock.calls.map(([message]) => message);
+        expect(messages).toContainEqual(expect.stringContaining('ignoring invalid poll_interval_seconds "soon"; using 60s'));
+        expect(messages.filter((message) => message.includes("baseline of"))).toHaveLength(1);
         poller.stop();
     });
 
