@@ -14,13 +14,18 @@ const TICK_EXPRESSION: &str = "0 * * * * *";
 pub async fn run(connected: Connected) {
     let tick_schedule = Schedule::from_str(TICK_EXPRESSION).expect("TICK_EXPRESSION is valid");
 
+    // Build the iterator once: each `next()` advances strictly past the
+    // previous tick. Re-creating it every iteration anchors it to `Utc::now()`,
+    // and since `tokio::time::sleep` can wake a hair before the wall-clock
+    // target, the same tick gets selected twice and the flow runs twice.
+    let mut ticks = tick_schedule.upcoming(Utc);
+
     loop {
-        let now = Utc::now();
-        let Some(next) = tick_schedule.upcoming(Utc).take(1).next() else {
+        let Some(next) = ticks.next() else {
             log::error!("no upcoming cron tick; stopping the scheduler");
             return;
         };
-        if let Ok(until_next) = (next - now).to_std() {
+        if let Ok(until_next) = (next - Utc::now()).to_std() {
             tokio::time::sleep(until_next).await;
         }
 
@@ -115,4 +120,50 @@ fn matches_schedule(flow: &ActionFlow, now: DateTime<Utc>) -> bool {
     );
 
     matches
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The scheduler woke a hair early (e.g. tokio's monotonic timer firing
+    /// just before the wall clock crosses the boundary), so `now` is still a
+    /// few hundred microseconds *before* the tick it just slept for.
+    fn now_just_before(tick: DateTime<Utc>) -> DateTime<Utc> {
+        tick - chrono::Duration::microseconds(500)
+    }
+
+    /// Reproduces the duplicate: re-deriving `upcoming`/`after` from an
+    /// early `now` every loop iteration re-selects the SAME tick, so the flow
+    /// fires twice for one minute.
+    #[test]
+    fn rederiving_from_early_now_repeats_the_tick() {
+        let schedule = Schedule::from_str(TICK_EXPRESSION).unwrap();
+
+        let first = schedule.upcoming(Utc).next().unwrap();
+        // Loop body wakes just before `first`, then rebuilds the iterator.
+        let now = now_just_before(first);
+        let second = schedule.after(&now).next().unwrap();
+
+        assert_eq!(first, second, "old behavior selects the same tick twice");
+    }
+
+    /// The fix: a single long-lived iterator advances strictly past the last
+    /// tick, so an early wakeup cannot re-select it.
+    #[test]
+    fn persistent_iterator_never_repeats_a_tick() {
+        let schedule = Schedule::from_str(TICK_EXPRESSION).unwrap();
+        let mut ticks = schedule.upcoming(Utc);
+
+        let mut prev = ticks.next().unwrap();
+        for _ in 0..5 {
+            // Even if we "wake early" relative to the tick we're about to
+            // process, the next pull is strictly later.
+            let _woke_early = now_just_before(prev);
+            let next = ticks.next().unwrap();
+            assert!(next > prev, "tick {next} must advance past {prev}");
+            assert_eq!((next - prev), chrono::Duration::minutes(1));
+            prev = next;
+        }
+    }
 }
