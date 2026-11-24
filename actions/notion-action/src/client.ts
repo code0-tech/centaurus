@@ -102,11 +102,11 @@ export class NotionClient {
         }
     }
 
-    async createPage(parentDatabaseId: string, properties: NotionProperties, children?: NotionBlock[]) {
+    async createPage(parentDatabaseId: string, properties: NotionProperties, children?: NotionBlock[] | null) {
         this.validateChildren(children);
         const data_source_id = await this.resolveDataSourceId(parentDatabaseId);
         return this.request(() => this.sdk.pages.create({
-            parent: { data_source_id }, properties, ...(children === undefined ? {} : { children }),
+            parent: { data_source_id }, properties, ...(children == null ? {} : { children }),
         }), NotionPageSchema);
     }
 
@@ -144,15 +144,15 @@ export class NotionClient {
         return database.data_sources[0].id;
     }
 
-    async queryDatabase(databaseId: string, filter?: NotionFilter, sorts?: NotionSort[]) {
+    async queryDatabase(databaseId: string, filter?: NotionFilter | null, sorts?: NotionSort[] | null) {
         return this.queryDataSource(await this.resolveDataSourceId(databaseId), filter, sorts);
     }
 
-    queryDataSource(dataSourceId: string, filter?: NotionFilter, sorts?: NotionSort[]) {
+    queryDataSource(dataSourceId: string, filter?: NotionFilter | null, sorts?: NotionSort[] | null) {
         const data_source_id = notionId(dataSourceId);
         return this.paginate((start_cursor) => this.request(() => this.sdk.dataSources.query({
             data_source_id,
-            page_size: 100, ...(filter === undefined ? {} : { filter }), ...(sorts === undefined ? {} : { sorts }),
+            page_size: 100, ...(filter == null ? {} : { filter }), ...(sorts == null ? {} : { sorts }),
             ...(start_cursor ? { start_cursor } : {}),
         }), NotionQueryResultSchema));
     }
@@ -164,13 +164,13 @@ export class NotionClient {
         return this.request(() => this.sdk.blocks.children.append({ block_id, children }), NotionBlockListSchema);
     }
 
-    search(query: string, filter?: NotionSearchFilter) {
+    search(query: string, filter?: NotionSearchFilter | null) {
         return this.paginate((start_cursor) => this.request(() => this.sdk.search({
-            query, page_size: 100, ...(filter === undefined ? {} : { filter }), ...(start_cursor ? { start_cursor } : {}),
+            query, page_size: 100, ...(filter == null ? {} : { filter }), ...(start_cursor ? { start_cursor } : {}),
         }), NotionSearchResultSchema));
     }
 
-    private validateChildren(children?: NotionBlock[]) {
+    private validateChildren(children?: NotionBlock[] | null) {
         if (children && children.length > 100) {
             throw new RuntimeError("NOTION_INVALID_CHILDREN", "A single request supports at most 100 top-level blocks.");
         }

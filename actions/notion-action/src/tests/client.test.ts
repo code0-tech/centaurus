@@ -76,6 +76,19 @@ describe("Notion API client", () => {
         await expect(new NotionClient(config()).search("")).rejects.toMatchObject({ code: "NOTION_INVALID_CURSOR" });
     });
 
+    it("omits optional arguments that a flow passes as null", async () => {
+        const client = new NotionClient(config());
+        http.request.mockResolvedValueOnce({ data: list([page()]) });
+        await client.queryDatabase("db", null, null);
+        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { page_size: 100 } });
+        http.request.mockResolvedValueOnce({ data: list([page()]) });
+        await client.search("Tasks", null);
+        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/search", data: { query: "Tasks", page_size: 100 } });
+        http.request.mockResolvedValueOnce({ data: page() });
+        await client.createPage("db", {}, null);
+        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "db-ds" }, properties: {} } });
+    });
+
     it("validates responses without dropping nested Notion fields", async () => {
         const original = page("page-1", { icon: { type: "emoji", emoji: "🚀" }, properties: { Count: { id: "count", type: "formula", formula: { type: "number", number: 7 } } } });
         http.request.mockResolvedValueOnce({ data: original }).mockResolvedValueOnce({ data: { object: "page" } });

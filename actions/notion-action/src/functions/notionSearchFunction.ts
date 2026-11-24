@@ -11,7 +11,7 @@ import type { NotionSearchFilter } from "../data_types/notionSearchFilter.js";
 @Parameter({ runtimeName: "query", name: [{ code: "en-US", content: "query" }], description: [{ code: "en-US", content: "Title search text; empty text lists all accessible results" }] })
 @Parameter({ runtimeName: "filter", name: [{ code: "en-US", content: "filter" }], description: [{ code: "en-US", content: "Optionally restrict to page or database objects" }] })
 export class NotionSearchFunction {
-    run(context: FunctionContext, query: string, filter?: NotionSearchFilter) {
+    run(context: FunctionContext, query: string, filter?: NotionSearchFilter | null) {
         return new NotionClient(context.matchedConfig).search(query, filter);
     }
 }

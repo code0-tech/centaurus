@@ -12,12 +12,12 @@ import type { NotionRichText } from "../../data_types/notionRichText.js";
 @Parameter({ runtimeName: "bold", name: [{ code: "en-US", content: "Bold" }] })
 @Parameter({ runtimeName: "italic", name: [{ code: "en-US", content: "Italic" }] })
 export class NotionCreateRichTextFunction {
-    run(_context: unknown, content: string, url?: string, bold = false, italic = false): NotionRichText {
+    run(_context: unknown, content: string, url?: string | null, bold?: boolean | null, italic?: boolean | null): NotionRichText {
         if (content.length > 2000) throw new RuntimeError("NOTION_TEXT_TOO_LONG", "One rich-text item supports at most 2000 characters.");
         return {
             type: "text",
-            text: { content, ...(url === undefined ? {} : { link: { url } }) },
-            annotations: { bold, italic },
+            text: { content, ...(url == null ? {} : { link: { url } }) },
+            annotations: { bold: bold ?? false, italic: italic ?? false },
         };
     }
 }

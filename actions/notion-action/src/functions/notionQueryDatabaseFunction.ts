@@ -13,7 +13,7 @@ import type { NotionSort } from "../data_types/notionSort.js";
 @Parameter({ runtimeName: "filter", name: [{ code: "en-US", content: "filter" }], description: [{ code: "en-US", content: "Optional Notion filter, including and/or groups" }] })
 @Parameter({ runtimeName: "sorts", name: [{ code: "en-US", content: "sorts" }], description: [{ code: "en-US", content: "Optional ordered sorting rules" }] })
 export class NotionQueryDatabaseFunction {
-    run(context: FunctionContext, databaseId: string, filter?: NotionFilter, sorts?: NotionSort[]) {
+    run(context: FunctionContext, databaseId: string, filter?: NotionFilter | null, sorts?: NotionSort[] | null) {
         return new NotionClient(context.matchedConfig).queryDatabase(databaseId, filter, sorts);
     }
 }

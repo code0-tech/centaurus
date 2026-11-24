@@ -46,7 +46,7 @@ export const action = new Action(
         {
             identifier: "notion_version", type: "TEXT", optional: true, defaultValue: NOTION_VERSION,
             name: [{ code: "en-US", content: "Notion API version" }],
-            description: [{ code: "en-US", content: "Pinned to 2022-06-28; data-source API versions are not supported by this database-based action." }],
+            description: [{ code: "en-US", content: "Defaults to the pinned 2025-09-03 (data sources API); other versions are rejected." }],
             linkedDataTypes: ["TEXT"],
         },
     ],

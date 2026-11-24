@@ -14,6 +14,10 @@ describe("Notion builders", () => {
         expect(richText.run(null, "Plain").text).not.toHaveProperty("link");
     });
 
+    it("treats null optional arguments from a flow as unset", () => {
+        expect(richText.run(null, "Plain", null, null, null)).toEqual({ type: "text", text: { content: "Plain" }, annotations: { bold: false, italic: false } });
+    });
+
     it.each([
         ["title", "Task", { title: [{ type: "text", text: { content: "Task" } }] }],
         ["rich_text", "Notes", { rich_text: [{ type: "text", text: { content: "Notes" } }] }],
