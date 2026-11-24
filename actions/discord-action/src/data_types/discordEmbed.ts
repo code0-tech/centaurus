@@ -4,34 +4,34 @@ import { z } from "zod";
 export const DiscordEmbedFieldSchema = z.object({
     name: z.string(),
     value: z.string(),
-    inline: z.boolean().optional(),
+    inline: z.boolean().nullish(),
 });
 export type DiscordEmbedFieldType = z.infer<typeof DiscordEmbedFieldSchema>;
 
 export const DiscordEmbedFooterSchema = z.object({
     text: z.string(),
-    iconUrl: z.string().optional(),
+    iconUrl: z.string().nullish(),
 });
 export type DiscordEmbedFooterType = z.infer<typeof DiscordEmbedFooterSchema>;
 
 export const DiscordEmbedAuthorSchema = z.object({
     name: z.string(),
-    url: z.string().optional(),
-    iconUrl: z.string().optional(),
+    url: z.string().nullish(),
+    iconUrl: z.string().nullish(),
 });
 export type DiscordEmbedAuthorType = z.infer<typeof DiscordEmbedAuthorSchema>;
 
 export const DiscordEmbedSchema = z.object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-    url: z.string().optional(),
-    color: z.union([z.number(), z.string()]).optional(),
-    timestamp: z.string().optional(),
-    footer: DiscordEmbedFooterSchema.optional(),
-    imageUrl: z.string().optional(),
-    thumbnailUrl: z.string().optional(),
-    author: DiscordEmbedAuthorSchema.optional(),
-    fields: z.array(DiscordEmbedFieldSchema).optional(),
+    title: z.string().nullish(),
+    description: z.string().nullish(),
+    url: z.string().nullish(),
+    color: z.union([z.number(), z.string()]).nullish(),
+    timestamp: z.string().nullish(),
+    footer: DiscordEmbedFooterSchema.nullish(),
+    imageUrl: z.string().nullish(),
+    thumbnailUrl: z.string().nullish(),
+    author: DiscordEmbedAuthorSchema.nullish(),
+    fields: z.array(DiscordEmbedFieldSchema).nullish(),
 });
 export type DiscordEmbedType = z.infer<typeof DiscordEmbedSchema>;
 

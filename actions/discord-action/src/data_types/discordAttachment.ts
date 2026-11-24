@@ -4,7 +4,7 @@ import { z } from "zod";
 export const DiscordAttachmentSchema = z.object({
     id: z.string(),
     filename: z.string(),
-    contentType: z.string().optional(),
+    contentType: z.string().nullish(),
     size: z.number(),
     url: z.string(),
 });

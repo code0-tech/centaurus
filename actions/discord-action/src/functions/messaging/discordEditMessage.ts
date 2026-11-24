@@ -1,15 +1,21 @@
 import { Description, DisplayIcon, DisplayMessage, Documentation, Identifier, Name, Parameter, Signature } from "@code0-tech/hercules";
 import { getDiscordClient } from "../../client.js";
-import { handleDiscordError, mapDiscordMessage } from "../../helpers.js";
+import { buildMessagePayload, fetchMessage, handleDiscordError, mapDiscordMessage } from "../../helpers.js";
+import { DiscordEmbedType } from "../../data_types/discordEmbed.js";
 import { DiscordMessageType } from "../../data_types/discordMessage.js";
 
 @Identifier("discordEditMessage")
-@Signature("(channelId: string, messageId: string, content: string): DISCORD_MESSAGE")
+@Signature("(botToken: string, channelId: string, messageId: string, content?: string, embed?: DISCORD_EMBED): DISCORD_MESSAGE")
 @Name({ code: "en-US", content: "Edit message" })
 @DisplayIcon("simple:discord")
 @DisplayMessage({ code: "en-US", content: "Edit message" })
 @Documentation({ code: "en-US", content: "Edits a message previously sent by the bot." })
 @Description({ code: "en-US", content: "Edit a message previously sent by the bot." })
+@Parameter({
+    runtimeName: "botToken",
+    name: [{ code: "en-US", content: "Bot token" }],
+    description: [{ code: "en-US", content: "The token of the Discord bot that sent the message." }],
+})
 @Parameter({
     runtimeName: "channelId",
     name: [{ code: "en-US", content: "Channel ID" }],
@@ -23,27 +29,30 @@ import { DiscordMessageType } from "../../data_types/discordMessage.js";
 @Parameter({
     runtimeName: "content",
     name: [{ code: "en-US", content: "Content" }],
-    description: [{ code: "en-US", content: "The new content for the message." }],
+    description: [{ code: "en-US", content: "The new text content of the message." }],
+    optional: true,
+})
+@Parameter({
+    runtimeName: "embed",
+    name: [{ code: "en-US", content: "Embed" }],
+    description: [{ code: "en-US", content: "The new embed of the message." }],
+    optional: true,
 })
 export class DiscordEditMessageFunction {
-    async run(_context: unknown, channelId: string, messageId: string, content: string): Promise<DiscordMessageType> {
+    async run(
+        _context: unknown,
+        botToken: string,
+        channelId: string,
+        messageId: string,
+        content?: string,
+        embed?: DiscordEmbedType
+    ): Promise<DiscordMessageType> {
         try {
-            const client = getDiscordClient();
-            if (!client) throw new Error("Discord client is not initialized.");
+            const client = await getDiscordClient(botToken);
+            const target = await fetchMessage(client, channelId, messageId);
+            const edited = await target.edit(buildMessagePayload(content, embed));
 
-            const channel = await client.channels.fetch(channelId);
-            if (!channel || !channel.isTextBased() || !("messages" in channel)) {
-                throw new Error(`Channel ${channelId} is not a text channel.`);
-            }
-
-            const targetMsg = await channel.messages.fetch(messageId);
-            if (!targetMsg) throw new Error(`Message ${messageId} not found.`);
-
-            const editedMsg = await targetMsg.edit({
-                content: content,
-            });
-
-            return mapDiscordMessage(editedMsg);
+            return mapDiscordMessage(edited);
         } catch (error) {
             return handleDiscordError(error, "ERROR_EDITING_MESSAGE", "Failed to edit Discord message.");
         }

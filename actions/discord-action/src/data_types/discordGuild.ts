@@ -4,7 +4,7 @@ import { z } from "zod";
 export const DiscordGuildSchema = z.object({
     id: z.string(),
     name: z.string(),
-    icon: z.string().optional(),
+    icon: z.string().nullish(),
     ownerId: z.string(),
     memberCount: z.number(),
 });

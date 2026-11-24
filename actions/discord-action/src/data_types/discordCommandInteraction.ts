@@ -10,10 +10,13 @@ export const DiscordCommandOptionSchema = z.object({
 export const DiscordCommandInteractionSchema = z.object({
     id: z.string(),
     commandName: z.string(),
+    // Discord's one-time token for answering this command. It is only valid for
+    // 15 minutes and only for this interaction.
+    interactionToken: z.string(),
     options: z.array(DiscordCommandOptionSchema),
     user: DiscordUserSchema,
     channelId: z.string(),
-    guildId: z.string().optional(),
+    guildId: z.string().nullish(),
 });
 export type DiscordCommandInteractionType = z.infer<typeof DiscordCommandInteractionSchema>;
 

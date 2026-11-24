@@ -15,11 +15,11 @@ export type DiscordChannelTypeType = z.infer<typeof DiscordChannelTypeEnum>;
 
 export const DiscordChannelSchema = z.object({
     id: z.string(),
-    guildId: z.string().optional(),
+    guildId: z.string().nullish(),
     name: z.string(),
     type: DiscordChannelTypeEnum,
-    topic: z.string().optional(),
-    parentId: z.string().optional(),
+    topic: z.string().nullish(),
+    parentId: z.string().nullish(),
 });
 export type DiscordChannelDataType = z.infer<typeof DiscordChannelSchema>;
 

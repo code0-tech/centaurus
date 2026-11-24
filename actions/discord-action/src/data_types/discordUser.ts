@@ -4,8 +4,8 @@ import { z } from "zod";
 export const DiscordUserSchema = z.object({
     id: z.string(),
     username: z.string(),
-    globalName: z.string().optional(),
-    avatar: z.string().optional(),
+    globalName: z.string().nullish(),
+    avatar: z.string().nullish(),
     bot: z.boolean(),
 });
 export type DiscordUserType = z.infer<typeof DiscordUserSchema>;

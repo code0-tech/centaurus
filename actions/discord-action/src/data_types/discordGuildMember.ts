@@ -4,9 +4,9 @@ import { DiscordUserSchema } from "./discordUser.js";
 
 export const DiscordGuildMemberSchema = z.object({
     user: DiscordUserSchema,
-    nickname: z.string().optional(),
+    nickname: z.string().nullish(),
     roles: z.array(z.string()),
-    joinedAt: z.string().optional(),
+    joinedAt: z.string().nullish(),
     guildId: z.string(),
 });
 export type DiscordGuildMemberType = z.infer<typeof DiscordGuildMemberSchema>;

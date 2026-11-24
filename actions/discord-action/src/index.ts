@@ -1,8 +1,6 @@
 import "reflect-metadata";
 import { Action, CodeZeroEvent } from "@code0-tech/hercules";
 
-import { initDiscordClient } from "./client.js";
-
 import {
     DiscordEmbedField,
     DiscordEmbedFooter,
@@ -34,8 +32,11 @@ import { DiscordMemberJoined } from "./events/discordMemberJoined.js";
 import { DiscordMemberLeft } from "./events/discordMemberLeft.js";
 import { DiscordSlashCommandInvoked } from "./events/discordSlashCommandInvoked.js";
 
+// The action holds no credentials of its own: every function and every event
+// takes the bot token it works with as its first parameter, so one running
+// action serves as many Discord bots as its flows use.
 const action = new Action(
-    process.env.ACTION_ID ?? "testing-action",
+    process.env.ACTION_ID ?? "discord-action",
     process.env.VERSION ?? "1.0.0",
     process.env.AQUILA_URL ?? "127.0.0.1:8081",
     "code0-tech",
@@ -91,17 +92,6 @@ action.on(CodeZeroEvent.error, (error: Error) => {
 
 action.connect(process.env.AUTH_TOKEN ?? "your_auth_token_here").catch((err: Error) => {
     action.emit(CodeZeroEvent.error, err);
-});
-
-initDiscordClient(process.env.DISCORD_BOT_TOKEN ?? "your_discord_bot_token_here", (err) => {
-    action.emit(CodeZeroEvent.error, err);
-}).catch((err: Error) => {
-    action.emit(CodeZeroEvent.error, err);
-});
-
-action.on(CodeZeroEvent.moduleUpdated, (message: any) => {
-    console.dir(message, { depth: null });
-    console.dir(action.configs.values(), { depth: null });
 });
 
 export { action };
