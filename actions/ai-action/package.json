@@ -20,7 +20,8 @@
     "@langchain/mistralai": "^1.0.0",
     "@langchain/ollama": "^1.0.0",
     "@langchain/openai": "^1.6.2",
-    "langchain": "^1.5.16"
+    "langchain": "^1.5.16",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

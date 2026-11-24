@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@code0-tech/hercules": "^1.9.0",
-    "twilio": "^5.0.0"
+    "twilio": "^5.0.0",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
