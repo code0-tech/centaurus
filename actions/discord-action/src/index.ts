@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import { Action, CodeZeroEvent } from "@code0-tech/hercules";
 
+import { startEventBridge } from "./eventBridge.js";
+
 import {
     DiscordEmbedField,
     DiscordEmbedFooter,
@@ -95,6 +97,8 @@ action.registerRuntimeEventClass(DiscordReactionAdded);
 action.registerRuntimeEventClass(DiscordMemberJoined);
 action.registerRuntimeEventClass(DiscordMemberLeft);
 action.registerRuntimeEventClass(DiscordSlashCommandInvoked);
+
+startEventBridge(action);
 
 action.on(CodeZeroEvent.connected, () => {
     console.log("Connected to aquila");
