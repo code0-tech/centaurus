@@ -1,7 +1,7 @@
 {
   "name": "shopify",
   "identifier": "shopify-action",
-  "description": "",
+  "description": "Shopify integration: react to order, fulfillment, and refund webhook events from a Shopify store.",
   "deployment": {
     "docker": {
       "image": "ghcr.io/code0-tech/centaurus/ci-builds/shopify-action"

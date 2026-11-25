@@ -1,0 +1,10 @@
+{
+  "name": "github",
+  "identifier": "github-action",
+  "description": "GitHub integration: manage issues, pull requests, reviews, comments, labels, milestones, releases, and repositories, and react to GitHub webhook events.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/github-action"
+    }
+  }
+}
