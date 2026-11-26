@@ -1,4 +1,4 @@
-import { RuntimeError, type ProjectConfiguration } from "@code0-tech/hercules";
+import { RuntimeError } from "@code0-tech/hercules";
 import { APIResponseError, Client, isNotionClientError, UnknownHTTPResponseError } from "@notionhq/client";
 import { z } from "zod";
 import { NotionPageSchema } from "./data_types/notionPage.js";
@@ -43,12 +43,12 @@ const DatabaseDataSourcesSchema = z.looseObject({ data_sources: z.array(z.looseO
 // types and our schemas describe rather than being configurable.
 export const NOTION_VERSION = "2025-09-03";
 
-export function notionCredentials(config: Pick<ProjectConfiguration, "findConfig">) {
-    const token = config.findConfig("integration_token") ?? process.env.NOTION_INTEGRATION_TOKEN;
-    if (typeof token !== "string" || !token.trim()) {
-        throw new RuntimeError("NOTION_MISSING_TOKEN", "Configure integration_token or NOTION_INTEGRATION_TOKEN.");
+/** Validates the integration token a function or trigger was given. */
+export function notionCredentials(integrationToken: unknown) {
+    if (typeof integrationToken !== "string" || !integrationToken.trim()) {
+        throw new RuntimeError("NOTION_MISSING_TOKEN", "No Notion integration token given. Set the integration token to your secret_... or ntn_... token.");
     }
-    return { token: token.trim(), version: NOTION_VERSION };
+    return { token: integrationToken.trim(), version: NOTION_VERSION };
 }
 
 /**
@@ -74,8 +74,8 @@ function notionId(id: string): string {
 export class NotionClient {
     private readonly sdk: Client;
 
-    constructor(config: Pick<ProjectConfiguration, "findConfig">) {
-        const { token, version } = notionCredentials(config);
+    constructor(integrationToken: string) {
+        const { token, version } = notionCredentials(integrationToken);
         this.sdk = new Client({
             auth: token,
             notionVersion: version,

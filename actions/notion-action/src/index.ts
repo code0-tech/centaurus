@@ -1,5 +1,6 @@
 import "reflect-metadata"
 import { Action, CodeZeroEvent, isExportMode } from "@code0-tech/hercules"
+import { NotionIntegrationTokenDataType } from "./data_types/notionIntegrationToken.js"
 import { registerNotionSupportingDataTypes } from "./data_types/generatedSupportingDataTypes.js"
 import { NotionRichTextDataType } from "./data_types/notionRichText.js"
 import { NotionPropertyValueDataType } from "./data_types/notionPropertyValue.js"
@@ -26,7 +27,7 @@ import { NotionSetPropertyFunction } from "./functions/utils/notionSetPropertyFu
 import { NotionDatabaseItemCreated } from "./events/notionDatabaseItemCreated.js"
 import { NotionDatabaseItemUpdated } from "./events/notionDatabaseItemUpdated.js"
 import { NotionPagePropertyChanged } from "./events/notionPagePropertyChanged.js"
-import { NotionPoller, POLL_INTERVAL_CONFIG, pollIntervalFromEnv } from "./polling.js"
+import { NotionPoller, pollIntervalFromEnv } from "./polling.js"
 
 export const action = new Action(
     process.env.HERCULES_ACTION_ID ?? "notion-action",
@@ -36,32 +37,11 @@ export const action = new Action(
     "simple:notion",
     "Read and write Notion pages, query databases, and trigger flows by polling for changes.",
     [{ code: "en-US", content: "Notion" }],
-    [
-        {
-            identifier: "integration_token",
-            type: "TEXT",
-            name: [{ code: "en-US", content: "Integration token" }],
-            description: [{ code: "en-US", content: "Internal integration bearer token. Falls back to NOTION_INTEGRATION_TOKEN in the action process." }],
-            linkedDataTypes: ["TEXT"],
-        },
-        {
-            identifier: POLL_INTERVAL_CONFIG,
-            type: "NUMBER",
-            optional: true,
-            name: [{ code: "en-US", content: "Poll interval (seconds)" }],
-            description: [
-                {
-                    code: "en-US",
-                    content:
-                        "How often the triggers check Notion for changes. Minimum 10 seconds; defaults to 60 seconds (or NOTION_POLL_INTERVAL_MS in the action process). Each check is one Notion API request per trigger, and Notion allows about three requests per second per integration.",
-                },
-            ],
-            linkedDataTypes: ["NUMBER"],
-        },
-    ]
+    []
 )
 
 registerNotionSupportingDataTypes(action)
+action.registerDataTypeClass(NotionIntegrationTokenDataType)
 action.registerDataTypeClass(NotionRichTextDataType)
 action.registerDataTypeClass(NotionPropertyValueDataType)
 action.registerDataTypeClass(NotionUserDataType)

@@ -9,7 +9,7 @@ Use Node.js 24 (matching the other action containers).
 ```sh
 npm ci
 cp .example.env .env
-# Fill in the Hercules connection settings and optionally NOTION_INTEGRATION_TOKEN.
+# Fill in the Hercules connection settings.
 npm run dev
 ```
 
@@ -17,12 +17,9 @@ On PowerShell, use `Copy-Item .example.env .env`. The dev/start scripts load `.e
 
 Create a Notion internal integration with read, insert and update content capabilities. Share each target database/page with that integration via **Add connections**. An integration token alone does not grant access to all workspace content.
 
-| Project configuration | Type | Meaning |
-| --- | --- | --- |
-| `integration_token` | TEXT | Internal integration bearer token. If absent, uses `NOTION_INTEGRATION_TOKEN` from the process environment. An explicitly empty token is rejected. |
-| `poll_interval_seconds` | NUMBER, optional | How often the triggers of this project check Notion. Minimum 10 seconds; defaults to `NOTION_POLL_INTERVAL_MS` of the action process (60 seconds). |
+The action has no project configuration. Every function and every trigger takes the integration token it works with as its first parameter, a `NOTION_INTEGRATION_TOKEN` (a single text value), so one running action serves as many Notion integrations as its flows use. Tokens are never cached globally and never put in exported module defaults; an empty token is rejected.
 
-Tokens are resolved per project, not cached globally, and are never put in exported module defaults. The environment fallback is shared by all projects that omit their own token.
+Each trigger additionally has an optional **Poll interval (seconds)** setting (`pollIntervalSeconds`, minimum 10 seconds). Without it the trigger uses `NOTION_POLL_INTERVAL_MS` of the action process (default 60 seconds).
 
 Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (default `localhost:50051`), `HERCULES_ACTION_ID` (default `notion-action`), `HERCULES_SDK_VERSION` (default `1.0.0`, used as the module version like the other actions).
 
@@ -30,13 +27,13 @@ Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (defa
 
 | Identifier | Parameters | Result |
 | --- | --- | --- |
-| `notionCreatePage` | `parentDatabaseId, properties, children?` | `NOTION_PAGE` |
-| `notionUpdatePage` | `pageId, properties` | `NOTION_PAGE` |
-| `notionGetPage` | `pageId` | `NOTION_PAGE` |
-| `notionArchivePage` | `pageId` | `boolean` (Hercules BOOLEAN) |
-| `notionQueryDatabase` | `databaseId, filter?, sorts?` | `NOTION_QUERY_RESULT` |
-| `notionAppendBlocks` | `pageId, children` (block or list) | `NOTION_BLOCK_LIST` |
-| `notionSearch` | `query, filter?` | `NOTION_SEARCH_RESULT` |
+| `notionCreatePage` | `integrationToken, parentDatabaseId, properties, children?` | `NOTION_PAGE` |
+| `notionUpdatePage` | `integrationToken, pageId, properties` | `NOTION_PAGE` |
+| `notionGetPage` | `integrationToken, pageId` | `NOTION_PAGE` |
+| `notionArchivePage` | `integrationToken, pageId` | `boolean` (Hercules BOOLEAN) |
+| `notionQueryDatabase` | `integrationToken, databaseId, filter?, sorts?` | `NOTION_QUERY_RESULT` |
+| `notionAppendBlocks` | `integrationToken, pageId, children` (block or list) | `NOTION_BLOCK_LIST` |
+| `notionSearch` | `integrationToken, query, filter?` | `NOTION_SEARCH_RESULT` |
 | `notionCreateBlock` | `type, text?, checked?, language?, url?, bold?, italic?` | `NOTION_BLOCK` |
 | `notionSetProperty` | `name, type, value, properties?` | `NOTION_PROPERTIES` |
 
@@ -75,7 +72,7 @@ const children = [
 ];
 ```
 
-Supported `notionSetProperty` types: `title`, `rich_text`, `number`, `checkbox`, `select`, `status`, `multi_select`, `date`, `url`, `email`, `phone_number`, `people`, `relation`. Text properties accept text or rich-text arrays; select/status accept a name; multi-select accepts name arrays; people/relation accept ID arrays. Date accepts ISO date text or `{ start, end?, time_zone? }`. Nullable properties accept `null` to clear. Empty arrays clear title/rich-text/multi-select/people/relation. Read-only properties such as formula and rollup cannot be built as write values.
+Supported `notionSetProperty` types: `title`, `rich_text`, `number`, `checkbox`, `select`, `status`, `multi_select`, `date`, `url`, `email`, `phone_number`, `people`, `relation`. Text properties accept text or rich-text arrays; select/status accept a name; multi-select accepts name arrays; people/relation accept ID arrays. Date accepts a `DATE` (e.g. a page timestamp or `std::date::now`), ISO date text or `{ start, end?, time_zone? }` whose `start`/`end` may each be a `DATE` or ISO text. Nullable properties accept `null` to clear. Empty arrays clear title/rich-text/multi-select/people/relation. Read-only properties such as formula and rollup cannot be built as write values.
 
 Supported block builder types: `paragraph`, `heading_1`, `heading_2`, `heading_3`, `bulleted_list_item`, `numbered_list_item`, `to_do`, `quote`, `callout`, `code`, `toggle`, `divider`. `text` is plain text (max 2000 characters) or a list of `NOTION_RICH_TEXT` items and is ignored for `divider`. `url`, `bold` and `italic` link or format the whole plain text (ignored for `code` and for rich-text items, which carry their own formatting; mixed formatting within one block needs rich-text items). `checked` applies to `to_do` (default `false`), `language` to `code` (default `plain text`, must be a language Notion supports). Pass the resulting blocks as `children` to `notionAppendBlocks` or `notionCreatePage`.
 
@@ -83,13 +80,13 @@ Supported block builder types: `paragraph`, `heading_1`, `heading_2`, `heading_3
 
 | Event | Settings | Flow input |
 | --- | --- | --- |
-| `NotionDatabaseItemCreated` | `databaseId` | The new `NOTION_PAGE` |
-| `NotionDatabaseItemUpdated` | `databaseId` | The edited `NOTION_PAGE` |
-| `NotionPagePropertyChanged` | `databaseId, propertyName` | The changed `NOTION_PAGE` |
+| `NotionDatabaseItemCreated` | `integrationToken, databaseId, pollIntervalSeconds?` | The new `NOTION_PAGE` |
+| `NotionDatabaseItemUpdated` | `integrationToken, databaseId, pollIntervalSeconds?` | The edited `NOTION_PAGE` |
+| `NotionPagePropertyChanged` | `integrationToken, databaseId, propertyName, pollIntervalSeconds?` | The changed `NOTION_PAGE` |
 
-Hercules registers each class as a RuntimeEvent **and** its matching Event definition. The poller reads Aquila's flow settings and each flow's project configuration. It calls `action.fire(flowId, page)` only for the matching flow; it does not broadcast to every flow of that event type.
+Hercules registers each class as a RuntimeEvent **and** its matching Event definition. The poller reads the token, database and interval from Aquila's flow settings. It calls `action.fire(flowId, page)` only for the matching flow; it does not broadcast to every flow of that event type.
 
-- Polling runs immediately after connection. Each flow is then polled every `poll_interval_seconds` of its project (minimum 10 seconds), falling back to `NOTION_POLL_INTERVAL_MS` of the action process (default 60 seconds); a base timer checks every 10 seconds which flows are due. Poll cycles do not overlap. After a flow establishes its baseline, one extra poll follows after 10 seconds so a first change shows up quickly. Changing the interval keeps the baseline. Each poll is one Notion API request per watched flow, so keep intervals and the number of flows per integration within Notion's rate limit (about three requests per second). API calls and flow acknowledgements can make a cycle take longer.
+- Polling runs immediately after connection. Each flow is then polled every `pollIntervalSeconds` of its own settings (minimum 10 seconds), falling back to `NOTION_POLL_INTERVAL_MS` of the action process (default 60 seconds); a base timer checks every 10 seconds which flows are due. Poll cycles do not overlap. After a flow establishes its baseline, one extra poll follows after 10 seconds so a first change shows up quickly. Changing the interval keeps the baseline. Each poll is one Notion API request per watched flow, so keep intervals and the number of flows per integration within Notion's rate limit (about three requests per second). API calls and flow acknowledgements can make a cycle take longer.
 - Notion rounds `created_time` down to the minute; item-created watches therefore count pages from the start of the activation minute.
 - The first successful, fully paginated query establishes a baseline and emits no historical pages. Created detects newly observed pages whose creation time is at or after watch activation; moving an old page into a database is not a creation event.
 - Updated detects increasing `last_edited_time`. A newly observed page that has already been edited can also trigger it. A new, unedited page is handled by Created.
@@ -107,7 +104,7 @@ Each data type has its own file under `src/data_types/`: the nine requested resp
 
 `NOTION_BLOCK` and `NOTION_FILTER` are deliberately compact (a block with a `type`, a filter as a plain object) rather than the full generated Notion unions: those unions are 10–14k characters long and make the flow editor's type checker take seconds to minutes per node, so no parameter suggestions (e.g. the block of a previous `notionCreateBlock` node) appear. `notionCreateBlock` still validates its result against the full block request schema, and Notion validates everything else.
 
-Points in time in responses (`created_time`, `last_edited_time`, file `expiry_time`, calendar `start_time`/`end_time`) are `DATE` values, i.e. Unix microseconds (UTC); the client converts Notion's ISO 8601 strings before validating a response. Values flows send to Notion keep Notion's formats: filter timestamps and date property values (`{ start, end, time_zone }`) stay ISO 8601 text, because Notion distinguishes date-only values and time zones that a `DATE` cannot express.
+Points in time in responses (`created_time`, `last_edited_time`, file `expiry_time`, calendar `start_time`/`end_time`) are `DATE` values, i.e. Unix microseconds (UTC); the client converts Notion's ISO 8601 strings before validating a response. Values flows send to Notion keep Notion's formats: filter timestamps and date property values (`{ start, end, time_zone }`) are sent as ISO 8601 text, because Notion distinguishes date-only values and time zones that a `DATE` cannot express. `notionSetProperty` also accepts a `DATE` for a date property and converts it to an ISO 8601 date-time (UTC).
 
 The API is pinned to [`2025-09-03`](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03), where a database is a container of one or more data sources and pages live in a data source. Functions and triggers keep taking a `databaseId`: the action resolves the database's data source (`GET /databases/{id}`) and then queries or creates pages in it. Databases with several data sources are ambiguous and fail with `NOTION_MULTIPLE_DATA_SOURCES`; the triggers resolve the data source once per watch.
 

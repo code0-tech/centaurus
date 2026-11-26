@@ -3,6 +3,17 @@ import { z } from "zod";
 import { NotionRichTextSchema } from "../../data_types/notionRichText.js";
 import { NotionPropertyValueSchema, type NotionPropertyValue } from "../../data_types/notionPropertyValue.js";
 
+/** A DATE (Unix microseconds) or ISO 8601 text, as Notion expects it: ISO 8601 text. */
+const dateInput = z.union([z.string(), z.number()]).transform((value, ctx) => {
+    if (typeof value === "string") return value;
+    const date = new Date(value / 1000);
+    if (!Number.isFinite(value) || Number.isNaN(date.getTime())) {
+        ctx.addIssue({ code: "custom", message: "Invalid date" });
+        return z.NEVER;
+    }
+    return date.toISOString();
+});
+
 const propertyInputs = {
     title: z.union([z.string().max(2000), z.array(NotionRichTextSchema)]),
     rich_text: z.union([z.string().max(2000), z.array(NotionRichTextSchema)]),
@@ -11,7 +22,7 @@ const propertyInputs = {
     select: z.string().nullable(),
     status: z.string().nullable(),
     multi_select: z.array(z.string()),
-    date: z.union([z.string(), z.object({ start: z.string(), end: z.string().nullable().optional(), time_zone: z.string().nullable().optional() })]).nullable(),
+    date: z.union([dateInput, z.object({ start: dateInput, end: dateInput.nullable().optional(), time_zone: z.string().nullable().optional() })]).nullable(),
     url: z.string().nullable(),
     email: z.string().nullable(),
     phone_number: z.string().nullable(),
@@ -23,10 +34,10 @@ export const PROPERTY_TYPES = Object.keys(propertyInputs) as (keyof typeof prope
 
 /** The writable property types as a signature type, so the flow editor offers them as a selection. */
 export const PROPERTY_TYPE_SIGNATURE = PROPERTY_TYPES.map((type) => `"${type}"`).join(" | ");
-export const PROPERTY_VALUE_SIGNATURE = "string | number | boolean | string[] | NOTION_RICH_TEXT[] | { start: string; end?: string; time_zone?: string } | null";
+export const PROPERTY_VALUE_SIGNATURE = "string | number | boolean | DATE | string[] | NOTION_RICH_TEXT[] | { start: DATE | string; end?: DATE | string; time_zone?: string } | null";
 
 export const PROPERTY_TYPE_DESCRIPTION = "Type of the database column: title, rich_text, number, checkbox, select, status, multi_select, date, url, email, phone_number, people or relation.";
-export const PROPERTY_VALUE_DESCRIPTION = "Text for title/rich_text/select/status/url/email/phone_number, a number or boolean for number/checkbox, names for multi_select, user or page IDs for people/relation, ISO date text or { start, end?, time_zone? } for date. null clears nullable properties.";
+export const PROPERTY_VALUE_DESCRIPTION = "Text for title/rich_text/select/status/url/email/phone_number, a number or boolean for number/checkbox, names for multi_select, user or page IDs for people/relation, a DATE, ISO date text or { start, end?, time_zone? } for date. null clears nullable properties.";
 
 /** Builds a writable Notion property value from a column type and a flow value (used by notionSetProperty). */
 export function buildPropertyValue(type: string, value: unknown): NotionPropertyValue {

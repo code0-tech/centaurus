@@ -10,7 +10,7 @@ vi.mock("@code0-tech/hercules", async (importOriginal) => {
 describe("Hercules registration", () => {
     it("builds a module with all functions, data types and matching runtime events", () => {
         expect(action.runtimeFunctions.size).toBe(9);
-        expect(action.dataTypes.size).toBe(13 + supportingSchemaNames.length);
+        expect(action.dataTypes.size).toBe(14 + supportingSchemaNames.length);
         expect(action.events.size).toBe(3);
         expect(action.runtimeEvents.size).toBe(3);
         for (const event of action.events.values()) {
@@ -20,8 +20,21 @@ describe("Hercules registration", () => {
             expect(event.signature).toContain("NOTION_PAGE");
         }
         const propertyEvent = action.events.get("NotionPagePropertyChanged");
-        expect(propertyEvent?.settings?.map((setting) => setting.identifier).sort()).toEqual(["databaseId", "propertyName"]);
+        expect(propertyEvent?.settings?.map((setting) => setting.identifier).sort()).toEqual(["databaseId", "integrationToken", "pollIntervalSeconds", "propertyName"]);
         expect(() => action.buildModule()).not.toThrow();
+    });
+
+    it("takes the integration token per function and trigger instead of a module configuration", () => {
+        expect(action.dataTypes.get("NOTION_INTEGRATION_TOKEN")!.type).toBe("string");
+        for (const fn of action.runtimeFunctions.values()) {
+            if (fn.runtimeName === "notionCreateBlock" || fn.runtimeName === "notionSetProperty") continue;
+            expect(fn.signature).toMatch(/^\(integrationToken: NOTION_INTEGRATION_TOKEN, /);
+        }
+        for (const event of action.events.values()) {
+            expect(event.signature).toMatch(/^\(integrationToken: NOTION_INTEGRATION_TOKEN, /);
+            expect(event.settings?.find((setting) => setting.identifier === "pollIntervalSeconds")?.optional).toBe(true);
+        }
+        expect(action.buildModule().configurations ?? []).toHaveLength(0);
     });
 
     it("types response timestamps as DATE but keeps request timestamps as text", () => {

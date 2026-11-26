@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NotionClient, withNotionDates } from "../client.js";
-import { config, list, page, parsed } from "./fixtures.js";
+import { list, page, parsed, TOKEN } from "./fixtures.js";
 import { mockDataSources, mockNotionHttp } from "./httpMock.js";
 
 const http = vi.hoisted(() => ({ request: vi.fn() }));
@@ -29,10 +29,10 @@ describe("Notion timestamps", () => {
 });
 
 describe("Notion API client", () => {
-    it("uses isolated project credentials and the pinned header", async () => {
+    it("uses the given integration token and the pinned header", async () => {
         http.request.mockResolvedValue({ data: page() });
-        await new NotionClient(config()).getPage("page");
-        await new NotionClient(config({ integration_token: "other-token" })).getPage("page");
+        await new NotionClient(TOKEN).getPage("page");
+        await new NotionClient("other-token").getPage("page");
         const first = new Headers(fetchMock.mock.calls[0][1]?.headers);
         const second = new Headers(fetchMock.mock.calls[1][1]?.headers);
         expect(first.get("authorization")).toBe("Bearer test-token");
@@ -41,19 +41,16 @@ describe("Notion API client", () => {
         expect(fetchMock.mock.calls[0][1]?.redirect).toBe("error");
     });
 
-    it("uses the environment fallback but rejects missing tokens", async () => {
-        vi.stubEnv("NOTION_INTEGRATION_TOKEN", "environment-token");
-        http.request.mockResolvedValue({ data: page() });
-        await new NotionClient(config({})).getPage("page");
-        expect(new Headers(fetchMock.mock.calls[0][1]?.headers).get("authorization")).toBe("Bearer environment-token");
-        expect(() => new NotionClient(config({ integration_token: "" }))).toThrow(/integration_token/);
+    it("rejects a missing integration token", () => {
+        expect(() => new NotionClient("")).toThrow(/integration token/);
+        expect(() => new NotionClient(" ")).toThrow(/integration token/);
     });
 
     it("collects database pages and preserves filters and sorts across cursors", async () => {
         http.request.mockResolvedValueOnce({ data: list([page()], "cursor-2") }).mockResolvedValueOnce({ data: list([page("page-2")]) });
         const filter = { property: "Done", checkbox: { equals: false } };
         const sorts = [{ timestamp: "last_edited_time", direction: "ascending" }] as const;
-        const result = await new NotionClient(config()).queryDatabase("db/1", filter, [...sorts]);
+        const result = await new NotionClient(TOKEN).queryDatabase("db/1", filter, [...sorts]);
         expect(result.results).toHaveLength(2);
         expect(result).toMatchObject({ has_more: false, next_cursor: null });
         expect(http.request).toHaveBeenNthCalledWith(2, { method: "POST", url: "/data_sources/db%2F1-ds/query", data: { page_size: 100, filter, sorts, start_cursor: "cursor-2" } });
@@ -63,20 +60,20 @@ describe("Notion API client", () => {
     it("paginates search even when an intermediate page has no results", async () => {
         http.request.mockResolvedValueOnce({ data: list([], "cursor-2") }).mockResolvedValueOnce({ data: list([page()]) });
         const filter = { property: "object", value: "page" } as const;
-        expect((await new NotionClient(config()).search("Tasks", filter)).results).toHaveLength(1);
+        expect((await new NotionClient(TOKEN).search("Tasks", filter)).results).toHaveLength(1);
         expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/search", data: { query: "Tasks", filter, page_size: 100, start_cursor: "cursor-2" } });
     });
 
     it("rejects looping or missing pagination cursors", async () => {
         http.request.mockResolvedValue({ data: list([], "same") });
-        await expect(new NotionClient(config()).queryDatabase("db")).rejects.toMatchObject({ code: "NOTION_INVALID_CURSOR" });
+        await expect(new NotionClient(TOKEN).queryDatabase("db")).rejects.toMatchObject({ code: "NOTION_INVALID_CURSOR" });
         expect(http.request).toHaveBeenCalledTimes(2);
         http.request.mockResolvedValue({ data: { ...list([]), has_more: true } });
-        await expect(new NotionClient(config()).search("")).rejects.toMatchObject({ code: "NOTION_INVALID_CURSOR" });
+        await expect(new NotionClient(TOKEN).search("")).rejects.toMatchObject({ code: "NOTION_INVALID_CURSOR" });
     });
 
     it("omits optional arguments that a flow passes as null", async () => {
-        const client = new NotionClient(config());
+        const client = new NotionClient(TOKEN);
         http.request.mockResolvedValueOnce({ data: list([page()]) });
         await client.queryDatabase("db", null, null);
         expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { page_size: 100 } });
@@ -89,7 +86,7 @@ describe("Notion API client", () => {
     });
 
     it("accepts a single block where a list of blocks is expected", async () => {
-        const client = new NotionClient(config());
+        const client = new NotionClient(TOKEN);
         const block = { type: "paragraph" as const, paragraph: { rich_text: [] } };
         http.request.mockResolvedValueOnce({ data: page() });
         await client.createPage("db", {}, block);
@@ -102,13 +99,13 @@ describe("Notion API client", () => {
     it("validates responses without dropping nested Notion fields", async () => {
         const original = page("page-1", { icon: { type: "emoji", emoji: "🚀" }, properties: { Count: { id: "count", type: "formula", formula: { type: "number", number: 7 } } } });
         http.request.mockResolvedValueOnce({ data: original }).mockResolvedValueOnce({ data: { object: "page" } });
-        const client = new NotionClient(config());
+        const client = new NotionClient(TOKEN);
         expect(await client.getPage("page-1")).toEqual(parsed(original));
         await expect(client.getPage("page-2")).rejects.toMatchObject({ code: "NOTION_INVALID_RESPONSE" });
     });
 
     it("rejects invalid block counts and empty IDs before issuing requests", async () => {
-        const client = new NotionClient(config());
+        const client = new NotionClient(TOKEN);
         expect(() => client.appendBlocks("page", [])).toThrow();
         expect(() => client.appendBlocks("page", Array.from({ length: 101 }, () => ({ type: "paragraph" as const, paragraph: { rich_text: [] } })))).toThrow();
         await expect(client.createPage("db", {}, Array.from({ length: 101 }, () => ({ type: "paragraph" as const, paragraph: { rich_text: [] } })))).rejects.toThrow();
@@ -118,7 +115,7 @@ describe("Notion API client", () => {
     });
 
     it("rejects databases without exactly one data source before querying or writing", async () => {
-        const client = new NotionClient(config());
+        const client = new NotionClient(TOKEN);
         mockDataSources.resolve = () => ["ds-1", "ds-2"];
         await expect(client.queryDatabase("db")).rejects.toMatchObject({ code: "NOTION_MULTIPLE_DATA_SOURCES" });
         await expect(client.createPage("db", {})).rejects.toMatchObject({ code: "NOTION_MULTIPLE_DATA_SOURCES" });
@@ -131,13 +128,13 @@ describe("Notion API client", () => {
         vi.useFakeTimers();
         const error = { status: 429, headers: { "retry-after": "2" }, data: { object: "error", status: 429, code: "rate_limited", message: "Rate limited" } };
         http.request.mockResolvedValueOnce(error).mockResolvedValueOnce({ data: page() });
-        const request = new NotionClient(config()).getPage("page");
+        const request = new NotionClient(TOKEN).getPage("page");
         await vi.advanceTimersByTimeAsync(1999);
         expect(http.request).toHaveBeenCalledTimes(1);
         await vi.advanceTimersByTimeAsync(1);
         await expect(request).resolves.toMatchObject({ id: "page-1" });
         http.request.mockResolvedValue(error);
-        const rejected = expect(new NotionClient(config()).getPage("page")).rejects.toMatchObject({ code: "NOTION_HTTP_429" });
+        const rejected = expect(new NotionClient(TOKEN).getPage("page")).rejects.toMatchObject({ code: "NOTION_HTTP_429" });
         await vi.runAllTimersAsync();
         await rejected;
         expect(http.request).toHaveBeenCalledTimes(5);
@@ -146,7 +143,7 @@ describe("Notion API client", () => {
     it("does not retry writes on ambiguous network failures or disclose credentials", async () => {
         http.request.mockRejectedValue(new Error("Bearer secret-token"));
         let failure: unknown;
-        try { await new NotionClient(config()).createPage("db", {}); } catch (error) { failure = error; }
+        try { await new NotionClient(TOKEN).createPage("db", {}); } catch (error) { failure = error; }
         expect(failure).toMatchObject({ code: "NOTION_NETWORK_ERROR" });
         expect(JSON.stringify(failure)).not.toContain("secret-token");
         expect(http.request).toHaveBeenCalledTimes(1);

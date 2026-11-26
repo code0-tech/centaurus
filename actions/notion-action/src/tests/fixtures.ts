@@ -5,7 +5,10 @@ import type { NotionPage } from "../data_types/notionPage.js";
 /** A page as the Notion API sends it: timestamps are ISO 8601 strings. */
 type ApiPage = Omit<NotionPage, "created_time" | "last_edited_time"> & { created_time: string; last_edited_time: string };
 
-export function config(values: Record<string, string | number> = { integration_token: "test-token" }, projectId = 1n): ProjectConfiguration {
+/** The integration token the tests call Notion with. */
+export const TOKEN = "test-token";
+
+export function config(values: Record<string, string | number> = {}, projectId = 1n): ProjectConfiguration {
     return { projectId, configValues: Object.entries(values).map(([identifier, value]) => ({ identifier, value })), findConfig: (key) => values[key] };
 }
 

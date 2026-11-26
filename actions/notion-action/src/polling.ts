@@ -29,7 +29,7 @@ const FOLLOW_UP_DELAY_MS = 10_000
 const MINUTE_MS = 60_000
 // Timers drift by a few milliseconds; a flow counts as due slightly early.
 const SCHEDULE_TOLERANCE_MS = 1_000
-export const POLL_INTERVAL_CONFIG = "poll_interval_seconds"
+export const POLL_INTERVAL_SETTING = "pollIntervalSeconds"
 
 /** Reads the action-wide default NOTION_POLL_INTERVAL_MS; invalid or too small values fall back to a safe interval. */
 export function pollIntervalFromEnv(value = process.env.NOTION_POLL_INTERVAL_MS, warn: (message: string) => void = console.warn): number {
@@ -46,16 +46,20 @@ export function pollIntervalFromEnv(value = process.env.NOTION_POLL_INTERVAL_MS,
     return interval
 }
 
-function setting(flow: ActionFlow, name: string): string {
+function rawSetting(flow: ActionFlow, name: string): unknown {
     const encoded = flow.settings.find((entry) => entry.flowSettingId === name)?.value
-    const value = encoded ? toAllowedValue(encoded) : undefined
+    return encoded ? toAllowedValue(encoded) : undefined
+}
+
+function setting(flow: ActionFlow, name: string): string {
+    const value = rawSetting(flow, name)
     if (typeof value !== "string" || !value.trim()) {
         throw new RuntimeError("NOTION_INVALID_SETTING", `Flow ${flow.flowId} requires ${name}.`)
     }
     return value.trim()
 }
 
-/** In-memory checkpoints, isolated per flow and credential set. */
+/** In-memory checkpoints, isolated per flow and integration token. */
 export class NotionPoller {
     private readonly states = new Map<bigint, WatchState>()
     // When each flow was last polled and whether its follow-up poll is pending.
@@ -68,7 +72,7 @@ export class NotionPoller {
 
     constructor(
         private readonly action: Action,
-        /** Default interval for projects without a poll_interval_seconds configuration. */
+        /** Default interval for flows without a pollIntervalSeconds setting. */
         private readonly intervalMs = DEFAULT_POLL_INTERVAL_MS,
         private readonly reportError: (error: unknown) => void = (error) =>
             console.error("Notion polling:", error instanceof Error ? error.message : "Poll failed"),
@@ -83,7 +87,6 @@ export class NotionPoller {
         this.stopped = false
         this.action.on(CodeZeroEvent.flowDeleted, this.forget)
         this.action.on(CodeZeroEvent.flowUpdated, this.flowUpdated)
-        this.action.on(CodeZeroEvent.moduleUpdated, this.configUpdated)
         // A short base timer; each flow is only polled once its own interval is due.
         this.timer = setInterval(this.pollDue, Math.min(MIN_POLL_INTERVAL_MS, this.intervalMs))
         this.pollDue()
@@ -95,7 +98,6 @@ export class NotionPoller {
         this.timer = undefined
         this.action.off(CodeZeroEvent.flowDeleted, this.forget)
         this.action.off(CodeZeroEvent.flowUpdated, this.flowUpdated)
-        this.action.off(CodeZeroEvent.moduleUpdated, this.configUpdated)
         this.states.clear()
         this.schedule.clear()
         this.announced.clear()
@@ -124,24 +126,20 @@ export class NotionPoller {
         if (state && !this.isCurrent(flow.flowId, state)) this.reset(flow.flowId)
         this.pollDue()
     }
-    private readonly configUpdated = () => {
-        for (const [id, state] of this.states) if (!this.isCurrent(id, state)) this.reset(id)
-        this.pollDue()
-    }
 
-    /** The project's poll_interval_seconds, falling back to the action-wide default. */
+    /** The flow's pollIntervalSeconds setting, falling back to the action-wide default. */
     private interval(flow: ActionFlow): number {
-        const raw = this.action.configs.get(flow.projectId)?.findConfig(POLL_INTERVAL_CONFIG)
+        const raw = rawSetting(flow, POLL_INTERVAL_SETTING)
         if (raw === undefined || raw === null || raw === "") return this.intervalMs
         const seconds = Number(raw)
         if (!Number.isFinite(seconds) || seconds <= 0) {
-            this.info(`interval:${flow.projectId}:${String(raw)}`,
-                `Project ${flow.projectId}: ignoring invalid ${POLL_INTERVAL_CONFIG} "${String(raw)}"; using ${this.intervalMs / 1000}s.`)
+            this.info(`interval:${flow.flowId}:${String(raw)}`,
+                `Flow ${flow.flowId}: ignoring invalid ${POLL_INTERVAL_SETTING} "${String(raw)}"; using ${this.intervalMs / 1000}s.`)
             return this.intervalMs
         }
         if (seconds * 1000 < MIN_POLL_INTERVAL_MS) {
-            this.info(`interval:${flow.projectId}:${seconds}`,
-                `Project ${flow.projectId}: ${POLL_INTERVAL_CONFIG} ${seconds}s is below the minimum; using ${MIN_POLL_INTERVAL_MS / 1000}s.`)
+            this.info(`interval:${flow.flowId}:${seconds}`,
+                `Flow ${flow.flowId}: ${POLL_INTERVAL_SETTING} ${seconds}s is below the minimum; using ${MIN_POLL_INTERVAL_MS / 1000}s.`)
             return MIN_POLL_INTERVAL_MS
         }
         return seconds * 1000
@@ -187,26 +185,20 @@ export class NotionPoller {
     }
 
     private watch(flow: ActionFlow) {
-        const config = this.action.configs.get(flow.projectId)
-        if (!config) {
-            // Aquila may deliver flows before project configuration.
-            this.info(`config:${flow.flowId}:${flow.projectId}`, `Flow ${flow.flowId} waits for the configuration of project ${flow.projectId}.`)
-            return undefined
-        }
+        const { token } = notionCredentials(rawSetting(flow, "integrationToken"))
         const databaseId = setting(flow, "databaseId")
         const propertyName = flow.type === "NotionPagePropertyChanged" ? setting(flow, "propertyName") : undefined
-        const credentials = notionCredentials(config)
         const fingerprint = createHash("sha256")
-            .update(JSON.stringify([flow.projectId.toString(), flow.type, databaseId, propertyName, credentials]))
+            .update(JSON.stringify([flow.projectId.toString(), flow.type, databaseId, propertyName, token]))
             .digest("hex")
-        return { config, databaseId, propertyName, fingerprint }
+        return { token, databaseId, propertyName, fingerprint }
     }
 
     private isCurrent(id: bigint, state: WatchState): boolean {
         if (this.stopped || this.states.get(id) !== state) return false
         const flow = this.action.flows.get(id)
         try {
-            return !!flow && this.watch(flow)?.fingerprint === state.fingerprint
+            return !!flow && this.watch(flow).fingerprint === state.fingerprint
         } catch {
             return false
         }
@@ -215,7 +207,6 @@ export class NotionPoller {
     /** Polls one flow; returns true when this poll established a new baseline. */
     private async poll(flow: ActionFlow): Promise<boolean> {
         const watch = this.watch(flow)
-        if (!watch) return false
         const now = this.now()
         const startedAt = now.toISOString()
         let state = this.states.get(flow.flowId)
@@ -229,7 +220,7 @@ export class NotionPoller {
         const baseline = state.cursor === undefined
         // Inclusive cursor plus overlap covers equal timestamps and short indexing delays.
         const since = state.cursor ? new Date(Date.parse(state.cursor) - 60_000).toISOString() : undefined
-        const client = new NotionClient(watch.config)
+        const client = new NotionClient(watch.token)
         const dataSourceId = state.dataSourceId ?? (await client.resolveDataSourceId(watch.databaseId))
         if (!this.isCurrent(flow.flowId, state)) return false
         state.dataSourceId = dataSourceId

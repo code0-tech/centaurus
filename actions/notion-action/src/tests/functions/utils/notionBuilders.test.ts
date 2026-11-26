@@ -80,6 +80,9 @@ describe("Notion builders", () => {
         ["multi_select", ["A", "B"], { multi_select: [{ name: "A" }, { name: "B" }] }],
         ["date", "2026-09-14", { date: { start: "2026-09-14" } }],
         ["date", { start: "2026-09-14", end: "2026-09-15" }, { date: { start: "2026-09-14", end: "2026-09-15" } }],
+        // DATE values (Unix microseconds), e.g. a page timestamp or std::date::now.
+        ["date", 1788256800000000, { date: { start: "2026-09-01T10:00:00.000Z" } }],
+        ["date", { start: 1788256800000000, end: "2026-09-02" }, { date: { start: "2026-09-01T10:00:00.000Z", end: "2026-09-02" } }],
         ["people", ["user-1"], { people: [{ id: "user-1" }] }],
         ["relation", ["page-1"], { relation: [{ id: "page-1" }] }],
         ["url", "https://example.com", { url: "https://example.com" }],

@@ -3,25 +3,29 @@ import { Action, CodeZeroEvent } from "@code0-tech/hercules";
 import { ActionFlow } from "@code0-tech/tucana/aquila";
 import { constructValue } from "@code0-tech/tucana/helpers";
 import { NotionPoller, pollIntervalFromEnv } from "../polling.js";
-import { config, list, page, parsed } from "./fixtures.js";
+import { list, page, parsed, TOKEN } from "./fixtures.js";
 import { mockNotionHttp } from "./httpMock.js";
 
 const http = vi.hoisted(() => ({ request: vi.fn() }));
 
-function flow(type = "NotionDatabaseItemCreated", flowId = 1n, projectId = 1n, databaseId = "db-1", propertyName = "Done") {
+interface Watch { token?: string | null; interval?: number | string }
+
+function flow(type = "NotionDatabaseItemCreated", flowId = 1n, projectId = 1n, databaseId = "db-1", propertyName = "Done", watch: Watch = {}) {
+    const token = watch.token === undefined ? TOKEN : watch.token;
     return ActionFlow.create({
         flowId, projectId, type,
         settings: [
+            ...(token === null ? [] : [{ flowSettingId: "integrationToken", value: constructValue(token) }]),
             { flowSettingId: "databaseId", value: constructValue(databaseId) },
             ...(type === "NotionPagePropertyChanged" ? [{ flowSettingId: "propertyName", value: constructValue(propertyName) }] : []),
+            ...(watch.interval === undefined ? [] : [{ flowSettingId: "pollIntervalSeconds", value: constructValue(watch.interval) }]),
         ],
     });
 }
 
-function setup(type?: string, options: { realClock?: boolean; values?: Record<string, string | number> } = {}) {
+function setup(type?: string, options: { realClock?: boolean; watch?: Watch } = {}) {
     const action = new Action("notion-test", "1.0.0", "localhost:50051", "code0-tech", "simple:notion", "", []);
-    action.configs.set(1n, config(options.values));
-    action.flows.set(1n, flow(type));
+    action.flows.set(1n, flow(type, 1n, 1n, "db-1", "Done", options.watch));
     const fire = vi.spyOn(action, "fire").mockResolvedValue(null);
     const errors = vi.fn();
     const log = vi.fn();
@@ -129,8 +133,7 @@ describe("Notion polling", () => {
 
     it("isolates flows and projects with the same page IDs", async () => {
         const { action, poller, fire } = setup("NotionDatabaseItemUpdated");
-        action.configs.set(2n, config({ integration_token: "project-2" }, 2n));
-        action.flows.set(2n, flow("NotionDatabaseItemUpdated", 2n, 2n, "db-2"));
+        action.flows.set(2n, flow("NotionDatabaseItemUpdated", 2n, 2n, "db-2", "Done", { token: "project-2" }));
         http.request.mockResolvedValue({ data: list([page()]) });
         await poller.tick();
         const edited = page("page-1", { last_edited_time: "2026-09-14T10:00:30.000Z" });
@@ -153,15 +156,15 @@ describe("Notion polling", () => {
     });
 
     it("logs the watch state once per flow instead of skipping silently", async () => {
-        const { action, poller, log } = setup("NotionPagePropertyChanged");
+        const { action, poller, log, errors } = setup("NotionPagePropertyChanged");
         action.flows.set(2n, flow("SomethingElse", 2n));
-        action.flows.set(3n, flow("NotionDatabaseItemCreated", 3n, 9n));
+        action.flows.set(3n, flow("NotionDatabaseItemCreated", 3n, 1n, "db-1", "Done", { token: null }));
         http.request.mockResolvedValue({ data: list([page()]) });
         await poller.tick();
         await poller.tick();
         const messages = log.mock.calls.map(([message]) => message);
         expect(messages.filter((message) => message.includes("Ignoring flow 2 of type SomethingElse"))).toHaveLength(1);
-        expect(messages.filter((message) => message.includes("Flow 3 waits for the configuration of project 9"))).toHaveLength(1);
+        expect(errors).toHaveBeenCalledWith(expect.objectContaining({ code: "NOTION_MISSING_TOKEN" }));
         expect(messages.filter((message) => message.includes("Flow 1 (NotionPagePropertyChanged) watches database db-1, property \"Done\"; baseline of 1 page(s)"))).toHaveLength(1);
     });
 
@@ -173,12 +176,11 @@ describe("Notion polling", () => {
         expect(log.mock.calls.map(([message]) => message)).toContainEqual(expect.stringMatching(/has no property "done"\. Available: .*Done/));
     });
 
-    it("waits for configuration and ignores unrelated events", async () => {
-        const { action, poller } = setup();
-        action.configs.clear();
+    it("skips flows without an integration token and ignores unrelated events", async () => {
+        const { action, poller, errors } = setup(undefined, { watch: { token: null } });
         await poller.tick();
         expect(http.request).not.toHaveBeenCalled();
-        action.configs.set(1n, config());
+        expect(errors).toHaveBeenCalledWith(expect.objectContaining({ code: "NOTION_MISSING_TOKEN" }));
         action.flows.set(1n, flow("Unrelated"));
         await poller.tick();
         expect(http.request).not.toHaveBeenCalled();
@@ -188,7 +190,7 @@ describe("Notion polling", () => {
         const { action, poller, fire } = setup("NotionDatabaseItemUpdated");
         http.request.mockResolvedValueOnce({ data: list([page()]) });
         await poller.tick();
-        action.configs.set(1n, config({ integration_token: "rotated" }));
+        action.flows.set(1n, flow("NotionDatabaseItemUpdated", 1n, 1n, "db-1", "Done", { token: "rotated" }));
         http.request.mockResolvedValue({ data: list([page("page-1", { last_edited_time: "2026-09-14T10:00:30.000Z" })]) });
         await poller.tick();
         expect(fire).not.toHaveBeenCalled();
@@ -263,37 +265,37 @@ describe("Notion polling", () => {
         poller.stop();
     });
 
-    it("uses the project's poll_interval_seconds per flow", async () => {
+    it("uses each flow's own pollIntervalSeconds", async () => {
         vi.useFakeTimers();
-        const { action, poller } = setup(undefined, { realClock: true, values: { integration_token: "test-token", poll_interval_seconds: 20 } });
-        action.configs.set(2n, config({ integration_token: "other-token" }, 2n));
-        action.flows.set(2n, flow("NotionDatabaseItemCreated", 2n, 2n));
+        const { action, poller } = setup(undefined, { realClock: true, watch: { interval: 20 } });
+        action.flows.set(2n, flow("NotionDatabaseItemCreated", 2n, 2n, "db-1", "Done", { token: "other-token" }));
         http.request.mockResolvedValue({ data: list([]) });
         poller.start();
         await vi.advanceTimersByTimeAsync(10_000); // baselines and follow-ups of both flows
         const afterFollowUps = http.request.mock.calls.length;
         expect(afterFollowUps).toBe(4);
-        await vi.advanceTimersByTimeAsync(20_000); // project 1 is due every 20s, project 2 every 60s
+        await vi.advanceTimersByTimeAsync(20_000); // flow 1 is due every 20s, flow 2 every 60s
         expect(http.request.mock.calls.length - afterFollowUps).toBe(1);
         await vi.advanceTimersByTimeAsync(40_000);
-        // 70s: project 1 polled at 30s, 50s and 70s; project 2 once at 70s.
+        // 70s: flow 1 polled at 30s, 50s and 70s; flow 2 once at 70s.
         expect(http.request.mock.calls.length - afterFollowUps).toBe(4);
         poller.stop();
     });
 
-    it("falls back for invalid or too small project intervals and keeps the baseline on changes", async () => {
+    it("falls back for invalid or too small intervals and keeps the baseline on changes", async () => {
         vi.useFakeTimers();
-        const { action, poller, log } = setup(undefined, { realClock: true, values: { integration_token: "test-token", poll_interval_seconds: 3 } });
+        const { action, poller, log } = setup(undefined, { realClock: true, watch: { interval: 3 } });
         http.request.mockResolvedValue({ data: list([]) });
         poller.start();
         await vi.advanceTimersByTimeAsync(30_000);
-        expect(log.mock.calls.map(([message]) => message)).toContainEqual(expect.stringContaining("poll_interval_seconds 3s is below the minimum; using 10s"));
+        expect(log.mock.calls.map(([message]) => message)).toContainEqual(expect.stringContaining("pollIntervalSeconds 3s is below the minimum; using 10s"));
         // Changing only the interval must not start a new baseline.
-        action.configs.set(1n, config({ integration_token: "test-token", poll_interval_seconds: "soon" }));
-        action.emit(CodeZeroEvent.moduleUpdated, {} as never);
+        const updated = flow(undefined, 1n, 1n, "db-1", "Done", { interval: "soon" });
+        action.flows.set(1n, updated);
+        action.emit(CodeZeroEvent.flowUpdated, updated);
         await vi.advanceTimersByTimeAsync(60_000);
         const messages = log.mock.calls.map(([message]) => message);
-        expect(messages).toContainEqual(expect.stringContaining('ignoring invalid poll_interval_seconds "soon"; using 60s'));
+        expect(messages).toContainEqual(expect.stringContaining('ignoring invalid pollIntervalSeconds "soon"; using 60s'));
         expect(messages.filter((message) => message.includes("baseline of"))).toHaveLength(1);
         poller.stop();
     });
