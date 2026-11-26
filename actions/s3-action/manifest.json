@@ -1,0 +1,10 @@
+{
+  "name": "s3",
+  "identifier": "s3-action",
+  "description": "S3 / object storage integration: upload, download, list, and delete objects, and generate presigned URLs, against AWS S3 or any S3-compatible provider.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/s3-action"
+    }
+  }
+}
