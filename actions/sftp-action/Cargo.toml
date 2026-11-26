@@ -1,0 +1,18 @@
+[package]
+name = "sftp-action"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+hercules-sdk = { version = "1.5.0" }
+tucana = { version = "0.0.82", default-features = false }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "io-util"] }
+tokio-stream = "0.1"
+russh = "0.65"
+russh-sftp = "3"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+schemars = "1"
+log = "0.4"
+env_logger = "0.11"

@@ -1,0 +1,10 @@
+{
+  "name": "sftp",
+  "identifier": "sftp-action",
+  "description": "Read, write, delete and list files on a remote SFTP server.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/sftp-action"
+    }
+  }
+}
