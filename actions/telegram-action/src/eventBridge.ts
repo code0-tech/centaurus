@@ -63,10 +63,15 @@ export class EventBridge {
     ) {}
 
     start(): Server {
-        const schedule = () => this.scheduleSync();
-        this.action.on(CodeZeroEvent.connected, schedule);
-        this.action.on(CodeZeroEvent.flowUpdated, schedule);
-        this.action.on(CodeZeroEvent.flowDeleted, schedule);
+        this.action.on(CodeZeroEvent.connected, () => this.scheduleSync());
+        this.action.on(CodeZeroEvent.flowUpdated, (flow: ActionFlow) => {
+            console.log(`Flow ${flow.flowId} (${flow.type}) was updated.`);
+            this.scheduleSync();
+        });
+        this.action.on(CodeZeroEvent.flowDeleted, (flowId: bigint) => {
+            console.log(`Flow ${flowId} was deleted.`);
+            this.scheduleSync();
+        });
 
         const server = createServer((request, response) => void this.handle(request, response));
         server.listen(this.config.port, this.config.host, () => {
@@ -115,10 +120,15 @@ export class EventBridge {
                     allowed_updates: ALLOWED_UPDATES,
                 });
                 this.registered.set(webhook.token, fingerprint);
+                console.log(
+                    `Registered the Telegram webhook of bot ${botId(webhook.token)} for ${webhook.flows.length} flow(s).`
+                );
             } catch (error: any) {
                 failed = true;
                 this.registered.delete(webhook.token);
-                console.error(`Could not register the Telegram webhook: ${error?.message ?? String(error)}`);
+                console.error(
+                    `Could not register the Telegram webhook of bot ${botId(webhook.token)}: ${errorText(error)}`
+                );
             }
         }
 
@@ -129,9 +139,10 @@ export class EventBridge {
             try {
                 await callTelegram(token, "deleteWebhook");
                 this.registered.delete(token);
+                console.log(`Removed the Telegram webhook of bot ${botId(token)} - no event flow uses it anymore.`);
             } catch (error: any) {
                 failed = true;
-                console.error(`Could not remove the Telegram webhook: ${error?.message ?? String(error)}`);
+                console.error(`Could not remove the Telegram webhook of bot ${botId(token)}: ${errorText(error)}`);
             }
         }
 
@@ -170,6 +181,15 @@ export class EventBridge {
 
         await fireFlows(this.action, match.flows, payload);
     }
+}
+
+/** The numeric bot id in front of the token's colon - public, unlike the token. */
+function botId(token: string): string {
+    return token.split(":")[0];
+}
+
+function errorText(error: any): string {
+    return error?.description ?? error?.message ?? String(error);
 }
 
 function readBody(request: IncomingMessage): Promise<string> {

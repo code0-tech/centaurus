@@ -62,7 +62,12 @@ export function planWebhooks(flows: ActionFlow[], warn: (message: string) => voi
 
         const token = readSetting(flow, "botToken");
         if (!token) {
-            warn(`Flow ${flow.flowId} listens for ${flow.type} without a bot token - skipping it.`);
+            const received = flow.settings
+                .map((setting) => `${setting.flowSettingId}=${setting.value?.kind.oneofKind ?? "empty"}`)
+                .join(", ");
+            warn(
+                `Flow ${flow.flowId} listens for ${flow.type} without a bot token - skipping it (settings: ${received || "none"}).`
+            );
             continue;
         }
 
