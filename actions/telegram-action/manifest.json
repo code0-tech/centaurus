@@ -1,0 +1,10 @@
+{
+  "name": "telegram",
+  "identifier": "telegram-action",
+  "description": "Telegram bot integration: send and manage messages, answer inline buttons, and react to incoming bot updates.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/telegram-action"
+    }
+  }
+}
