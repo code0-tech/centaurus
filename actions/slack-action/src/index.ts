@@ -1,7 +1,7 @@
 import "reflect-metadata"
 import { Action, CodeZeroEvent, isExportMode } from "@code0-tech/hercules"
 
-import { SlackAppCredentialsDataType, SlackBotCredentialsDataType } from "./data_types/slackCredentials.js"
+import { SlackAppTokenDataType, SlackBotTokenDataType } from "./data_types/slackTokens.js"
 import { SlackEmbedDataType, SlackEmbedFieldDataType } from "./data_types/slackEmbed.js"
 import { SlackChannelDataType } from "./data_types/slackChannel.js"
 import { SlackFileDataType } from "./data_types/slackFile.js"
@@ -44,8 +44,8 @@ const action = new Action(
     []
 )
 
-action.registerDataTypeClass(SlackBotCredentialsDataType)
-action.registerDataTypeClass(SlackAppCredentialsDataType)
+action.registerDataTypeClass(SlackBotTokenDataType)
+action.registerDataTypeClass(SlackAppTokenDataType)
 action.registerDataTypeClass(SlackEmbedFieldDataType)
 action.registerDataTypeClass(SlackEmbedDataType)
 action.registerDataTypeClass(SlackChannelDataType)
