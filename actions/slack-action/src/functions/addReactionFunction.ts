@@ -9,7 +9,11 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getSlackClient, toRuntimeError } from "../helpers.js";
+import { getSlackClient, toRuntimeError, toSlackTs } from "../helpers.js";
+import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
+import { MESSAGE_TS_DESCRIPTION } from "./messageParameters.js";
+
+const CODE = "SLACK_ADD_REACTION_FAILED";
 
 /**
  * Slack expects the bare emoji name, but users naturally type it the way Slack
@@ -22,15 +26,16 @@ export function normalizeEmojiName(emoji: string): string {
 
 @Identifier("slackAddReaction")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(channelId: TEXT, ts: TEXT, emoji: TEXT): BOOLEAN")
+@Signature("(botToken: SLACK_BOT_TOKEN, channelId: TEXT, ts: DATE, emoji: TEXT): BOOLEAN")
 @Name({ code: "en-US", content: "Add reaction" })
-@DisplayMessage({ code: "en-US", content: "Add :${emoji}: to Slack message ${ts}" })
+@DisplayMessage({ code: "en-US", content: "Add :${emoji}: to Slack message" })
 @Documentation({
     code: "en-US",
     content:
         "Adds an emoji reaction to a message via `reactions.add` and returns whether Slack accepted it.\nGive the emoji name, e.g. `white_check_mark`; surrounding colons (`:white_check_mark:`) are stripped. Unicode emoji such as 👍 are not accepted by Slack. Use it to acknowledge a message a flow has handled.",
 })
 @Description({ code: "en-US", content: "Adds an emoji reaction to a Slack message." })
+@Parameter(BOT_TOKEN_PARAMETER)
 @Parameter({
     runtimeName: "channelId",
     name: [{ code: "en-US", content: "Channel ID" }],
@@ -38,8 +43,8 @@ export function normalizeEmojiName(emoji: string): string {
 })
 @Parameter({
     runtimeName: "ts",
-    name: [{ code: "en-US", content: "Message timestamp" }],
-    description: [{ code: "en-US", content: "The `ts` of the message to react to. Format: Unix seconds with a dot before the last six digits, e.g. 1712345678.123456. From a message link (…/p1712345678123456) insert the dot before the last six digits." }],
+    name: [{ code: "en-US", content: "Message" }],
+    description: [{ code: "en-US", content: `The ts of the message to react to. ${MESSAGE_TS_DESCRIPTION}` }],
 })
 @Parameter({
     runtimeName: "emoji",
@@ -47,13 +52,23 @@ export function normalizeEmojiName(emoji: string): string {
     description: [{ code: "en-US", content: "The emoji name, e.g. white_check_mark or :white_check_mark:." }],
 })
 export class AddReactionFunction {
-    async run(context: FunctionContext, channelId: string, ts: string, emoji: string): Promise<boolean> {
-        const client = getSlackClient(context);
+    async run(
+        _context: FunctionContext,
+        botToken: SlackBotToken,
+        channelId: string,
+        ts: number,
+        emoji: string
+    ): Promise<boolean> {
+        const client = getSlackClient(botToken);
         try {
-            const result = await client.reactions.add({ channel: channelId, timestamp: ts, name: normalizeEmojiName(emoji) });
+            const result = await client.reactions.add({
+                channel: channelId,
+                timestamp: toSlackTs(ts, CODE),
+                name: normalizeEmojiName(emoji),
+            });
             return result.ok === true;
         } catch (error) {
-            throw toRuntimeError("SLACK_ADD_REACTION_FAILED", error);
+            throw toRuntimeError(CODE, error);
         }
     }
 }

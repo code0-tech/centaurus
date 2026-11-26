@@ -8,7 +8,18 @@ import { Description, DisplayIcon, DisplayMessage, EventSetting, Identifier, Nam
 @Name({ code: "en-US", content: "Slack slash command" })
 @Description({ code: "en-US", content: "Triggered when one of the app's slash commands is invoked. Reply by posting to the payload's response_url or with slackPostMessage." })
 @DisplayMessage({ code: "en-US", content: "Slack slash command" })
-@Signature("(channelId?: TEXT): SlackSlashCommandPayload")
+@Signature("(appToken: SLACK_APP_TOKEN, channelId?: TEXT): SlackSlashCommandPayload")
+@EventSetting({
+    identifier: "appToken",
+    name: [{ code: "en-US", content: "Slack app token" }],
+    description: [
+        {
+            code: "en-US",
+            content: "The app token (xapp-...) of the Slack app to listen with. Events arrive over Socket Mode.",
+        },
+    ],
+    linkedDataTypeIdentifiers: ["SLACK_APP_TOKEN"],
+})
 @EventSetting({
     identifier: "channelId",
     name: [{ code: "en-US", content: "Channel ID" }],

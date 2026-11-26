@@ -1,4 +1,4 @@
-import { Identifier, Name, Schema } from "@code0-tech/hercules";
+import { dateSchema, Identifier, Name, Schema } from "@code0-tech/hercules";
 import { z } from "zod";
 import { slackEventEnvelope } from "./slackEventEnvelope.js";
 
@@ -15,12 +15,12 @@ export const SlackChannelCreatedEventPayloadSchema = slackEventEnvelope(
             .object({
                 id: z.string().describe("The ID of the newly created channel."),
                 name: z.string().nullish().describe("The channel name without the leading #."),
-                created: z.number().nullish().describe("The Unix timestamp at which the channel was created."),
+                created: dateSchema.nullish().describe("When the channel was created."),
                 creator: z.string().nullish().describe("The ID of the user who created the channel."),
                 is_channel: z.boolean().nullish().describe("Whether the conversation is a channel."),
             })
             .describe("The channel that was created."),
-        event_ts: z.string().nullish().describe("The timestamp at which the event was dispatched."),
+        event_ts: dateSchema.nullish().describe("When the event was dispatched."),
     })
 );
 

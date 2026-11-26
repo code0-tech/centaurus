@@ -8,7 +8,18 @@ import { Description, DisplayIcon, DisplayMessage, EventSetting, Identifier, Nam
 @Name({ code: "en-US", content: "Slack reaction added" })
 @Description({ code: "en-US", content: "Triggered when a member adds an emoji reaction to a message or file (reaction_added). Use it to drive approval and reaction-role flows." })
 @DisplayMessage({ code: "en-US", content: "Slack reaction added" })
-@Signature("(channelId?: TEXT, messageTs?: TEXT): SlackReactionAddedEventPayload")
+@Signature("(appToken: SLACK_APP_TOKEN, channelId?: TEXT, messageTs?: TEXT): SlackReactionAddedEventPayload")
+@EventSetting({
+    identifier: "appToken",
+    name: [{ code: "en-US", content: "Slack app token" }],
+    description: [
+        {
+            code: "en-US",
+            content: "The app token (xapp-...) of the Slack app to listen with. Events arrive over Socket Mode.",
+        },
+    ],
+    linkedDataTypeIdentifiers: ["SLACK_APP_TOKEN"],
+})
 @EventSetting({
     identifier: "channelId",
     name: [{ code: "en-US", content: "Channel ID" }],

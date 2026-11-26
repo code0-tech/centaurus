@@ -11,11 +11,12 @@ import {
     Signature,
 } from "@code0-tech/hercules";
 import { getSlackClient, toRuntimeError } from "../helpers.js";
+import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
 import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
 
 @Identifier("slackSetChannelTopic")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(channelId: TEXT, topic: TEXT): SLACK_CHANNEL")
+@Signature("(botToken: SLACK_BOT_TOKEN, channelId: TEXT, topic: TEXT): SLACK_CHANNEL")
 @Name({ code: "en-US", content: "Set channel topic" })
 @DisplayMessage({ code: "en-US", content: "Set topic of Slack channel ${channelId}" })
 @Documentation({
@@ -24,6 +25,7 @@ import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
         "Sets a channel's topic via `conversations.setTopic` and returns the updated channel.\nThe topic is capped at 250 characters and setting it posts a visible notice into the channel.",
 })
 @Description({ code: "en-US", content: "Sets the topic of a Slack channel." })
+@Parameter(BOT_TOKEN_PARAMETER)
 @Parameter({
     runtimeName: "channelId",
     name: [{ code: "en-US", content: "Channel ID" }],
@@ -35,8 +37,8 @@ import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
     description: [{ code: "en-US", content: "The new channel topic. Max 250 characters." }],
 })
 export class SetChannelTopicFunction {
-    async run(context: FunctionContext, channelId: string, topic: string): Promise<SlackChannel> {
-        const client = getSlackClient(context);
+    async run(_context: FunctionContext, botToken: SlackBotToken, channelId: string, topic: string): Promise<SlackChannel> {
+        const client = getSlackClient(botToken);
         try {
             const result = await client.conversations.setTopic({ channel: channelId, topic });
             if (!result.channel) {

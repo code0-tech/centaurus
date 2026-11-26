@@ -1,3 +1,4 @@
+import { dateSchema } from "@code0-tech/hercules";
 import { z } from "zod";
 
 /**
@@ -14,7 +15,7 @@ export const slackEventEnvelope = <T extends z.ZodType>(event: T) =>
         api_app_id: z.string().nullish().describe("The ID of the Slack app the event was delivered to."),
         type: z.string().describe("The envelope type. Always `event_callback` for Events API deliveries."),
         event_id: z.string().nullish().describe("A unique identifier for this delivery, usable for deduplication."),
-        event_time: z.number().nullish().describe("The Unix timestamp at which the event happened."),
+        event_time: dateSchema.nullish().describe("When the event happened."),
         event_context: z.string().nullish().describe("An opaque string identifying the event's subscription context."),
         event,
     });

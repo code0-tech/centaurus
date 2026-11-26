@@ -4,34 +4,39 @@ import { Action, CodeZeroEvent } from "@code0-tech/hercules";
 import type { ActionFlow } from "@code0-tech/tucana/aquila";
 import { constructValue } from "@code0-tech/tucana/helpers";
 import { describe, expect, it, vi } from "vitest";
-import { normalizeMessageTs, routeDelivery, SlackSocketClient, SlackSocketDelivery, SlackSocketManager } from "../src/socketMode.js";
+import {
+    normalizeMessageTs,
+    routeDelivery,
+    SlackSocketClient,
+    SlackSocketDelivery,
+    SlackSocketManager,
+    toFlowPayload,
+} from "../src/socketMode.js";
 
-const flow = (flowId: number, projectId: number, type: string, channelId?: string, messageTs?: string): ActionFlow =>
+const flow = (
+    flowId: number,
+    appToken: string | undefined,
+    type: string,
+    channelId?: string,
+    messageTs?: string
+): ActionFlow =>
     ({
         flowId: BigInt(flowId),
-        projectId: BigInt(projectId),
+        projectId: 1n,
         type,
         settings: [
+            ...(appToken === undefined
+                ? []
+                : [{ flowSettingId: "appToken", value: constructValue(appToken) }]),
             ...(channelId === undefined ? [] : [{ flowSettingId: "channelId", value: constructValue(channelId) }]),
             ...(messageTs === undefined ? [] : [{ flowSettingId: "messageTs", value: constructValue(messageTs) }]),
         ],
     }) as unknown as ActionFlow;
 
-/** Just enough of an Action: configs per project, flows, events and fire. */
-function fakeAction(appTokens: Record<number, string>, flows: ActionFlow[] = []) {
+/** Just enough of an Action: flows, events and fire. */
+function fakeAction(flows: ActionFlow[] = []) {
     const emitter = new EventEmitter();
-    const configs = new Map(
-        Object.entries(appTokens).map(([projectId, appToken]) => [
-            BigInt(projectId),
-            {
-                projectId: BigInt(projectId),
-                configValues: [],
-                findConfig: (identifier: string) => (identifier === "app_token" ? appToken : undefined),
-            },
-        ])
-    );
     const action = {
-        configs,
         flows: new Map(flows.map((entry) => [entry.flowId, entry])),
         on: emitter.on.bind(emitter),
         off: emitter.off.bind(emitter),
@@ -112,25 +117,63 @@ describe("normalizeMessageTs", () => {
     });
 });
 
+describe("toFlowPayload", () => {
+    it("turns the points in time of an Events API delivery into DATE values", () => {
+        expect(
+            toFlowPayload("events_api", {
+                type: "event_callback",
+                event_time: 1712345678,
+                event: { type: "message", channel: "C1", ts: "1712345678.123456", event_ts: "1712345678.123456" },
+            })
+        ).toEqual({
+            type: "event_callback",
+            event_time: 1712345678000000,
+            event: { type: "message", channel: "C1", ts: 1712345678123456, event_ts: 1712345678123456 },
+        });
+    });
+
+    it("converts the reacted message and a created channel", () => {
+        const reaction = toFlowPayload("events_api", {
+            event: { type: "reaction_added", item: { type: "message", channel: "C1", ts: "1712345678.000001" } },
+        }) as { event: { item: { ts: number } } };
+        const created = toFlowPayload("events_api", {
+            event: { type: "channel_created", channel: { id: "C1", created: 1712345678 } },
+        }) as { event: { channel: { created: number } } };
+
+        expect(reaction.event.item.ts).toBe(1712345678000001);
+        expect(created.event.channel.created).toBe(1712345678000000);
+    });
+
+    it("passes a slash command through unchanged", () => {
+        expect(toFlowPayload("slash_commands", { command: "/deploy" })).toEqual({ command: "/deploy" });
+    });
+});
+
 describe("SlackSocketManager", () => {
-    it("opens one connection per project with an app token", () => {
-        const action = fakeAction({ 1: "xapp-one", 2: "", 3: "xapp-three" });
+    it("opens one connection per app token the trigger flows use", () => {
+        const action = fakeAction([
+            flow(1, "xapp-one", "SlackMessagePosted"),
+            flow(2, "xapp-one", "SlackReactionAdded"),
+            flow(3, "xapp-three", "SlackSlashCommand"),
+            flow(4, undefined, "SlackMessagePosted"),
+            flow(5, "xapp-ignored", "SomeOtherFlow"),
+        ]);
         const { created, createClient } = fakeClients();
 
-        new SlackSocketManager(action, createClient).start();
+        new SlackSocketManager(action, createClient, () => undefined).start();
 
         expect(created.map((entry) => entry.appToken)).toEqual(["xapp-one", "xapp-three"]);
         expect(created.every((entry) => vi.mocked(entry.client.start).mock.calls.length === 1)).toBe(true);
     });
 
-    it("replaces and closes connections when the configuration changes", () => {
-        const action = fakeAction({ 1: "xapp-old", 2: "xapp-two" });
+    it("opens and closes connections when the flows change", () => {
+        const action = fakeAction([flow(1, "xapp-old", "SlackMessagePosted"), flow(2, "xapp-two", "SlackMessagePosted")]);
         const { created, createClient } = fakeClients();
         new SlackSocketManager(action, createClient).start();
 
-        action.configs.get(1n)!.findConfig = (identifier: string) => (identifier === "app_token" ? "xapp-new" : undefined);
-        action.configs.delete(2n);
-        action.emit(CodeZeroEvent.moduleUpdated, {});
+        action.flows.set(1n, flow(1, "xapp-new", "SlackMessagePosted"));
+        action.flows.delete(2n);
+        action.emit(CodeZeroEvent.flowUpdated, action.flows.get(1n));
 
         expect(created.map((entry) => entry.appToken)).toEqual(["xapp-old", "xapp-two", "xapp-new"]);
         expect(created[0].client.disconnect).toHaveBeenCalled();
@@ -138,31 +181,34 @@ describe("SlackSocketManager", () => {
         expect(created[2].client.disconnect).not.toHaveBeenCalled();
     });
 
-    it("acknowledges a delivery and fires the matching flows of that project only", async () => {
-        const action = fakeAction({ 1: "xapp-one" }, [
-            flow(10, 1, "SlackMessagePosted"),
-            flow(11, 1, "SlackMessagePosted", "C1"),
-            flow(12, 1, "SlackMessagePosted", "C9"),
-            flow(13, 1, "SlackAppMentioned"),
-            flow(14, 2, "SlackMessagePosted"),
+    it("acknowledges a delivery and fires the matching flows of that app only", async () => {
+        const action = fakeAction([
+            flow(10, "xapp-one", "SlackMessagePosted"),
+            flow(11, "xapp-one", "SlackMessagePosted", "C1"),
+            flow(12, "xapp-one", "SlackMessagePosted", "C9"),
+            flow(13, "xapp-one", "SlackAppMentioned"),
+            flow(14, "xapp-two", "SlackMessagePosted"),
         ]);
         const manager = new SlackSocketManager(action, fakeClients().createClient);
-        const delivery = eventsApi({ type: "message", channel: "C1", text: "hi", ts: "1.2" });
+        const delivery = eventsApi({ type: "message", channel: "C1", text: "hi", ts: "1712345678.123456" });
 
-        await manager.handle(1n, delivery);
+        await manager.handle("xapp-one", delivery);
 
         expect(delivery.ack).toHaveBeenCalledOnce();
         expect(action.fire.mock.calls.map(([flowId]) => flowId)).toEqual([10n, 11n]);
-        expect(action.fire).toHaveBeenCalledWith(10n, delivery.body);
+        expect(action.fire).toHaveBeenCalledWith(10n, {
+            ...delivery.body,
+            event: { ...delivery.body.event, ts: 1712345678123456 },
+        });
     });
 
     it("fires reaction flows only for the selected message", async () => {
-        const action = fakeAction({ 1: "xapp-one" }, [
-            flow(10, 1, "SlackReactionAdded"),
-            flow(11, 1, "SlackReactionAdded", undefined, "https://team.slack.com/archives/C1/p1712345678123456"),
-            flow(12, 1, "SlackReactionAdded", "C1", "1712345678.123456"),
-            flow(13, 1, "SlackReactionAdded", undefined, "1712345678.999999"),
-            flow(14, 1, "SlackReactionAdded", "C9", "1712345678.123456"),
+        const action = fakeAction([
+            flow(10, "xapp-one", "SlackReactionAdded"),
+            flow(11, "xapp-one", "SlackReactionAdded", undefined, "https://team.slack.com/archives/C1/p1712345678123456"),
+            flow(12, "xapp-one", "SlackReactionAdded", "C1", "1712345678.123456"),
+            flow(13, "xapp-one", "SlackReactionAdded", undefined, "1712345678.999999"),
+            flow(14, "xapp-one", "SlackReactionAdded", "C9", "1712345678.123456"),
         ]);
         const manager = new SlackSocketManager(action, fakeClients().createClient);
         const delivery = eventsApi({
@@ -171,27 +217,24 @@ describe("SlackSocketManager", () => {
             item: { type: "message", channel: "C1", ts: "1712345678.123456" },
         });
 
-        await manager.handle(1n, delivery);
+        await manager.handle("xapp-one", delivery);
 
         expect(action.fire.mock.calls.map(([flowId]) => flowId)).toEqual([10n, 11n, 12n]);
     });
 
     it("still acknowledges deliveries no flow is interested in", async () => {
-        const action = fakeAction({ 1: "xapp-one" }, [flow(10, 1, "SlackMessagePosted")]);
+        const action = fakeAction([flow(10, "xapp-one", "SlackMessagePosted")]);
         const manager = new SlackSocketManager(action, fakeClients().createClient);
         const delivery = eventsApi({ type: "message", channel: "C1", bot_id: "B1" });
 
-        await manager.handle(1n, delivery);
+        await manager.handle("xapp-one", delivery);
 
         expect(delivery.ack).toHaveBeenCalledOnce();
         expect(action.fire).not.toHaveBeenCalled();
     });
 
-    it("routes deliveries from a connection to that connection's project", async () => {
-        const action = fakeAction({ 1: "xapp-one", 2: "xapp-two" }, [
-            flow(10, 1, "SlackSlashCommand"),
-            flow(20, 2, "SlackSlashCommand"),
-        ]);
+    it("routes deliveries from a connection to the flows of that app token", async () => {
+        const action = fakeAction([flow(10, "xapp-one", "SlackSlashCommand"), flow(20, "xapp-two", "SlackSlashCommand")]);
         const { created, createClient } = fakeClients();
         new SlackSocketManager(action, createClient).start();
 

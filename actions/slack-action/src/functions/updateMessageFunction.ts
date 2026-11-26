@@ -9,21 +9,26 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getSlackClient, toBlockArgument, toRuntimeError, withoutUndefined } from "../helpers.js";
-import { SlackBlock } from "../data_types/slackBlock.js";
-import { SlackMessage, SlackMessageSchema } from "../data_types/slackMessage.js";
+import { buildMessageContent, getSlackClient, toRuntimeError, toSlackTs } from "../helpers.js";
+import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
+import { SlackEmbed } from "../data_types/slackEmbed.js";
+import { parseSlackMessage, SlackMessage } from "../data_types/slackMessage.js";
+import { EMBED_PARAMETER, MESSAGE_TS_DESCRIPTION, TEXT_PARAMETER } from "./messageParameters.js";
+
+const CODE = "SLACK_UPDATE_MESSAGE_FAILED";
 
 @Identifier("slackUpdateMessage")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(channelId: TEXT, ts: TEXT, text: TEXT, blocks?: LIST<SLACK_BLOCK>): SLACK_MESSAGE")
+@Signature("(botToken: SLACK_BOT_TOKEN, channelId: TEXT, ts: DATE, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE")
 @Name({ code: "en-US", content: "Update message" })
-@DisplayMessage({ code: "en-US", content: "Update Slack message ${ts}" })
+@DisplayMessage({ code: "en-US", content: "Update Slack message in ${channelId}" })
 @Documentation({
     code: "en-US",
     content:
-        "Replaces the content of a message the app posted, via `chat.update`.\nUse it to turn an approval prompt into its outcome, or to keep a long running status message current instead of posting again.",
+        "Replaces the text and embed of a message via `chat.update`.\nA bot token can only update messages the app itself posted. Use it to turn an approval request into its outcome, e.g. after a SlackReactionAdded trigger.",
 })
-@Description({ code: "en-US", content: "Updates an existing Slack message." })
+@Description({ code: "en-US", content: "Updates a Slack message the app posted." })
+@Parameter(BOT_TOKEN_PARAMETER)
 @Parameter({
     runtimeName: "channelId",
     name: [{ code: "en-US", content: "Channel ID" }],
@@ -31,41 +36,30 @@ import { SlackMessage, SlackMessageSchema } from "../data_types/slackMessage.js"
 })
 @Parameter({
     runtimeName: "ts",
-    name: [{ code: "en-US", content: "Message timestamp" }],
-    description: [{ code: "en-US", content: "The `ts` of the message to update. Format: Unix seconds with a dot before the last six digits, e.g. 1712345678.123456. From a message link (…/p1712345678123456) insert the dot before the last six digits." }],
+    name: [{ code: "en-US", content: "Message" }],
+    description: [{ code: "en-US", content: `The ts of the message to update. ${MESSAGE_TS_DESCRIPTION}` }],
 })
-@Parameter({
-    runtimeName: "text",
-    name: [{ code: "en-US", content: "Text" }],
-    description: [{ code: "en-US", content: "The new message text. Replaces the previous text entirely." }],
-})
-@Parameter({
-    runtimeName: "blocks",
-    name: [{ code: "en-US", content: "Blocks" }],
-    description: [{ code: "en-US", content: "The new Block Kit blocks. Replace the previous blocks entirely." }],
-    optional: true,
-})
+@Parameter(TEXT_PARAMETER)
+@Parameter(EMBED_PARAMETER)
 export class UpdateMessageFunction {
     async run(
-        context: FunctionContext,
+        _context: FunctionContext,
+        botToken: SlackBotToken,
         channelId: string,
-        ts: string,
-        text: string,
-        blocks?: SlackBlock[]
+        ts: number,
+        text?: string,
+        embed?: SlackEmbed
     ): Promise<SlackMessage> {
-        const client = getSlackClient(context);
+        const client = getSlackClient(botToken);
         try {
             const result = await client.chat.update({
                 channel: channelId,
-                ts,
-                text,
-                ...toBlockArgument(blocks),
+                ts: toSlackTs(ts, CODE),
+                ...buildMessageContent(CODE, text, embed),
             });
-            return withoutUndefined(
-                SlackMessageSchema.parse({ ...result.message, ok: result.ok, channel: result.channel, ts: result.ts })
-            );
+            return parseSlackMessage(result);
         } catch (error) {
-            throw toRuntimeError("SLACK_UPDATE_MESSAGE_FAILED", error);
+            throw toRuntimeError(CODE, error);
         }
     }
 }

@@ -1,44 +1,35 @@
 import "reflect-metadata";
-import { FunctionContext } from "@code0-tech/hercules";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { SlackMessageSchema } from "../src/data_types/slackMessage.js";
 import { parseSlackChannel } from "../src/data_types/slackChannel.js";
 import { parseSlackFile } from "../src/data_types/slackFile.js";
 import { SlackSlashCommandPayloadSchema } from "../src/data_types/slackSlashCommandPayload.js";
 import { SlackReactionAddedEventPayloadSchema } from "../src/data_types/slackReactionAddedEventPayload.js";
-import { fromUnixSeconds, getSlackClient, toBlockArgument } from "../src/helpers.js";
-import { CreateBlockFunction } from "../src/functions/utils/createBlockFunction.js";
-import { CreateTextSectionFunction } from "../src/functions/utils/createTextSectionFunction.js";
+import { parseSlackMessage } from "../src/data_types/slackMessage.js";
+import {
+    buildMessageContent,
+    embedToBlocks,
+    fromSlackTs,
+    fromUnixSeconds,
+    getSlackClient,
+    resolveUserIds,
+    toSlackTs,
+} from "../src/helpers.js";
 import { normalizeEmojiName } from "../src/functions/addReactionFunction.js";
-
-/** A FunctionContext exposing just the configs the helpers read. */
-const contextWith = (configs: Record<string, string>): FunctionContext =>
-    ({
-        projectId: 1,
-        executionId: "test",
-        matchedConfig: {
-            projectId: 1,
-            configValues: Object.entries(configs).map(
-                ([identifier, value]) => ({ identifier, value }),
-            ),
-            findConfig: (identifier: string) => configs[identifier],
-        },
-        executeFlow: async () => undefined,
-    }) as unknown as FunctionContext;
 
 describe("SlackMessageSchema", () => {
     it("parses a chat.postMessage response", () => {
         const parsed = SlackMessageSchema.parse({
             ok: true,
             channel: "C0EXAMPLE",
-            ts: "1503435956.000247",
+            ts: 1503435956000247,
             text: "Deployment finished",
             bot_id: "B0EXAMPLE",
             type: "message",
         });
 
         expect(parsed.channel).toEqual("C0EXAMPLE");
-        expect(parsed.ts).toEqual("1503435956.000247");
+        expect(parsed.ts).toEqual(1503435956000247);
     });
 });
 
@@ -74,12 +65,17 @@ describe("dates", () => {
 });
 
 describe("getSlackClient", () => {
-    it("builds a client for each project's own bot token", () => {
-        const first = getSlackClient(contextWith({ bot_token: "xoxb-first" }));
-        const second = getSlackClient(contextWith({ bot_token: "xoxb-second" }));
+    it("builds a client for the given bot token", () => {
+        const first = getSlackClient("xoxb-first");
+        const second = getSlackClient(" xoxb-second ");
 
         expect(first.token).toEqual("xoxb-first");
         expect(second.token).toEqual("xoxb-second");
+    });
+
+    it("rejects a missing bot token", () => {
+        expect(() => getSlackClient(" ")).toThrow(/bot token/);
+        expect(() => getSlackClient(undefined)).toThrow(/bot token/);
     });
 });
 
@@ -97,14 +93,14 @@ describe("SlackReactionAddedEventPayloadSchema", () => {
                 item: {
                     type: "message",
                     channel: "C0EXAMPLE",
-                    ts: "1360782400.498405",
+                    ts: 1360782400498405,
                 },
-                event_ts: "1360782804.083113",
+                event_ts: 1360782804083113,
             },
         });
 
         expect(parsed.event.reaction).toEqual("white_check_mark");
-        expect(parsed.event.item.ts).toEqual("1360782400.498405");
+        expect(parsed.event.item.ts).toEqual(1360782400498405);
     });
 
     it("rejects a delivery without the inner event", () => {
@@ -138,75 +134,6 @@ describe("SlackSlashCommandPayloadSchema", () => {
     });
 });
 
-describe("block builders", () => {
-    it("builds a mrkdwn section by default and a plain_text one on request", () => {
-        const builder = new CreateTextSectionFunction();
-
-        expect(builder.run(undefined, "*bold*")).toEqual({
-            type: "section",
-            block_id: undefined,
-            text: { type: "mrkdwn", text: "*bold*" },
-        });
-        expect(builder.run(undefined, "*not bold*", false).text?.type).toEqual(
-            "plain_text",
-        );
-    });
-
-    it("renders header text literally and omits unused arguments", () => {
-        const builder = new CreateBlockFunction();
-
-        expect(builder.run(undefined, "header", "Release 1.2.0").text).toEqual({
-            type: "plain_text",
-            text: "Release 1.2.0",
-        });
-        expect(builder.run(undefined, "divider")).toEqual({
-            type: "divider",
-            block_id: undefined,
-            text: undefined,
-            fields: undefined,
-            image_url: undefined,
-            alt_text: undefined,
-        });
-    });
-
-    it("turns field texts into text objects", () => {
-        const block = new CreateBlockFunction().run(
-            undefined,
-            "section",
-            undefined,
-            ["*Env*\nstaging", "*By*\n<@U0E>"],
-        );
-
-        expect(block.fields).toEqual([
-            { type: "mrkdwn", text: "*Env*\nstaging" },
-            { type: "mrkdwn", text: "*By*\n<@U0E>" },
-        ]);
-    });
-
-    it("puts context texts into elements, because context blocks have no text field", () => {
-        const block = new CreateBlockFunction().run(undefined, "context", "Deployed by <@U0E>", ["2 min ago"]);
-
-        expect(block).toEqual({
-            type: "context",
-            block_id: undefined,
-            elements: [
-                { type: "mrkdwn", text: "Deployed by <@U0E>" },
-                { type: "mrkdwn", text: "2 min ago" },
-            ],
-        });
-    });
-});
-
-describe("toBlockArgument", () => {
-    it("omits blocks entirely when there are none, because Slack rejects an empty array", () => {
-        expect(toBlockArgument()).toEqual({});
-        expect(toBlockArgument([])).toEqual({});
-        expect(toBlockArgument([{ type: "divider" }])).toEqual({
-            blocks: [{ type: "divider" }],
-        });
-    });
-});
-
 describe("normalizeEmojiName", () => {
     it("strips the surrounding colons and whitespace Slack users type", () => {
         expect(normalizeEmojiName(":thumbsup:")).toBe("thumbsup");
@@ -218,57 +145,145 @@ describe("normalizeEmojiName", () => {
     });
 });
 
-describe("function results", () => {
-    // Hercules rejects undefined values when serializing a result ("Unsupported value type: undefined").
-    const hasUndefined = (value: unknown): boolean =>
-        value === undefined ||
-        (value !== null && typeof value === "object" && Object.values(value).some(hasUndefined));
 
-    it("contain no undefined values", () => {
-        expect(hasUndefined(new CreateBlockFunction().run(undefined, "divider"))).toBe(false);
-        expect(hasUndefined(new CreateBlockFunction().run(undefined, "context", "hi"))).toBe(false);
-        expect(hasUndefined(new CreateTextSectionFunction().run(undefined, "hi"))).toBe(false);
-        expect(hasUndefined(parseSlackChannel({ id: "C1", topic: {} } as never))).toBe(false);
-        expect(hasUndefined(parseSlackFile({ id: "F1" } as never))).toBe(false);
+describe("message timestamps as DATE", () => {
+    it("converts a Slack ts into DATE microseconds and back without losing precision", () => {
+        expect(fromSlackTs("1712345678.123456")).toBe(1712345678123456);
+        expect(fromSlackTs("1712345678.000001")).toBe(1712345678000001);
+        expect(fromSlackTs("1712345678")).toBe(1712345678000000);
+        expect(fromSlackTs(undefined)).toBeUndefined();
+        expect(fromSlackTs("not a ts")).toBeUndefined();
+
+        expect(toSlackTs(1712345678123456, "X")).toBe("1712345678.123456");
+        expect(toSlackTs(1712345678000001, "X")).toBe("1712345678.000001");
+        expect(toSlackTs(fromSlackTs("1503435956.000247")!, "X")).toBe("1503435956.000247");
+    });
+
+    it("also accepts a timestamp or message link as text", () => {
+        expect(toSlackTs("1712345678.123456", "X")).toBe("1712345678.123456");
+        expect(toSlackTs("https://team.slack.com/archives/C1/p1712345678123456", "X")).toBe("1712345678.123456");
+    });
+
+    it("rejects a missing timestamp", () => {
+        expect(() => toSlackTs(undefined, "SLACK_X")).toThrow(/timestamp/);
+        expect(() => toSlackTs(Number.NaN, "SLACK_X")).toThrow(/timestamp/);
+    });
+
+    it("parses a chat.postMessage response into a SLACK_MESSAGE with DATE timestamps", () => {
+        const message = parseSlackMessage({
+            ok: true,
+            channel: "C1",
+            ts: "1503435956.000247",
+            message: { text: "hi", thread_ts: "1503435900.000100", blocks: [{ type: "section" }] } as object,
+        });
+
+        expect(message).toEqual({
+            ok: true,
+            channel: "C1",
+            ts: 1503435956000247,
+            thread_ts: 1503435900000100,
+            text: "hi",
+        });
     });
 });
 
-describe("toBlockArgument null handling", () => {
-    it("drops null fields that unset optional block fields come back as", () => {
+describe("embeds", () => {
+    it("turns every part of an embed into the matching Block Kit block", () => {
         expect(
-            toBlockArgument([
-                { type: "divider", block_id: null, text: null, fields: null },
-                { type: "context", elements: [{ type: "mrkdwn", text: "hi", verbatim: null }] },
-            ])
-        ).toEqual({
-            blocks: [{ type: "divider" }, { type: "context", elements: [{ type: "mrkdwn", text: "hi" }] }],
-        });
+            embedToBlocks({
+                title: "Order shipped",
+                text: "Order *#1001* is on its way.",
+                fields: [
+                    { name: "Carrier", value: "GLS" },
+                    { name: "Tracking", value: "<https://example.com|123>" },
+                ],
+                thumbnailUrl: "https://example.com/logo.png",
+                imageUrl: "https://example.com/map.png",
+                footer: "Sent by code0",
+            })
+        ).toEqual([
+            { type: "header", text: { type: "plain_text", text: "Order shipped", emoji: true } },
+            {
+                type: "section",
+                text: { type: "mrkdwn", text: "Order *#1001* is on its way." },
+                accessory: { type: "image", image_url: "https://example.com/logo.png", alt_text: "Order shipped" },
+            },
+            {
+                type: "section",
+                fields: [
+                    { type: "mrkdwn", text: "*Carrier*\nGLS" },
+                    { type: "mrkdwn", text: "*Tracking*\n<https://example.com|123>" },
+                ],
+            },
+            { type: "image", image_url: "https://example.com/map.png", alt_text: "Order shipped" },
+            { type: "context", elements: [{ type: "mrkdwn", text: "Sent by code0" }] },
+        ]);
+    });
+
+    it("skips unset parts, including null values from the flow", () => {
+        expect(embedToBlocks({ title: null, text: " ", fields: null, footer: "Footer" })).toEqual([
+            { type: "context", elements: [{ type: "mrkdwn", text: "Footer" }] },
+        ]);
+        expect(embedToBlocks(undefined)).toEqual([]);
+    });
+
+    it("splits more than 10 fields over several sections, as Slack allows 10 per section", () => {
+        const fields = Array.from({ length: 12 }, (_, index) => ({ name: `F${index}`, value: "v" }));
+        const blocks = embedToBlocks({ fields });
+
+        expect(blocks).toHaveLength(2);
+        expect((blocks[0].fields as unknown[]).length).toBe(10);
+        expect((blocks[1].fields as unknown[]).length).toBe(2);
+    });
+
+    it("shows a thumbnail without a section to sit next to as an image", () => {
+        expect(embedToBlocks({ thumbnailUrl: "https://example.com/a.png" })).toEqual([
+            { type: "image", image_url: "https://example.com/a.png", alt_text: "Thumbnail" },
+        ]);
     });
 });
 
-describe("CreateBlockFunction per block type", () => {
-    const builder = new CreateBlockFunction();
-
-    it("only keeps the properties Slack allows for a type", () => {
-        expect(builder.run(undefined, "divider", "ignored", ["ignored"], "https://x", "alt", "")).toStrictEqual({
-            type: "divider",
-        });
-        expect(builder.run(undefined, "image", "ignored", undefined, "https://x/a.png", "A chart")).toStrictEqual({
-            type: "image",
-            image_url: "https://x/a.png",
-            alt_text: "A chart",
-        });
-        expect(builder.run(undefined, "header", "Release", ["ignored"])).toStrictEqual({
-            type: "header",
-            text: { type: "plain_text", text: "Release" },
-        });
+describe("buildMessageContent", () => {
+    it("sends a plain text without blocks", () => {
+        expect(buildMessageContent("X", "Hello", undefined)).toEqual({ text: "Hello" });
     });
 
-    it("treats empty strings as unset", () => {
-        expect(builder.run(undefined, "section", "Body", ["", "*Env*"], "", "", "")).toStrictEqual({
-            type: "section",
-            text: { type: "mrkdwn", text: "Body" },
-            fields: [{ type: "mrkdwn", text: "*Env*" }],
+    it("puts the text above the embed and keeps it as the notification text", () => {
+        const content = buildMessageContent("X", "Heads up", { title: "Deploy" });
+
+        expect(content.text).toBe("Heads up");
+        expect(content.blocks).toEqual([
+            { type: "section", text: { type: "mrkdwn", text: "Heads up" } },
+            { type: "header", text: { type: "plain_text", text: "Deploy", emoji: true } },
+        ]);
+    });
+
+    it("falls back to the embed title as notification text", () => {
+        expect(buildMessageContent("X", undefined, { title: "Deploy", text: "Done" }).text).toBe("Deploy");
+    });
+
+    it("rejects a message without text and embed content", () => {
+        expect(() => buildMessageContent("SLACK_X", " ", { title: "" })).toThrow(/text or an embed/);
+    });
+});
+
+describe("resolveUserIds", () => {
+    const client = (lookup: (email: string) => Promise<unknown>) =>
+        ({ users: { lookupByEmail: vi.fn(({ email }: { email: string }) => lookup(email)) } }) as never;
+
+    it("accepts user IDs, mentions and email addresses", async () => {
+        const slack = client(async (email) => ({ ok: true, user: { id: email === "ada@example.com" ? "U0ADA" : "U0X" } }));
+
+        await expect(
+            resolveUserIds(slack, ["U0123", "<@U0456|bob>", " ada@example.com ", "", "U0123"], "X")
+        ).resolves.toEqual(["U0123", "U0456", "U0ADA"]);
+    });
+
+    it("names the email address no user was found for", async () => {
+        const slack = client(async () => {
+            throw { code: "slack_webapi_platform_error", data: { error: "users_not_found" } };
         });
+
+        await expect(resolveUserIds(slack, ["nobody@example.com"], "SLACK_X")).rejects.toThrow(/nobody@example.com/);
     });
 });

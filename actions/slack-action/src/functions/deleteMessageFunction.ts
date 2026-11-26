@@ -9,19 +9,24 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getSlackClient, toRuntimeError } from "../helpers.js";
+import { getSlackClient, toRuntimeError, toSlackTs } from "../helpers.js";
+import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
+import { MESSAGE_TS_DESCRIPTION } from "./messageParameters.js";
+
+const CODE = "SLACK_DELETE_MESSAGE_FAILED";
 
 @Identifier("slackDeleteMessage")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(channelId: TEXT, ts: TEXT): BOOLEAN")
+@Signature("(botToken: SLACK_BOT_TOKEN, channelId: TEXT, ts: DATE): BOOLEAN")
 @Name({ code: "en-US", content: "Delete message" })
-@DisplayMessage({ code: "en-US", content: "Delete Slack message ${ts}" })
+@DisplayMessage({ code: "en-US", content: "Delete Slack message in ${channelId}" })
 @Documentation({
     code: "en-US",
     content:
         "Deletes a message via `chat.delete` and returns whether Slack accepted the deletion.\nA bot token can only delete messages the app itself posted.",
 })
 @Description({ code: "en-US", content: "Deletes a Slack message the app posted." })
+@Parameter(BOT_TOKEN_PARAMETER)
 @Parameter({
     runtimeName: "channelId",
     name: [{ code: "en-US", content: "Channel ID" }],
@@ -29,17 +34,17 @@ import { getSlackClient, toRuntimeError } from "../helpers.js";
 })
 @Parameter({
     runtimeName: "ts",
-    name: [{ code: "en-US", content: "Message timestamp" }],
-    description: [{ code: "en-US", content: "The `ts` of the message to delete. Format: Unix seconds with a dot before the last six digits, e.g. 1712345678.123456. From a message link (…/p1712345678123456) insert the dot before the last six digits." }],
+    name: [{ code: "en-US", content: "Message" }],
+    description: [{ code: "en-US", content: `The ts of the message to delete. ${MESSAGE_TS_DESCRIPTION}` }],
 })
 export class DeleteMessageFunction {
-    async run(context: FunctionContext, channelId: string, ts: string): Promise<boolean> {
-        const client = getSlackClient(context);
+    async run(_context: FunctionContext, botToken: SlackBotToken, channelId: string, ts: number): Promise<boolean> {
+        const client = getSlackClient(botToken);
         try {
-            const result = await client.chat.delete({ channel: channelId, ts });
+            const result = await client.chat.delete({ channel: channelId, ts: toSlackTs(ts, CODE) });
             return result.ok === true;
         } catch (error) {
-            throw toRuntimeError("SLACK_DELETE_MESSAGE_FAILED", error);
+            throw toRuntimeError(CODE, error);
         }
     }
 }

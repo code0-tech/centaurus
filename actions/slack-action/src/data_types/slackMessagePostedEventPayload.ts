@@ -1,6 +1,5 @@
-import { Identifier, Name, Schema } from "@code0-tech/hercules";
+import { dateSchema, Identifier, Name, Schema } from "@code0-tech/hercules";
 import { z } from "zod";
-import { SlackBlockSchema } from "./slackBlock.js";
 import { slackEventEnvelope } from "./slackEventEnvelope.js";
 
 /**
@@ -17,11 +16,10 @@ export const SlackMessagePostedEventPayloadSchema = slackEventEnvelope(
         user: z.string().nullish().describe("The ID of the user who posted the message."),
         bot_id: z.string().nullish().describe("The ID of the bot that posted the message, if any."),
         text: z.string().nullish().describe("The message text."),
-        ts: z.string().describe("The message timestamp. Pass it as the thread timestamp to reply in a thread. Format: e.g. 1712345678.123456."),
-        thread_ts: z.string().nullish().describe("The timestamp of the parent message when this message is a threaded reply. Format: e.g. 1712345678.123456."),
-        event_ts: z.string().nullish().describe("The timestamp at which the event was dispatched."),
+        ts: dateSchema.describe("When the message was posted. Identifies the message: pass it on to reply in its thread, react to it, update or delete it."),
+        thread_ts: dateSchema.nullish().describe("The ts of the parent message when this message is a threaded reply."),
+        event_ts: dateSchema.nullish().describe("When the event was dispatched."),
         team: z.string().nullish().describe("The ID of the workspace the message belongs to."),
-        blocks: z.array(SlackBlockSchema).nullish().describe("The Block Kit blocks that make up the message body."),
     })
 );
 

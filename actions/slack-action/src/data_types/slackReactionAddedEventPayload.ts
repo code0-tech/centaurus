@@ -1,4 +1,4 @@
-import { Identifier, Name, Schema } from "@code0-tech/hercules";
+import { dateSchema, Identifier, Name, Schema } from "@code0-tech/hercules";
 import { z } from "zod";
 import { slackEventEnvelope } from "./slackEventEnvelope.js";
 
@@ -18,11 +18,11 @@ export const SlackReactionAddedEventPayloadSchema = slackEventEnvelope(
             .object({
                 type: z.string().describe("The type of the item reacted to, e.g. `message` or `file`."),
                 channel: z.string().nullish().describe("The ID of the channel holding the item."),
-                ts: z.string().nullish().describe("The timestamp of the message reacted to. Format: e.g. 1712345678.123456."),
+                ts: dateSchema.nullish().describe("The ts of the message reacted to."),
                 file: z.string().nullish().describe("The ID of the file reacted to."),
             })
             .describe("The item the reaction was added to."),
-        event_ts: z.string().nullish().describe("The timestamp at which the event was dispatched."),
+        event_ts: dateSchema.nullish().describe("When the event was dispatched."),
     })
 );
 

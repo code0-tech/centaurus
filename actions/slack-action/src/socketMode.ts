@@ -1,7 +1,10 @@
-import { Action, CodeZeroEvent } from "@code0-tech/hercules";
+import { Action, CodeZeroEvent, PlainValue } from "@code0-tech/hercules";
 import type { ActionFlow } from "@code0-tech/tucana/aquila";
 import { toAllowedValue } from "@code0-tech/tucana/helpers";
 import { SocketModeClient } from "@slack/socket-mode";
+import { fromSlackTs, fromUnixSeconds, normalizeMessageTs, withoutUndefined } from "./helpers.js";
+
+export { normalizeMessageTs };
 
 /** A single delivery as emitted by `SocketModeClient` on `slack_event`. */
 export interface SlackSocketDelivery {
@@ -18,6 +21,15 @@ export interface SlackSocketClient {
     start(): Promise<unknown>;
     disconnect(): Promise<void>;
 }
+
+/** The triggers of this action; only their flows need a Socket Mode connection. */
+export const EVENT_IDENTIFIERS = new Set([
+    "SlackMessagePosted",
+    "SlackAppMentioned",
+    "SlackReactionAdded",
+    "SlackChannelCreated",
+    "SlackSlashCommand",
+]);
 
 /** Delivery types Slack expects an acknowledgement for within three seconds. */
 const ACKNOWLEDGED_TYPES = new Set(["events_api", "slash_commands", "interactive"]);
@@ -63,27 +75,54 @@ export function routeDelivery(type: string, body: SlackSocketDelivery["body"]): 
     }
 }
 
+/**
+ * Converts the points in time of a delivery into `DATE` values, so a message's
+ * `ts` from a trigger can be passed straight into the DATE parameters of the
+ * functions. Message timestamps are kept lossless (see {@link fromSlackTs}).
+ */
+export function toFlowPayload(type: string, body: SlackSocketDelivery["body"]): PlainValue {
+    if (type !== "events_api" || !body?.event) {
+        return withoutUndefined(body ?? null);
+    }
+
+    const event = body.event;
+    return withoutUndefined({
+        ...body,
+        event_time: fromUnixSeconds(body.event_time),
+        event: {
+            ...event,
+            ts: fromSlackTs(event.ts),
+            thread_ts: fromSlackTs(event.thread_ts),
+            event_ts: fromSlackTs(event.event_ts),
+            item: event.item ? { ...event.item, ts: fromSlackTs(event.item.ts) } : event.item,
+            channel:
+                event.channel && typeof event.channel === "object"
+                    ? { ...event.channel, created: fromUnixSeconds(event.channel.created) }
+                    : event.channel,
+        },
+    });
+}
+
+/** A flow's setting as a plain value, or `undefined` if it is not set. */
+function setting(flow: ActionFlow, identifier: string): PlainValue | undefined {
+    const encoded = flow.settings.find((candidate) => candidate.flowSettingId === identifier)?.value;
+    return encoded ? toAllowedValue(encoded) : undefined;
+}
+
 /** A flow's text setting, or `undefined` if it is not set. */
 function textSetting(flow: ActionFlow, identifier: string): string | undefined {
-    const encoded = flow.settings.find((setting) => setting.flowSettingId === identifier)?.value;
-    const value = encoded ? toAllowedValue(encoded) : undefined;
+    const value = setting(flow, identifier);
     return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+/** The `appToken` setting of a flow, or `undefined` if it has none. */
+export function appTokenOf(flow: ActionFlow): string | undefined {
+    return textSetting(flow, "appToken");
 }
 
 /** The optional `channelId` setting of a flow, or `undefined` for "every channel". */
 export function channelFilter(flow: ActionFlow): string | undefined {
     return textSetting(flow, "channelId");
-}
-
-/**
- * Turns a message timestamp or a Slack message link
- * (`…/archives/C0123ABC/p1712345678123456`) into Slack's `1712345678.123456`
- * form, so the copied link works as well as the timestamp itself.
- */
-export function normalizeMessageTs(value: string): string {
-    const linked = /\/p(\d{7,})(?:[/?#]|$)/.exec(value);
-    const digits = linked ? linked[1] : value.trim().replace(/^p/, "");
-    return /^\d{7,}$/.test(digits) ? `${digits.slice(0, -6)}.${digits.slice(-6)}` : value.trim();
 }
 
 /** The optional `messageTs` setting of a flow, normalized, or `undefined` for "every message". */
@@ -105,14 +144,14 @@ export function matchesFilters(flow: ActionFlow, route: SlackDeliveryRoute): boo
 /**
  * Receives Slack events over Socket Mode and fires the matching flows.
  *
- * Every project brings its own Slack app, so one WebSocket connection is kept
- * per project with an `app_token` configured. Connections follow the project
- * configuration Aquila sends: they are opened, replaced or closed whenever it
- * changes. Because the action dials out to Slack, no public URL, URL
- * verification challenge or request signature check is needed.
+ * Every trigger flow names the Slack app it listens with in its `appToken`
+ * setting, so one WebSocket connection is kept per app token in use. The
+ * connections follow the flows Aquila sends: they are opened and closed
+ * whenever a flow changes. Because the action dials out to Slack, no public
+ * URL, URL verification challenge or request signature check is needed.
  */
 export class SlackSocketManager {
-    private readonly connections = new Map<bigint, { appToken: string; client: SlackSocketClient }>();
+    private readonly connections = new Map<string, SlackSocketClient>();
     private started = false;
 
     constructor(
@@ -128,55 +167,63 @@ export class SlackSocketManager {
             return;
         }
         this.started = true;
-        this.action.on(CodeZeroEvent.moduleUpdated, this.sync);
+        this.action.on(CodeZeroEvent.connected, this.sync);
+        this.action.on(CodeZeroEvent.flowUpdated, this.sync);
+        this.action.on(CodeZeroEvent.flowDeleted, this.sync);
         this.sync();
     }
 
     async stop(): Promise<void> {
         this.started = false;
-        this.action.off(CodeZeroEvent.moduleUpdated, this.sync);
-        const connections = [...this.connections.values()];
+        this.action.off(CodeZeroEvent.connected, this.sync);
+        this.action.off(CodeZeroEvent.flowUpdated, this.sync);
+        this.action.off(CodeZeroEvent.flowDeleted, this.sync);
+        const clients = [...this.connections.values()];
         this.connections.clear();
-        await Promise.all(connections.map(({ client }) => client.disconnect().catch(() => undefined)));
+        await Promise.all(clients.map((client) => client.disconnect().catch(() => undefined)));
     }
 
-    /** Opens, replaces or closes connections to match the current project configuration. */
+    /** Opens and closes connections to match the app tokens the trigger flows use. */
     readonly sync = (): void => {
-        const wanted = new Map<bigint, string>();
-        for (const config of this.action.configs.values()) {
-            const appToken = config.findConfig("app_token");
-            if (typeof appToken === "string" && appToken.trim()) {
-                wanted.set(BigInt(config.projectId), appToken.trim());
+        const wanted = new Set<string>();
+        for (const flow of this.action.flows.values()) {
+            if (!EVENT_IDENTIFIERS.has(flow.type)) {
+                continue;
+            }
+            const appToken = appTokenOf(flow);
+            if (appToken) {
+                wanted.add(appToken);
+            } else {
+                this.reportError(`flow ${flow.flowId} has no Slack app token; it will not trigger.`);
             }
         }
 
-        for (const [projectId, connection] of this.connections) {
-            if (wanted.get(projectId) !== connection.appToken) {
-                this.connections.delete(projectId);
-                void connection.client.disconnect().catch(() => undefined);
+        for (const [appToken, client] of this.connections) {
+            if (!wanted.has(appToken)) {
+                this.connections.delete(appToken);
+                void client.disconnect().catch(() => undefined);
             }
         }
 
-        for (const [projectId, appToken] of wanted) {
-            if (this.connections.has(projectId)) {
+        for (const appToken of wanted) {
+            if (this.connections.has(appToken)) {
                 continue;
             }
             const client = this.createClient(appToken);
-            const connection = { appToken, client };
-            client.on("slack_event", (delivery) => void this.handle(projectId, delivery));
-            this.connections.set(projectId, connection);
+            client.on("slack_event", (delivery) => void this.handle(appToken, delivery));
+            this.connections.set(appToken, client);
             client.start().catch((error) => {
-                this.reportError(`could not connect for project ${projectId}; check the app_token config.`, error);
-                // Forget the failed connection so the next configuration update retries.
-                if (this.connections.get(projectId) === connection) {
-                    this.connections.delete(projectId);
+                this.reportError("could not connect; check the Slack app token of the trigger.", error);
+                // Forget the failed connection so the next flow update retries.
+                if (this.connections.get(appToken) === client) {
+                    this.connections.delete(appToken);
                 }
             });
         }
     };
 
-    /** Acknowledges a delivery and fires every flow of the project it matches. */
-    async handle(projectId: bigint, { ack, type, body }: SlackSocketDelivery): Promise<void> {
+    /** Acknowledges a delivery and fires every flow listening with this app token that it matches. */
+    async handle(appToken: string, { ack, type, body }: SlackSocketDelivery): Promise<void> {
         // Acknowledge right away: Slack redelivers anything not acknowledged within
         // three seconds, while a flow may run much longer.
         if (ACKNOWLEDGED_TYPES.has(type)) {
@@ -188,15 +235,17 @@ export class SlackSocketManager {
             return;
         }
 
+        let payload: PlainValue | undefined;
         for (const flow of this.action.flows.values()) {
-            if (flow.projectId !== projectId || flow.type !== route.flowType) {
+            if (flow.type !== route.flowType || appTokenOf(flow) !== appToken) {
                 continue;
             }
             if (!matchesFilters(flow, route)) {
                 continue;
             }
+            payload ??= toFlowPayload(type, body);
             this.action
-                .fire(flow.flowId, body)
+                .fire(flow.flowId, payload)
                 .catch((error) => this.reportError(`flow ${flow.flowId} failed.`, error));
         }
     }

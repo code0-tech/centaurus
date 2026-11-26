@@ -1,7 +1,8 @@
 import "reflect-metadata"
 import { Action, CodeZeroEvent, isExportMode } from "@code0-tech/hercules"
 
-import { SlackBlockDataType } from "./data_types/slackBlock.js"
+import { SlackAppCredentialsDataType, SlackBotCredentialsDataType } from "./data_types/slackCredentials.js"
+import { SlackEmbedDataType, SlackEmbedFieldDataType } from "./data_types/slackEmbed.js"
 import { SlackChannelDataType } from "./data_types/slackChannel.js"
 import { SlackFileDataType } from "./data_types/slackFile.js"
 import { SlackMessageDataType } from "./data_types/slackMessage.js"
@@ -25,9 +26,6 @@ import { SetChannelTopicFunction } from "./functions/setChannelTopicFunction.js"
 import { UpdateMessageFunction } from "./functions/updateMessageFunction.js"
 import { UploadFileFunction } from "./functions/uploadFileFunction.js"
 
-import { CreateBlockFunction } from "./functions/utils/createBlockFunction.js"
-import { CreateTextSectionFunction } from "./functions/utils/createTextSectionFunction.js"
-
 import { SlackAppMentioned } from "./events/slackAppMentioned.js"
 import { SlackChannelCreated } from "./events/slackChannelCreated.js"
 import { SlackMessagePosted } from "./events/slackMessagePosted.js"
@@ -43,40 +41,13 @@ const action = new Action(
     "tabler:brand-slack",
     "Slack integration: post and update messages, react to Slack events, and drive channel, user and file operations via the Slack Web API.",
     [{ code: "en-US", content: "Slack" }],
-    [
-        {
-            identifier: "bot_token",
-            type: "TEXT",
-            defaultValue: process.env.SLACK_BOT_TOKEN ?? "",
-            name: [{ code: "en-US", content: "Bot token" }],
-            description: [
-                {
-                    code: "en-US",
-                    content:
-                        "The bot user OAuth token (xoxb-...) used as the Bearer credential for the Slack Web API. Find it under OAuth & Permissions in your Slack app.",
-                },
-            ],
-            linkedDataTypes: ["TEXT"],
-        },
-        {
-            identifier: "app_token",
-            type: "TEXT",
-            defaultValue: process.env.SLACK_APP_TOKEN ?? "",
-            optional: true,
-            name: [{ code: "en-US", content: "App token" }],
-            description: [
-                {
-                    code: "en-US",
-                    content:
-                        "The app-level token (xapp-...) with the connections:write scope. Required for the Slack triggers: the action receives events over Socket Mode with it, so no public URL is needed. Create it under Basic Information > App-Level Tokens and enable Socket Mode in your Slack app.",
-                },
-            ],
-            linkedDataTypes: ["TEXT"],
-        },
-    ]
+    []
 )
 
-action.registerDataTypeClass(SlackBlockDataType)
+action.registerDataTypeClass(SlackBotCredentialsDataType)
+action.registerDataTypeClass(SlackAppCredentialsDataType)
+action.registerDataTypeClass(SlackEmbedFieldDataType)
+action.registerDataTypeClass(SlackEmbedDataType)
 action.registerDataTypeClass(SlackChannelDataType)
 action.registerDataTypeClass(SlackFileDataType)
 action.registerDataTypeClass(SlackMessageDataType)
@@ -100,17 +71,14 @@ action.registerRuntimeFunction(InviteToChannelFunction)
 action.registerRuntimeFunction(GetUserByEmailFunction)
 action.registerRuntimeFunction(SetChannelTopicFunction)
 
-action.registerRuntimeFunction(CreateBlockFunction)
-action.registerRuntimeFunction(CreateTextSectionFunction)
-
 action.registerRuntimeEventClass(SlackMessagePosted)
 action.registerRuntimeEventClass(SlackAppMentioned)
 action.registerRuntimeEventClass(SlackReactionAdded)
 action.registerRuntimeEventClass(SlackChannelCreated)
 action.registerRuntimeEventClass(SlackSlashCommand)
 
-// Slack events arrive over Socket Mode, one connection per project with an
-// app_token; the manager follows the project configuration Aquila sends.
+// Slack events arrive over Socket Mode, one connection per app token the
+// trigger flows use; the manager follows the flows Aquila sends.
 const socketManager = new SlackSocketManager(action)
 if (!isExportMode()) {
     socketManager.start()

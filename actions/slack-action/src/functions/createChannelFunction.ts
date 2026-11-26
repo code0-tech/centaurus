@@ -11,11 +11,12 @@ import {
     Signature,
 } from "@code0-tech/hercules";
 import { getSlackClient, toRuntimeError } from "../helpers.js";
+import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
 import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
 
 @Identifier("slackCreateChannel")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(name: TEXT, isPrivate?: BOOLEAN): SLACK_CHANNEL")
+@Signature("(botToken: SLACK_BOT_TOKEN, name: TEXT, isPrivate?: BOOLEAN): SLACK_CHANNEL")
 @Name({ code: "en-US", content: "Create channel" })
 @DisplayMessage({ code: "en-US", content: "Create Slack channel #${name}" })
 @Documentation({
@@ -24,6 +25,7 @@ import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
         "Creates a channel via `conversations.create`.\nSlack channel names are lowercase, max 80 characters, and may only contain letters, digits, hyphens and underscores. The creating app becomes a member, so it can post right away.",
 })
 @Description({ code: "en-US", content: "Creates a Slack channel." })
+@Parameter(BOT_TOKEN_PARAMETER)
 @Parameter({
     runtimeName: "name",
     name: [{ code: "en-US", content: "Name" }],
@@ -41,8 +43,8 @@ import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
     optional: true,
 })
 export class CreateChannelFunction {
-    async run(context: FunctionContext, name: string, isPrivate?: boolean): Promise<SlackChannel> {
-        const client = getSlackClient(context);
+    async run(_context: FunctionContext, botToken: SlackBotToken, name: string, isPrivate?: boolean): Promise<SlackChannel> {
+        const client = getSlackClient(botToken);
         try {
             const result = await client.conversations.create({ name, is_private: isPrivate ?? false });
             if (!result.channel) {

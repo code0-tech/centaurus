@@ -12,11 +12,12 @@ import {
     Signature,
 } from "@code0-tech/hercules";
 import { getSlackClient, toRuntimeError } from "../helpers.js";
+import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
 import { parseSlackFile, SlackFile } from "../data_types/slackFile.js";
 
 @Identifier("slackUploadFile")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(channelId: TEXT, file: FILE<TEXT>, title?: TEXT): SLACK_FILE")
+@Signature("(botToken: SLACK_BOT_TOKEN, channelId: TEXT, file: FILE<TEXT>, title?: TEXT): SLACK_FILE")
 @Name({ code: "en-US", content: "Upload file" })
 @DisplayMessage({ code: "en-US", content: "Upload file to Slack channel ${channelId}" })
 @Documentation({
@@ -25,6 +26,7 @@ import { parseSlackFile, SlackFile } from "../data_types/slackFile.js";
         "Uploads a file and shares it into a channel, using Slack's external upload flow (`files.getUploadURLExternal` + `files.completeUploadExternal`).\nThe file's name, including its extension, is used as the file name in Slack and determines how Slack renders the content, e.g. `report.csv` or `screenshot.png`.",
 })
 @Description({ code: "en-US", content: "Uploads a file and shares it into a Slack channel." })
+@Parameter(BOT_TOKEN_PARAMETER)
 @Parameter({
     runtimeName: "channelId",
     name: [{ code: "en-US", content: "Channel ID" }],
@@ -42,8 +44,8 @@ import { parseSlackFile, SlackFile } from "../data_types/slackFile.js";
     optional: true,
 })
 export class UploadFileFunction {
-    async run(context: FunctionContext, channelId: string, file: File<string>, title?: string): Promise<SlackFile> {
-        const client = getSlackClient(context);
+    async run(_context: FunctionContext, botToken: SlackBotToken, channelId: string, file: File<string>, title?: string): Promise<SlackFile> {
+        const client = getSlackClient(botToken);
         try {
             const result = await client.filesUploadV2({
                 channel_id: channelId,

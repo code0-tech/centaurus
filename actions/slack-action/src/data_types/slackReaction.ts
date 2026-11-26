@@ -1,4 +1,4 @@
-import { DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules";
+import { dateSchema, DisplayMessage, Identifier, Name, Schema } from "@code0-tech/hercules";
 import { z } from "zod";
 
 /**
@@ -16,12 +16,12 @@ export const SlackReactionSchema = z.object({
         .object({
             type: z.string().nullish().describe("The type of the item reacted to, usually message."),
             channel: z.string().nullish().describe("The ID of the channel holding the item."),
-            ts: z.string().nullish().describe("The timestamp of the message reacted to. Format: e.g. 1712345678.123456."),
+            ts: dateSchema.nullish().describe("The ts of the message reacted to."),
             file: z.string().nullish().describe("The ID of the file reacted to."),
         })
         .nullish()
         .describe("The item the reaction was added to."),
-    event_ts: z.string().nullish().describe("The timestamp at which the reaction event occurred."),
+    event_ts: dateSchema.nullish().describe("When the reaction event occurred."),
 });
 export type SlackReaction = z.infer<typeof SlackReactionSchema>;
 

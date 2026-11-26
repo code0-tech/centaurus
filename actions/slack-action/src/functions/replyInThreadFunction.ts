@@ -9,21 +9,28 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getSlackClient, toBlockArgument, toRuntimeError, withoutUndefined } from "../helpers.js";
-import { SlackBlock } from "../data_types/slackBlock.js";
-import { SlackMessage, SlackMessageSchema } from "../data_types/slackMessage.js";
+import { buildMessageContent, getSlackClient, toRuntimeError, toSlackTs } from "../helpers.js";
+import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
+import { SlackEmbed } from "../data_types/slackEmbed.js";
+import { parseSlackMessage, SlackMessage } from "../data_types/slackMessage.js";
+import { EMBED_PARAMETER, MESSAGE_TS_DESCRIPTION, TEXT_PARAMETER } from "./messageParameters.js";
+
+const CODE = "SLACK_REPLY_IN_THREAD_FAILED";
 
 @Identifier("slackReplyInThread")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(channelId: TEXT, threadTs: TEXT, text: TEXT, blocks?: LIST<SLACK_BLOCK>): SLACK_MESSAGE")
+@Signature(
+    "(botToken: SLACK_BOT_TOKEN, channelId: TEXT, threadTs: DATE, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE"
+)
 @Name({ code: "en-US", content: "Reply in thread" })
-@DisplayMessage({ code: "en-US", content: "Reply in Slack thread ${threadTs}" })
+@DisplayMessage({ code: "en-US", content: "Reply in Slack thread in ${channelId}" })
 @Documentation({
     code: "en-US",
     content:
-        "Posts a message as a threaded reply to an existing message.\n`threadTs` is the `ts` of the parent message — take it from a SlackMessagePosted or SlackAppMentioned event, or from the result of a previous slackPostMessage.",
+        "Posts a message as a threaded reply to an existing message.\n`threadTs` is the `ts` of the parent message — take it from a SlackMessagePosted or SlackAppMentioned trigger, or from the result of `slackPostMessage`.",
 })
-@Description({ code: "en-US", content: "Posts a reply in an existing Slack thread." })
+@Description({ code: "en-US", content: "Replies to a Slack message in its thread." })
+@Parameter(BOT_TOKEN_PARAMETER)
 @Parameter({
     runtimeName: "channelId",
     name: [{ code: "en-US", content: "Channel ID" }],
@@ -31,46 +38,30 @@ import { SlackMessage, SlackMessageSchema } from "../data_types/slackMessage.js"
 })
 @Parameter({
     runtimeName: "threadTs",
-    name: [{ code: "en-US", content: "Thread timestamp" }],
-    description: [{ code: "en-US", content: "The `ts` of the parent message to reply to. Format: Unix seconds with a dot before the last six digits, e.g. 1712345678.123456. From a message link (…/p1712345678123456) insert the dot before the last six digits." }],
+    name: [{ code: "en-US", content: "Parent message" }],
+    description: [{ code: "en-US", content: `The ts of the message to reply to. ${MESSAGE_TS_DESCRIPTION}` }],
 })
-@Parameter({
-    runtimeName: "text",
-    name: [{ code: "en-US", content: "Text" }],
-    description: [
-        {
-            code: "en-US",
-            content: "The reply text. Used as the notification and accessibility fallback when blocks are provided.",
-        },
-    ],
-})
-@Parameter({
-    runtimeName: "blocks",
-    name: [{ code: "en-US", content: "Blocks" }],
-    description: [{ code: "en-US", content: "Block Kit blocks making up the reply body." }],
-    optional: true,
-})
+@Parameter(TEXT_PARAMETER)
+@Parameter(EMBED_PARAMETER)
 export class ReplyInThreadFunction {
     async run(
-        context: FunctionContext,
+        _context: FunctionContext,
+        botToken: SlackBotToken,
         channelId: string,
-        threadTs: string,
-        text: string,
-        blocks?: SlackBlock[]
+        threadTs: number,
+        text?: string,
+        embed?: SlackEmbed
     ): Promise<SlackMessage> {
-        const client = getSlackClient(context);
+        const client = getSlackClient(botToken);
         try {
             const result = await client.chat.postMessage({
                 channel: channelId,
-                thread_ts: threadTs,
-                text,
-                ...toBlockArgument(blocks),
+                thread_ts: toSlackTs(threadTs, CODE),
+                ...buildMessageContent(CODE, text, embed),
             });
-            return withoutUndefined(
-                SlackMessageSchema.parse({ ...result.message, ok: result.ok, channel: result.channel, ts: result.ts })
-            );
+            return parseSlackMessage(result);
         } catch (error) {
-            throw toRuntimeError("SLACK_REPLY_IN_THREAD_FAILED", error);
+            throw toRuntimeError(CODE, error);
         }
     }
 }

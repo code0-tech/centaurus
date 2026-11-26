@@ -10,65 +10,64 @@ import {
     RuntimeError,
     Signature,
 } from "@code0-tech/hercules";
-import { getSlackClient, toBlockArgument, toRuntimeError, withoutUndefined } from "../helpers.js";
-import { SlackBlock } from "../data_types/slackBlock.js";
-import { SlackMessage, SlackMessageSchema } from "../data_types/slackMessage.js";
+import { buildMessageContent, getSlackClient, resolveUserIds, toRuntimeError } from "../helpers.js";
+import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
+import { SlackEmbed } from "../data_types/slackEmbed.js";
+import { parseSlackMessage, SlackMessage } from "../data_types/slackMessage.js";
+import { EMBED_PARAMETER, TEXT_PARAMETER } from "./messageParameters.js";
+
+const CODE = "SLACK_SEND_DIRECT_MESSAGE_FAILED";
 
 @Identifier("slackSendDirectMessage")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(userId: TEXT, text: TEXT, blocks?: LIST<SLACK_BLOCK>): SLACK_MESSAGE")
+@Signature("(botToken: SLACK_BOT_TOKEN, user: TEXT, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE")
 @Name({ code: "en-US", content: "Send direct message" })
-@DisplayMessage({ code: "en-US", content: "Send Slack DM to ${userId}" })
+@DisplayMessage({ code: "en-US", content: "Send Slack DM to ${user}" })
 @Documentation({
     code: "en-US",
     content:
-        "Sends a direct message to a single user. Opens (or reuses) the IM channel between the bot and the user via `conversations.open`, then posts into it.\nLook the user up by email first with `slackGetUserByEmail` if the flow only knows an address.",
+        "Sends a direct message to a single user. Opens (or reuses) the IM channel between the bot and the user via `conversations.open`, then posts into it.\nThe user can be given by email address (needs the `users:read.email` scope), by user ID or as a mention (`<@U0123456789>`).",
 })
 @Description({ code: "en-US", content: "Sends a direct message to a Slack user." })
+@Parameter(BOT_TOKEN_PARAMETER)
 @Parameter({
-    runtimeName: "userId",
-    name: [{ code: "en-US", content: "User ID" }],
-    description: [{ code: "en-US", content: "The ID of the user to message (e.g. U0123456789)." }],
-})
-@Parameter({
-    runtimeName: "text",
-    name: [{ code: "en-US", content: "Text" }],
+    runtimeName: "user",
+    name: [{ code: "en-US", content: "User" }],
     description: [
         {
             code: "en-US",
-            content: "The message text. Used as the notification and accessibility fallback when blocks are provided.",
+            content: "The user to message: their email address, user ID (e.g. U0123456789) or mention (<@U0123456789>).",
         },
     ],
 })
-@Parameter({
-    runtimeName: "blocks",
-    name: [{ code: "en-US", content: "Blocks" }],
-    description: [{ code: "en-US", content: "Block Kit blocks making up the message body." }],
-    optional: true,
-})
+@Parameter(TEXT_PARAMETER)
+@Parameter(EMBED_PARAMETER)
 export class SendDirectMessageFunction {
-    async run(context: FunctionContext, userId: string, text: string, blocks?: SlackBlock[]): Promise<SlackMessage> {
-        const client = getSlackClient(context);
+    async run(
+        _context: FunctionContext,
+        botToken: SlackBotToken,
+        user: string,
+        text?: string,
+        embed?: SlackEmbed
+    ): Promise<SlackMessage> {
+        const client = getSlackClient(botToken);
         try {
+            const content = buildMessageContent(CODE, text, embed);
+            const [userId] = await resolveUserIds(client, [user], CODE);
+            if (!userId) {
+                throw new RuntimeError(CODE, "No user given to message.");
+            }
+
             const conversation = await client.conversations.open({ users: userId });
             const channelId = conversation.channel?.id;
             if (!channelId) {
-                throw new RuntimeError(
-                    "SLACK_SEND_DIRECT_MESSAGE_FAILED",
-                    `Slack did not return an IM channel for user ${userId}.`
-                );
+                throw new RuntimeError(CODE, `Slack did not return an IM channel for user ${user}.`);
             }
 
-            const result = await client.chat.postMessage({
-                channel: channelId,
-                text,
-                ...toBlockArgument(blocks),
-            });
-            return withoutUndefined(
-                SlackMessageSchema.parse({ ...result.message, ok: result.ok, channel: result.channel, ts: result.ts })
-            );
+            const result = await client.chat.postMessage({ channel: channelId, ...content });
+            return parseSlackMessage(result);
         } catch (error) {
-            throw toRuntimeError("SLACK_SEND_DIRECT_MESSAGE_FAILED", error);
+            throw toRuntimeError(CODE, error);
         }
     }
 }
