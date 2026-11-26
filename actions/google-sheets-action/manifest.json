@@ -1,0 +1,10 @@
+{
+  "name": "google-sheets",
+  "identifier": "google-sheets-action",
+  "description": "Google Sheets integration: append, read, update, look up, and clear spreadsheet rows via the Google Sheets API using service-account authentication.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/google-sheets-action"
+    }
+  }
+}

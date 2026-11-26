@@ -28,6 +28,7 @@ include:
   - twilio-action
   - stripe-action
   - smtp-action
+  - google-sheets-action
   - github-action
   - ai-action
   - discord-action
@@ -36,7 +37,6 @@ include:
   - cron-action
   - rest-action
   - mcp-action
-  - smtp-action
 
 test-node:
   image: node:24.10.0
