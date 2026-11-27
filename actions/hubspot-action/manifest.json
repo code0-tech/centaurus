@@ -1,0 +1,13 @@
+{
+  "name": "hubspot",
+  "identifier": "hubspot-action",
+  "description": "HubSpot CRM integration: react to contact, deal, company and form webhooks and create, update, search, associate and annotate CRM records.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/hubspot-action"
+    }
+  },
+  "dependencies": [
+    "rest-action"
+  ]
+}

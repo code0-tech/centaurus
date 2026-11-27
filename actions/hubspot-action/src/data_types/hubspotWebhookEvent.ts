@@ -3,10 +3,10 @@ import { z } from "zod";
 
 /**
  * A single HubSpot app-webhook change event. HubSpot delivers webhook
- * subscriptions as a JSON array of these event objects; the Rest trigger
- * exposes the individual event to the flow. The schema is intentionally
- * permissive (most fields optional) because the exact set of fields depends on
- * the `subscriptionType` (property-change events carry `propertyName` /
+ * subscriptions as a JSON array of these event objects (see the per-trigger
+ * `*WebhookPayload` types). The schema is intentionally permissive (most
+ * fields optional) because the exact set of fields depends on the
+ * `subscriptionType` (property-change events carry `propertyName` /
  * `propertyValue`, creation events do not).
  * See https://developers.hubspot.com/docs/api/webhooks
  */
