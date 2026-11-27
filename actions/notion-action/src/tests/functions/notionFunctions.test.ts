@@ -6,10 +6,11 @@ import { NotionArchivePageFunction } from "../../functions/notionArchivePageFunc
 import { NotionQueryDatabaseFunction } from "../../functions/notionQueryDatabaseFunction.js";
 import { NotionSearchFunction } from "../../functions/notionSearchFunction.js";
 import { context, list, page, parsed, TOKEN } from "../fixtures.js";
-import { mockNotionHttp } from "../httpMock.js";
+import { mockNotionHttp, mockPageMarkdown } from "../httpMock.js";
 
 const http = vi.hoisted(() => ({ request: vi.fn() }));
-beforeEach(() => { http.request.mockReset(); mockNotionHttp(http.request); });
+let fetchMock: ReturnType<typeof mockNotionHttp>;
+beforeEach(() => { http.request.mockReset(); fetchMock = mockNotionHttp(http.request); });
 afterEach(() => vi.unstubAllGlobals());
 
 describe("Notion functions", () => {
@@ -45,10 +46,13 @@ describe("Notion functions", () => {
         expect(http.request).not.toHaveBeenCalledWith(expect.objectContaining({ method: "POST", url: "/pages" }));
     });
 
-    it("retrieves the requested page", async () => {
+    it("retrieves the requested page with its content as Markdown", async () => {
         http.request.mockResolvedValue({ data: page() });
-        expect(await new NotionGetPageFunction().run(context(), TOKEN, "page-1")).toEqual(parsed(page()));
+        mockPageMarkdown.value = "## Notes\n\n- [ ] Ship";
+        expect(await new NotionGetPageFunction().run(context(), TOKEN, "page-1")).toEqual({ ...parsed(page()), markdown: "## Notes\n\n- [ ] Ship" });
         expect(http.request).toHaveBeenCalledWith({ method: "GET", url: "/pages/page-1", data: undefined });
+        expect(fetchMock.markdownLookups).toHaveBeenCalledExactlyOnceWith("page-1", expect.any(URLSearchParams));
+        expect(fetchMock.markdownLookups.mock.lastCall?.[1].get("markdown_version")).toBe("v2");
     });
 
     it("returns the archive state confirmed by Notion", async () => {

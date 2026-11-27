@@ -35,6 +35,8 @@ export function withNotionDates(value: unknown): unknown {
 
 // Only the data source references are needed to resolve a database.
 const DatabaseDataSourcesSchema = z.looseObject({ data_sources: z.array(z.looseObject({ id: z.string() })) });
+// Only the Markdown text of a page's content is used.
+const PageMarkdownSchema = z.looseObject({ markdown: z.string() });
 // Only the column types are needed to convert plain property values.
 const ColumnTypesSchema = z.looseObject({ properties: z.record(z.string(), z.looseObject({ type: z.string() })) });
 type SdkProperties = Parameters<Client["pages"]["create"]>[0]["properties"];
@@ -145,9 +147,14 @@ export class NotionClient {
         return this.request(() => this.sdk.pages.update({ page_id, properties: notionProperties }), NotionPageSchema);
     }
 
-    getPage(pageId: string) {
+    /** Retrieves a page with its properties and its content as Notion-flavored Markdown (v2). */
+    async getPage(pageId: string) {
         const page_id = notionId(pageId);
-        return this.request(() => this.sdk.pages.retrieve({ page_id }), NotionPageSchema);
+        const [page, content] = await Promise.all([
+            this.request(() => this.sdk.pages.retrieve({ page_id }), NotionPageSchema),
+            this.request(() => this.sdk.pages.retrieveMarkdown({ page_id, markdown_version: "v2" }), PageMarkdownSchema),
+        ]);
+        return { ...page, markdown: content.markdown };
     }
 
     async archivePage(pageId: string): Promise<boolean> {

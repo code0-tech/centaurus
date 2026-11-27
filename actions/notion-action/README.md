@@ -34,7 +34,7 @@ Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (defa
 | `notionQueryDatabase` | `integrationToken, databaseId, filter?, sorts?` | `NOTION_QUERY_RESULT` |
 | `notionSearch` | `integrationToken, query, filter?` | `NOTION_SEARCH_RESULT` |
 
-`properties` is a plain object of the existing database's column names and values (see below). Update changes only the supplied columns. Create does not create a database or change its schema. Get retrieves page metadata/properties, not block children. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
+`properties` is a plain object of the existing database's column names and values (see below). Update changes only the supplied columns. Create does not create a database or change its schema. Get retrieves the page with its properties and its content as Notion-flavored Markdown in `markdown` (two parallel requests: the page and `GET /pages/{id}/markdown` with `markdown_version: "v2"`). `markdown` is an optional field of `NOTION_PAGE` that only Get fills in; other functions and the triggers return pages without content. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
 
 Query and search collect **all pages** of results into one response (`has_more: false`, `next_cursor: null`); large collections consume corresponding time and memory. Query filters accept the normal Notion property/timestamp filters and `and`/`or` groups. Sorts use either `property` or `timestamp` plus `direction`. Search matches titles, not full page text; its optional filter is `{ "property": "object", "value": "page" }` or `"data_source"`.
 

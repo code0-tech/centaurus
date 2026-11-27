@@ -34,7 +34,7 @@ describe("Notion API client", () => {
         await new NotionClient(TOKEN).getPage("page");
         await new NotionClient("other-token").getPage("page");
         const first = new Headers(fetchMock.mock.calls[0][1]?.headers);
-        const second = new Headers(fetchMock.mock.calls[1][1]?.headers);
+        const second = new Headers(fetchMock.mock.lastCall?.[1]?.headers);
         expect(first.get("authorization")).toBe("Bearer test-token");
         expect(first.get("notion-version")).toBe("2025-09-03");
         expect(second.get("authorization")).toBe("Bearer other-token");
@@ -100,13 +100,13 @@ describe("Notion API client", () => {
         const original = page("page-1", { icon: { type: "emoji", emoji: "🚀" }, properties: { Count: { id: "count", type: "formula", formula: { type: "number", number: 7 } } } });
         http.request.mockResolvedValueOnce({ data: original }).mockResolvedValueOnce({ data: { object: "page" } });
         const client = new NotionClient(TOKEN);
-        expect(await client.getPage("page-1")).toEqual(parsed(original));
+        expect(await client.getPage("page-1")).toEqual({ ...parsed(original), markdown: "# Page content" });
         await expect(client.getPage("page-2")).rejects.toMatchObject({ code: "NOTION_INVALID_RESPONSE" });
     });
 
     it("rejects empty IDs before issuing requests", async () => {
         const client = new NotionClient(TOKEN);
-        expect(() => client.getPage(" ")).toThrow();
+        await expect(client.getPage(" ")).rejects.toThrow();
         expect(http.request).not.toHaveBeenCalled();
         expect(fetchMock.databaseLookups).not.toHaveBeenCalled();
     });

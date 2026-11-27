@@ -2,10 +2,9 @@ import { Description, DisplayIcon, DisplayMessage, Identifier, Name, Parameter, 
 import { NotionClient } from "../client.js";
 import { INTEGRATION_TOKEN_PARAMETER } from "../integrationToken.js";
 
-
 @Identifier("notionGetPage")
 @Name({ code: "en-US", content: "Get Notion page" })
-@Description({ code: "en-US", content: "Retrieve a page and its properties (not its block children)." })
+@Description({ code: "en-US", content: "Retrieve a page with its properties and its content as Markdown (in markdown)." })
 @DisplayIcon("simple:notion")
 @DisplayMessage({ code: "en-US", content: "Get Notion page" })
 @Signature("(integrationToken: string, pageId: string): NOTION_PAGE")
