@@ -9,6 +9,7 @@ import {
     Signature,
 } from "@code0-tech/hercules";
 import {MailchimpMergeFields} from "../../data_types/mailchimpMergeFields.ts";
+import {formatMailchimpBirthday} from "../../helpers.ts";
 
 @Identifier("mailchimpCreateMergeFields")
 @Signature("(FirstName?: string, LastName?: string, Address?: string, Phone?: string, Birthday?: string): MAILCHIMP_MERGE_FIELDS")
@@ -48,7 +49,7 @@ import {MailchimpMergeFields} from "../../data_types/mailchimpMergeFields.ts";
 @Parameter({
     runtimeName: "Birthday",
     name: [{code: "en-US", content: "Birthday"}],
-    description: [{code: "en-US", content: "Maps to the BIRTHDAY merge tag."}],
+    description: [{code: "en-US", content: "Maps to the BIRTHDAY merge tag. Accepts 'MM/DD' or an ISO date ('YYYY-MM-DD'); it is converted to Mailchimp's 'MM/DD' format (the year is dropped)."}],
     optional: true,
 })
 export class CreateMergeFieldsFunction {
@@ -65,7 +66,7 @@ export class CreateMergeFieldsFunction {
         if (LastName !== undefined) mergeFields.LNAME = LastName;
         if (Address !== undefined) mergeFields.ADDRESS = Address;
         if (Phone !== undefined) mergeFields.PHONE = Phone;
-        if (Birthday !== undefined) mergeFields.BIRTHDAY = Birthday;
+        if (Birthday !== undefined) mergeFields.BIRTHDAY = formatMailchimpBirthday(Birthday);
         return mergeFields;
     }
 }

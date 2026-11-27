@@ -51,6 +51,53 @@ export function subscriberHash(email: string): string {
 }
 
 /**
+ * Normalizes a birthday into the `MM/DD` format Mailchimp expects for
+ * BIRTHDAY merge fields (the year is not stored).
+ *
+ * Accepted inputs:
+ *  - `MM/DD` (passed through after validation)
+ *  - ISO dates / timestamps, e.g. `1990-04-23` or `1990-04-23T00:00:00Z`
+ *  - `--MM-DD` or `MM-DD`
+ *  - anything else `Date` can parse (UTC components are used)
+ */
+export function formatMailchimpBirthday(value: string): string {
+    const input = value.trim();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const build = (month: number, day: number): string => {
+        // Validate against a leap year so 02/29 is allowed.
+        const probe = new Date(Date.UTC(2000, month - 1, day));
+        if (month < 1 || month > 12 || probe.getUTCMonth() !== month - 1 || probe.getUTCDate() !== day) {
+            throw invalidBirthday(value);
+        }
+        return `${pad(month)}/${pad(day)}`;
+    };
+
+    let match = /^(\d{1,2})\/(\d{1,2})$/.exec(input);
+    if (match) return build(Number(match[1]), Number(match[2]));
+
+    // Date part of an ISO string, parsed manually to avoid timezone shifts.
+    match = /^\d{4}-(\d{2})-(\d{2})(?:$|[T\s])/.exec(input);
+    if (match) return build(Number(match[1]), Number(match[2]));
+
+    match = /^(?:--)?(\d{1,2})-(\d{1,2})$/.exec(input);
+    if (match) return build(Number(match[1]), Number(match[2]));
+
+    const parsed = new Date(input);
+    if (!Number.isNaN(parsed.getTime())) {
+        return build(parsed.getUTCMonth() + 1, parsed.getUTCDate());
+    }
+
+    throw invalidBirthday(value);
+}
+
+function invalidBirthday(value: string): RuntimeError {
+    return new RuntimeError(
+        "MAILCHIMP_INVALID_BIRTHDAY",
+        `Invalid birthday '${value}'. Use 'MM/DD' or an ISO date such as 'YYYY-MM-DD'.`
+    );
+}
+
+/**
  * Maps an error thrown by the Mailchimp SDK (or anything else) into a
  * Hercules RuntimeError with a stable code and a human readable message.
  */
