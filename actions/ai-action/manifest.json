@@ -1,0 +1,10 @@
+{
+  "name": "ai",
+  "identifier": "ai-action",
+  "description": "AI agents built from what the project already has: the model they think with, the flows and MCP servers they use as tools, and the rules they follow.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/ai-action"
+    }
+  }
+}

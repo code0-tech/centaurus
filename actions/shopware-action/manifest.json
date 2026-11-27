@@ -1,7 +1,7 @@
 {
   "name": "shopware",
   "identifier": "shopware-action",
-  "description": "",
+  "description": "Shopware integration: react to order placed, paid, and cancelled webhook events from a Shopware store.",
   "deployment": {
     "docker": {
       "image": "ghcr.io/code0-tech/centaurus/ci-builds/shopware-action"

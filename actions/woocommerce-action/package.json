@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "packageManager": "npm@11.21.3",
+  "engines": {
+    "npm": ">=11.21.3"
+  },
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -13,8 +17,9 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@code0-tech/hercules": "^1.6.0",
-    "axios": "^1.7.7"
+    "@code0-tech/hercules": "^1.9.0",
+    "axios": "^1.7.7",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

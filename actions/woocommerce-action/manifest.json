@@ -1,7 +1,7 @@
 {
   "name": "woocommerce",
   "identifier": "woocommerce-action",
-  "description": "",
+  "description": "WooCommerce integration: react to order created and updated webhook events from a WooCommerce store.",
   "deployment": {
     "docker": {
       "image": "ghcr.io/code0-tech/centaurus/ci-builds/woocommerce-action"
