@@ -1,0 +1,13 @@
+{
+  "name": "mailchimp",
+  "identifier": "mailchimp-action",
+  "description": "Mailchimp integration: manage audiences, subscribers and campaigns, and react to Mailchimp audience webhook events.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/mailchimp-action"
+    }
+  },
+  "dependencies": [
+    "rest-action"
+  ]
+}
