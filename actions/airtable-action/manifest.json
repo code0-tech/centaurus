@@ -1,0 +1,10 @@
+{
+  "name": "airtable",
+  "identifier": "airtable-action",
+  "description": "Airtable integration: create, read, update and search records, and react to new and changed records.",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/airtable-action"
+    }
+  }
+}
