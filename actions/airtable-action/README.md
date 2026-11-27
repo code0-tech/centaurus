@@ -35,7 +35,7 @@ the bases the flows work with. The scopes it needs depend on what the flows do:
 | `airtableGetTables` | Read the tables of a base with their fields and views. |
 | `airtableCreateFieldMap` | Set a field in a field map (chain calls to build `fields`). |
 | `airtableCreateSort` | Create a sort for `airtableListRecords`. |
-| `airtableCreateAttachment` | Create an attachment from a public URL for an attachment field. |
+| `airtableAddAttachment` | Add a file from a public URL to an attachment field of a field map. |
 
 The record functions start with `apiToken, baseId, tableId`
 (e.g. `airtableCreateRecord(apiToken, baseId, tableId, fields, typecast?)`). The
@@ -46,6 +46,11 @@ table can be given by its ID (`tbl…`) or by its name.
 record, so a field that is missing from `fields` is empty. With `typecast`
 (default on) Airtable converts values to the field type, e.g. `"42"` into a
 number field or a new option into a single select.
+
+`airtableCreateFieldMap(field, value, fields?)` builds `fields` one field at a
+time. Its `value` is text (`Completed`, `0.5`, `2024-12-31`) that `typecast`
+converts; a JSON list such as `["recAbc123"]` sets a list field (linked records,
+multiple selects, attachments).
 
 **Find** compares the cell as text (`{field} & "" = "value"`), so a number field
 matches `"42"`. It fails with `AIRTABLE_RECORD_NOT_FOUND` when no record matches.

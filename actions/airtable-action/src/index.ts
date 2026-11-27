@@ -25,7 +25,7 @@ import { AirtableListBasesFunction } from "./functions/meta/airtableListBases.js
 import { AirtableGetTablesFunction } from "./functions/meta/airtableGetTables.js"
 import { AirtableCreateFieldMapFunction } from "./functions/utils/airtableCreateFieldMap.js"
 import { AirtableCreateSortFunction } from "./functions/utils/airtableCreateSort.js"
-import { AirtableCreateAttachmentFunction } from "./functions/utils/airtableCreateAttachment.js"
+import { AirtableAddAttachmentFunction } from "./functions/utils/airtableAddAttachment.js"
 
 import { AirtableRecordCreated } from "./events/airtableRecordCreated.js"
 import { AirtableRecordUpdated } from "./events/airtableRecordUpdated.js"
@@ -65,7 +65,7 @@ action.registerRuntimeFunction(AirtableListBasesFunction)
 action.registerRuntimeFunction(AirtableGetTablesFunction)
 action.registerRuntimeFunction(AirtableCreateFieldMapFunction)
 action.registerRuntimeFunction(AirtableCreateSortFunction)
-action.registerRuntimeFunction(AirtableCreateAttachmentFunction)
+action.registerRuntimeFunction(AirtableAddAttachmentFunction)
 
 action.registerRuntimeEventClass(AirtableRecordCreated)
 action.registerRuntimeEventClass(AirtableRecordUpdated)

@@ -82,7 +82,9 @@ export async function airtableRequest<T>(
 
     const payload = await readBody(response);
     if (!response.ok) {
-        throw toRuntimeError(response.status, payload);
+        // The path names base, table and record - enough to spot a wrong id,
+        // and unlike the headers it holds no secret.
+        throw toRuntimeError(response.status, payload, `${init.method} ${new URL(url).pathname}`);
     }
 
     return payload as T;
@@ -122,11 +124,12 @@ async function readBody(response: Response): Promise<unknown> {
  * Airtable reports errors either as `{ error: { type, message } }` or, for an
  * unknown route, as `{ error: "NOT_FOUND" }`.
  */
-export function toRuntimeError(status: number, payload: unknown): RuntimeError {
+export function toRuntimeError(status: number, payload: unknown, request?: string): RuntimeError {
     const error = (payload as { error?: unknown } | undefined)?.error;
     const type = typeof error === "string" ? error : (error as { type?: string } | undefined)?.type;
     const detail = typeof error === "object" && error ? (error as { message?: string }).message : undefined;
-    const message = [type, detail].filter(Boolean).join(": ") || `Airtable answered with HTTP ${status}.`;
+    const reason = [type, detail].filter(Boolean).join(": ") || `Airtable answered with HTTP ${status}.`;
+    const message = request ? `${reason} (${request})` : reason;
 
     switch (status) {
         case 400:

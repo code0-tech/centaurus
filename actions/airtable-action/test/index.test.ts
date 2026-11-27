@@ -17,7 +17,7 @@ import { AirtableListBasesFunction } from "../src/functions/meta/airtableListBas
 import { AirtableGetTablesFunction } from "../src/functions/meta/airtableGetTables.js";
 import { AirtableCreateFieldMapFunction } from "../src/functions/utils/airtableCreateFieldMap.js";
 import { AirtableCreateSortFunction } from "../src/functions/utils/airtableCreateSort.js";
-import { AirtableCreateAttachmentFunction } from "../src/functions/utils/airtableCreateAttachment.js";
+import { AirtableAddAttachmentFunction } from "../src/functions/utils/airtableAddAttachment.js";
 
 import { AirtableRecordCreated } from "../src/events/airtableRecordCreated.js";
 import { AirtableRecordUpdated } from "../src/events/airtableRecordUpdated.js";
@@ -124,6 +124,7 @@ describe("client", () => {
         expect(error).toBeInstanceOf(RuntimeError);
         expect(error.code).toEqual(code);
         expect(error.message).toContain("SOME_TYPE");
+        expect(error.message).toContain("(GET /v0/app/tbl)");
     });
 
     it("understands the short error form", async () => {
@@ -175,6 +176,15 @@ describe("field maps", () => {
 
         expect(second).toEqual({ Name: "Ada", Age: 36 });
         expect(first).toEqual({ Name: "Ada" });
+    });
+
+    it("reads a JSON list as list and keeps other text as text", () => {
+        const fn = new AirtableCreateFieldMapFunction();
+
+        expect(fn.run(undefined, "Tasks", ' ["recA", "recB"] ')).toEqual({ Tasks: ["recA", "recB"] });
+        expect(fn.run(undefined, "Progress", "0.5")).toEqual({ Progress: "0.5" });
+        expect(fn.run(undefined, "Note", "[draft")).toEqual({ Note: "[draft" });
+        expect(fn.run(undefined, "Note", "[not json]")).toEqual({ Note: "[not json]" });
     });
 });
 
@@ -402,14 +412,29 @@ describe("metadata", () => {
 });
 
 describe("attachments", () => {
-    it("needs a public url", () => {
-        const fn = new AirtableCreateAttachmentFunction();
+    it("adds files to the field, one call at a time", () => {
+        const fn = new AirtableAddAttachmentFunction();
+        const first = fn.run(undefined, "Files", "https://example.com/a.pdf", " a.pdf ");
+        const second = fn.run(undefined, "Files", "https://example.com/b.png", undefined, first);
 
-        expect(fn.run(undefined, "https://example.com/a.png", " a.png ")).toEqual({
-            url: "https://example.com/a.png",
-            filename: "a.png",
+        expect(first).toEqual({ Files: [{ url: "https://example.com/a.pdf", filename: "a.pdf" }] });
+        expect(second).toEqual({
+            Files: [{ url: "https://example.com/a.pdf", filename: "a.pdf" }, { url: "https://example.com/b.png" }],
         });
-        expect(fn.run(undefined, "https://example.com/a.png")).toEqual({ url: "https://example.com/a.png" });
-        expect(() => fn.run(undefined, "file:///etc/passwd")).toThrow(RuntimeError);
+    });
+
+    it("keeps the other fields of the map", () => {
+        const fields = new AirtableCreateFieldMapFunction().run(undefined, "Status", "Completed");
+
+        expect(new AirtableAddAttachmentFunction().run(undefined, "Files", "https://example.com/a.pdf", "", fields)).toEqual({
+            Status: "Completed",
+            Files: [{ url: "https://example.com/a.pdf" }],
+        });
+    });
+
+    it("needs a public url", () => {
+        expect(() => new AirtableAddAttachmentFunction().run(undefined, "Files", "file:///etc/passwd")).toThrow(
+            RuntimeError
+        );
     });
 });
