@@ -12,7 +12,7 @@ import {
     fromSlackTs,
     fromUnixSeconds,
     getSlackClient,
-    resolveUserIds,
+    resolveUserId,
     toSlackTs,
 } from "../src/helpers.js";
 import { normalizeEmojiName } from "../src/functions/addReactionFunction.js";
@@ -286,16 +286,23 @@ describe("buildMessageContent", () => {
     });
 });
 
-describe("resolveUserIds", () => {
+describe("resolveUserId", () => {
     const client = (lookup: (email: string) => Promise<unknown>) =>
         ({ users: { lookupByEmail: vi.fn(({ email }: { email: string }) => lookup(email)) } }) as never;
 
     it("accepts user IDs, mentions and email addresses", async () => {
         const slack = client(async (email) => ({ ok: true, user: { id: email === "ada@example.com" ? "U0ADA" : "U0X" } }));
 
-        await expect(
-            resolveUserIds(slack, ["U0123", "<@U0456|bob>", " ada@example.com ", "", "U0123"], "X")
-        ).resolves.toEqual(["U0123", "U0456", "U0ADA"]);
+        await expect(resolveUserId(slack, "U0123", "X")).resolves.toBe("U0123");
+        await expect(resolveUserId(slack, "<@U0456|bob>", "X")).resolves.toBe("U0456");
+        await expect(resolveUserId(slack, " ada@example.com ", "X")).resolves.toBe("U0ADA");
+    });
+
+    it("returns undefined when no user is given", async () => {
+        const slack = client(async () => ({ ok: true }));
+
+        await expect(resolveUserId(slack, " ", "X")).resolves.toBeUndefined();
+        await expect(resolveUserId(slack, undefined, "X")).resolves.toBeUndefined();
     });
 
     it("names the email address no user was found for", async () => {
@@ -303,6 +310,6 @@ describe("resolveUserIds", () => {
             throw { code: "slack_webapi_platform_error", data: { error: "users_not_found" } };
         });
 
-        await expect(resolveUserIds(slack, ["nobody@example.com"], "SLACK_X")).rejects.toThrow(/nobody@example.com/);
+        await expect(resolveUserId(slack, "nobody@example.com", "SLACK_X")).rejects.toThrow(/nobody@example.com/);
     });
 });

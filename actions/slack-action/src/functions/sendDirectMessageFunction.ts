@@ -10,7 +10,7 @@ import {
     RuntimeError,
     Signature,
 } from "@code0-tech/hercules";
-import { buildMessageContent, getSlackClient, resolveUserIds, toRuntimeError } from "../helpers.js";
+import { buildMessageContent, getSlackClient, resolveUserId, toRuntimeError } from "../helpers.js";
 import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
 import { SlackEmbed } from "../data_types/slackEmbed.js";
 import { parseSlackMessage, SlackMessage } from "../data_types/slackMessage.js";
@@ -53,7 +53,7 @@ export class SendDirectMessageFunction {
         const client = getSlackClient(botToken);
         try {
             const content = buildMessageContent(CODE, text, embed);
-            const [userId] = await resolveUserIds(client, [user], CODE);
+            const userId = await resolveUserId(client, user, CODE);
             if (!userId) {
                 throw new RuntimeError(CODE, "No user given to message.");
             }

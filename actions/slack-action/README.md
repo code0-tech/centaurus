@@ -32,7 +32,7 @@ different tokens, so each has its own token type (a single text value):
 | `slackSendDirectMessage` | `(botToken: SLACK_BOT_TOKEN, user: TEXT, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE` | Open (or reuse) an IM channel with a user, then post into it. |
 | `slackUploadFile` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, file: FILE<TEXT>, title?: TEXT): SLACK_FILE` | Upload a file and share it into a channel. |
 | `slackCreateChannel` | `(botToken: SLACK_BOT_TOKEN, name: TEXT, isPrivate?: BOOLEAN): SLACK_CHANNEL` | Create a public or private channel. |
-| `slackInviteToChannel` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, users: LIST<TEXT>): SLACK_CHANNEL` | Invite up to 1000 users to a channel. |
+| `slackInviteToChannel` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, user: TEXT): SLACK_CHANNEL` | Invite a user to a channel. |
 | `slackGetUserByEmail` | `(botToken: SLACK_BOT_TOKEN, email: TEXT): SLACK_USER` | Look a workspace member up by email address. |
 | `slackSetChannelTopic` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, topic: TEXT): SLACK_CHANNEL` | Set a channel's topic. |
 
@@ -55,7 +55,7 @@ title (or text) is used as the notification text.
 
 ### Users
 
-`slackSendDirectMessage` and `slackInviteToChannel` accept each user as an email
+`slackSendDirectMessage` and `slackInviteToChannel` accept the user as an email
 address (looked up via `users.lookupByEmail`, needs `users:read.email`), a user ID
 (`U0123456789`) or a mention as it appears in message text (`<@U0123456789>`).
 Slack has no API to look a user up by display name, and display names are not

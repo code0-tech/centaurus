@@ -229,35 +229,36 @@ const MENTION = /^<@([UW][A-Z0-9]+)(?:\|[^>]*)?>$/;
 const EMAIL = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
 
 /**
- * Resolves the ways a flow can name a workspace member into user IDs: a user
+ * Resolves the ways a flow can name a workspace member into a user ID: a user
  * ID (`U0123456789`), a mention as it appears in message text (`<@U0123456789>`)
  * or an email address, which is looked up via `users.lookupByEmail`.
+ * Returns `undefined` when no user is given.
  */
-export async function resolveUserIds(client: WebClient, users: string[], code: string): Promise<string[]> {
-    const ids = await Promise.all(
-        users
-            .map((user) => given(user))
-            .filter((user): user is string => user !== undefined)
-            .map(async (user) => {
-                const mention = MENTION.exec(user);
-                if (mention) {
-                    return mention[1];
-                }
-                if (EMAIL.test(user)) {
-                    const id = await client.users
-                        .lookupByEmail({ email: user })
-                        .then((result) => result.user?.id)
-                        .catch((error: { data?: { error?: string } }) => {
-                            if (error?.data?.error === "users_not_found") return undefined;
-                            throw error;
-                        });
-                    if (!id) {
-                        throw new RuntimeError(code, `No Slack user found for the email address ${user}.`);
-                    }
-                    return id;
-                }
-                return user;
-            })
-    );
-    return [...new Set(ids)];
+export async function resolveUserId(
+    client: WebClient,
+    user: string | null | undefined,
+    code: string
+): Promise<string | undefined> {
+    const value = given(user);
+    if (value === undefined) {
+        return undefined;
+    }
+    const mention = MENTION.exec(value);
+    if (mention) {
+        return mention[1];
+    }
+    if (!EMAIL.test(value)) {
+        return value;
+    }
+    const id = await client.users
+        .lookupByEmail({ email: value })
+        .then((result) => result.user?.id)
+        .catch((error: { data?: { error?: string } }) => {
+            if (error?.data?.error === "users_not_found") return undefined;
+            throw error;
+        });
+    if (!id) {
+        throw new RuntimeError(code, `No Slack user found for the email address ${value}.`);
+    }
+    return id;
 }
