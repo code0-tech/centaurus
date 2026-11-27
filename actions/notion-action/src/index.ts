@@ -1,6 +1,5 @@
 import "reflect-metadata"
 import { Action, CodeZeroEvent, isExportMode } from "@code0-tech/hercules"
-import { NotionIntegrationTokenDataType } from "./data_types/notionIntegrationToken.js"
 import { registerNotionSupportingDataTypes } from "./data_types/generatedSupportingDataTypes.js"
 import { NotionRichTextDataType } from "./data_types/notionRichText.js"
 import { NotionPropertyValueDataType } from "./data_types/notionPropertyValue.js"
@@ -9,7 +8,6 @@ import { NotionPageDataType } from "./data_types/notionPage.js"
 import { NotionDatabaseDataType } from "./data_types/notionDatabase.js"
 import { NotionQueryResultDataType } from "./data_types/notionQueryResult.js"
 import { NotionSearchResultDataType } from "./data_types/notionSearchResult.js"
-import { NotionPropertiesDataType } from "./data_types/notionProperties.js"
 import { NotionFilterDataType } from "./data_types/notionFilter.js"
 import { NotionSortDataType } from "./data_types/notionSort.js"
 import { NotionSearchFilterDataType } from "./data_types/notionSearchFilter.js"
@@ -19,7 +17,6 @@ import { NotionGetPageFunction } from "./functions/notionGetPageFunction.js"
 import { NotionArchivePageFunction } from "./functions/notionArchivePageFunction.js"
 import { NotionQueryDatabaseFunction } from "./functions/notionQueryDatabaseFunction.js"
 import { NotionSearchFunction } from "./functions/notionSearchFunction.js"
-import { NotionSetPropertyFunction } from "./functions/utils/notionSetPropertyFunction.js"
 import { NotionDatabaseItemCreated } from "./events/notionDatabaseItemCreated.js"
 import { NotionDatabaseItemUpdated } from "./events/notionDatabaseItemUpdated.js"
 import { NotionPagePropertyChanged } from "./events/notionPagePropertyChanged.js"
@@ -37,7 +34,6 @@ export const action = new Action(
 )
 
 registerNotionSupportingDataTypes(action)
-action.registerDataTypeClass(NotionIntegrationTokenDataType)
 action.registerDataTypeClass(NotionRichTextDataType)
 action.registerDataTypeClass(NotionPropertyValueDataType)
 action.registerDataTypeClass(NotionUserDataType)
@@ -45,7 +41,6 @@ action.registerDataTypeClass(NotionPageDataType)
 action.registerDataTypeClass(NotionDatabaseDataType)
 action.registerDataTypeClass(NotionQueryResultDataType)
 action.registerDataTypeClass(NotionSearchResultDataType)
-action.registerDataTypeClass(NotionPropertiesDataType)
 action.registerDataTypeClass(NotionFilterDataType)
 action.registerDataTypeClass(NotionSortDataType)
 action.registerDataTypeClass(NotionSearchFilterDataType)
@@ -55,7 +50,6 @@ action.registerRuntimeFunction(NotionGetPageFunction)
 action.registerRuntimeFunction(NotionArchivePageFunction)
 action.registerRuntimeFunction(NotionQueryDatabaseFunction)
 action.registerRuntimeFunction(NotionSearchFunction)
-action.registerRuntimeFunction(NotionSetPropertyFunction)
 // Hercules registers both the runtime event and its public event definition.
 action.registerRuntimeEventClass(NotionDatabaseItemCreated)
 action.registerRuntimeEventClass(NotionDatabaseItemUpdated)

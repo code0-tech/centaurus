@@ -4,7 +4,7 @@ import { z } from "zod";
 import { NotionPageSchema } from "./data_types/notionPage.js";
 import { NotionQueryResultSchema } from "./data_types/notionQueryResult.js";
 import { NotionSearchResultSchema } from "./data_types/notionSearchResult.js";
-import type { NotionProperties } from "./data_types/notionProperties.js";
+import { toNotionProperties } from "./functions/utils/propertyValue.js";
 import type { NotionFilter } from "./data_types/notionFilter.js";
 import type { NotionSort } from "./data_types/notionSort.js";
 import type { NotionSearchFilter } from "./data_types/notionSearchFilter.js";
@@ -35,6 +35,17 @@ export function withNotionDates(value: unknown): unknown {
 
 // Only the data source references are needed to resolve a database.
 const DatabaseDataSourcesSchema = z.looseObject({ data_sources: z.array(z.looseObject({ id: z.string() })) });
+// Only the column types are needed to convert plain property values.
+const ColumnTypesSchema = z.looseObject({ properties: z.record(z.string(), z.looseObject({ type: z.string() })) });
+type SdkProperties = Parameters<Client["pages"]["create"]>[0]["properties"];
+
+function columnTypes(schema: z.infer<typeof ColumnTypesSchema>): Record<string, string> {
+    return Object.fromEntries(Object.entries(schema.properties).map(([name, column]) => [name, column.type]));
+}
+
+function hasValues(properties: unknown): boolean {
+    return typeof properties === "object" && properties !== null && !Array.isArray(properties) && Object.keys(properties).length > 0;
+}
 
 // Request and response shapes differ between Notion versions (e.g. databases
 // vs. data sources), so the version is pinned to the one the bundled SDK
@@ -103,19 +114,35 @@ export class NotionClient {
      * Creates a page with optional content written as Notion-flavored Markdown
      * (`markdown_version` v2, as v1 is deprecated). Empty content is omitted.
      */
-    async createPage(parentDatabaseId: string, properties: NotionProperties, markdown?: string | null) {
+    /**
+     * Creates a page from plain column values ({ "Name": "Task", "Done": true }),
+     * converted using the column types of the database's data source, with
+     * optional content written as Notion-flavored Markdown (`markdown_version`
+     * v2, as v1 is deprecated). Empty content is omitted.
+     */
+    async createPage(parentDatabaseId: string, properties: unknown, markdown?: string | null) {
         if (markdown != null && typeof markdown !== "string") {
             throw new RuntimeError("NOTION_INVALID_MARKDOWN", "Page content must be Markdown text.");
         }
         const data_source_id = await this.resolveDataSourceId(parentDatabaseId);
+        const values = properties ?? {};
+        const columns = hasValues(values)
+            ? columnTypes(await this.request(() => this.sdk.dataSources.retrieve({ data_source_id }), ColumnTypesSchema))
+            : {};
+        const notionProperties = toNotionProperties(values, columns) as SdkProperties;
         return this.request(() => this.sdk.pages.create({
-            parent: { data_source_id }, properties, ...(markdown ? { markdown, markdown_version: "v2" as const } : {}),
+            parent: { data_source_id }, properties: notionProperties, ...(markdown ? { markdown, markdown_version: "v2" as const } : {}),
         }), NotionPageSchema);
     }
 
-    updatePage(pageId: string, properties: NotionProperties) {
+    /** Updates the given columns of a page; values are converted using the page's column types. */
+    async updatePage(pageId: string, properties: unknown) {
         const page_id = notionId(pageId);
-        return this.request(() => this.sdk.pages.update({ page_id, properties }), NotionPageSchema);
+        const columns = hasValues(properties)
+            ? columnTypes(await this.request(() => this.sdk.pages.retrieve({ page_id }), ColumnTypesSchema))
+            : {};
+        const notionProperties = toNotionProperties(properties, columns) as SdkProperties;
+        return this.request(() => this.sdk.pages.update({ page_id, properties: notionProperties }), NotionPageSchema);
     }
 
     getPage(pageId: string) {

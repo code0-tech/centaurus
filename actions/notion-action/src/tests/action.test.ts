@@ -9,8 +9,8 @@ vi.mock("@code0-tech/hercules", async (importOriginal) => {
 
 describe("Hercules registration", () => {
     it("builds a module with all functions, data types and matching runtime events", () => {
-        expect(action.runtimeFunctions.size).toBe(7);
-        expect(action.dataTypes.size).toBe(12 + supportingSchemaNames.length);
+        expect(action.runtimeFunctions.size).toBe(6);
+        expect(action.dataTypes.size).toBe(10 + supportingSchemaNames.length);
         expect(action.events.size).toBe(3);
         expect(action.runtimeEvents.size).toBe(3);
         for (const event of action.events.values()) {
@@ -25,13 +25,12 @@ describe("Hercules registration", () => {
     });
 
     it("takes the integration token per function and trigger instead of a module configuration", () => {
-        expect(action.dataTypes.get("NOTION_INTEGRATION_TOKEN")!.type).toBe("string");
+        expect(action.dataTypes.has("NOTION_INTEGRATION_TOKEN")).toBe(false);
         for (const fn of action.runtimeFunctions.values()) {
-            if (fn.runtimeName === "notionSetProperty") continue;
-            expect(fn.signature).toMatch(/^\(integrationToken: NOTION_INTEGRATION_TOKEN, /);
+            expect(fn.signature).toMatch(/^\(integrationToken: string, /);
         }
         for (const event of action.events.values()) {
-            expect(event.signature).toMatch(/^\(integrationToken: NOTION_INTEGRATION_TOKEN, /);
+            expect(event.signature).toMatch(/^\(integrationToken: string, /);
             expect(event.settings?.find((setting) => setting.identifier === "pollIntervalSeconds")?.optional).toBe(true);
         }
         expect(action.buildModule().configurations ?? []).toHaveLength(0);
