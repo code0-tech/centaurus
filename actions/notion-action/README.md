@@ -17,7 +17,7 @@ On PowerShell, use `Copy-Item .example.env .env`. The dev/start scripts load `.e
 
 Create a Notion internal integration with read, insert and update content capabilities. Share each target database/page with that integration via **Add connections**. An integration token alone does not grant access to all workspace content.
 
-The action has no project configuration. Every function and every trigger takes the integration token it works with as its first parameter, a `NOTION_INTEGRATION_TOKEN` (a single text value), so one running action serves as many Notion integrations as its flows use. Tokens are never cached globally and never put in exported module defaults; an empty token is rejected.
+The action has no project configuration. Every function and every trigger takes the integration token it works with as its first parameter, a plain text value, so one running action serves as many Notion integrations as its flows use. Tokens are never cached globally and never put in exported module defaults; an empty token is rejected.
 
 Each trigger additionally has an optional **Poll interval (seconds)** setting (`pollIntervalSeconds`, minimum 10 seconds). Without it the trigger uses `NOTION_POLL_INTERVAL_MS` of the action process (default 60 seconds).
 
@@ -33,41 +33,28 @@ Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (defa
 | `notionArchivePage` | `integrationToken, pageId` | `boolean` (Hercules BOOLEAN) |
 | `notionQueryDatabase` | `integrationToken, databaseId, filter?, sorts?` | `NOTION_QUERY_RESULT` |
 | `notionSearch` | `integrationToken, query, filter?` | `NOTION_SEARCH_RESULT` |
-| `notionSetProperty` | `name, type, text?, number?, checked?, date?, endDate?, values?, properties?` | `NOTION_PROPERTIES` |
 
-`properties` maps the existing database's property names to writable Notion values. Update sends only supplied properties. Create does not create a database or change its schema. Get retrieves page metadata/properties, not block children. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
+`properties` is a plain object of the existing database's column names and values (see below). Update changes only the supplied columns. Create does not create a database or change its schema. Get retrieves page metadata/properties, not block children. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
 
 Query and search collect **all pages** of results into one response (`has_more: false`, `next_cursor: null`); large collections consume corresponding time and memory. Query filters accept the normal Notion property/timestamp filters and `and`/`or` groups. Sorts use either `property` or `timestamp` plus `direction`. Search matches titles, not full page text; its optional filter is `{ "property": "object", "value": "page" }` or `"data_source"`.
 
 Create takes optional page content as Markdown (`markdown`), sent as [Notion-flavored Markdown](https://developers.notion.com/guides/data-apis/migrate-to-notion-flavored-markdown) (`markdown_version: "v2"`); Notion converts it into blocks such as headings, lists, to-dos (`- [ ]`), quotes, code blocks and links. Empty content creates an empty page. API calls time out after 30 seconds. HTTP 429 is retried at most twice using `Retry-After` (up to 60 seconds); ambiguous network failures on writes are not automatically retried.
 
-### Property builder
+### Properties
 
-`notionSetProperty` takes one value parameter per kind of value; the column type decides which one is read and the others are ignored:
+Create and update take the column values as a plain object, e.g. `{ "Name": "Ship the release", "Done": false, "Tags": ["a", "b"], "Due": "2026-09-14" }`. The action looks up the column types (create: the database's data source, update: the page) and converts each value:
 
-| Parameter | Used by |
+| Column type | Value |
 | --- | --- |
-| `text` | `title`, `rich_text`, `select`, `status` (option name), `url`, `email`, `phone_number` |
-| `number` | `number` |
-| `checked` | `checkbox` |
-| `date`, `endDate?` | `date`: a `DATE` (e.g. a page timestamp or `std::date::now`) or ISO 8601 text each |
-| `values` | `multi_select` (option names), `people` (user IDs), `relation` (page IDs) |
+| `title`, `rich_text`, `url`, `email`, `phone_number` | text (title/rich text: max 2000 characters) |
+| `number` | a number |
+| `checkbox` | `true` or `false` |
+| `select`, `status` | the option name |
+| `multi_select` | an option name or a list of names |
+| `date` | a `DATE` (e.g. a page timestamp or `std::date::now`), ISO date text, or `{ start, end }` with either |
+| `people`, `relation` | a user/page ID or a list of IDs |
 
-Leaving the matching parameter empty clears the column (`checkbox`: unchecked). Text is limited to 2000 characters. Read-only properties such as formula and rollup cannot be built as write values.
-
-```ts
-// Chain notionSetProperty nodes, each extending the previous properties:
-// notionSetProperty("Name", "title", text: "Ship the release")
-// notionSetProperty("Done", "checkbox", checked: false, properties: <previous>)
-// notionSetProperty("Priority", "select", text: "High", properties: <previous>)
-// notionSetProperty("Due", "date", date: "2026-09-14", endDate: "2026-09-15", properties: <previous>)
-const properties = {
-  Name: { title: [{ type: "text", text: { content: "Ship the release" } }] },
-  Done: { checkbox: false },
-  Priority: { select: { name: "High" } },
-  Due: { date: { start: "2026-09-14", end: "2026-09-15" } },
-};
-```
+`null`, an empty text or an empty list clears a column. A value already in Notion's shape (e.g. `{ "select": { "name": "High" } }` or formatted rich text) is sent as is. Unknown columns (`NOTION_UNKNOWN_PROPERTY`) and read-only types such as formula and rollup (`NOTION_READ_ONLY_PROPERTY`) are rejected before anything is written. Converting costs one extra request (the column lookup) per create or update with values.
 
 ## Polling events
 
@@ -93,11 +80,11 @@ No inbound HTTP server, public webhook URL or cron-action dependency is required
 
 ## Data types and compatibility
 
-Each data type has its own file under `src/data_types/`: the response/value types plus `NotionProperties`, `NotionFilter`, `NotionSort` and `NotionSearchFilter` for function inputs. Zod schemas describe common fields and preserve additional Notion fields. They are deliberately extensible, not exhaustive validators for every Notion block or property subtype. No `z.custom()` schemas are used. Zod is pinned to `4.4.3`, the version Hercules' embedded schema exporter is built against.
+Each data type has its own file under `src/data_types/`: the response/value types plus `NotionFilter`, `NotionSort` and `NotionSearchFilter` for function inputs. Zod schemas describe common fields and preserve additional Notion fields. They are deliberately extensible, not exhaustive validators for every Notion block or property subtype. No `z.custom()` schemas are used. Zod is pinned to `4.4.3`, the version Hercules' embedded schema exporter is built against.
 
 `NOTION_FILTER` is deliberately compact (a plain object) rather than the full generated Notion union: that union is over 10k characters long and makes the flow editor's type checker take seconds to minutes per node, so no parameter suggestions appear. Notion validates the filter.
 
-Points in time in responses (`created_time`, `last_edited_time`, file `expiry_time`, calendar `start_time`/`end_time`) are `DATE` values, i.e. Unix microseconds (UTC); the client converts Notion's ISO 8601 strings before validating a response. Values flows send to Notion keep Notion's formats: filter timestamps and date property values (`{ start, end, time_zone }`) are sent as ISO 8601 text, because Notion distinguishes date-only values and time zones that a `DATE` cannot express. `notionSetProperty` also accepts a `DATE` for a date property and converts it to an ISO 8601 date-time (UTC).
+Points in time in responses (`created_time`, `last_edited_time`, file `expiry_time`, calendar `start_time`/`end_time`) are `DATE` values, i.e. Unix microseconds (UTC); the client converts Notion's ISO 8601 strings before validating a response. Values flows send to Notion keep Notion's formats: filter timestamps and date property values (`{ start, end, time_zone }`) are sent as ISO 8601 text, because Notion distinguishes date-only values and time zones that a `DATE` cannot express. Create and update also accept a `DATE` for a date column and convert it to an ISO 8601 date-time (UTC).
 
 The API is pinned to [`2025-09-03`](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03), where a database is a container of one or more data sources and pages live in a data source. Functions and triggers keep taking a `databaseId`: the action resolves the database's data source (`GET /databases/{id}`) and then queries or creates pages in it. Databases with several data sources are ambiguous and fail with `NOTION_MULTIPLE_DATA_SOURCES`; the triggers resolve the data source once per watch.
 
