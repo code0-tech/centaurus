@@ -9,17 +9,17 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { buildMessageContent, getSlackClient, toRuntimeError, toSlackTs } from "../helpers.js";
+import { buildMessageContent, getSlackClient, toRuntimeError, toMessageTs } from "../helpers.js";
 import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
 import { SlackEmbed } from "../data_types/slackEmbed.js";
 import { parseSlackMessage, SlackMessage } from "../data_types/slackMessage.js";
-import { EMBED_PARAMETER, MESSAGE_TS_DESCRIPTION, TEXT_PARAMETER } from "./messageParameters.js";
+import { EMBED_PARAMETER, MESSAGE_ID_DESCRIPTION, TEXT_PARAMETER } from "./messageParameters.js";
 
 const CODE = "SLACK_UPDATE_MESSAGE_FAILED";
 
 @Identifier("slackUpdateMessage")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(botToken: SLACK_BOT_TOKEN, channelId: TEXT, ts: DATE, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE")
+@Signature("(botToken: SLACK_BOT_TOKEN, channelId: TEXT, messageId: TEXT, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE")
 @Name({ code: "en-US", content: "Update message" })
 @DisplayMessage({ code: "en-US", content: "Update Slack message in ${channelId}" })
 @Documentation({
@@ -35,9 +35,9 @@ const CODE = "SLACK_UPDATE_MESSAGE_FAILED";
     description: [{ code: "en-US", content: "The ID of the channel holding the message." }],
 })
 @Parameter({
-    runtimeName: "ts",
-    name: [{ code: "en-US", content: "Message" }],
-    description: [{ code: "en-US", content: `The ts of the message to update. ${MESSAGE_TS_DESCRIPTION}` }],
+    runtimeName: "messageId",
+    name: [{ code: "en-US", content: "Message ID" }],
+    description: [{ code: "en-US", content: `The ID of the message to update. ${MESSAGE_ID_DESCRIPTION}` }],
 })
 @Parameter(TEXT_PARAMETER)
 @Parameter(EMBED_PARAMETER)
@@ -46,7 +46,7 @@ export class UpdateMessageFunction {
         _context: FunctionContext,
         botToken: SlackBotToken,
         channelId: string,
-        ts: number,
+        messageId: string,
         text?: string,
         embed?: SlackEmbed
     ): Promise<SlackMessage> {
@@ -54,7 +54,7 @@ export class UpdateMessageFunction {
         try {
             const result = await client.chat.update({
                 channel: channelId,
-                ts: toSlackTs(ts, CODE),
+                ts: toMessageTs(messageId, CODE),
                 ...buildMessageContent(CODE, text, embed),
             });
             return parseSlackMessage(result);

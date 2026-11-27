@@ -16,7 +16,7 @@ export const SlackReactionSchema = z.object({
         .object({
             type: z.string().nullish().describe("The type of the item reacted to, usually message."),
             channel: z.string().nullish().describe("The ID of the channel holding the item."),
-            ts: dateSchema.nullish().describe("The ts of the message reacted to."),
+            ts: z.string().nullish().describe("The ID (`ts`, e.g. 1712345678.123456) of the message reacted to."),
             file: z.string().nullish().describe("The ID of the file reacted to."),
         })
         .nullish()

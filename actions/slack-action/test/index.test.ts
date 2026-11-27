@@ -13,7 +13,7 @@ import {
     fromUnixSeconds,
     getSlackClient,
     resolveUserId,
-    toSlackTs,
+    toMessageTs,
 } from "../src/helpers.js";
 import { normalizeEmojiName } from "../src/functions/addReactionFunction.js";
 import { normalizeChannelName } from "../src/functions/createChannelFunction.js";
@@ -23,14 +23,14 @@ describe("SlackMessageSchema", () => {
         const parsed = SlackMessageSchema.parse({
             ok: true,
             channel: "C0EXAMPLE",
-            ts: 1503435956000247,
+            ts: "1503435956.000247",
             text: "Deployment finished",
             bot_id: "B0EXAMPLE",
             type: "message",
         });
 
         expect(parsed.channel).toEqual("C0EXAMPLE");
-        expect(parsed.ts).toEqual(1503435956000247);
+        expect(parsed.ts).toEqual("1503435956.000247");
     });
 });
 
@@ -94,14 +94,14 @@ describe("SlackReactionAddedEventPayloadSchema", () => {
                 item: {
                     type: "message",
                     channel: "C0EXAMPLE",
-                    ts: 1360782400498405,
+                    ts: "1360782400.498405",
                 },
                 event_ts: 1360782804083113,
             },
         });
 
         expect(parsed.event.reaction).toEqual("white_check_mark");
-        expect(parsed.event.item.ts).toEqual(1360782400498405);
+        expect(parsed.event.item.ts).toEqual("1360782400.498405");
     });
 
     it("rejects a delivery without the inner event", () => {
@@ -165,30 +165,29 @@ describe("normalizeChannelName", () => {
 });
 
 
-describe("message timestamps as DATE", () => {
-    it("converts a Slack ts into DATE microseconds and back without losing precision", () => {
+describe("message IDs", () => {
+    it("converts event timestamps into DATE microseconds", () => {
         expect(fromSlackTs("1712345678.123456")).toBe(1712345678123456);
         expect(fromSlackTs("1712345678.000001")).toBe(1712345678000001);
         expect(fromSlackTs("1712345678")).toBe(1712345678000000);
         expect(fromSlackTs(undefined)).toBeUndefined();
         expect(fromSlackTs("not a ts")).toBeUndefined();
-
-        expect(toSlackTs(1712345678123456, "X")).toBe("1712345678.123456");
-        expect(toSlackTs(1712345678000001, "X")).toBe("1712345678.000001");
-        expect(toSlackTs(fromSlackTs("1503435956.000247")!, "X")).toBe("1503435956.000247");
     });
 
-    it("also accepts a timestamp or message link as text", () => {
-        expect(toSlackTs("1712345678.123456", "X")).toBe("1712345678.123456");
-        expect(toSlackTs("https://team.slack.com/archives/C1/p1712345678123456", "X")).toBe("1712345678.123456");
+    it("accepts a message ID or a message link", () => {
+        expect(toMessageTs("1712345678.123456", "X")).toBe("1712345678.123456");
+        expect(toMessageTs(" 1712345678.000001 ", "X")).toBe("1712345678.000001");
+        expect(toMessageTs("https://team.slack.com/archives/C1/p1712345678123456", "X")).toBe("1712345678.123456");
     });
 
-    it("rejects a missing timestamp", () => {
-        expect(() => toSlackTs(undefined, "SLACK_X")).toThrow(/timestamp/);
-        expect(() => toSlackTs(Number.NaN, "SLACK_X")).toThrow(/timestamp/);
+    it("rejects a missing or malformed message ID and names the format", () => {
+        expect(() => toMessageTs(undefined, "SLACK_X")).toThrow(/1712345678\.123456/);
+        expect(() => toMessageTs("", "SLACK_X")).toThrow(/message ID/);
+        expect(() => toMessageTs("yesterday", "SLACK_X")).toThrow(/message ID/);
+        expect(() => toMessageTs("1712345678.12", "SLACK_X")).toThrow(/message ID/);
     });
 
-    it("parses a chat.postMessage response into a SLACK_MESSAGE with DATE timestamps", () => {
+    it("keeps the message IDs of a chat.postMessage response as text", () => {
         const message = parseSlackMessage({
             ok: true,
             channel: "C1",
@@ -199,8 +198,8 @@ describe("message timestamps as DATE", () => {
         expect(message).toEqual({
             ok: true,
             channel: "C1",
-            ts: 1503435956000247,
-            thread_ts: 1503435900000100,
+            ts: "1503435956.000247",
+            thread_ts: "1503435900.000100",
             text: "hi",
         });
     });

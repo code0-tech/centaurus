@@ -9,9 +9,9 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getSlackClient, toRuntimeError, toSlackTs } from "../helpers.js";
+import { getSlackClient, toRuntimeError, toMessageTs } from "../helpers.js";
 import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
-import { MESSAGE_TS_DESCRIPTION } from "./messageParameters.js";
+import { MESSAGE_ID_DESCRIPTION } from "./messageParameters.js";
 
 const CODE = "SLACK_ADD_REACTION_FAILED";
 
@@ -26,7 +26,7 @@ export function normalizeEmojiName(emoji: string): string {
 
 @Identifier("slackAddReaction")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(botToken: SLACK_BOT_TOKEN, channelId: TEXT, ts: DATE, emoji: TEXT): BOOLEAN")
+@Signature("(botToken: SLACK_BOT_TOKEN, channelId: TEXT, messageId: TEXT, emoji: TEXT): BOOLEAN")
 @Name({ code: "en-US", content: "Add reaction" })
 @DisplayMessage({ code: "en-US", content: "Add :${emoji}: to Slack message" })
 @Documentation({
@@ -42,9 +42,9 @@ export function normalizeEmojiName(emoji: string): string {
     description: [{ code: "en-US", content: "The ID of the channel holding the message." }],
 })
 @Parameter({
-    runtimeName: "ts",
-    name: [{ code: "en-US", content: "Message" }],
-    description: [{ code: "en-US", content: `The ts of the message to react to. ${MESSAGE_TS_DESCRIPTION}` }],
+    runtimeName: "messageId",
+    name: [{ code: "en-US", content: "Message ID" }],
+    description: [{ code: "en-US", content: `The ID of the message to react to. ${MESSAGE_ID_DESCRIPTION}` }],
 })
 @Parameter({
     runtimeName: "emoji",
@@ -56,14 +56,14 @@ export class AddReactionFunction {
         _context: FunctionContext,
         botToken: SlackBotToken,
         channelId: string,
-        ts: number,
+        messageId: string,
         emoji: string
     ): Promise<boolean> {
         const client = getSlackClient(botToken);
         try {
             const result = await client.reactions.add({
                 channel: channelId,
-                timestamp: toSlackTs(ts, CODE),
+                timestamp: toMessageTs(messageId, CODE),
                 name: normalizeEmojiName(emoji),
             });
             return result.ok === true;

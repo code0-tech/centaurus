@@ -25,5 +25,5 @@ export const EMBED_PARAMETER = {
     optional: true,
 };
 
-export const MESSAGE_TS_DESCRIPTION =
-    "Use the ts of a message from a previous step, e.g. of Post message or of a Slack trigger.";
+export const MESSAGE_ID_DESCRIPTION =
+    "Format: 1712345678.123456, i.e. the message's `ts` from a previous step such as Post message or a Slack trigger. A message link copied from Slack (Copy link) works as well.";

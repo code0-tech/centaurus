@@ -25,10 +25,10 @@ different tokens, so each has its own token type (a single text value):
 | Function | Signature | Description |
 |----------|-----------|-------------|
 | `slackPostMessage` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE` | Post a message to a channel, private group or DM. |
-| `slackReplyInThread` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, threadTs: DATE, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE` | Reply in an existing thread. |
-| `slackUpdateMessage` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, ts: DATE, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE` | Replace the content of a message the app posted. |
-| `slackDeleteMessage` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, ts: DATE): BOOLEAN` | Delete a message the app posted. |
-| `slackAddReaction` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, ts: DATE, emoji: TEXT): BOOLEAN` | Add an emoji reaction to a message. |
+| `slackReplyInThread` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, parentMessageId: TEXT, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE` | Reply in an existing thread. |
+| `slackUpdateMessage` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, messageId: TEXT, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE` | Replace the content of a message the app posted. |
+| `slackDeleteMessage` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, messageId: TEXT): BOOLEAN` | Delete a message the app posted. |
+| `slackAddReaction` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, messageId: TEXT, emoji: TEXT): BOOLEAN` | Add an emoji reaction to a message. |
 | `slackSendDirectMessage` | `(botToken: SLACK_BOT_TOKEN, user: TEXT, text?: TEXT, embed?: SLACK_EMBED): SLACK_MESSAGE` | Open (or reuse) an IM channel with a user, then post into it. |
 | `slackUploadFile` | `(botToken: SLACK_BOT_TOKEN, channelId: TEXT, file: FILE<TEXT>, title?: TEXT): SLACK_FILE` | Upload a file and share it into a channel. |
 | `slackCreateChannel` | `(botToken: SLACK_BOT_TOKEN, name: TEXT, isPrivate?: BOOLEAN): SLACK_CHANNEL` | Create a public or private channel. |
@@ -94,10 +94,10 @@ Every trigger takes the **Slack app token** to listen with. Every trigger except
 Leave it empty to trigger for every channel the app is in, or set it to a channel
 ID (e.g. `C0123456789`) to trigger only for that channel.
 
-`SlackReactionAdded` also has an optional **Message** setting to trigger only for
-reactions to one message, e.g. an approval request. Paste the message link from
-Slack (*Copy link*) or enter its timestamp (`1712345678.123456`); the link is
-converted to the timestamp.
+`SlackReactionAdded` also has an optional **Message ID** setting to trigger only
+for reactions to one message, e.g. an approval request. Paste the message link
+from Slack (*Copy link*) or enter its ID (`1712345678.123456`); the link is
+converted to the ID.
 
 ### Replying to slash commands
 
@@ -135,14 +135,15 @@ registered with `@Identifier` / `@Name` / `@Schema`:
 | `SLACK_EMBED_FIELD` | One label/value pair of an embed. |
 
 All points in time are `DATE` values (Unix microseconds): the `created` and
-`last_set` fields of `SLACK_CHANNEL` and `SLACK_FILE`, and the message timestamps
-`ts`, `thread_ts` and `event_ts` of `SLACK_MESSAGE`, `SLACK_REACTION` and the event
-payloads (as well as `event_time` and `channel.created`).
+`last_set` fields of `SLACK_CHANNEL` and `SLACK_FILE`, and `event_ts` of
+`SLACK_REACTION` and the event payloads (as well as `event_time` and
+`channel.created`).
 
-Slack identifies a message by its timestamp (`1712345678.123456`, Unix seconds
-with six decimals). That is exactly a point in time in microseconds, so the
-conversion to `DATE` is lossless: pass the `ts` of a `SLACK_MESSAGE` or of a
-trigger payload straight into the `ts` / `threadTs` parameter of the next step.
+Slack identifies a message within its channel by its `ts`
+(`1712345678.123456`). It is an ID, not a date, so `ts`, `thread_ts` and the
+`item.ts` of a reaction are `TEXT` values in exactly that form. Pass them
+unchanged into the `messageId` / `parentMessageId` parameter of the next step;
+those parameters also accept a message link copied from Slack.
 
 The five event payload schemas live next to them; the four Events API ones share
 the envelope built by `src/data_types/slackEventEnvelope.ts`.

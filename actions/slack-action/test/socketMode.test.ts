@@ -18,7 +18,7 @@ const flow = (
     appToken: string | undefined,
     type: string,
     channelId?: string,
-    messageTs?: string
+    messageId?: string
 ): ActionFlow =>
     ({
         flowId: BigInt(flowId),
@@ -29,7 +29,7 @@ const flow = (
                 ? []
                 : [{ flowSettingId: "appToken", value: constructValue(appToken) }]),
             ...(channelId === undefined ? [] : [{ flowSettingId: "channelId", value: constructValue(channelId) }]),
-            ...(messageTs === undefined ? [] : [{ flowSettingId: "messageTs", value: constructValue(messageTs) }]),
+            ...(messageId === undefined ? [] : [{ flowSettingId: "messageId", value: constructValue(messageId) }]),
         ],
     }) as unknown as ActionFlow;
 
@@ -118,7 +118,7 @@ describe("normalizeMessageTs", () => {
 });
 
 describe("toFlowPayload", () => {
-    it("turns the points in time of an Events API delivery into DATE values", () => {
+    it("turns the points in time of an Events API delivery into DATE values and keeps message IDs as text", () => {
         expect(
             toFlowPayload("events_api", {
                 type: "event_callback",
@@ -128,19 +128,19 @@ describe("toFlowPayload", () => {
         ).toEqual({
             type: "event_callback",
             event_time: 1712345678000000,
-            event: { type: "message", channel: "C1", ts: 1712345678123456, event_ts: 1712345678123456 },
+            event: { type: "message", channel: "C1", ts: "1712345678.123456", event_ts: 1712345678123456 },
         });
     });
 
-    it("converts the reacted message and a created channel", () => {
+    it("keeps the reacted message ID and converts a created channel", () => {
         const reaction = toFlowPayload("events_api", {
             event: { type: "reaction_added", item: { type: "message", channel: "C1", ts: "1712345678.000001" } },
-        }) as { event: { item: { ts: number } } };
+        }) as { event: { item: { ts: string } } };
         const created = toFlowPayload("events_api", {
             event: { type: "channel_created", channel: { id: "C1", created: 1712345678 } },
         }) as { event: { channel: { created: number } } };
 
-        expect(reaction.event.item.ts).toBe(1712345678000001);
+        expect(reaction.event.item.ts).toBe("1712345678.000001");
         expect(created.event.channel.created).toBe(1712345678000000);
     });
 
@@ -196,10 +196,7 @@ describe("SlackSocketManager", () => {
 
         expect(delivery.ack).toHaveBeenCalledOnce();
         expect(action.fire.mock.calls.map(([flowId]) => flowId)).toEqual([10n, 11n]);
-        expect(action.fire).toHaveBeenCalledWith(10n, {
-            ...delivery.body,
-            event: { ...delivery.body.event, ts: 1712345678123456 },
-        });
+        expect(action.fire).toHaveBeenCalledWith(10n, delivery.body);
     });
 
     it("fires reaction flows only for the selected message", async () => {

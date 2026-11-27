@@ -9,15 +9,15 @@ import {
     Parameter,
     Signature,
 } from "@code0-tech/hercules";
-import { getSlackClient, toRuntimeError, toSlackTs } from "../helpers.js";
+import { getSlackClient, toRuntimeError, toMessageTs } from "../helpers.js";
 import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
-import { MESSAGE_TS_DESCRIPTION } from "./messageParameters.js";
+import { MESSAGE_ID_DESCRIPTION } from "./messageParameters.js";
 
 const CODE = "SLACK_DELETE_MESSAGE_FAILED";
 
 @Identifier("slackDeleteMessage")
 @DisplayIcon("tabler:brand-slack")
-@Signature("(botToken: SLACK_BOT_TOKEN, channelId: TEXT, ts: DATE): BOOLEAN")
+@Signature("(botToken: SLACK_BOT_TOKEN, channelId: TEXT, messageId: TEXT): BOOLEAN")
 @Name({ code: "en-US", content: "Delete message" })
 @DisplayMessage({ code: "en-US", content: "Delete Slack message in ${channelId}" })
 @Documentation({
@@ -33,15 +33,15 @@ const CODE = "SLACK_DELETE_MESSAGE_FAILED";
     description: [{ code: "en-US", content: "The ID of the channel holding the message." }],
 })
 @Parameter({
-    runtimeName: "ts",
-    name: [{ code: "en-US", content: "Message" }],
-    description: [{ code: "en-US", content: `The ts of the message to delete. ${MESSAGE_TS_DESCRIPTION}` }],
+    runtimeName: "messageId",
+    name: [{ code: "en-US", content: "Message ID" }],
+    description: [{ code: "en-US", content: `The ID of the message to delete. ${MESSAGE_ID_DESCRIPTION}` }],
 })
 export class DeleteMessageFunction {
-    async run(_context: FunctionContext, botToken: SlackBotToken, channelId: string, ts: number): Promise<boolean> {
+    async run(_context: FunctionContext, botToken: SlackBotToken, channelId: string, messageId: string): Promise<boolean> {
         const client = getSlackClient(botToken);
         try {
-            const result = await client.chat.delete({ channel: channelId, ts: toSlackTs(ts, CODE) });
+            const result = await client.chat.delete({ channel: channelId, ts: toMessageTs(messageId, CODE) });
             return result.ok === true;
         } catch (error) {
             throw toRuntimeError(CODE, error);

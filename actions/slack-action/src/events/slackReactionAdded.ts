@@ -8,7 +8,7 @@ import { Description, DisplayIcon, DisplayMessage, EventSetting, Identifier, Nam
 @Name({ code: "en-US", content: "Slack reaction added" })
 @Description({ code: "en-US", content: "Triggered when a member adds an emoji reaction to a message or file (reaction_added). Use it to drive approval and reaction-role flows." })
 @DisplayMessage({ code: "en-US", content: "Slack reaction added" })
-@Signature("(appToken: SLACK_APP_TOKEN, channelId?: TEXT, messageTs?: TEXT): SlackReactionAddedEventPayload")
+@Signature("(appToken: SLACK_APP_TOKEN, channelId?: TEXT, messageId?: TEXT): SlackReactionAddedEventPayload")
 @EventSetting({
     identifier: "appToken",
     name: [{ code: "en-US", content: "Slack app token" }],
@@ -33,13 +33,13 @@ import { Description, DisplayIcon, DisplayMessage, EventSetting, Identifier, Nam
     optional: true,
 })
 @EventSetting({
-    identifier: "messageTs",
-    name: [{ code: "en-US", content: "Message" }],
+    identifier: "messageId",
+    name: [{ code: "en-US", content: "Message ID" }],
     description: [
         {
             code: "en-US",
             content:
-                "Only trigger for reactions to this message. Enter its timestamp (e.g. 1712345678.123456) or paste its link from Slack (Copy link). Leave empty to trigger for every message.",
+                "Only trigger for reactions to this message. Enter its ID in the form 1712345678.123456 (its `ts`) or paste its link from Slack (Copy link). Leave empty to trigger for every message.",
         },
     ],
     linkedDataTypeIdentifiers: ["TEXT"],

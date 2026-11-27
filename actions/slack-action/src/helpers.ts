@@ -64,10 +64,9 @@ export function normalizeMessageTs(value: string): string {
 }
 
 /**
- * A Slack message timestamp (`1712345678.123456`) is Unix seconds with six
- * decimals, i.e. a point in time in microseconds - exactly what a `DATE`
- * holds. The conversion is lossless, so a message's `ts` can travel through a
- * flow as a `DATE` and still identify the message.
+ * Converts one of Slack's event timestamps (`1712345678.123456`, Unix seconds
+ * with six decimals) into a `DATE` in Unix microseconds. Only for real points
+ * in time such as `event_ts`; message IDs (`ts`) stay text.
  */
 export function fromSlackTs(ts: string | null | undefined): number | null | undefined {
     if (ts === null || ts === undefined) {
@@ -81,19 +80,19 @@ export function fromSlackTs(ts: string | null | undefined): number | null | unde
 }
 
 /**
- * The inverse of {@link fromSlackTs}: turns a `DATE` back into the timestamp
- * Slack identifies the message by. A text value (a timestamp or a copied
- * message link) is accepted as well.
+ * Slack identifies a message within its channel by its `ts`
+ * (`1712345678.123456`). Accepts that form or a message link copied from Slack
+ * and returns the `ts` the Web API expects.
  */
-export function toSlackTs(value: number | string | null | undefined, code: string): string {
-    if (typeof value === "string" && value.trim()) {
-        return normalizeMessageTs(value);
+export function toMessageTs(value: string | null | undefined, code: string): string {
+    const ts = typeof value === "string" ? normalizeMessageTs(value) : "";
+    if (!/^\d+\.\d{6}$/.test(ts)) {
+        throw new RuntimeError(
+            code,
+            `"${value ?? ""}" is not a valid Slack message ID. Use the form 1712345678.123456 or a link to the message.`
+        );
     }
-    if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
-        throw new RuntimeError(code, "No valid message timestamp given.");
-    }
-    const micros = Math.round(value);
-    return `${Math.floor(micros / 1_000_000)}.${String(micros % 1_000_000).padStart(6, "0")}`;
+    return ts;
 }
 
 /**

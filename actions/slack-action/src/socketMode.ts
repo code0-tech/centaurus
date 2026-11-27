@@ -76,9 +76,9 @@ export function routeDelivery(type: string, body: SlackSocketDelivery["body"]): 
 }
 
 /**
- * Converts the points in time of a delivery into `DATE` values, so a message's
- * `ts` from a trigger can be passed straight into the DATE parameters of the
- * functions. Message timestamps are kept lossless (see {@link fromSlackTs}).
+ * Converts the points in time of a delivery into `DATE` values. Message IDs
+ * (`ts`, `thread_ts`, `item.ts`) stay text, so they can be passed straight into
+ * the message ID parameters of the functions.
  */
 export function toFlowPayload(type: string, body: SlackSocketDelivery["body"]): PlainValue {
     if (type !== "events_api" || !body?.event) {
@@ -91,10 +91,7 @@ export function toFlowPayload(type: string, body: SlackSocketDelivery["body"]): 
         event_time: fromUnixSeconds(body.event_time),
         event: {
             ...event,
-            ts: fromSlackTs(event.ts),
-            thread_ts: fromSlackTs(event.thread_ts),
             event_ts: fromSlackTs(event.event_ts),
-            item: event.item ? { ...event.item, ts: fromSlackTs(event.item.ts) } : event.item,
             channel:
                 event.channel && typeof event.channel === "object"
                     ? { ...event.channel, created: fromUnixSeconds(event.channel.created) }
@@ -125,9 +122,9 @@ export function channelFilter(flow: ActionFlow): string | undefined {
     return textSetting(flow, "channelId");
 }
 
-/** The optional `messageTs` setting of a flow, normalized, or `undefined` for "every message". */
+/** The optional `messageId` setting of a flow, normalized, or `undefined` for "every message". */
 export function messageFilter(flow: ActionFlow): string | undefined {
-    const value = textSetting(flow, "messageTs");
+    const value = textSetting(flow, "messageId");
     return value === undefined ? undefined : normalizeMessageTs(value);
 }
 
