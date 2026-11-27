@@ -1,7 +1,7 @@
 {
   "name": "notion",
   "identifier": "notion-action",
-  "description": "Notion integration: read and write pages, query databases, append blocks, search, and poll for changes.",
+  "description": "Notion integration: read and write pages, query databases, search, and poll for changes.",
   "deployment": {
     "docker": {
       "image": "ghcr.io/code0-tech/centaurus/ci-builds/notion-action"
