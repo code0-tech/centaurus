@@ -14,6 +14,31 @@ import { getSlackClient, toRuntimeError } from "../helpers.js";
 import { BOT_TOKEN_PARAMETER, SlackBotToken } from "../data_types/slackTokens.js";
 import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
 
+const CODE = "SLACK_CREATE_CHANNEL_FAILED";
+const MAX_CHANNEL_NAME_LENGTH = 80;
+
+/**
+ * Slack only accepts lowercase channel names of at most 80 characters made of
+ * letters, digits, hyphens and underscores. Turn whatever the user typed
+ * (`#Release Planning Q3!`) into such a name (`release-planning-q3`):
+ * drop a leading #, strip diacritics, lowercase, and collapse every run of
+ * other characters into a single hyphen.
+ */
+export function normalizeChannelName(name: string): string {
+    return name
+        .trim()
+        .replace(/^#+/, "")
+        .normalize("NFKD")
+        .replace(/\p{M}/gu, "")
+        .replace(/ß/g, "ss")
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, "-")
+        .replace(/-{2,}/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, MAX_CHANNEL_NAME_LENGTH)
+        .replace(/-+$/, "");
+}
+
 @Identifier("slackCreateChannel")
 @DisplayIcon("tabler:brand-slack")
 @Signature("(botToken: SLACK_BOT_TOKEN, name: TEXT, isPrivate?: BOOLEAN): SLACK_CHANNEL")
@@ -32,7 +57,7 @@ import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
     description: [
         {
             code: "en-US",
-            content: "The channel name without the leading #. Lowercase, max 80 characters, letters, digits, hyphens and underscores only.",
+            content: "The channel name. Any text is accepted and converted to a valid Slack channel name.",
         },
     ],
 })
@@ -44,15 +69,19 @@ import { parseSlackChannel, SlackChannel } from "../data_types/slackChannel.js";
 })
 export class CreateChannelFunction {
     async run(_context: FunctionContext, botToken: SlackBotToken, name: string, isPrivate?: boolean): Promise<SlackChannel> {
+        const channelName = normalizeChannelName(name);
+        if (!channelName) {
+            throw new RuntimeError(CODE, `"${name}" does not contain any characters usable in a Slack channel name.`);
+        }
         const client = getSlackClient(botToken);
         try {
-            const result = await client.conversations.create({ name, is_private: isPrivate ?? false });
+            const result = await client.conversations.create({ name: channelName, is_private: isPrivate ?? false });
             if (!result.channel) {
-                throw new RuntimeError("SLACK_CREATE_CHANNEL_FAILED", `Slack did not return a channel for ${name}.`);
+                throw new RuntimeError(CODE, `Slack did not return a channel for ${channelName}.`);
             }
             return parseSlackChannel(result.channel);
         } catch (error) {
-            throw toRuntimeError("SLACK_CREATE_CHANNEL_FAILED", error);
+            throw toRuntimeError(CODE, error);
         }
     }
 }

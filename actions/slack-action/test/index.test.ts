@@ -16,6 +16,7 @@ import {
     toSlackTs,
 } from "../src/helpers.js";
 import { normalizeEmojiName } from "../src/functions/addReactionFunction.js";
+import { normalizeChannelName } from "../src/functions/createChannelFunction.js";
 
 describe("SlackMessageSchema", () => {
     it("parses a chat.postMessage response", () => {
@@ -142,6 +143,24 @@ describe("normalizeEmojiName", () => {
 
     it("keeps inner colons such as skin tone modifiers", () => {
         expect(normalizeEmojiName(":thumbsup::skin-tone-2:")).toBe("thumbsup::skin-tone-2");
+    });
+});
+
+describe("normalizeChannelName", () => {
+    it("turns arbitrary text into a valid Slack channel name", () => {
+        expect(normalizeChannelName("#Release Planning Q3!")).toBe("release-planning-q3");
+        expect(normalizeChannelName("  Über  Straße / Team_A  ")).toBe("uber-strasse-team_a");
+        expect(normalizeChannelName("already-valid_name")).toBe("already-valid_name");
+    });
+
+    it("caps the name at 80 characters without a trailing hyphen", () => {
+        const name = normalizeChannelName(`${"a".repeat(79)} b`);
+        expect(name).toBe("a".repeat(79));
+        expect(normalizeChannelName("x".repeat(100))).toHaveLength(80);
+    });
+
+    it("returns an empty string when nothing usable is left", () => {
+        expect(normalizeChannelName("#!?")).toBe("");
     });
 });
 
