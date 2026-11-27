@@ -85,15 +85,15 @@ describe("Notion API client", () => {
         expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "db-ds" }, properties: {} } });
     });
 
-    it("accepts a single block where a list of blocks is expected", async () => {
+    it("sends page content as Notion-flavored Markdown", async () => {
         const client = new NotionClient(TOKEN);
-        const block = { type: "paragraph" as const, paragraph: { rich_text: [] } };
         http.request.mockResolvedValueOnce({ data: page() });
-        await client.createPage("db", {}, block);
-        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "db-ds" }, properties: {}, children: [block] } });
-        http.request.mockResolvedValueOnce({ data: { object: "list", type: "block", block: {}, results: [], has_more: false, next_cursor: null } });
-        await client.appendBlocks("page", block);
-        expect(http.request).toHaveBeenLastCalledWith(expect.objectContaining({ method: "PATCH", url: "/blocks/page/children", data: { children: [block] } }));
+        await client.createPage("db", {}, "# Summary\n\n- [ ] Ship");
+        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "db-ds" }, properties: {}, markdown: "# Summary\n\n- [ ] Ship", markdown_version: "v2" } });
+        http.request.mockResolvedValueOnce({ data: page() });
+        await client.createPage("db", {}, "");
+        expect(http.request.mock.lastCall?.[0].data).not.toHaveProperty("markdown");
+        await expect(client.createPage("db", {}, 1 as unknown as string)).rejects.toMatchObject({ code: "NOTION_INVALID_MARKDOWN" });
     });
 
     it("validates responses without dropping nested Notion fields", async () => {
@@ -104,11 +104,8 @@ describe("Notion API client", () => {
         await expect(client.getPage("page-2")).rejects.toMatchObject({ code: "NOTION_INVALID_RESPONSE" });
     });
 
-    it("rejects invalid block counts and empty IDs before issuing requests", async () => {
+    it("rejects empty IDs before issuing requests", async () => {
         const client = new NotionClient(TOKEN);
-        expect(() => client.appendBlocks("page", [])).toThrow();
-        expect(() => client.appendBlocks("page", Array.from({ length: 101 }, () => ({ type: "paragraph" as const, paragraph: { rich_text: [] } })))).toThrow();
-        await expect(client.createPage("db", {}, Array.from({ length: 101 }, () => ({ type: "paragraph" as const, paragraph: { rich_text: [] } })))).rejects.toThrow();
         expect(() => client.getPage(" ")).toThrow();
         expect(http.request).not.toHaveBeenCalled();
         expect(fetchMock.databaseLookups).not.toHaveBeenCalled();

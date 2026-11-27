@@ -4,7 +4,6 @@ import { NotionUpdatePageFunction } from "../../functions/notionUpdatePageFuncti
 import { NotionGetPageFunction } from "../../functions/notionGetPageFunction.js";
 import { NotionArchivePageFunction } from "../../functions/notionArchivePageFunction.js";
 import { NotionQueryDatabaseFunction } from "../../functions/notionQueryDatabaseFunction.js";
-import { NotionAppendBlocksFunction } from "../../functions/notionAppendBlocksFunction.js";
 import { NotionSearchFunction } from "../../functions/notionSearchFunction.js";
 import { context, list, page, parsed, TOKEN } from "../fixtures.js";
 import { mockNotionHttp } from "../httpMock.js";
@@ -15,14 +14,14 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("Notion functions", () => {
     const properties = { Name: { title: [{ type: "text" as const, text: { content: "Task" } }] } };
-    const children = [{ object: "block" as const, type: "paragraph" as const, paragraph: { rich_text: [{ type: "text" as const, text: { content: "Notes" } }] } }];
+    const markdown = "## Notes\n\nSome **bold** text";
 
-    it("creates a page with its database parent, properties and initial blocks", async () => {
+    it("creates a page with its database parent, properties and Markdown content", async () => {
         http.request.mockResolvedValue({ data: page() });
-        expect(await new NotionCreatePageFunction().run(context(), TOKEN, "database-1", properties, children)).toEqual(parsed(page()));
-        expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "database-1-ds" }, properties, children } });
-        await new NotionCreatePageFunction().run(context(), TOKEN, "database-1", properties);
-        expect(http.request.mock.lastCall?.[0].data).not.toHaveProperty("children");
+        expect(await new NotionCreatePageFunction().run(context(), TOKEN, "database-1", properties, markdown)).toEqual(parsed(page()));
+        expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "database-1-ds" }, properties, markdown, markdown_version: "v2" } });
+        await new NotionCreatePageFunction().run(context(), TOKEN, "database-1", properties, null);
+        expect(http.request.mock.lastCall?.[0].data).not.toHaveProperty("markdown");
     });
 
     it("updates only the requested properties", async () => {
@@ -51,13 +50,6 @@ describe("Notion functions", () => {
         const sorts = [{ property: "Name", direction: "ascending" as const }];
         expect((await new NotionQueryDatabaseFunction().run(context(), TOKEN, "db", filter, sorts)).results).toHaveLength(1);
         expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { filter, sorts, page_size: 100 } });
-    });
-
-    it("appends block input and preserves block-specific response fields", async () => {
-        const response = list([{ object: "block", id: "block-1" }], null, "block");
-        http.request.mockResolvedValue({ data: response });
-        expect(await new NotionAppendBlocksFunction().run(context(), TOKEN, "page-1", children)).toEqual(response);
-        expect(http.request).toHaveBeenCalledWith({ method: "PATCH", url: "/blocks/page-1/children", data: { children } });
     });
 
     it("searches with the requested object filter", async () => {

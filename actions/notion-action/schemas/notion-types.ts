@@ -1,7 +1,6 @@
 // Source aliases only: every API shape comes from the pinned official SDK.
 // These aliases are converted into OpenAPI components before Zod generation.
 import type {
-    AppendBlockChildrenParameters, AppendBlockChildrenResponse,
     CreatePageParameters, DatabaseObjectResponse, PageObjectResponse,
     QueryDataSourceParameters, QueryDataSourceResponse, SearchParameters, SearchResponse,
     UserObjectResponse,
@@ -10,8 +9,6 @@ import type {
 export type NotionPage = PageObjectResponse;
 export type NotionDatabase = DatabaseObjectResponse;
 export type NotionUser = UserObjectResponse;
-export type NotionBlock = AppendBlockChildrenParameters["children"][number];
-export type NotionBlockList = AppendBlockChildrenResponse;
 export type NotionQueryResult = QueryDataSourceResponse;
 export type NotionSearchResult = SearchResponse;
 export type NotionProperties = NonNullable<CreatePageParameters["properties"]>;

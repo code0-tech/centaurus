@@ -1,6 +1,5 @@
 import { RuntimeError } from "@code0-tech/hercules";
 import { z } from "zod";
-import { NotionRichTextSchema } from "../../data_types/notionRichText.js";
 import { NotionPropertyValueSchema, type NotionPropertyValue } from "../../data_types/notionPropertyValue.js";
 
 /** A DATE (Unix microseconds) or ISO 8601 text, as Notion expects it: ISO 8601 text. */
@@ -14,44 +13,60 @@ const dateInput = z.union([z.string(), z.number()]).transform((value, ctx) => {
     return date.toISOString();
 });
 
-const propertyInputs = {
-    title: z.union([z.string().max(2000), z.array(NotionRichTextSchema)]),
-    rich_text: z.union([z.string().max(2000), z.array(NotionRichTextSchema)]),
-    number: z.number().nullable(),
-    checkbox: z.boolean(),
-    select: z.string().nullable(),
-    status: z.string().nullable(),
-    multi_select: z.array(z.string()),
-    date: z.union([dateInput, z.object({ start: dateInput, end: dateInput.nullable().optional(), time_zone: z.string().nullable().optional() })]).nullable(),
-    url: z.string().nullable(),
-    email: z.string().nullable(),
-    phone_number: z.string().nullable(),
-    people: z.array(z.string()),
-    relation: z.array(z.string()),
-};
+/** One flow parameter per kind of value; each property type reads the one it needs. */
+const PropertyInputSchema = z.object({
+    text: z.string().max(2000).nullish(),
+    number: z.number().nullish(),
+    checked: z.boolean().nullish(),
+    date: dateInput.nullish(),
+    endDate: dateInput.nullish(),
+    values: z.array(z.string()).nullish(),
+});
+export type PropertyInput = z.input<typeof PropertyInputSchema>;
+type Input = z.output<typeof PropertyInputSchema>;
 
-export const PROPERTY_TYPES = Object.keys(propertyInputs) as (keyof typeof propertyInputs)[];
+const text = (input: Input) => input.text ? [{ type: "text", text: { content: input.text } }] : [];
+const option = (input: Input) => input.text ? { name: input.text } : null;
+const plain = (input: Input) => input.text || null;
+
+const builders = {
+    title: text,
+    rich_text: text,
+    number: (input: Input) => input.number ?? null,
+    checkbox: (input: Input) => input.checked ?? false,
+    select: option,
+    status: option,
+    multi_select: (input: Input) => (input.values ?? []).map((name) => ({ name })),
+    date: (input: Input) => {
+        if (input.date == null) {
+            if (input.endDate != null) throw new RuntimeError("NOTION_INVALID_PROPERTY_VALUE", "An end date needs a start date.");
+            return null;
+        }
+        return { start: input.date, ...(input.endDate != null ? { end: input.endDate } : {}) };
+    },
+    url: plain,
+    email: plain,
+    phone_number: plain,
+    people: (input: Input) => (input.values ?? []).map((id) => ({ id })),
+    relation: (input: Input) => (input.values ?? []).map((id) => ({ id })),
+} satisfies Record<string, (input: Input) => unknown>;
+
+export const PROPERTY_TYPES = Object.keys(builders) as (keyof typeof builders)[];
 
 /** The writable property types as a signature type, so the flow editor offers them as a selection. */
 export const PROPERTY_TYPE_SIGNATURE = PROPERTY_TYPES.map((type) => `"${type}"`).join(" | ");
-export const PROPERTY_VALUE_SIGNATURE = "string | number | boolean | DATE | string[] | NOTION_RICH_TEXT[] | { start: DATE | string; end?: DATE | string; time_zone?: string } | null";
-
 export const PROPERTY_TYPE_DESCRIPTION = "Type of the database column: title, rich_text, number, checkbox, select, status, multi_select, date, url, email, phone_number, people or relation.";
-export const PROPERTY_VALUE_DESCRIPTION = "Text for title/rich_text/select/status/url/email/phone_number, a number or boolean for number/checkbox, names for multi_select, user or page IDs for people/relation, a DATE, ISO date text or { start, end?, time_zone? } for date. null clears nullable properties.";
 
-/** Builds a writable Notion property value from a column type and a flow value (used by notionSetProperty). */
-export function buildPropertyValue(type: string, value: unknown): NotionPropertyValue {
-    if (!Object.hasOwn(propertyInputs, type)) throw new RuntimeError("NOTION_INVALID_PROPERTY_TYPE", `Unsupported writable property type: ${type}`);
-    const parsed = propertyInputs[type as keyof typeof propertyInputs].safeParse(value);
+/**
+ * Builds a writable Notion property value from a column type and the flow
+ * parameter that belongs to it (used by notionSetProperty). A missing value
+ * clears the property (a checkbox becomes unchecked).
+ */
+export function buildPropertyValue(type: string, input: PropertyInput): NotionPropertyValue {
+    if (!Object.hasOwn(builders, type)) throw new RuntimeError("NOTION_INVALID_PROPERTY_TYPE", `Unsupported writable property type: ${type}`);
+    const parsed = PropertyInputSchema.safeParse(input);
     if (!parsed.success) throw new RuntimeError("NOTION_INVALID_PROPERTY_VALUE", `Invalid value for Notion property type ${type}.`);
-    const input = parsed.data;
-    let nested: unknown = input;
-    if ((type === "title" || type === "rich_text") && typeof input === "string") nested = [{ type: "text", text: { content: input } }];
-    if ((type === "select" || type === "status") && input !== null) nested = { name: input };
-    if (type === "multi_select") nested = (input as string[]).map((name) => ({ name }));
-    if (type === "people" || type === "relation") nested = (input as string[]).map((id) => ({ id }));
-    if (type === "date" && typeof input === "string") nested = { start: input };
-    const result = NotionPropertyValueSchema.safeParse({ [type]: nested });
+    const result = NotionPropertyValueSchema.safeParse({ [type]: builders[type as keyof typeof builders](parsed.data) });
     if (!result.success) throw new RuntimeError("NOTION_INVALID_PROPERTY_VALUE", `Invalid value for Notion property type ${type}.`);
     return result.data;
 }

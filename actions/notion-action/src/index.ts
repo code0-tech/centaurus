@@ -7,8 +7,6 @@ import { NotionPropertyValueDataType } from "./data_types/notionPropertyValue.js
 import { NotionUserDataType } from "./data_types/notionUser.js"
 import { NotionPageDataType } from "./data_types/notionPage.js"
 import { NotionDatabaseDataType } from "./data_types/notionDatabase.js"
-import { NotionBlockDataType } from "./data_types/notionBlock.js"
-import { NotionBlockListDataType } from "./data_types/notionBlockList.js"
 import { NotionQueryResultDataType } from "./data_types/notionQueryResult.js"
 import { NotionSearchResultDataType } from "./data_types/notionSearchResult.js"
 import { NotionPropertiesDataType } from "./data_types/notionProperties.js"
@@ -20,9 +18,7 @@ import { NotionUpdatePageFunction } from "./functions/notionUpdatePageFunction.j
 import { NotionGetPageFunction } from "./functions/notionGetPageFunction.js"
 import { NotionArchivePageFunction } from "./functions/notionArchivePageFunction.js"
 import { NotionQueryDatabaseFunction } from "./functions/notionQueryDatabaseFunction.js"
-import { NotionAppendBlocksFunction } from "./functions/notionAppendBlocksFunction.js"
 import { NotionSearchFunction } from "./functions/notionSearchFunction.js"
-import { NotionCreateBlockFunction } from "./functions/utils/notionCreateBlockFunction.js"
 import { NotionSetPropertyFunction } from "./functions/utils/notionSetPropertyFunction.js"
 import { NotionDatabaseItemCreated } from "./events/notionDatabaseItemCreated.js"
 import { NotionDatabaseItemUpdated } from "./events/notionDatabaseItemUpdated.js"
@@ -47,8 +43,6 @@ action.registerDataTypeClass(NotionPropertyValueDataType)
 action.registerDataTypeClass(NotionUserDataType)
 action.registerDataTypeClass(NotionPageDataType)
 action.registerDataTypeClass(NotionDatabaseDataType)
-action.registerDataTypeClass(NotionBlockDataType)
-action.registerDataTypeClass(NotionBlockListDataType)
 action.registerDataTypeClass(NotionQueryResultDataType)
 action.registerDataTypeClass(NotionSearchResultDataType)
 action.registerDataTypeClass(NotionPropertiesDataType)
@@ -60,9 +54,7 @@ action.registerRuntimeFunction(NotionUpdatePageFunction)
 action.registerRuntimeFunction(NotionGetPageFunction)
 action.registerRuntimeFunction(NotionArchivePageFunction)
 action.registerRuntimeFunction(NotionQueryDatabaseFunction)
-action.registerRuntimeFunction(NotionAppendBlocksFunction)
 action.registerRuntimeFunction(NotionSearchFunction)
-action.registerRuntimeFunction(NotionCreateBlockFunction)
 action.registerRuntimeFunction(NotionSetPropertyFunction)
 // Hercules registers both the runtime event and its public event definition.
 action.registerRuntimeEventClass(NotionDatabaseItemCreated)

@@ -4,9 +4,7 @@ import { z } from "zod";
 import { NotionPageSchema } from "./data_types/notionPage.js";
 import { NotionQueryResultSchema } from "./data_types/notionQueryResult.js";
 import { NotionSearchResultSchema } from "./data_types/notionSearchResult.js";
-import { NotionBlockListSchema } from "./data_types/notionBlockList.js";
 import type { NotionProperties } from "./data_types/notionProperties.js";
-import type { NotionBlock } from "./data_types/notionBlock.js";
 import type { NotionFilter } from "./data_types/notionFilter.js";
 import type { NotionSort } from "./data_types/notionSort.js";
 import type { NotionSearchFilter } from "./data_types/notionSearchFilter.js";
@@ -51,19 +49,7 @@ export function notionCredentials(integrationToken: unknown) {
     return { token: integrationToken.trim(), version: NOTION_VERSION };
 }
 
-/**
- * Flows can pass a single block (e.g. straight from notionCreateBlock) where a
- * list of blocks is expected; both are sent as a list. Unset stays unset.
- */
-// NOTION_BLOCK is a compact data type (see notionBlock.ts); Notion validates
-// the block-specific shape, so blocks are handed to the SDK as its request type.
-type SdkBlocks = Parameters<Client["blocks"]["children"]["append"]>[0]["children"];
 type SdkFilter = Parameters<Client["dataSources"]["query"]>[0]["filter"];
-
-export function toBlockList(children?: NotionBlock | NotionBlock[] | null): NotionBlock[] | undefined {
-    if (children == null) return undefined;
-    return Array.isArray(children) ? children : [children];
-}
 
 function notionId(id: string): string {
     if (!id.trim()) throw new RuntimeError("NOTION_INVALID_ID", "A Notion page or database ID is required.");
@@ -113,12 +99,17 @@ export class NotionClient {
         }
     }
 
-    async createPage(parentDatabaseId: string, properties: NotionProperties, blocks?: NotionBlock | NotionBlock[] | null) {
-        const children = toBlockList(blocks);
-        this.validateChildren(children);
+    /**
+     * Creates a page with optional content written as Notion-flavored Markdown
+     * (`markdown_version` v2, as v1 is deprecated). Empty content is omitted.
+     */
+    async createPage(parentDatabaseId: string, properties: NotionProperties, markdown?: string | null) {
+        if (markdown != null && typeof markdown !== "string") {
+            throw new RuntimeError("NOTION_INVALID_MARKDOWN", "Page content must be Markdown text.");
+        }
         const data_source_id = await this.resolveDataSourceId(parentDatabaseId);
         return this.request(() => this.sdk.pages.create({
-            parent: { data_source_id }, properties, ...(children === undefined ? {} : { children: children as SdkBlocks }),
+            parent: { data_source_id }, properties, ...(markdown ? { markdown, markdown_version: "v2" as const } : {}),
         }), NotionPageSchema);
     }
 
@@ -169,24 +160,10 @@ export class NotionClient {
         }), NotionQueryResultSchema));
     }
 
-    appendBlocks(pageId: string, blocks: NotionBlock | NotionBlock[]) {
-        const children = toBlockList(blocks) ?? [];
-        this.validateChildren(children);
-        if (!children.length) throw new RuntimeError("NOTION_INVALID_CHILDREN", "Provide at least one block.");
-        const block_id = notionId(pageId);
-        return this.request(() => this.sdk.blocks.children.append({ block_id, children: children as SdkBlocks }), NotionBlockListSchema);
-    }
-
     search(query: string, filter?: NotionSearchFilter | null) {
         return this.paginate((start_cursor) => this.request(() => this.sdk.search({
             query, page_size: 100, ...(filter == null ? {} : { filter }), ...(start_cursor ? { start_cursor } : {}),
         }), NotionSearchResultSchema));
-    }
-
-    private validateChildren(children?: NotionBlock[]) {
-        if (children && children.length > 100) {
-            throw new RuntimeError("NOTION_INVALID_CHILDREN", "A single request supports at most 100 top-level blocks.");
-        }
     }
 
     private async paginate<T extends { results: unknown[]; has_more: boolean; next_cursor: string | null }>(fetchPage: (cursor?: string) => Promise<T>): Promise<T> {

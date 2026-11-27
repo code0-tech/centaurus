@@ -55,7 +55,7 @@ for (const name of roots) if (!schemas[name]) throw new Error(`Missing root sche
 // Only response components are typed this way: request shapes keep the strings
 // Notion expects (e.g. a file property's `expiry_time`).
 const DATE_FIELDS = ["created_time", "last_edited_time", "expiry_time", "start_time", "end_time"];
-const REQUEST_ROOTS = ["NotionBlock", "NotionProperties", "NotionPropertyValue", "NotionRichText", "NotionFilter", "NotionSort", "NotionSearchFilter"];
+const REQUEST_ROOTS = ["NotionProperties", "NotionPropertyValue", "NotionRichText", "NotionFilter", "NotionSort", "NotionSearchFilter"];
 const referencedBy = (name) => [...JSON.stringify(schemas[name]).matchAll(/"\$ref":"#\/components\/schemas\/([^"]+)"/g)].map((match) => match[1]);
 const requestComponents = new Set();
 for (const pending = [...REQUEST_ROOTS]; pending.length;) {

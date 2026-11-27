@@ -27,54 +27,47 @@ Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (defa
 
 | Identifier | Parameters | Result |
 | --- | --- | --- |
-| `notionCreatePage` | `integrationToken, parentDatabaseId, properties, children?` | `NOTION_PAGE` |
+| `notionCreatePage` | `integrationToken, parentDatabaseId, properties, markdown?` | `NOTION_PAGE` |
 | `notionUpdatePage` | `integrationToken, pageId, properties` | `NOTION_PAGE` |
 | `notionGetPage` | `integrationToken, pageId` | `NOTION_PAGE` |
 | `notionArchivePage` | `integrationToken, pageId` | `boolean` (Hercules BOOLEAN) |
 | `notionQueryDatabase` | `integrationToken, databaseId, filter?, sorts?` | `NOTION_QUERY_RESULT` |
-| `notionAppendBlocks` | `integrationToken, pageId, children` (block or list) | `NOTION_BLOCK_LIST` |
 | `notionSearch` | `integrationToken, query, filter?` | `NOTION_SEARCH_RESULT` |
-| `notionCreateBlock` | `type, text?, checked?, language?, url?, bold?, italic?` | `NOTION_BLOCK` |
-| `notionSetProperty` | `name, type, value, properties?` | `NOTION_PROPERTIES` |
+| `notionSetProperty` | `name, type, text?, number?, checked?, date?, endDate?, values?, properties?` | `NOTION_PROPERTIES` |
 
 `properties` maps the existing database's property names to writable Notion values. Update sends only supplied properties. Create does not create a database or change its schema. Get retrieves page metadata/properties, not block children. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
 
 Query and search collect **all pages** of results into one response (`has_more: false`, `next_cursor: null`); large collections consume corresponding time and memory. Query filters accept the normal Notion property/timestamp filters and `and`/`or` groups. Sorts use either `property` or `timestamp` plus `direction`. Search matches titles, not full page text; its optional filter is `{ "property": "object", "value": "page" }` or `"data_source"`.
 
-Append accepts a page or block ID. Create and append take a single block or a list of blocks (e.g. from `notionCreateBlock`) and support at most 100 top-level child blocks per call. Notion validates block-specific shapes, nesting and request-size limits. API calls time out after 30 seconds. HTTP 429 is retried at most twice using `Retry-After` (up to 60 seconds); ambiguous network failures on writes are not automatically retried.
+Create takes optional page content as Markdown (`markdown`), sent as [Notion-flavored Markdown](https://developers.notion.com/guides/data-apis/migrate-to-notion-flavored-markdown) (`markdown_version: "v2"`); Notion converts it into blocks such as headings, lists, to-dos (`- [ ]`), quotes, code blocks and links. Empty content creates an empty page. API calls time out after 30 seconds. HTTP 429 is retried at most twice using `Retry-After` (up to 60 seconds); ambiguous network failures on writes are not automatically retried.
 
-### Builder examples
+### Property builder
 
-The following illustrates values produced by the builders and passed to create/update functions:
+`notionSetProperty` takes one value parameter per kind of value; the column type decides which one is read and the others are ignored:
+
+| Parameter | Used by |
+| --- | --- |
+| `text` | `title`, `rich_text`, `select`, `status` (option name), `url`, `email`, `phone_number` |
+| `number` | `number` |
+| `checked` | `checkbox` |
+| `date`, `endDate?` | `date`: a `DATE` (e.g. a page timestamp or `std::date::now`) or ISO 8601 text each |
+| `values` | `multi_select` (option names), `people` (user IDs), `relation` (page IDs) |
+
+Leaving the matching parameter empty clears the column (`checkbox`: unchecked). Text is limited to 2000 characters. Read-only properties such as formula and rollup cannot be built as write values.
 
 ```ts
 // Chain notionSetProperty nodes, each extending the previous properties:
-// notionSetProperty("Name", "title", "Ship the release")
-// notionSetProperty("Done", "checkbox", false, <previous properties>)
-// notionSetProperty("Priority", "select", "High", <previous properties>)
+// notionSetProperty("Name", "title", text: "Ship the release")
+// notionSetProperty("Done", "checkbox", checked: false, properties: <previous>)
+// notionSetProperty("Priority", "select", text: "High", properties: <previous>)
+// notionSetProperty("Due", "date", date: "2026-09-14", endDate: "2026-09-15", properties: <previous>)
 const properties = {
   Name: { title: [{ type: "text", text: { content: "Ship the release" } }] },
   Done: { checkbox: false },
   Priority: { select: { name: "High" } },
+  Due: { date: { start: "2026-09-14", end: "2026-09-15" } },
 };
-
-// notionCreateBlock("heading_2", "Summary")
-// notionCreateBlock("paragraph", "Release notes", undefined, undefined, "https://example.com", true)
-// notionCreateBlock("to_do", "Ship the release", true)
-// notionCreateBlock("code", "{ \"ok\": true }", undefined, "json")
-// notionCreateBlock("divider")
-const children = [
-  { type: "heading_2", heading_2: { rich_text: [{ type: "text", text: { content: "Summary" } }] } },
-  { type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: "Release notes", link: { url: "https://example.com" } }, annotations: { bold: true, italic: false } }] } },
-  { type: "to_do", to_do: { rich_text: [{ type: "text", text: { content: "Ship the release" } }], checked: true } },
-  { type: "code", code: { rich_text: [{ type: "text", text: { content: "{ \"ok\": true }" } }], language: "json" } },
-  { type: "divider", divider: {} },
-];
 ```
-
-Supported `notionSetProperty` types: `title`, `rich_text`, `number`, `checkbox`, `select`, `status`, `multi_select`, `date`, `url`, `email`, `phone_number`, `people`, `relation`. Text properties accept text or rich-text arrays; select/status accept a name; multi-select accepts name arrays; people/relation accept ID arrays. Date accepts a `DATE` (e.g. a page timestamp or `std::date::now`), ISO date text or `{ start, end?, time_zone? }` whose `start`/`end` may each be a `DATE` or ISO text. Nullable properties accept `null` to clear. Empty arrays clear title/rich-text/multi-select/people/relation. Read-only properties such as formula and rollup cannot be built as write values.
-
-Supported block builder types: `paragraph`, `heading_1`, `heading_2`, `heading_3`, `bulleted_list_item`, `numbered_list_item`, `to_do`, `quote`, `callout`, `code`, `toggle`, `divider`. `text` is plain text (max 2000 characters) or a list of `NOTION_RICH_TEXT` items and is ignored for `divider`. `url`, `bold` and `italic` link or format the whole plain text (ignored for `code` and for rich-text items, which carry their own formatting; mixed formatting within one block needs rich-text items). `checked` applies to `to_do` (default `false`), `language` to `code` (default `plain text`, must be a language Notion supports). Pass the resulting blocks as `children` to `notionAppendBlocks` or `notionCreatePage`.
 
 ## Polling events
 
@@ -100,9 +93,9 @@ No inbound HTTP server, public webhook URL or cron-action dependency is required
 
 ## Data types and compatibility
 
-Each data type has its own file under `src/data_types/`: the nine requested response/value types plus `NotionProperties`, `NotionFilter`, `NotionSort` and `NotionSearchFilter` for function inputs. Zod schemas describe common fields and preserve additional Notion fields. They are deliberately extensible, not exhaustive validators for every Notion block or property subtype. No `z.custom()` schemas are used. Zod is pinned to `4.4.3`, the version Hercules' embedded schema exporter is built against.
+Each data type has its own file under `src/data_types/`: the response/value types plus `NotionProperties`, `NotionFilter`, `NotionSort` and `NotionSearchFilter` for function inputs. Zod schemas describe common fields and preserve additional Notion fields. They are deliberately extensible, not exhaustive validators for every Notion block or property subtype. No `z.custom()` schemas are used. Zod is pinned to `4.4.3`, the version Hercules' embedded schema exporter is built against.
 
-`NOTION_BLOCK` and `NOTION_FILTER` are deliberately compact (a block with a `type`, a filter as a plain object) rather than the full generated Notion unions: those unions are 10–14k characters long and make the flow editor's type checker take seconds to minutes per node, so no parameter suggestions (e.g. the block of a previous `notionCreateBlock` node) appear. `notionCreateBlock` still validates its result against the full block request schema, and Notion validates everything else.
+`NOTION_FILTER` is deliberately compact (a plain object) rather than the full generated Notion union: that union is over 10k characters long and makes the flow editor's type checker take seconds to minutes per node, so no parameter suggestions appear. Notion validates the filter.
 
 Points in time in responses (`created_time`, `last_edited_time`, file `expiry_time`, calendar `start_time`/`end_time`) are `DATE` values, i.e. Unix microseconds (UTC); the client converts Notion's ISO 8601 strings before validating a response. Values flows send to Notion keep Notion's formats: filter timestamps and date property values (`{ start, end, time_zone }`) are sent as ISO 8601 text, because Notion distinguishes date-only values and time zones that a `DATE` cannot express. `notionSetProperty` also accepts a `DATE` for a date property and converts it to an ISO 8601 date-time (UTC).
 
