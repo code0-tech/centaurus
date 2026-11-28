@@ -63,7 +63,7 @@ No inbound HTTP server, public webhook URL or cron-action dependency is required
 
 ## Data types and compatibility
 
-Each data type has its own file under `src/data_types/`: the response/value types; `notionQueryResult.ts` only validates the triggers' data source queries and is not registered as a data type. Zod schemas describe common fields and preserve additional Notion fields. They are deliberately extensible, not exhaustive validators for every Notion block or property subtype. No `z.custom()` schemas are used. Zod is pinned to `4.4.3`, the version Hercules' embedded schema exporter is built against.
+Each data type has its own file under `src/data_types/`. Zod schemas describe common fields and preserve additional Notion fields. They are deliberately extensible, not exhaustive validators for every Notion block or property subtype. No `z.custom()` schemas are used. Zod is pinned to `4.4.3`, the version Hercules' embedded schema exporter is built against.
 
 Points in time in responses (`created_time`, `last_edited_time`, file `expiry_time`, calendar `start_time`/`end_time`) are `DATE` values, i.e. Unix microseconds (UTC); the client converts Notion's ISO 8601 strings before validating a response. The triggers' query filters send timestamps to Notion as ISO 8601 text.
 
