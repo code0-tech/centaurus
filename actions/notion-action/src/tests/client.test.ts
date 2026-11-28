@@ -81,19 +81,20 @@ describe("Notion API client", () => {
         await client.search("Tasks", null);
         expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/search", data: { query: "Tasks", page_size: 100 } });
         http.request.mockResolvedValueOnce({ data: page() });
-        await client.createPage("db", {}, null);
-        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "db-ds" }, properties: {} } });
+        await client.createPage("db", "", null);
+        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "db-ds" }, properties: { title: { title: [] } } } });
     });
 
     it("sends page content as Notion-flavored Markdown", async () => {
         const client = new NotionClient(TOKEN);
         http.request.mockResolvedValueOnce({ data: page() });
-        await client.createPage("db", {}, "# Summary\n\n- [ ] Ship");
-        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "db-ds" }, properties: {}, markdown: "# Summary\n\n- [ ] Ship", markdown_version: "v2" } });
+        await client.createPage("db", "Summary", "# Summary\n\n- [ ] Ship");
+        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "db-ds" }, properties: { title: { title: [{ type: "text", text: { content: "Summary" } }] } }, markdown: "# Summary\n\n- [ ] Ship", markdown_version: "v2" } });
         http.request.mockResolvedValueOnce({ data: page() });
-        await client.createPage("db", {}, "");
+        await client.createPage("db", "Summary", "");
         expect(http.request.mock.lastCall?.[0].data).not.toHaveProperty("markdown");
-        await expect(client.createPage("db", {}, 1 as unknown as string)).rejects.toMatchObject({ code: "NOTION_INVALID_MARKDOWN" });
+        await expect(client.createPage("db", "Summary", 1 as unknown as string)).rejects.toMatchObject({ code: "NOTION_INVALID_MARKDOWN" });
+        await expect(client.createPage("db", null as unknown as string)).rejects.toMatchObject({ code: "NOTION_INVALID_TITLE" });
     });
 
     it("validates responses without dropping nested Notion fields", async () => {
@@ -115,7 +116,7 @@ describe("Notion API client", () => {
         const client = new NotionClient(TOKEN);
         mockDataSources.resolve = () => ["ds-1", "ds-2"];
         await expect(client.queryDatabase("db")).rejects.toMatchObject({ code: "NOTION_MULTIPLE_DATA_SOURCES" });
-        await expect(client.createPage("db", {})).rejects.toMatchObject({ code: "NOTION_MULTIPLE_DATA_SOURCES" });
+        await expect(client.createPage("db", "Task")).rejects.toMatchObject({ code: "NOTION_MULTIPLE_DATA_SOURCES" });
         mockDataSources.resolve = () => [];
         await expect(client.queryDatabase("db")).rejects.toMatchObject({ code: "NOTION_NO_DATA_SOURCE" });
         expect(http.request).not.toHaveBeenCalled();
@@ -140,7 +141,7 @@ describe("Notion API client", () => {
     it("does not retry writes on ambiguous network failures or disclose credentials", async () => {
         http.request.mockRejectedValue(new Error("Bearer secret-token"));
         let failure: unknown;
-        try { await new NotionClient(TOKEN).createPage("db", {}); } catch (error) { failure = error; }
+        try { await new NotionClient(TOKEN).createPage("db", "Task"); } catch (error) { failure = error; }
         expect(failure).toMatchObject({ code: "NOTION_NETWORK_ERROR" });
         expect(JSON.stringify(failure)).not.toContain("secret-token");
         expect(http.request).toHaveBeenCalledTimes(1);

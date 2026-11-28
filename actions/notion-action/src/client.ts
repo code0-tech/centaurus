@@ -4,7 +4,6 @@ import { z } from "zod";
 import { NotionPageSchema } from "./data_types/notionPage.js";
 import { NotionQueryResultSchema } from "./data_types/notionQueryResult.js";
 import { NotionSearchResultSchema } from "./data_types/notionSearchResult.js";
-import { toNotionProperties } from "./functions/utils/propertyValue.js";
 import type { NotionFilter } from "./data_types/notionFilter.js";
 import type { NotionSearchFilter } from "./data_types/notionSearchFilter.js";
 import { notionDateFields } from "./generated/notion-schema-order.js";
@@ -36,16 +35,18 @@ export function withNotionDates(value: unknown): unknown {
 const DatabaseDataSourcesSchema = z.looseObject({ data_sources: z.array(z.looseObject({ id: z.string() })) });
 // Only the Markdown text of a page's content is used.
 const PageMarkdownSchema = z.looseObject({ markdown: z.string() });
-// Only the column types are needed to convert plain property values.
-const ColumnTypesSchema = z.looseObject({ properties: z.record(z.string(), z.looseObject({ type: z.string() })) });
-type SdkProperties = Parameters<Client["pages"]["create"]>[0]["properties"];
-
-function columnTypes(schema: z.infer<typeof ColumnTypesSchema>): Record<string, string> {
-    return Object.fromEntries(Object.entries(schema.properties).map(([name, column]) => [name, column.type]));
+/**
+ * The title column of a page, addressed by its ID: Notion gives the title
+ * column of every database and page the property ID "title", whatever its name.
+ */
+function titleProperty(title: string) {
+    return { title: { title: title ? [{ type: "text" as const, text: { content: title } }] : [] } };
 }
 
-function hasValues(properties: unknown): boolean {
-    return typeof properties === "object" && properties !== null && !Array.isArray(properties) && Object.keys(properties).length > 0;
+function optionalText(value: unknown, code: string, message: string): string | undefined {
+    if (value == null || value === "") return undefined;
+    if (typeof value !== "string") throw new RuntimeError(code, message);
+    return value;
 }
 
 // Request and response shapes differ between Notion versions (e.g. databases
@@ -131,38 +132,36 @@ export class NotionClient {
     }
 
     /**
-     * Creates a page with optional content written as Notion-flavored Markdown
-     * (`markdown_version` v2, as v1 is deprecated). Empty content is omitted.
+     * Creates a page in a database with a title and optional content written
+     * as Notion-flavored Markdown (`markdown_version` v2, as v1 is deprecated).
      */
-    /**
-     * Creates a page from plain column values ({ "Name": "Task", "Done": true }),
-     * converted using the column types of the database's data source, with
-     * optional content written as Notion-flavored Markdown (`markdown_version`
-     * v2, as v1 is deprecated). Empty content is omitted.
-     */
-    async createPage(parentDatabaseId: string, properties: unknown, markdown?: string | null) {
-        if (markdown != null && typeof markdown !== "string") {
-            throw new RuntimeError("NOTION_INVALID_MARKDOWN", "Page content must be Markdown text.");
-        }
+    async createPage(parentDatabaseId: string, title: string, markdown?: string | null) {
+        if (typeof title !== "string") throw new RuntimeError("NOTION_INVALID_TITLE", "The title must be text.");
+        const content = optionalText(markdown, "NOTION_INVALID_MARKDOWN", "Page content must be Markdown text.");
         const data_source_id = await this.resolveDataSourceId(parentDatabaseId);
-        const values = properties ?? {};
-        const columns = hasValues(values)
-            ? columnTypes(await this.request(() => this.sdk.dataSources.retrieve({ data_source_id }), ColumnTypesSchema))
-            : {};
-        const notionProperties = toNotionProperties(values, columns) as SdkProperties;
         return this.request(() => this.sdk.pages.create({
-            parent: { data_source_id }, properties: notionProperties, ...(markdown ? { markdown, markdown_version: "v2" as const } : {}),
+            parent: { data_source_id }, properties: titleProperty(title.trim()),
+            ...(content ? { markdown: content, markdown_version: "v2" as const } : {}),
         }), NotionPageSchema);
     }
 
-    /** Updates the given columns of a page; values are converted using the page's column types. */
-    async updatePage(pageId: string, properties: unknown) {
+    /**
+     * Changes the title and/or replaces the whole content of a page with
+     * Markdown (v2). Empty values leave the title or content unchanged. Child
+     * pages and databases are never deleted: Notion rejects such a replacement.
+     */
+    async updatePage(pageId: string, title?: string | null, markdown?: string | null) {
         const page_id = notionId(pageId);
-        const columns = hasValues(properties)
-            ? columnTypes(await this.request(() => this.sdk.pages.retrieve({ page_id }), ColumnTypesSchema))
-            : {};
-        const notionProperties = toNotionProperties(properties, columns) as SdkProperties;
-        return this.request(() => this.sdk.pages.update({ page_id, properties: notionProperties }), NotionPageSchema);
+        const newTitle = optionalText(title, "NOTION_INVALID_TITLE", "The title must be text.")?.trim();
+        const content = optionalText(markdown, "NOTION_INVALID_MARKDOWN", "Page content must be Markdown text.");
+        const page = newTitle
+            ? await this.request(() => this.sdk.pages.update({ page_id, properties: titleProperty(newTitle) }), NotionPageSchema)
+            : await this.request(() => this.sdk.pages.retrieve({ page_id }), NotionPageSchema);
+        if (content === undefined) return page;
+        const updated = await this.request(() => this.sdk.pages.updateMarkdown({
+            page_id, markdown_version: "v2", type: "replace_content", replace_content: { new_str: content },
+        }), PageMarkdownSchema);
+        return { ...page, markdown: updated.markdown };
     }
 
     /** Retrieves a page with its properties and its content as Notion-flavored Markdown (v2). */

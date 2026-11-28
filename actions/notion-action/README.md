@@ -27,34 +27,18 @@ Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (defa
 
 | Identifier | Parameters | Result |
 | --- | --- | --- |
-| `notionCreatePage` | `integrationToken, parentDatabaseId, properties, markdown?` | `NOTION_PAGE` |
-| `notionUpdatePage` | `integrationToken, pageId, properties` | `NOTION_PAGE` |
+| `notionCreatePage` | `integrationToken, parentDatabaseId, title, markdown?` | `NOTION_PAGE` |
+| `notionUpdatePage` | `integrationToken, pageId, title?, markdown?` | `NOTION_PAGE` |
 | `notionGetPage` | `integrationToken, pageId` | `NOTION_PAGE` |
 | `notionArchivePage` | `integrationToken, pageId` | `boolean` (Hercules BOOLEAN) |
 | `notionQueryDatabase` | `integrationToken, databaseId, filter?, sortProperty?, sortDirection?` | `NOTION_QUERY_RESULT` |
 | `notionSearch` | `integrationToken, query, filter?` | `NOTION_SEARCH_RESULT` |
 
-`properties` is a plain object of the existing database's column names and values (see below). Update changes only the supplied columns. Create does not create a database or change its schema. Get retrieves the page with its properties and its content as Notion-flavored Markdown in `markdown` (two parallel requests: the page and `GET /pages/{id}/markdown` with `markdown_version: "v2"`). `markdown` is an optional field of `NOTION_PAGE` that only Get fills in; other functions and the triggers return pages without content. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
+Create adds an entry to an existing database with a title and optional content. Update changes the title and/or replaces the whole content; an empty title or content stays unchanged. The title is written to the title column by its property ID `title`, so its name (usually Name) does not matter; other columns are not written. Get retrieves the page with its properties and its content as Notion-flavored Markdown in `markdown` (two parallel requests: the page and `GET /pages/{id}/markdown` with `markdown_version: "v2"`). `markdown` is an optional field of `NOTION_PAGE` that Get and an update with content fill in; other functions and the triggers return pages without content. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
 
 Query and search collect **all pages** of results into one response (`has_more: false`, `next_cursor: null`); large collections consume corresponding time and memory. Query filters accept the normal Notion property/timestamp filters and `and`/`or` groups. Results are sorted by the column `sortProperty` (ascending unless `sortDirection` says otherwise) or, without one, by `created_time` (descending, i.e. newest first, unless `sortDirection` says otherwise). Search matches titles, not full page text; its optional filter is `{ "property": "object", "value": "page" }` or `"data_source"`.
 
-Create takes optional page content as Markdown (`markdown`), sent as [Notion-flavored Markdown](https://developers.notion.com/guides/data-apis/migrate-to-notion-flavored-markdown) (`markdown_version: "v2"`); Notion converts it into blocks such as headings, lists, to-dos (`- [ ]`), quotes, code blocks and links. Empty content creates an empty page. API calls time out after 30 seconds. HTTP 429 is retried at most twice using `Retry-After` (up to 60 seconds); ambiguous network failures on writes are not automatically retried.
-
-### Properties
-
-Create and update take the column values as a plain object, e.g. `{ "Name": "Ship the release", "Done": false, "Tags": ["a", "b"], "Due": "2026-09-14" }`. The action looks up the column types (create: the database's data source, update: the page) and converts each value:
-
-| Column type | Value |
-| --- | --- |
-| `title`, `rich_text`, `url`, `email`, `phone_number` | text (title/rich text: max 2000 characters) |
-| `number` | a number |
-| `checkbox` | `true` or `false` |
-| `select`, `status` | the option name |
-| `multi_select` | an option name or a list of names |
-| `date` | a `DATE` (e.g. a page timestamp or `std::date::now`), ISO date text, or `{ start, end }` with either |
-| `people`, `relation` | a user/page ID or a list of IDs |
-
-`null`, an empty text or an empty list clears a column. A value already in Notion's shape (e.g. `{ "select": { "name": "High" } }` or formatted rich text) is sent as is. Unknown columns (`NOTION_UNKNOWN_PROPERTY`) and read-only types such as formula and rollup (`NOTION_READ_ONLY_PROPERTY`) are rejected before anything is written. Converting costs one extra request (the column lookup) per create or update with values.
+Create and update take page content as Markdown (`markdown`), sent as [Notion-flavored Markdown](https://developers.notion.com/guides/data-apis/migrate-to-notion-flavored-markdown) (`markdown_version: "v2"`); Notion converts it into blocks such as headings, lists, to-dos (`- [ ]`), quotes, code blocks and links. Update replaces the content (`PATCH /pages/{id}/markdown`, `replace_content`) without allowing Notion to delete child pages or databases. Without content, create makes an empty page. API calls time out after 30 seconds. HTTP 429 is retried at most twice using `Retry-After` (up to 60 seconds); ambiguous network failures on writes are not automatically retried.
 
 ## Polling events
 
@@ -84,7 +68,7 @@ Each data type has its own file under `src/data_types/`: the response/value type
 
 `NOTION_FILTER` is deliberately compact (a plain object) rather than the full generated Notion union: that union is over 10k characters long and makes the flow editor's type checker take seconds to minutes per node, so no parameter suggestions appear. Notion validates the filter.
 
-Points in time in responses (`created_time`, `last_edited_time`, file `expiry_time`, calendar `start_time`/`end_time`) are `DATE` values, i.e. Unix microseconds (UTC); the client converts Notion's ISO 8601 strings before validating a response. Values flows send to Notion keep Notion's formats: filter timestamps and date property values (`{ start, end, time_zone }`) are sent as ISO 8601 text, because Notion distinguishes date-only values and time zones that a `DATE` cannot express. Create and update also accept a `DATE` for a date column and convert it to an ISO 8601 date-time (UTC).
+Points in time in responses (`created_time`, `last_edited_time`, file `expiry_time`, calendar `start_time`/`end_time`) are `DATE` values, i.e. Unix microseconds (UTC); the client converts Notion's ISO 8601 strings before validating a response. Values flows send to Notion keep Notion's formats: filter timestamps and dates are sent as ISO 8601 text, because Notion distinguishes date-only values and time zones that a `DATE` cannot express.
 
 The API is pinned to [`2025-09-03`](https://developers.notion.com/guides/get-started/upgrade-guide-2025-09-03), where a database is a container of one or more data sources and pages live in a data source. Functions and triggers keep taking a `databaseId`: the action resolves the database's data source (`GET /databases/{id}`) and then queries or creates pages in it. Databases with several data sources are ambiguous and fail with `NOTION_MULTIPLE_DATA_SOURCES`; the triggers resolve the data source once per watch.
 

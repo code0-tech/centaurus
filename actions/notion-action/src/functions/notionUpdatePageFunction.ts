@@ -5,16 +5,16 @@ import { PAGE_ID_PARAMETER } from "../parameters.js";
 
 @Identifier("notionUpdatePage")
 @Name({ code: "en-US", content: "Update Notion page" })
-@Description({ code: "en-US", content: "Update the supplied page properties; other properties remain unchanged." })
+@Description({ code: "en-US", content: "Change the title and/or replace the content of a page. Empty fields stay unchanged." })
 @DisplayIcon("simple:notion")
 @DisplayMessage({ code: "en-US", content: "Update Notion page" })
-@Signature("(integrationToken: string, pageId: string, properties: OBJECT<{ [key: string]: any }>): NOTION_PAGE")
+@Signature("(integrationToken: string, pageId: string, title?: string, markdown?: string): NOTION_PAGE")
 @Parameter(INTEGRATION_TOKEN_PARAMETER)
 @Parameter(PAGE_ID_PARAMETER)
-@Parameter({ runtimeName: "properties", name: [{ code: "en-US", content: "Properties" }], description: [{ code: "en-US", content: "Columns to change as an object, e.g. { \"Status\": \"Done\", \"Due\": null }. Other columns stay unchanged; null clears a column." }] })
+@Parameter({ runtimeName: "title", name: [{ code: "en-US", content: "Title" }], description: [{ code: "en-US", content: "New title of the page. Leave empty to keep the current title." }], optional: true })
+@Parameter({ runtimeName: "markdown", name: [{ code: "en-US", content: "Content (Markdown)" }], description: [{ code: "en-US", content: "New page content as Markdown; replaces the entire current content. Leave empty to keep the current content. Child pages and databases are kept: Notion rejects content that would delete them." }], optional: true })
 export class NotionUpdatePageFunction {
-    run(_context: FunctionContext, integrationToken: string, pageId: string, properties: Record<string, unknown>) {
-        return new NotionClient(integrationToken).updatePage(pageId, properties);
+    run(_context: FunctionContext, integrationToken: string, pageId: string, title?: string | null, markdown?: string | null) {
+        return new NotionClient(integrationToken).updatePage(pageId, title, markdown);
     }
 }
-

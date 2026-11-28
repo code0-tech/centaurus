@@ -14,36 +14,34 @@ beforeEach(() => { http.request.mockReset(); fetchMock = mockNotionHttp(http.req
 afterEach(() => vi.unstubAllGlobals());
 
 describe("Notion functions", () => {
-    const properties = { Name: "Task", Done: true };
-    const notionProperties = { Name: { title: [{ type: "text", text: { content: "Task" } }] }, Done: { checkbox: true } };
-    const columns = { Name: { id: "title", type: "title" }, Done: { id: "done", type: "checkbox" } };
     const markdown = "## Notes\n\nSome **bold** text";
+    const titled = (content: string) => ({ title: { title: [{ type: "text", text: { content } }] } });
 
-    // Answers the column lookup (data source or page) and returns a page for writes.
-    const respond = async ({ method, url }: { method?: string; url: string }) => method === "GET"
-        ? { data: url.startsWith("/data_sources/") ? { object: "data_source", id: "ds", properties: columns } : page("page-1", { properties: columns as never }) }
-        : { data: page() };
-
-    it("creates a page from plain column values and Markdown content", async () => {
-        http.request.mockImplementation(respond);
-        expect(await new NotionCreatePageFunction().run(context(), TOKEN, "database-1", properties, markdown)).toEqual(parsed(page()));
-        expect(http.request).toHaveBeenCalledWith({ method: "GET", url: "/data_sources/database-1-ds", data: undefined });
-        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "database-1-ds" }, properties: notionProperties, markdown, markdown_version: "v2" } });
-        await new NotionCreatePageFunction().run(context(), TOKEN, "database-1", properties, null);
+    it("creates a database entry with a title and Markdown content", async () => {
+        http.request.mockResolvedValue({ data: page() });
+        expect(await new NotionCreatePageFunction().run(context(), TOKEN, "database-1", " Task ", markdown)).toEqual(parsed(page()));
+        expect(http.request).toHaveBeenCalledExactlyOnceWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "database-1-ds" }, properties: titled("Task"), markdown, markdown_version: "v2" } });
+        await new NotionCreatePageFunction().run(context(), TOKEN, "database-1", "Task", null);
         expect(http.request.mock.lastCall?.[0].data).not.toHaveProperty("markdown");
     });
 
-    it("updates only the requested columns, converted with the page's column types", async () => {
-        http.request.mockImplementation(respond);
-        await new NotionUpdatePageFunction().run(context(), TOKEN, "page-1", { Done: false });
-        expect(http.request).toHaveBeenCalledWith({ method: "GET", url: "/pages/page-1", data: undefined });
-        expect(http.request).toHaveBeenLastCalledWith({ method: "PATCH", url: "/pages/page-1", data: { properties: { Done: { checkbox: false } } } });
+    it("changes the title and replaces the content as Markdown", async () => {
+        http.request.mockResolvedValue({ data: page() });
+        expect(await new NotionUpdatePageFunction().run(context(), TOKEN, "page-1", "Renamed", markdown)).toEqual({ ...parsed(page()), markdown });
+        expect(http.request).toHaveBeenCalledExactlyOnceWith({ method: "PATCH", url: "/pages/page-1", data: { properties: titled("Renamed") } });
+        expect(fetchMock.markdownUpdates).toHaveBeenCalledExactlyOnceWith("page-1", { markdown_version: "v2", type: "replace_content", replace_content: { new_str: markdown } });
     });
 
-    it("rejects unknown columns before writing", async () => {
-        http.request.mockImplementation(respond);
-        await expect(new NotionCreatePageFunction().run(context(), TOKEN, "database-1", { Missing: "x" })).rejects.toMatchObject({ code: "NOTION_UNKNOWN_PROPERTY" });
-        expect(http.request).not.toHaveBeenCalledWith(expect.objectContaining({ method: "POST", url: "/pages" }));
+    it("leaves an empty title or content unchanged", async () => {
+        http.request.mockResolvedValue({ data: page() });
+        const update = new NotionUpdatePageFunction();
+        expect(await update.run(context(), TOKEN, "page-1", "", markdown)).toEqual({ ...parsed(page()), markdown });
+        expect(http.request).toHaveBeenCalledExactlyOnceWith({ method: "GET", url: "/pages/page-1", data: undefined });
+        http.request.mockClear();
+        expect(await update.run(context(), TOKEN, "page-1", "Renamed", "")).toEqual(parsed(page()));
+        expect(http.request).toHaveBeenCalledExactlyOnceWith({ method: "PATCH", url: "/pages/page-1", data: { properties: titled("Renamed") } });
+        await update.run(context(), TOKEN, "page-1", null, null);
+        expect(fetchMock.markdownUpdates).toHaveBeenCalledOnce();
     });
 
     it("retrieves the requested page with its content as Markdown", async () => {

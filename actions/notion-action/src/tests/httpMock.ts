@@ -9,7 +9,10 @@ type NotionRequest = { method?: string; url: string; data: unknown };
  */
 export const mockDataSources = { resolve: (databaseId: string): string[] => [`${databaseId}-ds`] };
 
-/** The Markdown content every mocked page has (GET /pages/{id}/markdown). */
+/**
+ * The Markdown content every mocked page has (GET /pages/{id}/markdown).
+ * Content updates (PATCH /pages/{id}/markdown) answer with the new content.
+ */
 export const mockPageMarkdown = { value: "# Page content" };
 
 // Exercise the real Notion SDK, replacing only its network boundary.
@@ -18,6 +21,7 @@ export function mockNotionHttp(request: (args: NotionRequest) => Promise<{ data:
     mockPageMarkdown.value = "# Page content";
     const databaseLookups = vi.fn<(databaseId: string) => void>();
     const markdownLookups = vi.fn<(pageId: string, query: URLSearchParams) => void>();
+    const markdownUpdates = vi.fn<(pageId: string, body: unknown) => void>();
     const fetchMock = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
         const args = {
             method: init?.method,
@@ -31,6 +35,13 @@ export function mockNotionHttp(request: (args: NotionRequest) => Promise<{ data:
             const data_sources = mockDataSources.resolve(databaseId).map((id) => ({ id, name: id }));
             return new Response(JSON.stringify({ object: "database", id: databaseId, data_sources }), { status: 200 });
         }
+        const markdownUpdate = args.method === "PATCH" ? /^\/pages\/([^/]+)\/markdown$/.exec(args.url) : null;
+        if (markdownUpdate) {
+            const pageId = decodeURIComponent(markdownUpdate[1]);
+            markdownUpdates(pageId, args.data);
+            const content = (args.data as { replace_content?: { new_str?: string } }).replace_content?.new_str ?? "";
+            return new Response(JSON.stringify({ object: "page_markdown", id: pageId, markdown: content, truncated: false, unknown_block_ids: [] }), { status: 200 });
+        }
         const markdown = args.method === "GET" ? /^\/pages\/([^/]+)\/markdown$/.exec(args.url) : null;
         if (markdown) {
             const pageId = decodeURIComponent(markdown[1]);
@@ -41,5 +52,5 @@ export function mockNotionHttp(request: (args: NotionRequest) => Promise<{ data:
         return new Response(JSON.stringify(response.data), { status: response.status ?? 200, headers: response.headers });
     });
     vi.stubGlobal("fetch", fetchMock);
-    return Object.assign(fetchMock, { databaseLookups, markdownLookups });
+    return Object.assign(fetchMock, { databaseLookups, markdownLookups, markdownUpdates });
 }
