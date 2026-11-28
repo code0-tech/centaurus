@@ -1,6 +1,7 @@
 import { Description, DisplayIcon, DisplayMessage, Identifier, Name, Parameter, Signature, type FunctionContext } from "@code0-tech/hercules";
 import { NotionClient } from "../client.js";
 import { INTEGRATION_TOKEN_PARAMETER } from "../integrationToken.js";
+import { PAGE_ID_PARAMETER } from "../parameters.js";
 
 
 @Identifier("notionArchivePage")
@@ -10,7 +11,7 @@ import { INTEGRATION_TOKEN_PARAMETER } from "../integrationToken.js";
 @DisplayMessage({ code: "en-US", content: "Archive Notion page" })
 @Signature("(integrationToken: string, pageId: string): boolean")
 @Parameter(INTEGRATION_TOKEN_PARAMETER)
-@Parameter({ runtimeName: "pageId", name: [{ code: "en-US", content: "pageId" }], description: [{ code: "en-US", content: "Page ID" }] })
+@Parameter(PAGE_ID_PARAMETER)
 export class NotionArchivePageFunction {
     run(_context: FunctionContext, integrationToken: string, pageId: string) {
         return new NotionClient(integrationToken).archivePage(pageId);

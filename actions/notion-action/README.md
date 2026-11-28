@@ -31,12 +31,12 @@ Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (defa
 | `notionUpdatePage` | `integrationToken, pageId, properties` | `NOTION_PAGE` |
 | `notionGetPage` | `integrationToken, pageId` | `NOTION_PAGE` |
 | `notionArchivePage` | `integrationToken, pageId` | `boolean` (Hercules BOOLEAN) |
-| `notionQueryDatabase` | `integrationToken, databaseId, filter?, sorts?` | `NOTION_QUERY_RESULT` |
+| `notionQueryDatabase` | `integrationToken, databaseId, filter?, sort?` | `NOTION_QUERY_RESULT` |
 | `notionSearch` | `integrationToken, query, filter?` | `NOTION_SEARCH_RESULT` |
 
 `properties` is a plain object of the existing database's column names and values (see below). Update changes only the supplied columns. Create does not create a database or change its schema. Get retrieves the page with its properties and its content as Notion-flavored Markdown in `markdown` (two parallel requests: the page and `GET /pages/{id}/markdown` with `markdown_version: "v2"`). `markdown` is an optional field of `NOTION_PAGE` that only Get fills in; other functions and the triggers return pages without content. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
 
-Query and search collect **all pages** of results into one response (`has_more: false`, `next_cursor: null`); large collections consume corresponding time and memory. Query filters accept the normal Notion property/timestamp filters and `and`/`or` groups. Sorts are a list of columns, `{ "property": "Due", "direction": "ascending" }`, applied in order; without a sort, results come newest first (`created_time` descending). Search matches titles, not full page text; its optional filter is `{ "property": "object", "value": "page" }` or `"data_source"`.
+Query and search collect **all pages** of results into one response (`has_more: false`, `next_cursor: null`); large collections consume corresponding time and memory. Query filters accept the normal Notion property/timestamp filters and `and`/`or` groups. The optional sort is one column, `{ "property": "Due", "direction": "ascending" }`; without it, results come newest first (`created_time` descending). Search matches titles, not full page text; its optional filter is `{ "property": "object", "value": "page" }` or `"data_source"`.
 
 Create takes optional page content as Markdown (`markdown`), sent as [Notion-flavored Markdown](https://developers.notion.com/guides/data-apis/migrate-to-notion-flavored-markdown) (`markdown_version: "v2"`); Notion converts it into blocks such as headings, lists, to-dos (`- [ ]`), quotes, code blocks and links. Empty content creates an empty page. API calls time out after 30 seconds. HTTP 429 is retried at most twice using `Retry-After` (up to 60 seconds); ambiguous network failures on writes are not automatically retried.
 
