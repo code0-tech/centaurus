@@ -1,0 +1,10 @@
+{
+  "name": "__vendor__",
+  "identifier": "__vendor__-action",
+  "description": "__DESCRIPTION__",
+  "deployment": {
+    "docker": {
+      "image": "ghcr.io/code0-tech/centaurus/ci-builds/__vendor__-action"
+    }
+  }
+}
