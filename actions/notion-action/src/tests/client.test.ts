@@ -46,11 +46,11 @@ describe("Notion API client", () => {
         expect(() => new NotionClient(" ")).toThrow(/integration token/);
     });
 
-    it("collects database pages and preserves filters and sorts across cursors", async () => {
+    it("collects database pages newest first and preserves the filter across cursors", async () => {
         http.request.mockResolvedValueOnce({ data: list([page()], "cursor-2") }).mockResolvedValueOnce({ data: list([page("page-2")]) });
         const filter = { property: "Done", checkbox: { equals: false } };
-        const sorts = [{ timestamp: "last_edited_time", direction: "ascending" }] as const;
-        const result = await new NotionClient(TOKEN).queryDatabase("db/1", filter, [...sorts]);
+        const sorts = [{ timestamp: "created_time", direction: "descending" }];
+        const result = await new NotionClient(TOKEN).queryDatabase("db/1", filter);
         expect(result.results).toHaveLength(2);
         expect(result).toMatchObject({ has_more: false, next_cursor: null });
         expect(http.request).toHaveBeenNthCalledWith(2, { method: "POST", url: "/data_sources/db%2F1-ds/query", data: { page_size: 100, filter, sorts, start_cursor: "cursor-2" } });
@@ -75,8 +75,8 @@ describe("Notion API client", () => {
     it("omits optional arguments that a flow passes as null", async () => {
         const client = new NotionClient(TOKEN);
         http.request.mockResolvedValueOnce({ data: list([page()]) });
-        await client.queryDatabase("db", null, null);
-        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { page_size: 100 } });
+        await client.queryDatabase("db", null);
+        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { page_size: 100, sorts: [{ timestamp: "created_time", direction: "descending" }] } });
         http.request.mockResolvedValueOnce({ data: list([page()]) });
         await client.search("Tasks", null);
         expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/search", data: { query: "Tasks", page_size: 100 } });

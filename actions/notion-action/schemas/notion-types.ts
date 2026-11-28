@@ -15,5 +15,4 @@ export type NotionProperties = NonNullable<CreatePageParameters["properties"]>;
 export type NotionPropertyValue = NotionProperties[string];
 export type NotionRichText = Extract<NotionPropertyValue, { rich_text: unknown }>["rich_text"][number];
 export type NotionFilter = NonNullable<QueryDataSourceParameters["filter"]>;
-export type NotionSort = NonNullable<QueryDataSourceParameters["sorts"]>[number];
 export type NotionSearchFilter = NonNullable<SearchParameters["filter"]>;

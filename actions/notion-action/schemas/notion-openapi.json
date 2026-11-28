@@ -4728,9 +4728,6 @@
           "type"
         ]
       },
-      "NotionSort": {
-        "$ref": "#/components/schemas/ViewSortRequest"
-      },
       "NotionUser": {
         "$ref": "#/components/schemas/UserObjectResponse"
       },
@@ -7529,53 +7526,6 @@
             "required": [
               "id",
               "object"
-            ]
-          }
-        ]
-      },
-      "ViewSortRequest": {
-        "description": "Sort by property name or ID, or by timestamp.",
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "property": {
-                "type": "string"
-              },
-              "direction": {
-                "enum": [
-                  "ascending",
-                  "descending"
-                ],
-                "type": "string"
-              }
-            },
-            "required": [
-              "direction",
-              "property"
-            ]
-          },
-          {
-            "type": "object",
-            "properties": {
-              "timestamp": {
-                "enum": [
-                  "created_time",
-                  "last_edited_time"
-                ],
-                "type": "string"
-              },
-              "direction": {
-                "enum": [
-                  "ascending",
-                  "descending"
-                ],
-                "type": "string"
-              }
-            },
-            "required": [
-              "direction",
-              "timestamp"
             ]
           }
         ]

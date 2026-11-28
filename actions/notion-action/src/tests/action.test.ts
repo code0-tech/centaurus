@@ -28,6 +28,9 @@ describe("Hercules registration", () => {
         expect(action.dataTypes.has("NOTION_INTEGRATION_TOKEN")).toBe(false);
         for (const fn of action.runtimeFunctions.values()) {
             expect(fn.signature).toMatch(/^\(integrationToken: string, /);
+            // A closed parameter list followed by the return type.
+            expect(fn.signature).toMatch(/^\(.*\): [A-Z_a-z]+$/);
+            expect(fn.signature.split("(").length).toBe(fn.signature.split(")").length);
         }
         for (const event of action.events.values()) {
             expect(event.signature).toMatch(/^\(integrationToken: string, /);

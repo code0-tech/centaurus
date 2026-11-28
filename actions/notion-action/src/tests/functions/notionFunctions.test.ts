@@ -63,12 +63,15 @@ describe("Notion functions", () => {
         expect(await fn.run(context(), TOKEN, "page-1")).toBe(false);
     });
 
-    it("queries with optional filter and sort values", async () => {
+    it("queries with an optional filter, newest first unless sorted by a column", async () => {
         http.request.mockResolvedValue({ data: list([page()]) });
         const filter = { property: "Done", checkbox: { equals: false } };
-        const sorts = [{ property: "Name", direction: "ascending" as const }];
-        expect((await new NotionQueryDatabaseFunction().run(context(), TOKEN, "db", filter, sorts)).results).toHaveLength(1);
+        const sorts = [{ timestamp: "created_time", direction: "descending" }];
+        expect((await new NotionQueryDatabaseFunction().run(context(), TOKEN, "db", filter)).results).toHaveLength(1);
         expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { filter, sorts, page_size: 100 } });
+        const byDue = { property: "Due", direction: "ascending" as const };
+        await new NotionQueryDatabaseFunction().run(context(), TOKEN, "db", null, byDue);
+        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { sorts: [byDue], page_size: 100 } });
     });
 
     it("searches with the requested object filter", async () => {

@@ -63,6 +63,10 @@ export function notionCredentials(integrationToken: unknown) {
 }
 
 type SdkFilter = Parameters<Client["dataSources"]["query"]>[0]["filter"];
+type SdkSorts = NonNullable<Parameters<Client["dataSources"]["query"]>[0]["sorts"]>;
+
+/** Query results without a sort come newest first. */
+export const DEFAULT_QUERY_SORTS: SdkSorts = [{ timestamp: "created_time", direction: "descending" }];
 
 function notionId(id: string): string {
     if (!id.trim()) throw new RuntimeError("NOTION_INVALID_ID", "A Notion page or database ID is required.");
@@ -181,11 +185,12 @@ export class NotionClient {
         return database.data_sources[0].id;
     }
 
-    async queryDatabase(databaseId: string, filter?: NotionFilter | null, sorts?: NotionSort[] | null) {
-        return this.queryDataSource(await this.resolveDataSourceId(databaseId), filter, sorts);
+    /** Queries a database's matching entries sorted by a column, or newest first (by created_time). */
+    async queryDatabase(databaseId: string, filter?: NotionFilter | null, sort?: NotionSort | null) {
+        return this.queryDataSource(await this.resolveDataSourceId(databaseId), filter, sort == null ? DEFAULT_QUERY_SORTS : [sort]);
     }
 
-    queryDataSource(dataSourceId: string, filter?: NotionFilter | null, sorts?: NotionSort[] | null) {
+    queryDataSource(dataSourceId: string, filter?: NotionFilter | null, sorts?: SdkSorts | null) {
         const data_source_id = notionId(dataSourceId);
         return this.paginate((start_cursor) => this.request(() => this.sdk.dataSources.query({
             data_source_id,
