@@ -89,7 +89,7 @@ export function toMessageTs(value: string | null | undefined, code: string): str
     if (!/^\d+\.\d{6}$/.test(ts)) {
         throw new RuntimeError(
             code,
-            `"${value ?? ""}" is not a valid Slack message ID. Use the form 1712345678.123456 or a link to the message.`
+            `"${value ?? ""}" is not a valid Slack message ID. Use the form 1712345678.123456 (the dot is optional) or a link to the message.`
         );
     }
     return ts;

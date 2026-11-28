@@ -26,4 +26,4 @@ export const EMBED_PARAMETER = {
 };
 
 export const MESSAGE_ID_DESCRIPTION =
-    "Format: 1712345678.123456, i.e. the message's `ts` from a previous step such as Post message or a Slack trigger. A message link copied from Slack (Copy link) works as well.";
+    "Format: 1712345678.123456 (or without the dot: 1712345678123456), i.e. the message's `ts` from a previous step such as Post message or a Slack trigger. A message link copied from Slack (Copy link) works as well.";

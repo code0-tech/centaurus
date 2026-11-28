@@ -96,7 +96,7 @@ ID (e.g. `C0123456789`) to trigger only for that channel.
 
 `SlackReactionAdded` also has an optional **Message ID** setting to trigger only
 for reactions to one message, e.g. an approval request. Paste the message link
-from Slack (*Copy link*) or enter its ID (`1712345678.123456`); the link is
+from Slack (*Copy link*) or enter its ID (`1712345678.123456`, the dot is optional); the link is
 converted to the ID.
 
 ### Replying to slash commands

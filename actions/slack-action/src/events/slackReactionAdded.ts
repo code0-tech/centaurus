@@ -39,7 +39,7 @@ import { Description, DisplayIcon, DisplayMessage, EventSetting, Identifier, Nam
         {
             code: "en-US",
             content:
-                "Only trigger for reactions to this message. Enter its ID in the form 1712345678.123456 (its `ts`) or paste its link from Slack (Copy link). Leave empty to trigger for every message.",
+                "Only trigger for reactions to this message. Enter its ID in the form 1712345678.123456 (its `ts`; the dot is optional) or paste its link from Slack (Copy link). Leave empty to trigger for every message.",
         },
     ],
     linkedDataTypeIdentifiers: ["TEXT"],
