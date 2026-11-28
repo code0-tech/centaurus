@@ -6,15 +6,11 @@ import { NotionPropertyValueDataType } from "./data_types/notionPropertyValue.js
 import { NotionUserDataType } from "./data_types/notionUser.js"
 import { NotionPageDataType } from "./data_types/notionPage.js"
 import { NotionDatabaseDataType } from "./data_types/notionDatabase.js"
-import { NotionQueryResultDataType } from "./data_types/notionQueryResult.js"
 import { NotionSearchResultDataType } from "./data_types/notionSearchResult.js"
-import { NotionFilterDataType } from "./data_types/notionFilter.js"
-import { NotionSearchFilterDataType } from "./data_types/notionSearchFilter.js"
 import { NotionCreatePageFunction } from "./functions/notionCreatePageFunction.js"
 import { NotionUpdatePageFunction } from "./functions/notionUpdatePageFunction.js"
 import { NotionGetPageFunction } from "./functions/notionGetPageFunction.js"
 import { NotionArchivePageFunction } from "./functions/notionArchivePageFunction.js"
-import { NotionQueryDatabaseFunction } from "./functions/notionQueryDatabaseFunction.js"
 import { NotionSearchFunction } from "./functions/notionSearchFunction.js"
 import { NotionDatabaseItemCreated } from "./events/notionDatabaseItemCreated.js"
 import { NotionDatabaseItemUpdated } from "./events/notionDatabaseItemUpdated.js"
@@ -27,7 +23,7 @@ export const action = new Action(
     process.env.HERCULES_AQUILA_URL ?? "127.0.0.1:8081",
     "code0-tech",
     "simple:notion",
-    "Read and write Notion pages, query databases, and trigger flows by polling for changes.",
+    "Create, read, update and search Notion pages, and trigger flows by polling databases for changes.",
     [{ code: "en-US", content: "Notion" }],
     []
 )
@@ -38,15 +34,11 @@ action.registerDataTypeClass(NotionPropertyValueDataType)
 action.registerDataTypeClass(NotionUserDataType)
 action.registerDataTypeClass(NotionPageDataType)
 action.registerDataTypeClass(NotionDatabaseDataType)
-action.registerDataTypeClass(NotionQueryResultDataType)
 action.registerDataTypeClass(NotionSearchResultDataType)
-action.registerDataTypeClass(NotionFilterDataType)
-action.registerDataTypeClass(NotionSearchFilterDataType)
 action.registerRuntimeFunction(NotionCreatePageFunction)
 action.registerRuntimeFunction(NotionUpdatePageFunction)
 action.registerRuntimeFunction(NotionGetPageFunction)
 action.registerRuntimeFunction(NotionArchivePageFunction)
-action.registerRuntimeFunction(NotionQueryDatabaseFunction)
 action.registerRuntimeFunction(NotionSearchFunction)
 // Hercules registers both the runtime event and its public event definition.
 action.registerRuntimeEventClass(NotionDatabaseItemCreated)

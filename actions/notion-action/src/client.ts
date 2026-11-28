@@ -2,10 +2,8 @@ import { RuntimeError } from "@code0-tech/hercules";
 import { APIResponseError, Client, isNotionClientError, UnknownHTTPResponseError } from "@notionhq/client";
 import { z } from "zod";
 import { NotionPageSchema } from "./data_types/notionPage.js";
-import { NotionQueryResultSchema } from "./data_types/notionQueryResult.js";
+import { schemas } from "./generated/notion-schemas.js";
 import { NotionSearchResultSchema } from "./data_types/notionSearchResult.js";
-import type { NotionFilter } from "./data_types/notionFilter.js";
-import type { NotionSearchFilter } from "./data_types/notionSearchFilter.js";
 import { notionDateFields } from "./generated/notion-schema-order.js";
 
 const DATE_FIELDS = new Set<string>(notionDateFields);
@@ -64,24 +62,6 @@ export function notionCredentials(integrationToken: unknown) {
 
 type SdkFilter = Parameters<Client["dataSources"]["query"]>[0]["filter"];
 type SdkSorts = NonNullable<Parameters<Client["dataSources"]["query"]>[0]["sorts"]>;
-
-export type SortDirection = "ascending" | "descending";
-const SORT_DIRECTIONS: readonly string[] = ["ascending", "descending"];
-
-/**
- * The sort of a database query: by a column (ascending unless given), or
- * without one by creation time (newest first unless given).
- */
-export function querySorts(sortProperty?: string | null, sortDirection?: string | null): SdkSorts {
-    if (sortDirection != null && sortDirection !== "" && !SORT_DIRECTIONS.includes(sortDirection)) {
-        throw new RuntimeError("NOTION_INVALID_SORT", "The sort direction must be ascending or descending.");
-    }
-    const direction = (sortDirection || undefined) as SortDirection | undefined;
-    const property = typeof sortProperty === "string" ? sortProperty.trim() : "";
-    return property
-        ? [{ property, direction: direction ?? "ascending" }]
-        : [{ timestamp: "created_time", direction: direction ?? "descending" }];
-}
 
 function notionId(id: string): string {
     if (!id.trim()) throw new RuntimeError("NOTION_INVALID_ID", "A Notion page or database ID is required.");
@@ -216,24 +196,20 @@ export class NotionClient {
         }
     }
 
-    /** Queries a database's matching entries, sorted as described by querySorts. */
-    async queryDatabase(databaseId: string, filter?: NotionFilter | null, sortProperty?: string | null, sortDirection?: string | null) {
-        const sorts = querySorts(sortProperty, sortDirection);
-        return this.queryDataSource(await this.resolveDataSourceId(databaseId), filter, sorts);
-    }
-
-    queryDataSource(dataSourceId: string, filter?: NotionFilter | null, sorts?: SdkSorts | null) {
+    /** Queries all matching pages of a data source, in the given order (used by the triggers). */
+    queryDataSource(dataSourceId: string, filter?: SdkFilter | null, sorts?: SdkSorts | null) {
         const data_source_id = notionId(dataSourceId);
         return this.paginate((start_cursor) => this.request(() => this.sdk.dataSources.query({
             data_source_id,
-            page_size: 100, ...(filter == null ? {} : { filter: filter as SdkFilter }), ...(sorts == null ? {} : { sorts }),
+            page_size: 100, ...(filter == null ? {} : { filter }), ...(sorts == null ? {} : { sorts }),
             ...(start_cursor ? { start_cursor } : {}),
-        }), NotionQueryResultSchema));
+        }), schemas.NotionQueryResult));
     }
 
-    search(query: string, filter?: NotionSearchFilter | null) {
+    /** Searches page and database titles the integration can access. */
+    search(query: string) {
         return this.paginate((start_cursor) => this.request(() => this.sdk.search({
-            query, page_size: 100, ...(filter == null ? {} : { filter }), ...(start_cursor ? { start_cursor } : {}),
+            query, page_size: 100, ...(start_cursor ? { start_cursor } : {}),
         }), NotionSearchResultSchema));
     }
 

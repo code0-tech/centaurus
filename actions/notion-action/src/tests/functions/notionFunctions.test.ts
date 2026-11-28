@@ -3,7 +3,6 @@ import { NotionCreatePageFunction } from "../../functions/notionCreatePageFuncti
 import { NotionUpdatePageFunction } from "../../functions/notionUpdatePageFunction.js";
 import { NotionGetPageFunction } from "../../functions/notionGetPageFunction.js";
 import { NotionArchivePageFunction } from "../../functions/notionArchivePageFunction.js";
-import { NotionQueryDatabaseFunction } from "../../functions/notionQueryDatabaseFunction.js";
 import { NotionSearchFunction } from "../../functions/notionSearchFunction.js";
 import { context, list, page, parsed, TOKEN } from "../fixtures.js";
 import { mockDataSources, mockNotionHttp, mockPageMarkdown } from "../httpMock.js";
@@ -75,28 +74,9 @@ describe("Notion functions", () => {
         expect(await fn.run(context(), TOKEN, "page-1")).toBe(false);
     });
 
-    it("queries with an optional filter, newest first unless sorted by a column", async () => {
+    it("searches titles for the given text", async () => {
         http.request.mockResolvedValue({ data: list([page()]) });
-        const filter = { property: "Done", checkbox: { equals: false } };
-        const sorts = [{ timestamp: "created_time", direction: "descending" }];
-        expect((await new NotionQueryDatabaseFunction().run(context(), TOKEN, "db", filter)).results).toHaveLength(1);
-        expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { filter, sorts, page_size: 100 } });
-        const query = new NotionQueryDatabaseFunction();
-        const sortedBy = async (property: string | null, direction: "ascending" | "descending" | null) => {
-            await query.run(context(), TOKEN, "db", null, property, direction);
-            return http.request.mock.lastCall?.[0].data.sorts;
-        };
-        expect(await sortedBy("Due", null)).toEqual([{ property: "Due", direction: "ascending" }]);
-        expect(await sortedBy("Due", "descending")).toEqual([{ property: "Due", direction: "descending" }]);
-        expect(await sortedBy(null, "ascending")).toEqual([{ timestamp: "created_time", direction: "ascending" }]);
-        expect(await sortedBy(" ", null)).toEqual([{ timestamp: "created_time", direction: "descending" }]);
-        await expect(query.run(context(), TOKEN, "db", null, "Due", "up" as "ascending")).rejects.toMatchObject({ code: "NOTION_INVALID_SORT" });
-    });
-
-    it("searches with the requested object filter", async () => {
-        http.request.mockResolvedValue({ data: list([page()]) });
-        const filter = { property: "object" as const, value: "page" as const };
-        expect((await new NotionSearchFunction().run(context(), TOKEN, "Task", filter)).results).toHaveLength(1);
-        expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/search", data: { query: "Task", filter, page_size: 100 } });
+        expect((await new NotionSearchFunction().run(context(), TOKEN, "Task")).results).toHaveLength(1);
+        expect(http.request).toHaveBeenCalledExactlyOnceWith({ method: "POST", url: "/search", data: { query: "Task", page_size: 100 } });
     });
 });

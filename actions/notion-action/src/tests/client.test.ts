@@ -46,27 +46,25 @@ describe("Notion API client", () => {
         expect(() => new NotionClient(" ")).toThrow(/integration token/);
     });
 
-    it("collects database pages newest first and preserves the filter across cursors", async () => {
+    it("collects data source pages and preserves the filter and sort across cursors", async () => {
         http.request.mockResolvedValueOnce({ data: list([page()], "cursor-2") }).mockResolvedValueOnce({ data: list([page("page-2")]) });
-        const filter = { property: "Done", checkbox: { equals: false } };
-        const sorts = [{ timestamp: "created_time", direction: "descending" }];
-        const result = await new NotionClient(TOKEN).queryDatabase("db/1", filter);
+        const filter = { timestamp: "last_edited_time" as const, last_edited_time: { on_or_after: "2026-09-01T00:00:00.000Z" } };
+        const sorts = [{ timestamp: "last_edited_time" as const, direction: "ascending" as const }];
+        const result = await new NotionClient(TOKEN).queryDataSource("ds/1", filter, sorts);
         expect(result.results).toHaveLength(2);
         expect(result).toMatchObject({ has_more: false, next_cursor: null });
-        expect(http.request).toHaveBeenNthCalledWith(2, { method: "POST", url: "/data_sources/db%2F1-ds/query", data: { page_size: 100, filter, sorts, start_cursor: "cursor-2" } });
-        expect(fetchMock.databaseLookups).toHaveBeenCalledExactlyOnceWith("db/1");
+        expect(http.request).toHaveBeenNthCalledWith(2, { method: "POST", url: "/data_sources/ds%2F1/query", data: { page_size: 100, filter, sorts, start_cursor: "cursor-2" } });
     });
 
     it("paginates search even when an intermediate page has no results", async () => {
         http.request.mockResolvedValueOnce({ data: list([], "cursor-2") }).mockResolvedValueOnce({ data: list([page()]) });
-        const filter = { property: "object", value: "page" } as const;
-        expect((await new NotionClient(TOKEN).search("Tasks", filter)).results).toHaveLength(1);
-        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/search", data: { query: "Tasks", filter, page_size: 100, start_cursor: "cursor-2" } });
+        expect((await new NotionClient(TOKEN).search("Tasks")).results).toHaveLength(1);
+        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/search", data: { query: "Tasks", page_size: 100, start_cursor: "cursor-2" } });
     });
 
     it("rejects looping or missing pagination cursors", async () => {
         http.request.mockResolvedValue({ data: list([], "same") });
-        await expect(new NotionClient(TOKEN).queryDatabase("db")).rejects.toMatchObject({ code: "NOTION_INVALID_CURSOR" });
+        await expect(new NotionClient(TOKEN).queryDataSource("ds")).rejects.toMatchObject({ code: "NOTION_INVALID_CURSOR" });
         expect(http.request).toHaveBeenCalledTimes(2);
         http.request.mockResolvedValue({ data: { ...list([]), has_more: true } });
         await expect(new NotionClient(TOKEN).search("")).rejects.toMatchObject({ code: "NOTION_INVALID_CURSOR" });
@@ -75,11 +73,8 @@ describe("Notion API client", () => {
     it("omits optional arguments that a flow passes as null", async () => {
         const client = new NotionClient(TOKEN);
         http.request.mockResolvedValueOnce({ data: list([page()]) });
-        await client.queryDatabase("db", null);
-        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { page_size: 100, sorts: [{ timestamp: "created_time", direction: "descending" }] } });
-        http.request.mockResolvedValueOnce({ data: list([page()]) });
-        await client.search("Tasks", null);
-        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/search", data: { query: "Tasks", page_size: 100 } });
+        await client.queryDataSource("ds", null, null);
+        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/data_sources/ds/query", data: { page_size: 100 } });
         http.request.mockResolvedValueOnce({ data: page() });
         await client.createPage("db", "", null);
         expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "db-ds" }, properties: { title: { title: [] } } } });
@@ -112,13 +107,13 @@ describe("Notion API client", () => {
         expect(fetchMock.databaseLookups).not.toHaveBeenCalled();
     });
 
-    it("rejects databases without exactly one data source before querying or writing", async () => {
+    it("rejects databases without exactly one data source before writing", async () => {
         const client = new NotionClient(TOKEN);
         mockDataSources.resolve = () => ["ds-1", "ds-2"];
-        await expect(client.queryDatabase("db")).rejects.toMatchObject({ code: "NOTION_MULTIPLE_DATA_SOURCES" });
+        await expect(client.resolveDataSourceId("db")).rejects.toMatchObject({ code: "NOTION_MULTIPLE_DATA_SOURCES" });
         await expect(client.createPage("db", "Task")).rejects.toMatchObject({ code: "NOTION_MULTIPLE_DATA_SOURCES" });
         mockDataSources.resolve = () => [];
-        await expect(client.queryDatabase("db")).rejects.toMatchObject({ code: "NOTION_NO_DATA_SOURCE" });
+        await expect(client.resolveDataSourceId("db")).rejects.toMatchObject({ code: "NOTION_NO_DATA_SOURCE" });
         expect(http.request).not.toHaveBeenCalled();
     });
 
