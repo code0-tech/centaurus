@@ -27,14 +27,14 @@ Shared environment variables: `HERCULES_AUTH_TOKEN`, `HERCULES_AQUILA_URL` (defa
 
 | Identifier | Parameters | Result |
 | --- | --- | --- |
-| `notionCreatePage` | `integrationToken, parentDatabaseId, title, markdown?` | `NOTION_PAGE` |
+| `notionCreatePage` | `integrationToken, parentId, title, markdown?` | `NOTION_PAGE` |
 | `notionUpdatePage` | `integrationToken, pageId, title?, markdown?` | `NOTION_PAGE` |
 | `notionGetPage` | `integrationToken, pageId` | `NOTION_PAGE` |
 | `notionArchivePage` | `integrationToken, pageId` | `boolean` (Hercules BOOLEAN) |
 | `notionQueryDatabase` | `integrationToken, databaseId, filter?, sortProperty?, sortDirection?` | `NOTION_QUERY_RESULT` |
 | `notionSearch` | `integrationToken, query, filter?` | `NOTION_SEARCH_RESULT` |
 
-Create adds an entry to an existing database with a title and optional content. Update changes the title and/or replaces the whole content; an empty title or content stays unchanged. The title is written to the title column by its property ID `title`, so its name (usually Name) does not matter; other columns are not written. Get retrieves the page with its properties and its content as Notion-flavored Markdown in `markdown` (two parallel requests: the page and `GET /pages/{id}/markdown` with `markdown_version: "v2"`). `markdown` is an optional field of `NOTION_PAGE` that Get and an update with content fill in; other functions and the triggers return pages without content. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
+Create adds a page with a title and optional content under `parentId`: a database ID makes it a new entry, a page ID a subpage. The action first looks the ID up as a database; if Notion answers 400 or 404 (e.g. because it is a page), it creates the page under a parent page instead. Update changes the title and/or replaces the whole content; an empty title or content stays unchanged. The title is written by the property ID `title`, so the name of a database's title column (usually Name) does not matter; other columns are not written. Get retrieves the page with its properties and its content as Notion-flavored Markdown in `markdown` (two parallel requests: the page and `GET /pages/{id}/markdown` with `markdown_version: "v2"`). `markdown` is an optional field of `NOTION_PAGE` that Get and an update with content fill in; other functions and the triggers return pages without content. Archive moves the page to the trash (`in_trash`) and returns the state confirmed by Notion.
 
 Query and search collect **all pages** of results into one response (`has_more: false`, `next_cursor: null`); large collections consume corresponding time and memory. Query filters accept the normal Notion property/timestamp filters and `and`/`or` groups. Results are sorted by the column `sortProperty` (ascending unless `sortDirection` says otherwise) or, without one, by `created_time` (descending, i.e. newest first, unless `sortDirection` says otherwise). Search matches titles, not full page text; its optional filter is `{ "property": "object", "value": "page" }` or `"data_source"`.
 

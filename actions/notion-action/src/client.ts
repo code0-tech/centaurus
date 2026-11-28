@@ -132,15 +132,16 @@ export class NotionClient {
     }
 
     /**
-     * Creates a page in a database with a title and optional content written
-     * as Notion-flavored Markdown (`markdown_version` v2, as v1 is deprecated).
+     * Creates a page with a title and optional content written as
+     * Notion-flavored Markdown (`markdown_version` v2, as v1 is deprecated):
+     * an entry if the parent is a database, otherwise a subpage of the parent page.
      */
-    async createPage(parentDatabaseId: string, title: string, markdown?: string | null) {
+    async createPage(parentId: string, title: string, markdown?: string | null) {
         if (typeof title !== "string") throw new RuntimeError("NOTION_INVALID_TITLE", "The title must be text.");
         const content = optionalText(markdown, "NOTION_INVALID_MARKDOWN", "Page content must be Markdown text.");
-        const data_source_id = await this.resolveDataSourceId(parentDatabaseId);
+        const parent = await this.resolveParent(parentId);
         return this.request(() => this.sdk.pages.create({
-            parent: { data_source_id }, properties: titleProperty(title.trim()),
+            parent, properties: titleProperty(title.trim()),
             ...(content ? { markdown: content, markdown_version: "v2" as const } : {}),
         }), NotionPageSchema);
     }
@@ -196,6 +197,23 @@ export class NotionClient {
         }
         // Raw ID: callers encode it for paths, request bodies take it as is.
         return database.data_sources[0].id;
+    }
+
+    /**
+     * The parent of a new page: the data source of a database, or else a page.
+     * Notion answers the database lookup of a page ID with 400 (a page, not a
+     * database) or 404, so those fall back to the page; if the ID is no
+     * accessible page either, creating the page fails with Notion's error.
+     */
+    private async resolveParent(parentId: string): Promise<{ data_source_id: string } | { page_id: string }> {
+        try {
+            return { data_source_id: await this.resolveDataSourceId(parentId) };
+        } catch (error) {
+            if (error instanceof RuntimeError && (error.code === "NOTION_HTTP_400" || error.code === "NOTION_HTTP_404")) {
+                return { page_id: parentId.trim() };
+            }
+            throw error;
+        }
     }
 
     /** Queries a database's matching entries, sorted as described by querySorts. */

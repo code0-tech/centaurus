@@ -6,8 +6,9 @@ type NotionRequest = { method?: string; url: string; data: unknown };
  * Data source IDs a mocked database resolves to. By default every database
  * holds exactly one data source, `<databaseId>-ds`, so tests about other
  * behaviour don't have to answer the lookup that precedes database requests.
+ * `null` answers the lookup as Notion does for a page ID.
  */
-export const mockDataSources = { resolve: (databaseId: string): string[] => [`${databaseId}-ds`] };
+export const mockDataSources = { resolve: (databaseId: string): string[] | null => [`${databaseId}-ds`] };
 
 /**
  * The Markdown content every mocked page has (GET /pages/{id}/markdown).
@@ -32,7 +33,12 @@ export function mockNotionHttp(request: (args: NotionRequest) => Promise<{ data:
         if (lookup) {
             const databaseId = decodeURIComponent(lookup[1]);
             databaseLookups(databaseId);
-            const data_sources = mockDataSources.resolve(databaseId).map((id) => ({ id, name: id }));
+            const sources = mockDataSources.resolve(databaseId);
+            if (sources === null) {
+                // Notion's answer for the ID of a page.
+                return new Response(JSON.stringify({ object: "error", status: 400, code: "validation_error", message: "Provided ID is a page, not a database." }), { status: 400 });
+            }
+            const data_sources = sources.map((id) => ({ id, name: id }));
             return new Response(JSON.stringify({ object: "database", id: databaseId, data_sources }), { status: 200 });
         }
         const markdownUpdate = args.method === "PATCH" ? /^\/pages\/([^/]+)\/markdown$/.exec(args.url) : null;

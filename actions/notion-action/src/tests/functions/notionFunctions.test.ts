@@ -6,7 +6,7 @@ import { NotionArchivePageFunction } from "../../functions/notionArchivePageFunc
 import { NotionQueryDatabaseFunction } from "../../functions/notionQueryDatabaseFunction.js";
 import { NotionSearchFunction } from "../../functions/notionSearchFunction.js";
 import { context, list, page, parsed, TOKEN } from "../fixtures.js";
-import { mockNotionHttp, mockPageMarkdown } from "../httpMock.js";
+import { mockDataSources, mockNotionHttp, mockPageMarkdown } from "../httpMock.js";
 
 const http = vi.hoisted(() => ({ request: vi.fn() }));
 let fetchMock: ReturnType<typeof mockNotionHttp>;
@@ -23,6 +23,20 @@ describe("Notion functions", () => {
         expect(http.request).toHaveBeenCalledExactlyOnceWith({ method: "POST", url: "/pages", data: { parent: { data_source_id: "database-1-ds" }, properties: titled("Task"), markdown, markdown_version: "v2" } });
         await new NotionCreatePageFunction().run(context(), TOKEN, "database-1", "Task", null);
         expect(http.request.mock.lastCall?.[0].data).not.toHaveProperty("markdown");
+    });
+
+    it("creates a subpage when the parent is a page", async () => {
+        http.request.mockResolvedValue({ data: page() });
+        mockDataSources.resolve = (id) => id === "page-1" ? null : [`${id}-ds`];
+        await new NotionCreatePageFunction().run(context(), TOKEN, "page-1", "Notes", markdown);
+        expect(fetchMock.databaseLookups).toHaveBeenCalledExactlyOnceWith("page-1");
+        expect(http.request).toHaveBeenCalledExactlyOnceWith({ method: "POST", url: "/pages", data: { parent: { page_id: "page-1" }, properties: titled("Notes"), markdown, markdown_version: "v2" } });
+    });
+
+    it("does not fall back to a page for other lookup failures", async () => {
+        mockDataSources.resolve = () => ["ds-1", "ds-2"];
+        await expect(new NotionCreatePageFunction().run(context(), TOKEN, "database-1", "Task")).rejects.toMatchObject({ code: "NOTION_MULTIPLE_DATA_SOURCES" });
+        expect(http.request).not.toHaveBeenCalled();
     });
 
     it("changes the title and replaces the content as Markdown", async () => {

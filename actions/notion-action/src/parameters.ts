@@ -11,5 +11,12 @@ export const databaseIdParameter = (runtimeName: string) => ({ runtimeName, name
 /** The page ID parameter of a function. */
 export const PAGE_ID_PARAMETER = { runtimeName: "pageId", name: text("Page ID"), description: text(PAGE_ID_HINT) };
 
+/** The parent of a new page: a database or a page. */
+export const PARENT_ID_PARAMETER = {
+    runtimeName: "parentId",
+    name: text("Parent ID"),
+    description: text("The ID of a database (the new page becomes an entry) or a page (the new page becomes a subpage): the 32-character code in its URL. Share the parent with the integration (... > Connections)."),
+};
+
 /** The database ID setting of every trigger. */
 export const DATABASE_ID_SETTING = { identifier: "databaseId", name: text("Database ID"), description: text(DATABASE_ID_HINT), linkedDataTypeIdentifiers: ["TEXT"] };
