@@ -69,9 +69,16 @@ describe("Notion functions", () => {
         const sorts = [{ timestamp: "created_time", direction: "descending" }];
         expect((await new NotionQueryDatabaseFunction().run(context(), TOKEN, "db", filter)).results).toHaveLength(1);
         expect(http.request).toHaveBeenCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { filter, sorts, page_size: 100 } });
-        const byDue = { property: "Due", direction: "ascending" as const };
-        await new NotionQueryDatabaseFunction().run(context(), TOKEN, "db", null, byDue);
-        expect(http.request).toHaveBeenLastCalledWith({ method: "POST", url: "/data_sources/db-ds/query", data: { sorts: [byDue], page_size: 100 } });
+        const query = new NotionQueryDatabaseFunction();
+        const sortedBy = async (property: string | null, direction: "ascending" | "descending" | null) => {
+            await query.run(context(), TOKEN, "db", null, property, direction);
+            return http.request.mock.lastCall?.[0].data.sorts;
+        };
+        expect(await sortedBy("Due", null)).toEqual([{ property: "Due", direction: "ascending" }]);
+        expect(await sortedBy("Due", "descending")).toEqual([{ property: "Due", direction: "descending" }]);
+        expect(await sortedBy(null, "ascending")).toEqual([{ timestamp: "created_time", direction: "ascending" }]);
+        expect(await sortedBy(" ", null)).toEqual([{ timestamp: "created_time", direction: "descending" }]);
+        await expect(query.run(context(), TOKEN, "db", null, "Due", "up" as "ascending")).rejects.toMatchObject({ code: "NOTION_INVALID_SORT" });
     });
 
     it("searches with the requested object filter", async () => {

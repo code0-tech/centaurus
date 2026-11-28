@@ -9,7 +9,6 @@ import { NotionDatabaseDataType } from "./data_types/notionDatabase.js"
 import { NotionQueryResultDataType } from "./data_types/notionQueryResult.js"
 import { NotionSearchResultDataType } from "./data_types/notionSearchResult.js"
 import { NotionFilterDataType } from "./data_types/notionFilter.js"
-import { NotionSortDataType } from "./data_types/notionSort.js"
 import { NotionSearchFilterDataType } from "./data_types/notionSearchFilter.js"
 import { NotionCreatePageFunction } from "./functions/notionCreatePageFunction.js"
 import { NotionUpdatePageFunction } from "./functions/notionUpdatePageFunction.js"
@@ -42,7 +41,6 @@ action.registerDataTypeClass(NotionDatabaseDataType)
 action.registerDataTypeClass(NotionQueryResultDataType)
 action.registerDataTypeClass(NotionSearchResultDataType)
 action.registerDataTypeClass(NotionFilterDataType)
-action.registerDataTypeClass(NotionSortDataType)
 action.registerDataTypeClass(NotionSearchFilterDataType)
 action.registerRuntimeFunction(NotionCreatePageFunction)
 action.registerRuntimeFunction(NotionUpdatePageFunction)
